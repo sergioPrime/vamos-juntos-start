@@ -22,6 +22,8 @@ export type Database = {
           id: string
           last_interaction: string | null
           name: string
+          org_id: string | null
+          owner_id: string | null
           phone: string | null
           tags: string[] | null
           total_spent: number | null
@@ -34,6 +36,8 @@ export type Database = {
           id?: string
           last_interaction?: string | null
           name: string
+          org_id?: string | null
+          owner_id?: string | null
           phone?: string | null
           tags?: string[] | null
           total_spent?: number | null
@@ -46,12 +50,78 @@ export type Database = {
           id?: string
           last_interaction?: string | null
           name?: string
+          org_id?: string | null
+          owner_id?: string | null
           phone?: string | null
           tags?: string[] | null
           total_spent?: number | null
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "customers_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string | null
+          updated_at?: string
+        }
         Relationships: []
+      }
+      user_organizations: {
+        Row: {
+          created_at: string
+          id: string
+          org_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          org_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          org_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_organizations_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

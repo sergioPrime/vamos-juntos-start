@@ -7,6 +7,8 @@ import { AppLayout } from "./components/layout/AppLayout";
 import { PageTransition } from "./components/layout/PageTransition";
 import { NotificationProvider } from "./components/ui/notification-system";
 import { AuthProvider } from "./hooks/useAuth";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { AuthRedirect } from "./components/auth/AuthRedirect";
 import Dashboard from "./pages/Dashboard";
 import Receivables from "./pages/finance/Receivables";
 import Payables from "./pages/finance/Payables";
@@ -34,7 +36,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/auth" replace />} />
+          <Route path="/" element={<AuthRedirect />} />
           <Route path="/auth" element={<Auth />} />
           
           {/* Onboarding routes */}
@@ -43,83 +45,105 @@ const App = () => (
           <Route path="/onboarding/business-type" element={<BusinessType />} />
           <Route path="/onboarding/tutorial" element={<Tutorial />} />
           
-          {/* Main app routes */}
+          {/* Main app routes - Protected */}
           <Route path="/dashboard" element={
-            <AppLayout>
-              <PageTransition direction="right">
-                <Dashboard />
-              </PageTransition>
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="right">
+                  <Dashboard />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
           } />
           <Route path="/finance/receivables" element={
-            <AppLayout>
-              <PageTransition direction="left">
-                <Receivables />
-              </PageTransition>
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Receivables />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
           } />
           <Route path="/finance/payables" element={
-            <AppLayout>
-              <PageTransition direction="left">
-                <Payables />
-              </PageTransition>
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Payables />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
           } />
           <Route path="/charges" element={
-            <AppLayout>
-              <PageTransition direction="left">
-                <Charges />
-              </PageTransition>
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Charges />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
           } />
           <Route path="/charges/new" element={
-            <AppLayout>
-              <PageTransition direction="left">
-                <Receivables />
-              </PageTransition>
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Receivables />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
           } />
           <Route path="/nfse" element={
-            <AppLayout>
-              <PageTransition direction="left">
-                <NFSe />
-              </PageTransition>
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <NFSe />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
           } />
           <Route path="/quotes" element={
-            <AppLayout>
-              <PageTransition direction="left">
-                <Quotes />
-              </PageTransition>
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Quotes />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
           } />
           <Route path="/quotes/new" element={
-            <AppLayout>
-              <PageTransition direction="left">
-                <Quotes />
-              </PageTransition>
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Quotes />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
           } />
           <Route path="/customers" element={
-            <AppLayout>
-              <PageTransition direction="left">
-                <Customers />
-              </PageTransition>
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Customers />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
           } />
           <Route path="/reports" element={
-            <AppLayout>
-              <PageTransition direction="fade">
-                <Reports />
-              </PageTransition>
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="fade">
+                  <Reports />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
           } />
           <Route path="/settings" element={
-            <AppLayout>
-              <PageTransition direction="left">
-                <Settings />
-              </PageTransition>
-            </AppLayout>
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Settings />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
           } />
           
           {/* Catch-all route */}

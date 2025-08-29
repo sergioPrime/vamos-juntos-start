@@ -171,4 +171,92 @@ All colors MUST be HSL.
     transform: translateY(-4px);
     box-shadow: 0 12px 30px rgba(59, 130, 246, 0.15);
   }
+
+  /* Action button animations */
+  @keyframes pulseBlue {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+    }
+    50% {
+      transform: scale(1.05);
+      box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+    }
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+  }
+
+  @keyframes glowGreen {
+    0% {
+      box-shadow: 0 0 5px rgba(16, 185, 129, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+    }
+    100% {
+      box-shadow: 0 0 5px rgba(16, 185, 129, 0.5);
+    }
+  }
+
+  @keyframes spinIcon {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes slideAndCheck {
+    0% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    50% {
+      transform: translateX(20px);
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes checkBounce {
+    0%, 20%, 53%, 80%, 100% {
+      transform: translate3d(0, 0, 0);
+    }
+    40%, 43% {
+      transform: translate3d(0, -8px, 0);
+    }
+    70% {
+      transform: translate3d(0, -4px, 0);
+    }
+    90% {
+      transform: translate3d(0, -2px, 0);
+    }
+  }
+
+  /* Animation utility classes */
+  .animate-pulse-blue {
+    animation: pulseBlue 0.2s ease-out;
+  }
+
+  .animate-glow-green {
+    animation: glowGreen 0.8s ease-in-out;
+  }
+
+  .animate-spin-icon {
+    animation: spinIcon 0.3s ease-in-out;
+  }
+
+  .animate-slide-check {
+    animation: slideAndCheck 0.4s ease-out;
+  }
+
+  .animate-check-bounce {
+    animation: checkBounce 0.6s ease-out;
+  }
 }

@@ -26,6 +26,7 @@ export default function Quotes() {
   })
   const [showNewQuote, setShowNewQuote] = useState(false)
   const [selectedQuote, setSelectedQuote] = useState<any>(null)
+  const [isSpinning, setIsSpinning] = useState(false)
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -37,9 +38,14 @@ export default function Quotes() {
       return
     }
     
-    const message = `🤝 *ORÇAMENTO*\n\n👤 *Cliente:* ${formData.client}\n📋 *Serviço:* ${formData.description}\n💰 *Valor:* ${formData.value}\n\n📝 *Observações:* ${formData.observations}\n\n✅ Para aceitar este orçamento, responda "ACEITO"`
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
-    window.open(whatsappUrl, "_blank")
+    setIsSpinning(true)
+    
+    setTimeout(() => {
+      const message = `🤝 *ORÇAMENTO*\n\n👤 *Cliente:* ${formData.client}\n📋 *Serviço:* ${formData.description}\n💰 *Valor:* ${formData.value}\n\n📝 *Observações:* ${formData.observations}\n\n✅ Para aceitar este orçamento, responda "ACEITO"`
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
+      window.open(whatsappUrl, "_blank")
+      setIsSpinning(false)
+    }, 300)
   }
 
   const handleConvertToPix = () => {
@@ -196,7 +202,7 @@ export default function Quotes() {
 
             <div className="flex flex-col gap-3 pt-4">
               <Button onClick={handleWhatsAppSend} className="w-full bg-success hover:bg-success/90">
-                <MessageCircle className="h-4 w-4 mr-2" />
+                <MessageCircle className={`h-4 w-4 mr-2 ${isSpinning ? 'animate-spin-icon' : ''}`} />
                 Enviar no WhatsApp
               </Button>
               

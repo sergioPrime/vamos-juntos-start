@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft, Zap, Copy, QrCode, Check, Eye, Search, Filter } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { useToast } from "@/hooks/use-toast"
 
 const mockReceivables = [
   { id: 1, client: "João Silva", description: "Desenvolvimento de site", value: "R$ 2.500,00", dueDate: "2024-01-15", status: "pending" },
@@ -18,11 +19,13 @@ const mockReceivables = [
 
 export default function Receivables() {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [selectedItem, setSelectedItem] = useState<any>(null)
   const [showPixFlow, setShowPixFlow] = useState(false)
   const [pixCode, setPixCode] = useState("")
+  const [animatingItems, setAnimatingItems] = useState<Set<number>>(new Set())
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -43,7 +46,20 @@ export default function Receivables() {
   }
 
   const markAsPaid = (id: number) => {
-    console.log(`Marking item ${id} as paid`)
+    setAnimatingItems(prev => new Set(prev).add(id))
+    
+    setTimeout(() => {
+      toast({
+        title: "✅ Cobrança marcada como paga!",
+        description: "O pagamento foi registrado com sucesso.",
+      })
+      setAnimatingItems(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(id)
+        return newSet
+      })
+    }, 400)
+    
     setSelectedItem(null)
   }
 
@@ -119,7 +135,9 @@ export default function Receivables() {
               {mockReceivables.map((item) => (
                 <TableRow 
                   key={item.id} 
-                  className="cursor-pointer hover:bg-accent/50"
+                  className={`cursor-pointer hover:bg-accent/50 transition-all duration-300 ${
+                    animatingItems.has(item.id) ? 'animate-slide-check' : ''
+                  }`}
                   onClick={() => handleRowClick(item)}
                 >
                   <TableCell className="font-medium">{item.client}</TableCell>
@@ -137,9 +155,17 @@ export default function Receivables() {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={(e) => { e.stopPropagation(); markAsPaid(item.id); }}
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            markAsPaid(item.id); 
+                          }}
+                          className="relative"
                         >
-                          <Check className="h-3 w-3 mr-1" />
+                          {animatingItems.has(item.id) ? (
+                            <Check className="h-3 w-3 mr-1 animate-check-bounce text-success" />
+                          ) : (
+                            <Check className="h-3 w-3 mr-1" />
+                          )}
                           Marcar Pago
                         </Button>
                       )}

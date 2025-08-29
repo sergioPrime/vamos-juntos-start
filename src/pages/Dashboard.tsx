@@ -1,7 +1,9 @@
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { DollarSign, Calendar, TrendingUp, Wallet, FileText, Quote, Users, BarChart3, Zap } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { useToast } from "@/hooks/use-toast"
 
 const mockActivities = [
   { id: 1, type: "payment", client: "João Silva", value: "R$ 850,00", date: "Hoje", status: "paid" },
@@ -11,6 +13,16 @@ const mockActivities = [
 
 export default function Dashboard() {
   const navigate = useNavigate()
+  const { toast } = useToast()
+  const [isPulsing, setIsPulsing] = useState(false)
+
+  const handlePixClick = () => {
+    setIsPulsing(true)
+    setTimeout(() => {
+      setIsPulsing(false)
+      navigate("/finance/receivables")
+    }, 200)
+  }
 
   return (
     <div className="space-y-6">
@@ -55,10 +67,10 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <div className="flex justify-center animate-fade-in">{/* Botão Principal PIX */}
+      <div className="flex justify-center animate-fade-in">
         <Button 
-          onClick={() => navigate("/finance/receivables")}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 h-14 px-8 text-lg font-semibold"
+          onClick={handlePixClick}
+          className={`bg-primary text-primary-foreground hover:bg-primary/90 h-14 px-8 text-lg font-semibold transition-all duration-200 ${isPulsing ? 'animate-pulse-blue' : ''}`}
           size="lg"
         >
           <Zap className="h-5 w-5 mr-3" />

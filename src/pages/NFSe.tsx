@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ArrowLeft, FileText, Download } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { useToast } from "@/hooks/use-toast"
 
 const mockNFSe = [
   { id: 1, number: "001", client: "João Silva", value: "R$ 2.500,00", date: "2024-01-15", status: "issued" },
@@ -17,6 +18,7 @@ const mockNFSe = [
 
 export default function NFSe() {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
     clientName: "",
     serviceDescription: "",
@@ -24,6 +26,7 @@ export default function NFSe() {
   })
   const [showReceipt, setShowReceipt] = useState(false)
   const [generatedNFSe, setGeneratedNFSe] = useState<any>(null)
+  const [isGlowing, setIsGlowing] = useState(false)
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -56,7 +59,18 @@ export default function NFSe() {
     }
 
     setGeneratedNFSe(nfseData)
-    setShowReceipt(true)
+    setIsGlowing(true)
+    
+    // Show success toast
+    toast({
+      title: "Nota emitida com sucesso! 🎉",
+      description: `NFS-e Nº ${nfseData.number} foi gerada para ${formData.clientName}`,
+    })
+    
+    setTimeout(() => {
+      setIsGlowing(false)
+      setShowReceipt(true)
+    }, 800)
   }
 
   const downloadPDF = () => {
@@ -120,7 +134,7 @@ export default function NFSe() {
 
             <Button 
               onClick={handleEmitirNota} 
-              className="w-full bg-primary hover:bg-primary/90 mt-6"
+              className={`w-full bg-primary hover:bg-primary/90 mt-6 transition-all duration-200 ${isGlowing ? 'animate-glow-green' : ''}`}
             >
               <FileText className="h-4 w-4 mr-2" />
               Emitir Nota

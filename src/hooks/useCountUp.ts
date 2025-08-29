@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 
 export function useCountUp(end: number, duration: number = 800, start: number = 0) {
   const [count, setCount] = useState(start)
-  const [isAnimating, setIsAnimating] = useState(false)
+  const hasAnimated = useRef(false)
 
   useEffect(() => {
-    if (!isAnimating) {
-      setIsAnimating(true)
+    // Only animate once when component mounts
+    if (!hasAnimated.current) {
+      hasAnimated.current = true
       let startTime: number
       const startValue = start
 
@@ -25,13 +26,12 @@ export function useCountUp(end: number, duration: number = 800, start: number = 
           requestAnimationFrame(animate)
         } else {
           setCount(end)
-          setIsAnimating(false)
         }
       }
 
       requestAnimationFrame(animate)
     }
-  }, [end, duration, start, isAnimating])
+  }, []) // Empty dependency array - only run once on mount
 
   return count
 }

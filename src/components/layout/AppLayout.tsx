@@ -8,12 +8,18 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+    <SidebarProvider
+      defaultOpen={false} // Start collapsed on mobile
+      style={{
+        "--sidebar-width": "280px",
+        "--sidebar-width-mobile": "320px",
+      } as React.CSSProperties}
+    >
+      <div className="min-h-screen flex w-full relative">
         <AppSidebar />
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0"> {/* min-w-0 prevents overflow */}
           <AppHeader />
-          <main className="flex-1 p-6 bg-muted/30">
+          <main className="flex-1 p-3 sm:p-4 lg:p-6 bg-muted/30 overflow-auto">
             {children}
           </main>
         </div>

@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label"
 import { ArrowLeft, Search, Phone, Mail, Calendar, DollarSign, FileText, Plus, Eye } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { ResponsiveTable } from "@/components/ui/responsive-table"
 
 const mockCustomers = [
   { 
@@ -88,25 +89,30 @@ export default function Customers() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* Back Navigation */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         <Button 
           variant="ghost" 
           onClick={() => navigate("/")}
-          className="p-2 hover:bg-accent"
+          className="p-1 sm:p-2 hover:bg-accent"
+          size="sm"
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Seus clientes especiais 👥</h1>
-          <p className="text-muted-foreground">Relacionamentos que geram resultados</p>
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">Seus clientes especiais 👥</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">Relacionamentos que geram resultados</p>
         </div>
       </div>
 
       {/* New Customer Button */}
-      <div className="flex justify-end">
-        <Button onClick={() => setShowNewCustomer(true)} className="bg-primary hover:bg-primary/90">
+      <div className="flex justify-center sm:justify-end">
+        <Button 
+          onClick={() => setShowNewCustomer(true)} 
+          className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
+          size="sm"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Novo Cliente
         </Button>
@@ -115,8 +121,8 @@ export default function Customers() {
       {/* Customers List */}
       <Card>
         <CardHeader>
-          <div className="flex gap-4 items-center">
-            <div className="relative flex-1">
+          <div className="p-3 sm:p-0">
+            <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar clientes..."
@@ -127,68 +133,70 @@ export default function Customers() {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Telefone</TableHead>
-                <TableHead>Gasto Total</TableHead>
-                <TableHead>Última Interação</TableHead>
-                <TableHead>Tags</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockCustomers.map((customer, index) => (
-                <TableRow 
-                  key={customer.id} 
-                  className={`cursor-pointer hover:bg-accent/50 transition-all duration-300 ${
-                    visibleItems.includes(index) 
-                      ? 'opacity-100 translate-y-0' 
-                      : 'opacity-0 translate-y-4'
-                  }`}
-                  style={{
-                    transitionDelay: visibleItems.includes(index) ? '0ms' : `${index * 100}ms`
-                  }}
-                  onClick={() => handleCustomerClick(customer)}
-                >
-                  <TableCell className="font-medium">{customer.name}</TableCell>
-                  <TableCell>{customer.phone}</TableCell>
-                  <TableCell className="font-medium">{customer.totalSpent}</TableCell>
-                  <TableCell>{new Date(customer.lastInteraction).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-1 flex-wrap">
-                      {customer.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        handleCustomerClick(customer); 
-                      }}
-                    >
-                      <Eye className="h-3 w-3 mr-1" />
-                      Ver Detalhes
-                    </Button>
-                  </TableCell>
+        <CardContent className="p-0 sm:p-6">
+          <ResponsiveTable>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Telefone</TableHead>
+                  <TableHead>Gasto Total</TableHead>
+                  <TableHead>Última Interação</TableHead>
+                  <TableHead>Tags</TableHead>
+                  <TableHead>Ações</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {mockCustomers.map((customer, index) => (
+                  <TableRow 
+                    key={customer.id} 
+                    className={`cursor-pointer hover:bg-accent/50 transition-all duration-300 ${
+                      visibleItems.includes(index) 
+                        ? 'opacity-100 translate-y-0' 
+                        : 'opacity-0 translate-y-4'
+                    }`}
+                    style={{
+                      transitionDelay: visibleItems.includes(index) ? '0ms' : `${index * 100}ms`
+                    }}
+                    onClick={() => handleCustomerClick(customer)}
+                  >
+                    <TableCell className="font-medium">{customer.name}</TableCell>
+                    <TableCell>{customer.phone}</TableCell>
+                    <TableCell className="font-medium">{customer.totalSpent}</TableCell>
+                    <TableCell>{new Date(customer.lastInteraction).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-1 flex-wrap">
+                        {customer.tags.map((tag) => (
+                          <Badge key={tag} variant="secondary" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          handleCustomerClick(customer); 
+                        }}
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        Ver Detalhes
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ResponsiveTable>
         </CardContent>
       </Card>
 
       {/* New Customer Dialog */}
       <Dialog open={showNewCustomer} onOpenChange={setShowNewCustomer}>
-        <DialogContent>
+        <DialogContent className="mx-4 max-w-md sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Novo Cliente</DialogTitle>
           </DialogHeader>
@@ -222,14 +230,14 @@ export default function Customers() {
 
       {/* Customer Detail Dialog */}
       <Dialog open={!!selectedCustomer} onOpenChange={() => setSelectedCustomer(null)}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="mx-4 max-w-2xl sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{selectedCustomer?.name}</DialogTitle>
           </DialogHeader>
           {selectedCustomer && (
             <div className="space-y-6">
               {/* Customer Info */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm sm:text-base">
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-muted-foreground" />
                   <span>{selectedCustomer.phone}</span>
@@ -286,7 +294,7 @@ export default function Customers() {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-3 pt-4 border-t">
+              <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
                 <Button 
                   onClick={() => {
                     setSelectedCustomer(null)

@@ -11,6 +11,7 @@ import { ArrowLeft, Zap, Copy, QrCode, Check, Eye, Search, Filter } from "lucide
 import { useNavigate } from "react-router-dom"
 import { useToast } from "@/hooks/use-toast"
 import { useNotifications } from "@/components/ui/notification-system"
+import { ResponsiveTable } from "@/components/ui/responsive-table"
 
 const mockReceivables = [
   { id: 1, client: "João Silva", description: "Desenvolvimento de site", value: "R$ 2.500,00", dueDate: "2024-01-15", status: "pending" },
@@ -72,25 +73,30 @@ export default function Receivables() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* Back Navigation */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         <Button 
           variant="ghost" 
           onClick={() => navigate("/")}
-          className="p-2 hover:bg-accent"
+          className="p-1 sm:p-2 hover:bg-accent"
+          size="sm"
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Bora cobrar? 💰</h1>
-          <p className="text-muted-foreground">Seus recebimentos e cobranças</p>
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">Bora cobrar? 💰</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">Seus recebimentos e cobranças</p>
         </div>
       </div>
 
       {/* Nova Cobrança Button */}
-      <div className="flex justify-end">
-        <Button onClick={() => setShowPixFlow(true)} className="bg-primary hover:bg-primary/90">
+      <div className="flex justify-center sm:justify-end">
+        <Button 
+          onClick={() => setShowPixFlow(true)} 
+          className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
+          size="sm"
+        >
           <Zap className="h-4 w-4 mr-2" />
           Nova Cobrança
         </Button>
@@ -99,92 +105,96 @@ export default function Receivables() {
       {/* Search and Filters */}
       <Card>
         <CardHeader>
-          <div className="flex gap-4 items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por cliente ou descrição"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+          <div className="p-3 sm:p-0">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por cliente ou descrição"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-40">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="pending">Pendente</SelectItem>
+                  <SelectItem value="paid">Pago</SelectItem>
+                  <SelectItem value="overdue">Atrasado</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="pending">Pendente</SelectItem>
-                <SelectItem value="paid">Pago</SelectItem>
-                <SelectItem value="overdue">Atrasado</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Descrição</TableHead>
-                <TableHead>Valor</TableHead>
-                <TableHead>Vencimento</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockReceivables.map((item) => (
-                <TableRow 
-                  key={item.id} 
-                  className={`cursor-pointer hover:bg-accent/50 transition-all duration-300 ${
-                    animatingItems.has(item.id) ? 'animate-slide-check' : ''
-                  }`}
-                  onClick={() => handleRowClick(item)}
-                >
-                  <TableCell className="font-medium">{item.client}</TableCell>
-                  <TableCell>{item.description}</TableCell>
-                  <TableCell>{item.value}</TableCell>
-                  <TableCell>{new Date(item.dueDate).toLocaleDateString()}</TableCell>
-                  <TableCell>{getStatusBadge(item.status)}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleRowClick(item); }}>
-                        <Eye className="h-3 w-3 mr-1" />
-                        Ver
-                      </Button>
-                      {item.status !== "paid" && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            markAsPaid(item.id); 
-                          }}
-                          className="relative"
-                        >
-                          {animatingItems.has(item.id) ? (
-                            <Check className="h-3 w-3 mr-1 animate-check-bounce text-success" />
-                          ) : (
-                            <Check className="h-3 w-3 mr-1" />
-                          )}
-                          Marcar Pago
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
+        <CardContent className="p-0 sm:p-6">
+          <ResponsiveTable>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead>Valor</TableHead>
+                  <TableHead>Vencimento</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Ações</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {mockReceivables.map((item) => (
+                  <TableRow 
+                    key={item.id} 
+                    className={`cursor-pointer hover:bg-accent/50 transition-all duration-300 ${
+                      animatingItems.has(item.id) ? 'animate-slide-check' : ''
+                    }`}
+                    onClick={() => handleRowClick(item)}
+                  >
+                    <TableCell className="font-medium">{item.client}</TableCell>
+                    <TableCell>{item.description}</TableCell>
+                    <TableCell>{item.value}</TableCell>
+                    <TableCell>{new Date(item.dueDate).toLocaleDateString()}</TableCell>
+                    <TableCell>{getStatusBadge(item.status)}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleRowClick(item); }}>
+                          <Eye className="h-3 w-3 mr-1" />
+                          Ver
+                        </Button>
+                        {item.status !== "paid" && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              markAsPaid(item.id); 
+                            }}
+                            className="relative"
+                          >
+                            {animatingItems.has(item.id) ? (
+                              <Check className="h-3 w-3 mr-1 animate-check-bounce text-success" />
+                            ) : (
+                              <Check className="h-3 w-3 mr-1" />
+                            )}
+                            Marcar Pago
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ResponsiveTable>
         </CardContent>
       </Card>
 
       {/* PIX Flow Dialog */}
       <Dialog open={showPixFlow} onOpenChange={setShowPixFlow}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="mx-4 max-w-md sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Nova Cobrança Pix</DialogTitle>
           </DialogHeader>
@@ -247,7 +257,7 @@ export default function Receivables() {
 
       {/* Detail Dialog */}
       <Dialog open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>
-        <DialogContent>
+        <DialogContent className="mx-4 max-w-md sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Detalhes da Cobrança</DialogTitle>
           </DialogHeader>

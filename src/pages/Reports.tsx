@@ -6,6 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { ArrowLeft, TrendingUp, DollarSign, AlertTriangle, Download, Eye } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useCountUp, formatCurrency } from "@/hooks/useCountUp"
+import { ResponsiveTable } from "@/components/ui/responsive-table"
 
 // Mock data for the chart
 const monthlyRevenueData = [
@@ -52,24 +53,25 @@ export default function Reports() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* Back Navigation */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         <Button 
           variant="ghost" 
           onClick={() => navigate("/")}
-          className="p-2 hover:bg-accent"
+          className="p-1 sm:p-2 hover:bg-accent"
+          size="sm"
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Relatórios 📊</h1>
-          <p className="text-muted-foreground">Acompanhe o desempenho do seu negócio</p>
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">Relatórios 📊</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">Acompanhe o desempenho do seu negócio</p>
         </div>
       </div>
 
       {/* Export Buttons */}
-      <div className="flex gap-2 justify-end">
+      <div className="flex gap-2 justify-center sm:justify-end flex-wrap">
         <Button variant="outline" onClick={handleExportCSV}>
           <Download className="h-4 w-4 mr-2" />
           Exportar CSV
@@ -80,8 +82,8 @@ export default function Reports() {
         </Button>
       </div>
 
-      {/* Métricas principais */}
-      <div className="grid gap-4 md:grid-cols-3">
+      {/* Métricas principais - responsive */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Faturamento do Mês</CardTitle>
@@ -122,15 +124,15 @@ export default function Reports() {
         </Card>
       </div>
 
-      {/* Bar Chart with animation */}
+      {/* Bar Chart with animation - responsive */}
       <Card className="animate-fade-in">
         <CardHeader>
-          <CardTitle>Faturamento por Mês</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Faturamento por Mês</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-80 animate-[slideInUp_0.6s_ease-out_0.2s_both]">
+          <div className="h-64 sm:h-80 animate-[slideInUp_0.6s_ease-out_0.2s_both]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyRevenueData}>
+              <BarChart data={monthlyRevenueData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                 <XAxis dataKey="month" />
                 <YAxis 
@@ -157,12 +159,13 @@ export default function Reports() {
         </CardContent>
       </Card>
 
-      {/* Overdue Clients Table */}
+      {/* Overdue Clients Table - responsive */}
       <Card>
         <CardHeader>
-          <CardTitle>Clientes em Atraso</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Clientes em Atraso</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0 sm:p-6">
+          <ResponsiveTable>
           <Table>
             <TableHeader>
               <TableRow>
@@ -202,7 +205,8 @@ export default function Reports() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+            </Table>
+          </ResponsiveTable>
         </CardContent>
       </Card>
     </div>

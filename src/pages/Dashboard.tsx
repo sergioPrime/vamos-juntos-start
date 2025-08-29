@@ -47,15 +47,16 @@ export default function Dashboard() {
   }, [addNotification])
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Quanto você já faturou este mês 🚀</h1>
-        <p className="text-muted-foreground">Acompanhe seu crescimento em tempo real</p>
+    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
+      {/* Welcome Section */}
+      <div className="text-center sm:text-left">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Quanto você já faturou este mês 🚀</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">Acompanhe seu crescimento em tempo real</p>
       </div>
 
-      {/* Cards de métricas */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+      {/* Cards de métricas - responsive grid */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <Card className="sm:col-span-2 lg:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -95,27 +96,28 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <div className="flex justify-center animate-fade-in">
+      {/* Botão Principal PIX - responsive */}
+      <div className="flex justify-center animate-fade-in px-4">
         <Button 
           onClick={handlePixClick}
-          className={`bg-primary text-primary-foreground hover:bg-primary/90 h-14 px-8 text-lg font-semibold transition-all duration-200 ${isPulsing ? 'animate-pulse-blue' : ''}`}
+          className={`bg-primary text-primary-foreground hover:bg-primary/90 h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg font-semibold transition-all duration-200 w-full sm:w-auto max-w-sm ${isPulsing ? 'animate-pulse-blue' : ''}`}
           size="lg"
         >
-          <Zap className="h-5 w-5 mr-3" />
+          <Zap className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
           Gerar Cobrança Pix
         </Button>
       </div>
 
-      {/* Cards de Navegação */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Cards de Navegação - responsive grid */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card 
           className="cursor-pointer card-hover transition-all duration-200"
           onClick={() => navigate("/nfse")}
         >
-          <CardContent className="p-6 text-center animate-[staggerFadeIn_0.5s_ease-out_0.1s_both]">
-            <FileText className="h-12 w-12 text-primary mx-auto mb-4" />
-            <h3 className="font-semibold text-lg mb-2">Emitir Nota Fiscal</h3>
-            <p className="text-sm text-muted-foreground">NFS-e para seus serviços</p>
+          <CardContent className="p-4 sm:p-6 text-center animate-[staggerFadeIn_0.5s_ease-out_0.1s_both]">
+            <FileText className="h-10 w-10 sm:h-12 sm:w-12 text-primary mx-auto mb-3 sm:mb-4" />
+            <h3 className="font-semibold text-base sm:text-lg mb-2">Emitir Nota Fiscal</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground">NFS-e para seus serviços</p>
           </CardContent>
         </Card>
 
@@ -123,10 +125,10 @@ export default function Dashboard() {
           className="cursor-pointer card-hover transition-all duration-200"
           onClick={() => navigate("/quotes")}
         >
-          <CardContent className="p-6 text-center animate-[staggerFadeIn_0.5s_ease-out_0.2s_both]">
-            <Quote className="h-12 w-12 text-primary mx-auto mb-4" />
-            <h3 className="font-semibold text-lg mb-2">Novo Orçamento</h3>
-            <p className="text-sm text-muted-foreground">Crie propostas profissionais</p>
+          <CardContent className="p-4 sm:p-6 text-center animate-[staggerFadeIn_0.5s_ease-out_0.2s_both]">
+            <Quote className="h-10 w-10 sm:h-12 sm:w-12 text-primary mx-auto mb-3 sm:mb-4" />
+            <h3 className="font-semibold text-base sm:text-lg mb-2">Novo Orçamento</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground">Crie propostas profissionais</p>
           </CardContent>
         </Card>
 
@@ -134,10 +136,10 @@ export default function Dashboard() {
           className="cursor-pointer card-hover transition-all duration-200"
           onClick={() => navigate("/customers")}
         >
-          <CardContent className="p-6 text-center animate-[staggerFadeIn_0.5s_ease-out_0.3s_both]">
-            <Users className="h-12 w-12 text-primary mx-auto mb-4" />
-            <h3 className="font-semibold text-lg mb-2">Meus Clientes</h3>
-            <p className="text-sm text-muted-foreground">Gerencie relacionamentos</p>
+          <CardContent className="p-4 sm:p-6 text-center animate-[staggerFadeIn_0.5s_ease-out_0.3s_both]">
+            <Users className="h-10 w-10 sm:h-12 sm:w-12 text-primary mx-auto mb-3 sm:mb-4" />
+            <h3 className="font-semibold text-base sm:text-lg mb-2">Meus Clientes</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground">Gerencie relacionamentos</p>
           </CardContent>
         </Card>
 
@@ -145,10 +147,10 @@ export default function Dashboard() {
           className="cursor-pointer card-hover transition-all duration-200"
           onClick={() => navigate("/reports")}
         >
-          <CardContent className="p-6 text-center animate-[staggerFadeIn_0.5s_ease-out_0.4s_both]">
-            <BarChart3 className="h-12 w-12 text-primary mx-auto mb-4" />
-            <h3 className="font-semibold text-lg mb-2">Relatórios</h3>
-            <p className="text-sm text-muted-foreground">Acompanhe performance</p>
+          <CardContent className="p-4 sm:p-6 text-center animate-[staggerFadeIn_0.5s_ease-out_0.4s_both]">
+            <BarChart3 className="h-10 w-10 sm:h-12 sm:w-12 text-primary mx-auto mb-3 sm:mb-4" />
+            <h3 className="font-semibold text-base sm:text-lg mb-2">Relatórios</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground">Acompanhe performance</p>
           </CardContent>
         </Card>
       </div>
@@ -159,25 +161,25 @@ export default function Dashboard() {
           <CardTitle>Atividades Recentes</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {mockActivities.map((activity) => (
-              <div key={activity.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-2 h-2 rounded-full ${
+              <div key={activity.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/30 transition-colors">
+                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
                     activity.status === 'paid' ? 'bg-green-500' :
                     activity.status === 'pending' ? 'bg-yellow-500' : 'bg-blue-500'
                   }`} />
-                  <div>
-                    <p className="font-medium">{activity.client}</p>
-                    <p className="text-sm text-muted-foreground">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm sm:text-base truncate">{activity.client}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
                       {activity.type === 'payment' ? 'Pagamento recebido' :
                        activity.type === 'quote' ? 'Orçamento enviado' : 'NFS-e emitida'}
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-semibold">{activity.value}</p>
-                  <p className="text-sm text-muted-foreground">{activity.date}</p>
+                <div className="text-right flex-shrink-0 ml-4">
+                  <p className="font-semibold text-sm sm:text-base">{activity.value}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{activity.date}</p>
                 </div>
               </div>
             ))}

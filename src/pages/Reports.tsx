@@ -1,6 +1,20 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { TrendingUp, DollarSign, AlertTriangle, Calendar } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import { ArrowLeft, TrendingUp, DollarSign, AlertTriangle, Download, Eye } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+
+// Mock data for the chart
+const monthlyRevenue = [
+  { month: "Jul", revenue: 8500 },
+  { month: "Ago", revenue: 12000 },
+  { month: "Set", revenue: 9800 },
+  { month: "Out", revenue: 11500 },
+  { month: "Nov", revenue: 14200 },
+  { month: "Dez", revenue: 15750 },
+]
 
 const mockOverdueClients = [
   { name: "Empresa ABC", value: "R$ 5.000,00", daysOverdue: 15 },
@@ -9,11 +23,55 @@ const mockOverdueClients = [
 ]
 
 export default function Reports() {
+  const navigate = useNavigate()
+
+  const handleExportCSV = () => {
+    // Here you would implement CSV export logic
+    alert("Relatório CSV exportado com sucesso!")
+  }
+
+  const handleExportPDF = () => {
+    // Here you would implement PDF export logic
+    alert("Relatório PDF exportado com sucesso!")
+  }
+
+  const getDaysOverdueBadge = (days: number) => {
+    if (days > 10) {
+      return <Badge className="bg-destructive/20 text-destructive border-destructive/30">{days} dias</Badge>
+    } else if (days > 5) {
+      return <Badge className="bg-warning/20 text-warning border-warning/30">{days} dias</Badge>
+    } else {
+      return <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30">{days} dias</Badge>
+    }
+  }
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Relatórios</h1>
-        <p className="text-muted-foreground">Acompanhe o desempenho do seu negócio</p>
+      {/* Back Navigation */}
+      <div className="flex items-center gap-4">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate("/")}
+          className="p-2 hover:bg-accent"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Relatórios 📊</h1>
+          <p className="text-muted-foreground">Acompanhe o desempenho do seu negócio</p>
+        </div>
+      </div>
+
+      {/* Export Buttons */}
+      <div className="flex gap-2 justify-end">
+        <Button variant="outline" onClick={handleExportCSV}>
+          <Download className="h-4 w-4 mr-2" />
+          Exportar CSV
+        </Button>
+        <Button variant="outline" onClick={handleExportPDF}>
+          <Download className="h-4 w-4 mr-2" />
+          Exportar PDF
+        </Button>
       </div>
 
       {/* Métricas principais */}
@@ -52,25 +110,41 @@ export default function Reports() {
         </Card>
       </div>
 
-      {/* Gráfico placeholder */}
+      {/* Bar Chart */}
       <Card>
         <CardHeader>
           <CardTitle>Faturamento por Mês</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center bg-muted/10">
-            <TrendingUp className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground">
-              Gráfico de faturamento mensal será exibido aqui
-            </p>
-            <p className="text-sm text-muted-foreground mt-2">
-              Integração com biblioteca de gráficos em desenvolvimento
-            </p>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyRevenue}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis 
+                  tickFormatter={(value) => `R$ ${value.toLocaleString()}`}
+                />
+                <Tooltip 
+                  formatter={(value) => [`R$ ${value.toLocaleString()}`, 'Faturamento']}
+                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--background))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px'
+                  }}
+                />
+                <Bar 
+                  dataKey="revenue" 
+                  fill="hsl(var(--primary))" 
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>
 
-      {/* Tabela de inadimplentes */}
+      {/* Overdue Clients Table */}
       <Card>
         <CardHeader>
           <CardTitle>Clientes em Atraso</CardTitle>
@@ -82,27 +156,34 @@ export default function Reports() {
                 <TableHead>Cliente</TableHead>
                 <TableHead>Valor</TableHead>
                 <TableHead>Dias em Atraso</TableHead>
-                <TableHead>Ação</TableHead>
+                <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {mockOverdueClients.map((client, index) => (
-                <TableRow key={index}>
+                <TableRow 
+                  key={index}
+                  className="cursor-pointer hover:bg-accent/50"
+                  onClick={() => navigate("/finance/receivables")}
+                >
                   <TableCell className="font-medium">{client.name}</TableCell>
-                  <TableCell>{client.value}</TableCell>
+                  <TableCell className="font-medium">{client.value}</TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      client.daysOverdue > 10 ? 'bg-red-100 text-red-800' :
-                      client.daysOverdue > 5 ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-orange-100 text-orange-800'
-                    }`}>
-                      {client.daysOverdue} dias
-                    </span>
+                    {getDaysOverdueBadge(client.daysOverdue)}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <button className="text-primary hover:underline text-sm">Enviar cobrança</button>
-                      <button className="text-primary hover:underline text-sm">Contatar</button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          navigate("/finance/receivables")
+                        }}
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        Ver Detalhes
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>

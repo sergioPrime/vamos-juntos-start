@@ -128,6 +128,64 @@ export default function Customers() {
     setSelectedCustomer(customer)
   }
 
+  // CPF/CNPJ validation functions
+  const validateCPF = (cpf: string) => {
+    const cleanCPF = cpf.replace(/\D/g, '')
+    if (cleanCPF.length !== 11) return false
+    if (/^(\d)\1{10}$/.test(cleanCPF)) return false
+    
+    let sum = 0
+    for (let i = 0; i < 9; i++) {
+      sum += parseInt(cleanCPF.charAt(i)) * (10 - i)
+    }
+    let digit = 11 - (sum % 11)
+    if (digit === 10 || digit === 11) digit = 0
+    if (digit !== parseInt(cleanCPF.charAt(9))) return false
+    
+    sum = 0
+    for (let i = 0; i < 10; i++) {
+      sum += parseInt(cleanCPF.charAt(i)) * (11 - i)
+    }
+    digit = 11 - (sum % 11)
+    if (digit === 10 || digit === 11) digit = 0
+    return digit === parseInt(cleanCPF.charAt(10))
+  }
+
+  const validateCNPJ = (cnpj: string) => {
+    const cleanCNPJ = cnpj.replace(/\D/g, '')
+    if (cleanCNPJ.length !== 14) return false
+    if (/^(\d)\1{13}$/.test(cleanCNPJ)) return false
+    
+    const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+    const weights2 = [6, 7, 8, 9, 2, 3, 4, 5, 6, 7, 8, 9]
+    
+    let sum = 0
+    for (let i = 0; i < 12; i++) {
+      sum += parseInt(cleanCNPJ.charAt(i)) * weights1[i]
+    }
+    let digit = sum % 11 < 2 ? 0 : 11 - (sum % 11)
+    if (digit !== parseInt(cleanCNPJ.charAt(12))) return false
+    
+    sum = 0
+    for (let i = 0; i < 13; i++) {
+      sum += parseInt(cleanCNPJ.charAt(i)) * weights2[i]
+    }
+    digit = sum % 11 < 2 ? 0 : 11 - (sum % 11)
+    return digit === parseInt(cleanCNPJ.charAt(13))
+  }
+
+  const validateDocument = (document: string) => {
+    if (!document.trim()) return true // Document is optional
+    
+    const cleanDoc = document.replace(/\D/g, '')
+    if (cleanDoc.length === 11) {
+      return validateCPF(cleanDoc)
+    } else if (cleanDoc.length === 14) {
+      return validateCNPJ(cleanDoc)
+    }
+    return false
+  }
+
   const handleSaveCustomer = async () => {
     if (!newCustomer.name.trim()) {
       toast({
@@ -138,6 +196,44 @@ export default function Customers() {
       return
     }
     
+    // Validate document if provided
+    if (newCustomer.document.trim() && !validateDocument(newCustomer.document)) {
+      toast({
+        title: "Erro",
+        description: "CPF ou CNPJ inválido",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    // Check for duplicate document
+    if (newCustomer.document.trim()) {
+      const cleanDoc = newCustomer.document.replace(/\D/g, '')
+      const { data: existingCustomer, error: checkError } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('document', cleanDoc)
+        .single()
+      
+      if (checkError && checkError.code !== 'PGRST116') {
+        toast({
+          title: "Erro",
+          description: "Erro ao verificar duplicação de documento",
+          variant: "destructive"
+        })
+        return
+      }
+      
+      if (existingCustomer) {
+        toast({
+          title: "Erro",
+          description: "Já existe um cliente cadastrado com este CPF/CNPJ",
+          variant: "destructive"
+        })
+        return
+      }
+    }
+    
     try {
       const { error } = await supabase
         .from('customers')
@@ -145,7 +241,7 @@ export default function Customers() {
           name: newCustomer.name,
           phone: newCustomer.phone,
           email: newCustomer.email,
-          document: newCustomer.document,
+          document: newCustomer.document.replace(/\D/g, ''), // Store only numbers
           tags: [],
           total_spent: 0,
           last_interaction: new Date().toISOString()

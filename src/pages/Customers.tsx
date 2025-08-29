@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label"
 import { ArrowLeft, Search, Phone, Mail, Calendar, DollarSign, FileText, Plus, Eye } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { ResponsiveTable } from "@/components/ui/responsive-table"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
 
 const mockCustomers = [
   { 
@@ -53,6 +55,9 @@ const mockCustomers = [
 
 export default function Customers() {
   const navigate = useNavigate()
+  const { toast } = useToast()
+  const [customers, setCustomers] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null)
   const [showNewCustomer, setShowNewCustomer] = useState(false)
@@ -66,10 +71,37 @@ export default function Customers() {
     document: ""
   })
 
+  // Load customers from database
+  const loadCustomers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('customers')
+        .select('*')
+        .order('created_at', { ascending: false })
+      
+      if (error) throw error
+      
+      setCustomers(data || [])
+    } catch (error) {
+      console.error('Error loading customers:', error)
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os clientes",
+        variant: "destructive"
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadCustomers()
+  }, [])
+
   // Staggered animation for customer list
   useEffect(() => {
     const timer = setTimeout(() => {
-      mockCustomers.forEach((_, index) => {
+      customers.forEach((_, index) => {
         setTimeout(() => {
           setVisibleItems(prev => [...prev, index])
         }, index * 100) // 0.1s delay between each item
@@ -77,7 +109,7 @@ export default function Customers() {
     }, 200) // Initial delay
 
     return () => clearTimeout(timer)
-  }, [])
+  }, [customers])
 
   const getServiceStatusBadge = (status: string) => {
     switch (status) {
@@ -96,26 +128,55 @@ export default function Customers() {
     setSelectedCustomer(customer)
   }
 
-  const handleSaveCustomer = () => {
+  const handleSaveCustomer = async () => {
     if (!newCustomer.name.trim()) {
-      alert("Por favor, preencha o nome do cliente")
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha o nome do cliente",
+        variant: "destructive"
+      })
       return
     }
     
-    // Aqui você pode integrar com sua API
-    console.log("Salvando cliente:", newCustomer)
-    
-    // Reset form and close dialog
-    setNewCustomer({
-      name: "",
-      phone: "",
-      email: "",
-      document: ""
-    })
-    setShowNewCustomer(false)
-    
-    // Show success message (você pode usar toast aqui)
-    alert("Cliente salvo com sucesso!")
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .insert([{
+          name: newCustomer.name,
+          phone: newCustomer.phone,
+          email: newCustomer.email,
+          document: newCustomer.document,
+          tags: [],
+          total_spent: 0,
+          last_interaction: new Date().toISOString()
+        }])
+      
+      if (error) throw error
+      
+      // Reset form and close dialog
+      setNewCustomer({
+        name: "",
+        phone: "",
+        email: "",
+        document: ""
+      })
+      setShowNewCustomer(false)
+      
+      // Reload customers list
+      await loadCustomers()
+      
+      toast({
+        title: "Sucesso!",
+        description: "Cliente salvo com sucesso!"
+      })
+    } catch (error) {
+      console.error('Error saving customer:', error)
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar o cliente",
+        variant: "destructive"
+      })
+    }
   }
 
   return (
@@ -164,63 +225,83 @@ export default function Customers() {
           </div>
         </CardHeader>
         <CardContent className="p-0 sm:p-6">
-          <ResponsiveTable>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Telefone</TableHead>
-                  <TableHead>Gasto Total</TableHead>
-                  <TableHead>Última Interação</TableHead>
-                  <TableHead>Tags</TableHead>
-                  <TableHead>Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockCustomers.map((customer, index) => (
-                  <TableRow 
-                    key={customer.id} 
-                    className={`cursor-pointer hover:bg-accent/50 transition-all duration-300 ${
-                      visibleItems.includes(index) 
-                        ? 'opacity-100 translate-y-0' 
-                        : 'opacity-0 translate-y-4'
-                    }`}
-                    style={{
-                      transitionDelay: visibleItems.includes(index) ? '0ms' : `${index * 100}ms`
-                    }}
-                    onClick={() => handleCustomerClick(customer)}
-                  >
-                    <TableCell className="font-medium">{customer.name}</TableCell>
-                    <TableCell>{customer.phone}</TableCell>
-                    <TableCell className="font-medium">{customer.totalSpent}</TableCell>
-                    <TableCell>{new Date(customer.lastInteraction).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-1 flex-wrap">
-                        {customer.tags.map((tag) => (
-                          <Badge key={tag} variant="secondary" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          handleCustomerClick(customer); 
-                        }}
-                      >
-                        <Eye className="h-3 w-3 mr-1" />
-                        Ver Detalhes
-                      </Button>
-                    </TableCell>
+          {loading ? (
+            <div className="p-8 text-center">
+              <p className="text-muted-foreground">Carregando clientes...</p>
+            </div>
+          ) : customers.length === 0 ? (
+            <div className="p-8 text-center">
+              <p className="text-muted-foreground">Nenhum cliente encontrado. Que tal adicionar o primeiro?</p>
+            </div>
+          ) : (
+            <ResponsiveTable>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Telefone</TableHead>
+                    <TableHead>Gasto Total</TableHead>
+                    <TableHead>Última Interação</TableHead>
+                    <TableHead>Tags</TableHead>
+                    <TableHead>Ações</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </ResponsiveTable>
+                </TableHeader>
+                <TableBody>
+                  {customers
+                    .filter(customer => 
+                      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      customer.phone?.toLowerCase().includes(searchTerm.toLowerCase())
+                    )
+                    .map((customer, index) => (
+                      <TableRow 
+                        key={customer.id} 
+                        className={`cursor-pointer hover:bg-accent/50 transition-all duration-300 ${
+                          visibleItems.includes(index) 
+                            ? 'opacity-100 translate-y-0' 
+                            : 'opacity-0 translate-y-4'
+                        }`}
+                        style={{
+                          transitionDelay: visibleItems.includes(index) ? '0ms' : `${index * 100}ms`
+                        }}
+                        onClick={() => handleCustomerClick(customer)}
+                      >
+                        <TableCell className="font-medium">{customer.name}</TableCell>
+                        <TableCell>{customer.phone || '-'}</TableCell>
+                        <TableCell className="font-medium">
+                          R$ {customer.total_spent?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
+                        </TableCell>
+                        <TableCell>
+                          {customer.last_interaction ? new Date(customer.last_interaction).toLocaleDateString('pt-BR') : '-'}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1 flex-wrap">
+                            {customer.tags?.map((tag: string) => (
+                              <Badge key={tag} variant="secondary" className="text-xs">
+                                {tag}
+                              </Badge>
+                            )) || <span className="text-muted-foreground text-sm">-</span>}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              handleCustomerClick(customer); 
+                            }}
+                          >
+                            <Eye className="h-3 w-3 mr-1" />
+                            Ver Detalhes
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </ResponsiveTable>
+          )}
         </CardContent>
       </Card>
 
@@ -300,61 +381,53 @@ export default function Customers() {
           {selectedCustomer && (
             <div className="space-y-6">
               {/* Customer Info */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm sm:text-base">
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span>{selectedCustomer.phone}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span>{selectedCustomer.email}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">Total: {selectedCustomer.totalSpent}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>Última interação: {new Date(selectedCustomer.lastInteraction).toLocaleDateString()}</span>
-                </div>
-              </div>
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm sm:text-base">
+                 <div className="flex items-center gap-2">
+                   <Phone className="h-4 w-4 text-muted-foreground" />
+                   <span>{selectedCustomer.phone || '-'}</span>
+                 </div>
+                 <div className="flex items-center gap-2">
+                   <Mail className="h-4 w-4 text-muted-foreground" />
+                   <span>{selectedCustomer.email || '-'}</span>
+                 </div>
+                 <div className="flex items-center gap-2">
+                   <DollarSign className="h-4 w-4 text-muted-foreground" />
+                   <span className="font-medium">
+                     Total: R$ {selectedCustomer.total_spent?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
+                   </span>
+                 </div>
+                 <div className="flex items-center gap-2">
+                   <Calendar className="h-4 w-4 text-muted-foreground" />
+                   <span>
+                     Última interação: {selectedCustomer.last_interaction ? 
+                       new Date(selectedCustomer.last_interaction).toLocaleDateString('pt-BR') : '-'}
+                   </span>
+                 </div>
+               </div>
 
               {/* Tags */}
-              <div>
-                <Label className="text-sm font-medium">Tags</Label>
-                <div className="flex gap-2 mt-1">
-                  {selectedCustomer.tags.map((tag: string) => (
-                    <Badge key={tag} variant="secondary">{tag}</Badge>
-                  ))}
-                </div>
-              </div>
+               <div>
+                 <Label className="text-sm font-medium">Tags</Label>
+                 <div className="flex gap-2 mt-1">
+                   {selectedCustomer.tags?.length > 0 ? 
+                     selectedCustomer.tags.map((tag: string) => (
+                       <Badge key={tag} variant="secondary">{tag}</Badge>
+                     )) : 
+                     <span className="text-muted-foreground text-sm">Nenhuma tag adicionada</span>
+                   }
+                 </div>
+               </div>
 
               {/* Service History */}
-              <div>
-                <Label className="text-sm font-medium">Histórico de Serviços</Label>
-                <div className="mt-2">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Data</TableHead>
-                        <TableHead>Serviço</TableHead>
-                        <TableHead>Valor</TableHead>
-                        <TableHead>Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {selectedCustomer.services.map((service: any, index: number) => (
-                        <TableRow key={index}>
-                          <TableCell>{new Date(service.date).toLocaleDateString()}</TableCell>
-                          <TableCell>{service.service}</TableCell>
-                          <TableCell className="font-medium">{service.value}</TableCell>
-                          <TableCell>{getServiceStatusBadge(service.status)}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
+               <div>
+                 <Label className="text-sm font-medium">Histórico de Serviços</Label>
+                 <div className="mt-2">
+                   <div className="text-center p-4 text-muted-foreground">
+                     <p>Histórico de serviços em desenvolvimento</p>
+                     <p className="text-xs mt-1">Em breve você poderá visualizar todos os serviços prestados</p>
+                   </div>
+                 </div>
+               </div>
 
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">

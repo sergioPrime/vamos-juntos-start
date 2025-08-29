@@ -57,9 +57,31 @@ export default function Auth() {
       })
 
       if (createUserError || createUserData?.error) {
+        // Se o usuário já existir, tentamos fazer login automaticamente
+        const { data: signInTry, error: signInTryError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
+
+        if (signInTry?.user && signInTry?.session && !signInTryError) {
+          toast({
+            title: "Login realizado",
+            description: "Bem-vindo de volta!",
+          })
+          navigate("/dashboard")
+          return
+        }
+
+        const friendly =
+          (createUserData?.error as string) ||
+          (signInTryError?.message?.toLowerCase().includes("invalid login credentials")
+            ? "E-mail já cadastrado. Entre com sua senha ou recupere o acesso."
+            : createUserError?.message) ||
+          "Erro ao criar usuário"
+
         toast({
           title: "Erro no cadastro",
-          description: createUserData?.error || createUserError?.message || "Erro ao criar usuário",
+          description: friendly,
           variant: "destructive",
         })
         return

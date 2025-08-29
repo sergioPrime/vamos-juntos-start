@@ -27,19 +27,6 @@ export default function Dashboard() {
     }, 200)
   }
 
-  // Demo reminder notification (simulate periodic reminders)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      addNotification({
-        type: 'reminder',
-        title: '⚡ Lembrete de Cobrança',
-        message: '3 cobranças vencem hoje! Envie lembretes via Pix.',
-        duration: 6000
-      })
-    }, 5000) // Show after 5 seconds for demo
-
-    return () => clearTimeout(timer)
-  }, [addNotification])
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">

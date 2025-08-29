@@ -12,10 +12,7 @@ import { useNavigate } from "react-router-dom"
 import { useToast } from "@/hooks/use-toast"
 import { useNotifications } from "@/components/ui/notification-system"
 
-const mockNFSe = [
-  { id: 1, number: "001", client: "João Silva", value: "R$ 2.500,00", date: "2024-01-15", status: "issued" },
-  { id: 2, number: "002", client: "Maria Santos", value: "R$ 1.200,00", date: "2024-01-20", status: "sent" },
-]
+const nfseList = [] // Real data from database will be loaded here
 
 export default function NFSe() {
   const navigate = useNavigate()
@@ -73,7 +70,7 @@ export default function NFSe() {
     }
 
     const nfseData = {
-      number: `${String(mockNFSe.length + 1).padStart(3, '0')}`,
+      number: `${String(nfseList.length + 1).padStart(3, '0')}`,
       client: formData.clientName,
       service: formData.serviceDescription,
       value: formData.value,
@@ -184,15 +181,23 @@ export default function NFSe() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockNFSe.map((nfse) => (
-                  <TableRow key={nfse.id}>
-                    <TableCell className="font-medium">{nfse.number}</TableCell>
-                    <TableCell>{nfse.client}</TableCell>
-                    <TableCell>{nfse.value}</TableCell>
-                    <TableCell>{new Date(nfse.date).toLocaleDateString()}</TableCell>
-                    <TableCell>{getStatusBadge(nfse.status)}</TableCell>
+                {nfseList.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                      Nenhuma nota fiscal encontrada
+                    </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  nfseList.map((nfse) => (
+                    <TableRow key={nfse.id}>
+                      <TableCell className="font-medium">{nfse.number}</TableCell>
+                      <TableCell>{nfse.client}</TableCell>
+                      <TableCell>{nfse.value}</TableCell>
+                      <TableCell>{new Date(nfse.date).toLocaleDateString()}</TableCell>
+                      <TableCell>{getStatusBadge(nfse.status)}</TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </CardContent>

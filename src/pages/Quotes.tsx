@@ -11,10 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, FileText, MessageCircle, Zap, Eye, Plus } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
-const mockQuotes = [
-  { id: 1, client: "João Silva", description: "Website corporativo", value: "R$ 3.500,00", date: "2024-01-10", status: "pending" },
-  { id: 2, client: "Maria Santos", description: "Sistema de vendas", value: "R$ 8.000,00", date: "2024-01-12", status: "accepted" },
-]
+const quotesList = [] // Real data from database will be loaded here
 
 export default function Quotes() {
   const navigate = useNavigate()
@@ -112,37 +109,45 @@ export default function Quotes() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockQuotes.map((quote) => (
-                <TableRow key={quote.id}>
-                  <TableCell className="font-medium">{quote.client}</TableCell>
-                  <TableCell>{quote.description}</TableCell>
-                  <TableCell>{quote.value}</TableCell>
-                  <TableCell>{new Date(quote.date).toLocaleDateString()}</TableCell>
-                  <TableCell>{getStatusBadge(quote.status)}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setSelectedQuote(quote)}
-                      >
-                        <Eye className="h-3 w-3 mr-1" />
-                        Ver
-                      </Button>
-                      {quote.status === "accepted" && (
+              {quotesList.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    Nenhum orçamento encontrado
+                  </TableCell>
+                </TableRow>
+              ) : (
+                quotesList.map((quote) => (
+                  <TableRow key={quote.id}>
+                    <TableCell className="font-medium">{quote.client}</TableCell>
+                    <TableCell>{quote.description}</TableCell>
+                    <TableCell>{quote.value}</TableCell>
+                    <TableCell>{new Date(quote.date).toLocaleDateString()}</TableCell>
+                    <TableCell>{getStatusBadge(quote.status)}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => navigate("/finance/receivables")}
+                          onClick={() => setSelectedQuote(quote)}
                         >
-                          <Zap className="h-3 w-3 mr-1" />
-                          Gerar Cobrança
+                          <Eye className="h-3 w-3 mr-1" />
+                          Ver
                         </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                        {quote.status === "accepted" && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => navigate("/finance/receivables")}
+                          >
+                            <Zap className="h-3 w-3 mr-1" />
+                            Gerar Cobrança
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>

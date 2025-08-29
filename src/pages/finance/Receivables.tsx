@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Zap, Copy, QrCode, Check, Eye, Search, Filter } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useToast } from "@/hooks/use-toast"
+import { useNotifications } from "@/components/ui/notification-system"
 
 const mockReceivables = [
   { id: 1, client: "João Silva", description: "Desenvolvimento de site", value: "R$ 2.500,00", dueDate: "2024-01-15", status: "pending" },
@@ -20,6 +21,7 @@ const mockReceivables = [
 export default function Receivables() {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { addNotification } = useNotifications()
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [selectedItem, setSelectedItem] = useState<any>(null)
@@ -49,9 +51,11 @@ export default function Receivables() {
     setAnimatingItems(prev => new Set(prev).add(id))
     
     setTimeout(() => {
-      toast({
-        title: "✅ Cobrança marcada como paga!",
-        description: "O pagamento foi registrado com sucesso.",
+      addNotification({
+        type: 'success',
+        title: '✅ Pagamento confirmado!',
+        message: 'A cobrança foi marcada como paga.',
+        duration: 4000
       })
       setAnimatingItems(prev => {
         const newSet = new Set(prev)

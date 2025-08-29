@@ -1,10 +1,11 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { DollarSign, Calendar, TrendingUp, Wallet, FileText, Quote, Users, BarChart3, Zap } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useToast } from "@/hooks/use-toast"
 import { useCountUp, formatCurrency } from "@/hooks/useCountUp"
+import { useNotifications } from "@/components/ui/notification-system"
 
 const mockActivities = [
   { id: 1, type: "payment", client: "João Silva", value: "R$ 850,00", date: "Hoje", status: "paid" },
@@ -15,6 +16,7 @@ const mockActivities = [
 export default function Dashboard() {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { addNotification } = useNotifications()
   const [isPulsing, setIsPulsing] = useState(false)
   
   // Count-up animations for metrics
@@ -29,6 +31,20 @@ export default function Dashboard() {
       navigate("/finance/receivables")
     }, 200)
   }
+
+  // Demo reminder notification (simulate periodic reminders)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      addNotification({
+        type: 'reminder',
+        title: '⚡ Lembrete de Cobrança',
+        message: '3 cobranças vencem hoje! Envie lembretes via Pix.',
+        duration: 6000
+      })
+    }, 5000) // Show after 5 seconds for demo
+
+    return () => clearTimeout(timer)
+  }, [addNotification])
 
   return (
     <div className="space-y-6">

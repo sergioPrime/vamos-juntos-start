@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ArrowLeft, FileText, Download } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useToast } from "@/hooks/use-toast"
+import { useNotifications } from "@/components/ui/notification-system"
 
 const mockNFSe = [
   { id: 1, number: "001", client: "João Silva", value: "R$ 2.500,00", date: "2024-01-15", status: "issued" },
@@ -19,6 +20,7 @@ const mockNFSe = [
 export default function NFSe() {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { addNotification } = useNotifications()
   const [formData, setFormData] = useState({
     clientName: "",
     serviceDescription: "",
@@ -27,6 +29,7 @@ export default function NFSe() {
   const [showReceipt, setShowReceipt] = useState(false)
   const [generatedNFSe, setGeneratedNFSe] = useState<any>(null)
   const [isGlowing, setIsGlowing] = useState(false)
+  const [isError, setIsError] = useState(false)
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -45,7 +48,27 @@ export default function NFSe() {
 
   const handleEmitirNota = () => {
     if (!formData.clientName || !formData.serviceDescription || !formData.value) {
-      alert("Por favor, preencha todos os campos obrigatórios")
+      setIsError(true)
+      addNotification({
+        type: 'error',
+        title: 'Erro ao emitir nota',
+        message: 'Por favor, preencha todos os campos obrigatórios',
+        duration: 4000
+      })
+      setTimeout(() => setIsError(false), 500)
+      return
+    }
+
+    // Simulate potential error (10% chance)
+    if (Math.random() < 0.1) {
+      setIsError(true)
+      addNotification({
+        type: 'error',
+        title: 'Falha na emissão',
+        message: 'Erro no servidor. Tente novamente em alguns minutos.',
+        duration: 5000
+      })
+      setTimeout(() => setIsError(false), 500)
       return
     }
 
@@ -61,10 +84,12 @@ export default function NFSe() {
     setGeneratedNFSe(nfseData)
     setIsGlowing(true)
     
-    // Show success toast
-    toast({
-      title: "Nota emitida com sucesso! 🎉",
-      description: `NFS-e Nº ${nfseData.number} foi gerada para ${formData.clientName}`,
+    // Show success notification
+    addNotification({
+      type: 'success',
+      title: 'Nota emitida com sucesso! 🎉',
+      message: `NFS-e Nº ${nfseData.number} foi gerada para ${formData.clientName}`,
+      duration: 4000
     })
     
     setTimeout(() => {
@@ -97,7 +122,7 @@ export default function NFSe() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Formulário simplificado */}
-        <Card>
+        <Card className={`transition-all duration-300 ${isError ? 'animate-error-shake' : ''}`}>
           <CardHeader>
             <CardTitle>Nova NFS-e</CardTitle>
           </CardHeader>

@@ -6,7 +6,9 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { ExternalLink, FileText, Upload } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ArrowLeft, FileText, Download } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 const mockNFSe = [
   { id: 1, number: "001", client: "João Silva", value: "R$ 2.500,00", date: "2024-01-15", status: "issued" },
@@ -14,21 +16,21 @@ const mockNFSe = [
 ]
 
 export default function NFSe() {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     clientName: "",
-    clientDocument: "",
-    clientEmail: "",
     serviceDescription: "",
-    value: "",
-    date: ""
+    value: ""
   })
+  const [showReceipt, setShowReceipt] = useState(false)
+  const [generatedNFSe, setGeneratedNFSe] = useState<any>(null)
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "issued":
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Emitida</Badge>
+        return <Badge className="bg-primary/20 text-primary border-primary/30">Emitida</Badge>
       case "sent":
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Enviada</Badge>
+        return <Badge className="bg-success/20 text-success border-success/30">Enviada</Badge>
       default:
         return <Badge>-</Badge>
     }
@@ -38,100 +40,95 @@ export default function NFSe() {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleOpenGovPortal = () => {
-    window.open("https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/servicos-para-mei/emissao-de-nota-fiscal", "_blank")
+  const handleEmitirNota = () => {
+    if (!formData.clientName || !formData.serviceDescription || !formData.value) {
+      alert("Por favor, preencha todos os campos obrigatórios")
+      return
+    }
+
+    const nfseData = {
+      number: `${String(mockNFSe.length + 1).padStart(3, '0')}`,
+      client: formData.clientName,
+      service: formData.serviceDescription,
+      value: formData.value,
+      date: new Date().toLocaleDateString(),
+      issueTime: new Date().toLocaleTimeString()
+    }
+
+    setGeneratedNFSe(nfseData)
+    setShowReceipt(true)
+  }
+
+  const downloadPDF = () => {
+    // Here you would generate and download the actual PDF
+    alert("PDF baixado com sucesso!")
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Parabéns! Sua primeira nota 🎉</h1>
-        <p className="text-muted-foreground">Emita suas notas fiscais de serviço</p>
+      {/* Back Navigation */}
+      <div className="flex items-center gap-4">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate("/")}
+          className="p-2 hover:bg-accent"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Parabéns! Sua primeira nota 🎉</h1>
+          <p className="text-muted-foreground">Emita suas notas fiscais de serviço</p>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
+        {/* Formulário simplificado */}
         <Card>
           <CardHeader>
             <CardTitle>Nova NFS-e</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="clientName">Nome do Cliente</Label>
+              <Label htmlFor="clientName">Cliente *</Label>
               <Input
                 id="clientName"
-                placeholder="Nome completo ou razão social"
+                placeholder="Nome do cliente"
                 value={formData.clientName}
                 onChange={(e) => handleInputChange("clientName", e.target.value)}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="clientDocument">CPF/CNPJ</Label>
-              <Input
-                id="clientDocument"
-                placeholder="000.000.000-00 ou 00.000.000/0000-00"
-                value={formData.clientDocument}
-                onChange={(e) => handleInputChange("clientDocument", e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="clientEmail">E-mail</Label>
-              <Input
-                id="clientEmail"
-                type="email"
-                placeholder="cliente@email.com"
-                value={formData.clientEmail}
-                onChange={(e) => handleInputChange("clientEmail", e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="serviceDescription">Serviço Prestado</Label>
+              <Label htmlFor="serviceDescription">Serviço *</Label>
               <Textarea
                 id="serviceDescription"
-                placeholder="Descreva o serviço prestado"
+                placeholder="Descrição do serviço prestado"
                 value={formData.serviceDescription}
                 onChange={(e) => handleInputChange("serviceDescription", e.target.value)}
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="value">Valor</Label>
-                <Input
-                  id="value"
-                  placeholder="R$ 0,00"
-                  value={formData.value}
-                  onChange={(e) => handleInputChange("value", e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="date">Data</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => handleInputChange("date", e.target.value)}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="value">Valor *</Label>
+              <Input
+                id="value"
+                placeholder="R$ 0,00"
+                value={formData.value}
+                onChange={(e) => handleInputChange("value", e.target.value)}
+              />
             </div>
 
-            <div className="flex flex-col gap-2 pt-4">
-              <Button onClick={handleOpenGovPortal} className="w-full">
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Abrir Emissor Nacional (gov.br)
-              </Button>
-              
-              <Button variant="outline" className="w-full">
-                <Upload className="h-4 w-4 mr-2" />
-                Anexar PDF da NFS-e
-              </Button>
-            </div>
+            <Button 
+              onClick={handleEmitirNota} 
+              className="w-full bg-primary hover:bg-primary/90 mt-6"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Emitir Nota
+            </Button>
           </CardContent>
         </Card>
 
+        {/* Histórico */}
         <Card>
           <CardHeader>
             <CardTitle>Histórico de NFS-e</CardTitle>
@@ -162,6 +159,73 @@ export default function NFSe() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Receipt Dialog */}
+      <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Comprovante NFS-e</DialogTitle>
+          </DialogHeader>
+          {generatedNFSe && (
+            <div className="space-y-6">
+              {/* Header do comprovante */}
+              <div className="text-center border-b pb-4">
+                <h2 className="text-xl font-bold">NOTA FISCAL DE SERVIÇOS ELETRÔNICA</h2>
+                <p className="text-muted-foreground">NFS-e Nº {generatedNFSe.number}</p>
+              </div>
+
+              {/* Dados da nota */}
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-sm font-medium">Cliente</Label>
+                    <p className="text-sm">{generatedNFSe.client}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Data de Emissão</Label>
+                    <p className="text-sm">{generatedNFSe.date} às {generatedNFSe.issueTime}</p>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-sm font-medium">Valor Total</Label>
+                    <p className="text-lg font-bold text-primary">{generatedNFSe.value}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Status</Label>
+                    <Badge className="bg-success/20 text-success border-success/30">Emitida</Badge>
+                  </div>
+                </div>
+              </div>
+
+              {/* Serviço */}
+              <div>
+                <Label className="text-sm font-medium">Descrição do Serviço</Label>
+                <div className="mt-1 p-3 bg-muted rounded-md">
+                  <p className="text-sm">{generatedNFSe.service}</p>
+                </div>
+              </div>
+
+              {/* Ações */}
+              <div className="flex gap-3 pt-4 border-t">
+                <Button onClick={downloadPDF} className="flex-1">
+                  <Download className="h-4 w-4 mr-2" />
+                  Baixar PDF
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowReceipt(false)
+                    setFormData({ clientName: "", serviceDescription: "", value: "" })
+                  }}
+                >
+                  Fechar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

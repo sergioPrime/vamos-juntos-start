@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { ArrowLeft, Search, Phone, Mail, Calendar, DollarSign, FileText, Plus, Eye } from "lucide-react"
+import { ArrowLeft, Search, Phone, Mail, Calendar, DollarSign, FileText, Plus, Eye, Edit, Trash2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { useToast } from "@/hooks/use-toast"
@@ -61,10 +61,22 @@ export default function Customers() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null)
   const [showNewCustomer, setShowNewCustomer] = useState(false)
+  const [showEditCustomer, setShowEditCustomer] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [customerToDelete, setCustomerToDelete] = useState<any>(null)
+  const [editingCustomer, setEditingCustomer] = useState<any>(null)
   const [visibleItems, setVisibleItems] = useState<number[]>([])
   
   // New customer form states
   const [newCustomer, setNewCustomer] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    document: ""
+  })
+  
+  // Edit customer form states
+  const [editCustomer, setEditCustomer] = useState({
     name: "",
     phone: "",
     email: "",
@@ -275,6 +287,143 @@ export default function Customers() {
     }
   }
 
+  const handleEditCustomer = (customer: any) => {
+    setEditingCustomer(customer)
+    setEditCustomer({
+      name: customer.name,
+      phone: customer.phone || "",
+      email: customer.email || "",
+      document: customer.document || ""
+    })
+    setShowEditCustomer(true)
+  }
+
+  const handleUpdateCustomer = async () => {
+    if (!editCustomer.name.trim()) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha o nome do cliente",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    // Validate document if provided
+    if (editCustomer.document.trim() && !validateDocument(editCustomer.document)) {
+      toast({
+        title: "Erro",
+        description: "CPF ou CNPJ inválido",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    // Check for duplicate document (excluding current customer)
+    if (editCustomer.document.trim()) {
+      const cleanDoc = editCustomer.document.replace(/\D/g, '')
+      const { data: existingCustomers, error: checkError } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('document', cleanDoc)
+        .neq('id', editingCustomer.id)
+      
+      if (checkError) {
+        console.error('Error checking duplicate document:', checkError)
+        toast({
+          title: "Erro",
+          description: "Erro ao verificar duplicação de documento",
+          variant: "destructive"
+        })
+        return
+      }
+      
+      if (existingCustomers && existingCustomers.length > 0) {
+        toast({
+          title: "Erro",
+          description: "Já existe um cliente cadastrado com este CPF/CNPJ",
+          variant: "destructive"
+        })
+        return
+      }
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .update({
+          name: editCustomer.name,
+          phone: editCustomer.phone,
+          email: editCustomer.email,
+          document: editCustomer.document.replace(/\D/g, ''), // Store only numbers
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingCustomer.id)
+      
+      if (error) throw error
+      
+      // Reset form and close dialog
+      setEditCustomer({
+        name: "",
+        phone: "",
+        email: "",
+        document: ""
+      })
+      setEditingCustomer(null)
+      setShowEditCustomer(false)
+      
+      // Reload customers list
+      await loadCustomers()
+      
+      toast({
+        title: "Sucesso!",
+        description: "Cliente atualizado com sucesso!"
+      })
+    } catch (error) {
+      console.error('Error updating customer:', error)
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o cliente",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const handleDeleteClick = (customer: any) => {
+    setCustomerToDelete(customer)
+    setShowDeleteConfirm(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!customerToDelete) return
+    
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .delete()
+        .eq('id', customerToDelete.id)
+      
+      if (error) throw error
+      
+      setCustomerToDelete(null)
+      setShowDeleteConfirm(false)
+      
+      // Reload customers list
+      await loadCustomers()
+      
+      toast({
+        title: "Sucesso!",
+        description: "Cliente excluído com sucesso!"
+      })
+    } catch (error) {
+      console.error('Error deleting customer:', error)
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir o cliente",
+        variant: "destructive"
+      })
+    }
+  }
+
   return (
     <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* Back Navigation */}
@@ -380,17 +529,41 @@ export default function Customers() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={(e) => { 
-                              e.stopPropagation(); 
-                              handleCustomerClick(customer); 
-                            }}
-                          >
-                            <Eye className="h-3 w-3 mr-1" />
-                            Ver Detalhes
-                          </Button>
+                          <div className="flex gap-1 flex-wrap">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                handleCustomerClick(customer); 
+                              }}
+                              className="text-xs px-2"
+                            >
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                handleEditCustomer(customer); 
+                              }}
+                              className="text-xs px-2"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                handleDeleteClick(customer); 
+                              }}
+                              className="text-xs px-2 text-destructive hover:text-destructive-foreground hover:bg-destructive"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -550,6 +723,107 @@ export default function Customers() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Customer Dialog */}
+      <Dialog open={showEditCustomer} onOpenChange={setShowEditCustomer}>
+        <DialogContent className="mx-4 max-w-md sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Editar Cliente</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-name">Nome *</Label>
+              <Input 
+                id="edit-name"
+                placeholder="Nome completo ou razão social" 
+                value={editCustomer.name}
+                onChange={(e) => setEditCustomer(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="edit-phone">Telefone</Label>
+              <Input 
+                id="edit-phone"
+                placeholder="(11) 99999-9999" 
+                value={editCustomer.phone}
+                onChange={(e) => setEditCustomer(prev => ({ ...prev, phone: e.target.value }))}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="edit-email">E-mail</Label>
+              <Input 
+                id="edit-email"
+                type="email" 
+                placeholder="cliente@email.com" 
+                value={editCustomer.email}
+                onChange={(e) => setEditCustomer(prev => ({ ...prev, email: e.target.value }))}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="edit-document">CPF/CNPJ</Label>
+              <Input 
+                id="edit-document"
+                placeholder="000.000.000-00" 
+                value={editCustomer.document}
+                onChange={(e) => setEditCustomer(prev => ({ ...prev, document: e.target.value }))}
+              />
+            </div>
+            
+            <div className="pt-4 flex gap-3">
+              <Button 
+                variant="outline" 
+                className="flex-1"
+                onClick={() => setShowEditCustomer(false)}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                className="flex-1"
+                onClick={handleUpdateCustomer}
+              >
+                Salvar Alterações
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="mx-4 max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">
+              Tem certeza que deseja excluir o cliente <strong>{customerToDelete?.name}</strong>?
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Esta ação não pode ser desfeita.
+            </p>
+            
+            <div className="flex gap-3 pt-4">
+              <Button 
+                variant="outline" 
+                className="flex-1"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                variant="destructive"
+                className="flex-1"
+                onClick={handleConfirmDelete}
+              >
+                Excluir Cliente
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

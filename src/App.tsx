@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
 import { PageTransition } from "./components/layout/PageTransition";
 import { NotificationProvider } from "./components/ui/notification-system";
+import { AuthProvider } from "./hooks/useAuth";
 import Dashboard from "./pages/Dashboard";
 import Receivables from "./pages/finance/Receivables";
 import Payables from "./pages/finance/Payables";
@@ -19,19 +20,22 @@ import Welcome from "./pages/onboarding/Welcome";
 import Signup from "./pages/onboarding/Signup";
 import BusinessType from "./pages/onboarding/BusinessType";
 import Tutorial from "./pages/onboarding/Tutorial";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <NotificationProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+    <AuthProvider>
+      <TooltipProvider>
+        <NotificationProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/onboarding" replace />} />
+          <Route path="/" element={<Navigate to="/auth" replace />} />
+          <Route path="/auth" element={<Auth />} />
           
           {/* Onboarding routes */}
           <Route path="/onboarding" element={<Welcome />} />
@@ -121,9 +125,10 @@ const App = () => (
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-        </BrowserRouter>
-      </NotificationProvider>
-    </TooltipProvider>
+          </BrowserRouter>
+        </NotificationProvider>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

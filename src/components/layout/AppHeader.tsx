@@ -1,16 +1,41 @@
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Plus, FileText, Calculator, User, MoreHorizontal } from "lucide-react"
+import { Plus, FileText, Calculator, User, MoreHorizontal, LogOut } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { useState } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
+import { UserProfileDialog } from "@/components/UserProfileDialog"
+import { useAuth } from "@/hooks/useAuth"
+import { useToast } from "@/hooks/use-toast"
 
 export function AppHeader() {
   const navigate = useNavigate()
+  const { signOut, user } = useAuth()
+  const { toast } = useToast()
+  const [showProfile, setShowProfile] = useState(false)
+
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      toast({
+        title: "Logout realizado",
+        description: "Você foi desconectado com sucesso.",
+      })
+      navigate("/")
+    } catch (error) {
+      toast({
+        title: "Erro no logout",
+        description: "Ocorreu um erro ao tentar desconectar.",
+        variant: "destructive",
+      })
+    }
+  }
 
   return (
     <header className="h-14 sm:h-16 border-b bg-background flex items-center justify-between px-3 sm:px-4 lg:px-6 shrink-0">
@@ -50,9 +75,24 @@ export function AppHeader() {
           Orçamento
         </Button>
         
-        <Button variant="ghost" size="icon">
-          <User className="h-4 w-4" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <User className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={() => setShowProfile(true)}>
+              <User className="h-4 w-4 mr-2" />
+              Perfil
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleSignOut}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Mobile Actions */}
@@ -81,13 +121,23 @@ export function AppHeader() {
               <Calculator className="h-4 w-4 mr-2" />
               Orçamento
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setShowProfile(true)}>
               <User className="h-4 w-4 mr-2" />
               Perfil
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleSignOut}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      
+      <UserProfileDialog 
+        open={showProfile} 
+        onOpenChange={setShowProfile}
+      />
     </header>
   )
 }

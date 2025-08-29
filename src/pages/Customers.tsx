@@ -12,46 +12,6 @@ import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 
-const mockCustomers = [
-  { 
-    id: 1, 
-    name: "João Silva", 
-    phone: "(11) 99999-9999", 
-    email: "joao@email.com",
-    lastInteraction: "2024-01-15", 
-    tags: ["VIP", "Desenvolvimento"],
-    totalSpent: "R$ 8.500,00",
-    services: [
-      { date: "2024-01-15", service: "Website corporativo", value: "R$ 3.500,00", status: "completed" },
-      { date: "2024-01-10", service: "Sistema de vendas", value: "R$ 5.000,00", status: "completed" }
-    ]
-  },
-  { 
-    id: 2, 
-    name: "Maria Santos", 
-    phone: "(11) 88888-8888", 
-    email: "maria@email.com",
-    lastInteraction: "2024-01-20", 
-    tags: ["Marketing"],
-    totalSpent: "R$ 2.200,00",
-    services: [
-      { date: "2024-01-20", service: "Consultoria em marketing", value: "R$ 1.200,00", status: "completed" },
-      { date: "2024-01-05", service: "Logo e identidade visual", value: "R$ 1.000,00", status: "completed" }
-    ]
-  },
-  { 
-    id: 3, 
-    name: "Empresa ABC", 
-    phone: "(11) 77777-7777", 
-    email: "contato@empresaabc.com",
-    lastInteraction: "2024-01-25", 
-    tags: ["Corporativo", "Sistema"],
-    totalSpent: "R$ 15.000,00",
-    services: [
-      { date: "2024-01-25", service: "Sistema de gestão completo", value: "R$ 15.000,00", status: "in_progress" }
-    ]
-  },
-]
 
 export default function Customers() {
   const navigate = useNavigate()

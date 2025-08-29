@@ -13,11 +13,6 @@ import { useToast } from "@/hooks/use-toast"
 import { useNotifications } from "@/components/ui/notification-system"
 import { ResponsiveTable } from "@/components/ui/responsive-table"
 
-const mockReceivables = [
-  { id: 1, client: "João Silva", description: "Desenvolvimento de site", value: "R$ 2.500,00", dueDate: "2024-01-15", status: "pending" },
-  { id: 2, client: "Maria Santos", description: "Consultoria em marketing", value: "R$ 1.200,00", dueDate: "2024-01-20", status: "paid" },
-  { id: 3, client: "Empresa ABC", description: "Sistema de gestão", value: "R$ 5.000,00", dueDate: "2024-01-25", status: "overdue" },
-]
 
 export default function Receivables() {
   const navigate = useNavigate()
@@ -145,47 +140,11 @@ export default function Receivables() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockReceivables.map((item) => (
-                  <TableRow 
-                    key={item.id} 
-                    className={`cursor-pointer hover:bg-accent/50 transition-all duration-300 ${
-                      animatingItems.has(item.id) ? 'animate-slide-check' : ''
-                    }`}
-                    onClick={() => handleRowClick(item)}
-                  >
-                    <TableCell className="font-medium">{item.client}</TableCell>
-                    <TableCell>{item.description}</TableCell>
-                    <TableCell>{item.value}</TableCell>
-                    <TableCell>{new Date(item.dueDate).toLocaleDateString()}</TableCell>
-                    <TableCell>{getStatusBadge(item.status)}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleRowClick(item); }}>
-                          <Eye className="h-3 w-3 mr-1" />
-                          Ver
-                        </Button>
-                        {item.status !== "paid" && (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={(e) => { 
-                              e.stopPropagation(); 
-                              markAsPaid(item.id); 
-                            }}
-                            className="relative"
-                          >
-                            {animatingItems.has(item.id) ? (
-                              <Check className="h-3 w-3 mr-1 animate-check-bounce text-success" />
-                            ) : (
-                              <Check className="h-3 w-3 mr-1" />
-                            )}
-                            Marcar Pago
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    Nenhuma cobrança encontrada
+                  </TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </ResponsiveTable>

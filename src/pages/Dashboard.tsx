@@ -7,11 +7,6 @@ import { useToast } from "@/hooks/use-toast"
 import { useCountUp, formatCurrency } from "@/hooks/useCountUp"
 import { useNotifications } from "@/components/ui/notification-system"
 
-const mockActivities = [
-  { id: 1, type: "payment", client: "João Silva", value: "R$ 850,00", date: "Hoje", status: "paid" },
-  { id: 2, type: "quote", client: "Maria Santos", value: "R$ 1.200,00", date: "Ontem", status: "pending" },
-  { id: 3, type: "invoice", client: "Empresa ABC", value: "R$ 2.500,00", date: "2 dias", status: "issued" },
-]
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -20,9 +15,9 @@ export default function Dashboard() {
   const [isPulsing, setIsPulsing] = useState(false)
   
   // Count-up animations for metrics
-  const currentBalance = useCountUp(12580, 800)
-  const todayReceivables = useCountUp(2350, 800, 0)
-  const weeklyReceivables = useCountUp(8750, 800, 0)
+  const currentBalance = useCountUp(0, 800)
+  const todayReceivables = useCountUp(0, 800, 0)
+  const weeklyReceivables = useCountUp(0, 800, 0)
 
   const handlePixClick = () => {
     setIsPulsing(true)
@@ -161,28 +156,8 @@ export default function Dashboard() {
           <CardTitle>Atividades Recentes</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3 sm:space-y-4">
-            {mockActivities.map((activity) => (
-              <div key={activity.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/30 transition-colors">
-                <div className="flex items-center space-x-3 flex-1 min-w-0">
-                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                    activity.status === 'paid' ? 'bg-green-500' :
-                    activity.status === 'pending' ? 'bg-yellow-500' : 'bg-blue-500'
-                  }`} />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-sm sm:text-base truncate">{activity.client}</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground">
-                      {activity.type === 'payment' ? 'Pagamento recebido' :
-                       activity.type === 'quote' ? 'Orçamento enviado' : 'NFS-e emitida'}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right flex-shrink-0 ml-4">
-                  <p className="font-semibold text-sm sm:text-base">{activity.value}</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">{activity.date}</p>
-                </div>
-              </div>
-            ))}
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Nenhuma atividade recente encontrada</p>
           </div>
         </CardContent>
       </Card>

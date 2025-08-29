@@ -8,29 +8,14 @@ import { useNavigate } from "react-router-dom"
 import { useCountUp, formatCurrency } from "@/hooks/useCountUp"
 import { ResponsiveTable } from "@/components/ui/responsive-table"
 
-// Mock data for the chart
-const monthlyRevenueData = [
-  { month: "Jul", revenue: 8500 },
-  { month: "Ago", revenue: 12000 },
-  { month: "Set", revenue: 9800 },
-  { month: "Out", revenue: 11500 },
-  { month: "Nov", revenue: 14200 },
-  { month: "Dez", revenue: 15750 },
-]
-
-const mockOverdueClients = [
-  { name: "Empresa ABC", value: "R$ 5.000,00", daysOverdue: 15 },
-  { name: "João Silva", value: "R$ 1.200,00", daysOverdue: 7 },
-  { name: "Maria Santos", value: "R$ 800,00", daysOverdue: 3 },
-]
 
 export default function Reports() {
   const navigate = useNavigate()
   
   // Count-up animations for metrics
-  const monthlyRevenue = useCountUp(15750, 800)
-  const receivedAmount = useCountUp(12580, 800)
-  const overdueAmount = useCountUp(7000, 800)
+  const monthlyRevenue = useCountUp(0, 800)
+  const receivedAmount = useCountUp(0, 800)
+  const overdueAmount = useCountUp(0, 800)
 
   const handleExportCSV = () => {
     // Here you would implement CSV export logic
@@ -130,31 +115,8 @@ export default function Reports() {
           <CardTitle className="text-lg sm:text-xl">Faturamento por Mês</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-64 sm:h-80 animate-[slideInUp_0.6s_ease-out_0.2s_both]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyRevenueData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis dataKey="month" />
-                <YAxis 
-                  tickFormatter={(value) => `R$ ${value.toLocaleString()}`}
-                />
-                <Tooltip 
-                  formatter={(value) => [`R$ ${value.toLocaleString()}`, 'Faturamento']}
-                  labelStyle={{ color: 'hsl(var(--foreground))' }}
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--background))', 
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
-                  }}
-                />
-                <Bar 
-                  dataKey="revenue" 
-                  fill="hsl(var(--primary))" 
-                  radius={[4, 4, 0, 0]}
-                  className="animate-[fillUp_0.8s_ease-out_0.4s_both]"
-                />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Dados de receita não disponíveis</p>
           </div>
         </CardContent>
       </Card>
@@ -176,34 +138,11 @@ export default function Reports() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockOverdueClients.map((client, index) => (
-                <TableRow 
-                  key={index}
-                  className="cursor-pointer hover:bg-accent/50"
-                  onClick={() => navigate("/finance/receivables")}
-                >
-                  <TableCell className="font-medium">{client.name}</TableCell>
-                  <TableCell className="font-medium">{client.value}</TableCell>
-                  <TableCell>
-                    {getDaysOverdueBadge(client.daysOverdue)}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          navigate("/finance/receivables")
-                        }}
-                      >
-                        <Eye className="h-3 w-3 mr-1" />
-                        Ver Detalhes
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                  Nenhum cliente em atraso encontrado
+                </TableCell>
+              </TableRow>
             </TableBody>
             </Table>
           </ResponsiveTable>

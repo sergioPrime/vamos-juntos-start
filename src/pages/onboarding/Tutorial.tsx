@@ -12,8 +12,8 @@ const tutorialSteps = [
   },
   {
     icon: FileText,
-    title: "2. Emita Notas Fiscais",
-    description: "Integração direta com o portal gov.br para emissão simplificada de NFS-e"
+    title: "2. Emita Orçamento",
+    description: "Crie orçamentos profissionais e converta em vendas rapidamente"
   },
   {
     icon: BarChart3,

@@ -37,10 +37,20 @@ export default function Welcome() {
           
           <Button 
             className="w-full" 
+            size="lg"
             onClick={() => navigate("/onboarding/signup")}
           >
             Começar Agora
           </Button>
+          
+          <div className="text-center">
+            <button 
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              onClick={() => navigate("/dashboard")}
+            >
+              Já tenho uma conta
+            </button>
+          </div>
         </CardContent>
       </Card>
     </div>

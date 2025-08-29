@@ -30,6 +30,13 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				
+				/* Hierarquia de níveis visuais */
+				elevated: {
+					DEFAULT: 'hsl(var(--elevated))',
+					foreground: 'hsl(var(--elevated-foreground))'
+				},
+				
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
@@ -73,6 +80,12 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				}
 			},
+			/* Gradientes para elementos destacados */
+			backgroundImage: {
+				'gradient-primary': 'var(--gradient-primary)',
+				'gradient-card': 'var(--gradient-card)',
+				'gradient-elevated': 'var(--gradient-elevated)'
+			},
 			borderRadius: {
 				lg: 'var(--radius-lg)',
 				md: 'var(--radius)',
@@ -80,7 +93,9 @@ export default {
 				card: 'var(--radius-card)'
 			},
 			boxShadow: {
-				'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+				'card': 'var(--shadow-card)',
+				'elevated': 'var(--shadow-elevated)',
+				'floating': 'var(--shadow-floating)',
 				'card-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
 			},
 			keyframes: {

@@ -57,6 +57,14 @@ export default function Customers() {
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null)
   const [showNewCustomer, setShowNewCustomer] = useState(false)
   const [visibleItems, setVisibleItems] = useState<number[]>([])
+  
+  // New customer form states
+  const [newCustomer, setNewCustomer] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    document: ""
+  })
 
   // Staggered animation for customer list
   useEffect(() => {
@@ -86,6 +94,28 @@ export default function Customers() {
 
   const handleCustomerClick = (customer: any) => {
     setSelectedCustomer(customer)
+  }
+
+  const handleSaveCustomer = () => {
+    if (!newCustomer.name.trim()) {
+      alert("Por favor, preencha o nome do cliente")
+      return
+    }
+    
+    // Aqui você pode integrar com sua API
+    console.log("Salvando cliente:", newCustomer)
+    
+    // Reset form and close dialog
+    setNewCustomer({
+      name: "",
+      phone: "",
+      email: "",
+      document: ""
+    })
+    setShowNewCustomer(false)
+    
+    // Show success message (você pode usar toast aqui)
+    alert("Cliente salvo com sucesso!")
   }
 
   return (
@@ -203,26 +233,59 @@ export default function Customers() {
           <div className="space-y-4">
             <div>
               <Label htmlFor="name">Nome *</Label>
-              <Input placeholder="Nome completo ou razão social" />
+              <Input 
+                id="name"
+                placeholder="Nome completo ou razão social" 
+                value={newCustomer.name}
+                onChange={(e) => setNewCustomer(prev => ({ ...prev, name: e.target.value }))}
+              />
             </div>
             
             <div>
               <Label htmlFor="phone">Telefone</Label>
-              <Input placeholder="(11) 99999-9999" />
+              <Input 
+                id="phone"
+                placeholder="(11) 99999-9999" 
+                value={newCustomer.phone}
+                onChange={(e) => setNewCustomer(prev => ({ ...prev, phone: e.target.value }))}
+              />
             </div>
             
             <div>
               <Label htmlFor="email">E-mail</Label>
-              <Input type="email" placeholder="cliente@email.com" />
+              <Input 
+                id="email"
+                type="email" 
+                placeholder="cliente@email.com" 
+                value={newCustomer.email}
+                onChange={(e) => setNewCustomer(prev => ({ ...prev, email: e.target.value }))}
+              />
             </div>
             
             <div>
               <Label htmlFor="document">CPF/CNPJ</Label>
-              <Input placeholder="000.000.000-00" />
+              <Input 
+                id="document"
+                placeholder="000.000.000-00" 
+                value={newCustomer.document}
+                onChange={(e) => setNewCustomer(prev => ({ ...prev, document: e.target.value }))}
+              />
             </div>
             
-            <div className="pt-4">
-              <Button className="w-full">Salvar Cliente</Button>
+            <div className="pt-4 flex gap-3">
+              <Button 
+                variant="outline" 
+                className="flex-1"
+                onClick={() => setShowNewCustomer(false)}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                className="flex-1"
+                onClick={handleSaveCustomer}
+              >
+                Salvar Cliente
+              </Button>
             </div>
           </div>
         </DialogContent>

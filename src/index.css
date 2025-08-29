@@ -113,8 +113,8 @@ All colors MUST be HSL.
     @apply font-poppins font-semibold;
   }
 
-  .font-mono, .currency, .number {
-    @apply font-mono;
+  .currency, .number {
+    font-family: 'Roboto Mono', monospace;
   }
 
   button {

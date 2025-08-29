@@ -137,18 +137,61 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-inter;
+    line-height: 1.6;
   }
 
+  /* === SISTEMA DE TIPOGRAFIA === */
+  
+  /* Títulos - Inter/Poppins Bold, 18-20px mobile */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-poppins font-semibold;
+    @apply font-poppins font-bold leading-tight;
+  }
+  
+  h1 {
+    @apply text-xl sm:text-2xl lg:text-3xl; /* 20px mobile, 24px tablet, 30px desktop */
+  }
+  
+  h2 {
+    @apply text-lg sm:text-xl lg:text-2xl; /* 18px mobile, 20px tablet, 24px desktop */
+  }
+  
+  h3 {
+    @apply text-base sm:text-lg lg:text-xl; /* 16px mobile, 18px tablet, 20px desktop */
+  }
+  
+  h4, h5, h6 {
+    @apply text-sm sm:text-base lg:text-lg; /* 14px mobile, 16px tablet, 18px desktop */
   }
 
-  .currency, .number {
-    font-family: 'Roboto Mono', monospace;
+  /* Números financeiros - Roboto Mono */
+  .currency, .number, .financial {
+    @apply font-mono font-medium;
+    font-feature-settings: 'tnum' 1; /* Tabular numbers */
   }
 
+  /* Textos secundários - cinza claro, 14px */
+  .text-secondary {
+    @apply text-muted-foreground text-sm; /* 14px */
+    color: #9CA3AF;
+  }
+  
+  .text-tertiary {
+    @apply text-muted-foreground text-xs; /* 12px */
+    color: #6B7280;
+  }
+
+  /* Botões com tipografia consistente */
   button {
     @apply font-poppins font-semibold;
+  }
+  
+  /* Labels e inputs */
+  label {
+    @apply font-inter font-medium text-sm;
+  }
+  
+  input, textarea, select {
+    @apply font-inter;
   }
 }
 
@@ -210,24 +253,100 @@ All colors MUST be HSL.
     box-shadow: var(--shadow-floating);
   }
 
-  /* Utilitários para hierarquia visual */
+  /* Utilitários para hierarquia visual com espaçamento confortável */
   .bg-level-1 {
     background: hsl(var(--background));
+    @apply p-4 sm:p-6 lg:p-8;
   }
 
   .bg-level-2 {
     background: hsl(var(--card));
     box-shadow: var(--shadow-card);
+    @apply p-4 sm:p-5 lg:p-6 rounded-card;
   }
 
   .bg-level-3 {
     background: hsl(var(--elevated));
     box-shadow: var(--shadow-elevated);
+    @apply p-3 sm:p-4 lg:p-5 rounded-lg;
   }
 
   .bg-level-floating {
     background: hsl(var(--elevated));
     box-shadow: var(--shadow-floating);
+    @apply p-3 sm:p-4 lg:p-5 rounded-lg;
+  }
+  
+  /* === CLASSES UTILITÁRIAS DE TIPOGRAFIA === */
+  
+  /* Títulos com tamanhos responsivos */
+  .title-xl {
+    @apply font-poppins font-bold text-xl sm:text-2xl lg:text-3xl leading-tight;
+  }
+  
+  .title-lg {
+    @apply font-poppins font-bold text-lg sm:text-xl lg:text-2xl leading-tight;
+  }
+  
+  .title-md {
+    @apply font-poppins font-bold text-base sm:text-lg lg:text-xl leading-tight;
+  }
+  
+  .title-sm {
+    @apply font-poppins font-semibold text-sm sm:text-base lg:text-lg leading-tight;
+  }
+  
+  /* Números financeiros */
+  .financial-lg {
+    @apply font-mono font-semibold text-2xl sm:text-3xl lg:text-4xl;
+    font-feature-settings: 'tnum' 1;
+  }
+  
+  .financial-md {
+    @apply font-mono font-medium text-lg sm:text-xl lg:text-2xl;
+    font-feature-settings: 'tnum' 1;
+  }
+  
+  .financial-sm {
+    @apply font-mono font-medium text-base sm:text-lg;
+    font-feature-settings: 'tnum' 1;
+  }
+  
+  /* Textos secundários */
+  .text-secondary {
+    @apply text-sm;
+    color: #9CA3AF;
+  }
+  
+  .text-tertiary {
+    @apply text-xs;
+    color: #6B7280;
+  }
+  
+  /* === ESPAÇAMENTOS CONFORTÁVEIS === */
+  
+  /* Containers principais */
+  .container-comfortable {
+    @apply px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12;
+  }
+  
+  /* Cards com espaçamento confortável */
+  .card-comfortable {
+    @apply p-4 sm:p-5 lg:p-6 space-y-3 sm:space-y-4;
+  }
+  
+  /* Seções com espaçamento vertical */
+  .section-spacing {
+    @apply space-y-4 sm:space-y-6 lg:space-y-8;
+  }
+  
+  /* Elementos de formulário */
+  .form-comfortable {
+    @apply space-y-4 sm:space-y-5;
+  }
+  
+  .form-field {
+    @apply space-y-2;
   }
 
   /* Action button animations */

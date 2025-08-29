@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Home, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Calculator } from "lucide-react"
+import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
 import {
@@ -15,18 +15,18 @@ import {
 } from "@/components/ui/sidebar"
 
 const navigationItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
 ]
 
 const financeItems = [
-  { title: "Receber", url: "/finance/receivables", icon: DollarSign },
+  { title: "Receber", url: "/finance/receivables", icon: Wallet },
   { title: "Pagar", url: "/finance/payables", icon: CreditCard },
   { title: "Cobranças", url: "/charges", icon: Receipt },
 ]
 
 const businessItems = [
   { title: "NFS-e", url: "/nfse", icon: FileText },
-  { title: "Orçamentos", url: "/quotes", icon: Calculator },
+  { title: "Orçamentos", url: "/quotes", icon: Quote },
   { title: "Clientes", url: "/customers", icon: Users },
   { title: "Relatórios", url: "/reports", icon: BarChart3 },
 ]

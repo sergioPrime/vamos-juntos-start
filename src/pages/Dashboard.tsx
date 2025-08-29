@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { DollarSign, Calendar, TrendingUp, Plus, FileText, Calculator } from "lucide-react"
+import { DollarSign, Calendar, TrendingUp, Wallet, FileText, Quote, Users, BarChart3, Zap } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 const mockActivities = [
@@ -55,39 +55,64 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Ações rápidas */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Bora acelerar? 🚀</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4 flex-wrap">
-            <Button 
-              onClick={() => navigate("/charges/new")}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Nova Cobrança Pix
-            </Button>
-            
-            <Button 
-              variant="outline"
-              onClick={() => navigate("/nfse")}
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Emitir NFS-e
-            </Button>
-            
-            <Button 
-              variant="outline"
-              onClick={() => navigate("/quotes/new")}
-            >
-              <Calculator className="h-4 w-4 mr-2" />
-              Novo Orçamento
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Botão Principal PIX */}
+      <div className="flex justify-center">
+        <Button 
+          onClick={() => navigate("/finance/receivables")}
+          className="bg-primary text-primary-foreground hover:bg-primary/90 h-14 px-8 text-lg font-semibold"
+          size="lg"
+        >
+          <Zap className="h-5 w-5 mr-3" />
+          Gerar Cobrança Pix
+        </Button>
+      </div>
+
+      {/* Cards de Navegação */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card 
+          className="cursor-pointer hover:shadow-card-hover transition-all duration-200 hover:scale-105"
+          onClick={() => navigate("/nfse")}
+        >
+          <CardContent className="p-6 text-center">
+            <FileText className="h-12 w-12 text-primary mx-auto mb-4" />
+            <h3 className="font-semibold text-lg mb-2">Emitir Nota Fiscal</h3>
+            <p className="text-sm text-muted-foreground">NFS-e para seus serviços</p>
+          </CardContent>
+        </Card>
+
+        <Card 
+          className="cursor-pointer hover:shadow-card-hover transition-all duration-200 hover:scale-105"
+          onClick={() => navigate("/quotes")}
+        >
+          <CardContent className="p-6 text-center">
+            <Quote className="h-12 w-12 text-primary mx-auto mb-4" />
+            <h3 className="font-semibold text-lg mb-2">Novo Orçamento</h3>
+            <p className="text-sm text-muted-foreground">Crie propostas profissionais</p>
+          </CardContent>
+        </Card>
+
+        <Card 
+          className="cursor-pointer hover:shadow-card-hover transition-all duration-200 hover:scale-105"
+          onClick={() => navigate("/customers")}
+        >
+          <CardContent className="p-6 text-center">
+            <Users className="h-12 w-12 text-primary mx-auto mb-4" />
+            <h3 className="font-semibold text-lg mb-2">Meus Clientes</h3>
+            <p className="text-sm text-muted-foreground">Gerencie relacionamentos</p>
+          </CardContent>
+        </Card>
+
+        <Card 
+          className="cursor-pointer hover:shadow-card-hover transition-all duration-200 hover:scale-105"
+          onClick={() => navigate("/reports")}
+        >
+          <CardContent className="p-6 text-center">
+            <BarChart3 className="h-12 w-12 text-primary mx-auto mb-4" />
+            <h3 className="font-semibold text-lg mb-2">Relatórios</h3>
+            <p className="text-sm text-muted-foreground">Acompanhe performance</p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Atividades recentes */}
       <Card>

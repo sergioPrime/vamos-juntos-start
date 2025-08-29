@@ -36,8 +36,8 @@ export default function Receivables() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Contas a Receber</h1>
-          <p className="text-muted-foreground">Gerencie suas cobranças e recebimentos</p>
+          <h1 className="text-3xl font-bold tracking-tight">Bora cobrar? 💰</h1>
+          <p className="text-muted-foreground">Seus recebimentos e cobranças</p>
         </div>
         
         <Drawer>

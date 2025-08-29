@@ -15,8 +15,8 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Visão geral do seu negócio</p>
+        <h1 className="text-3xl font-bold tracking-tight">Quanto você já faturou este mês 🚀</h1>
+        <p className="text-muted-foreground">Acompanhe seu crescimento em tempo real</p>
       </div>
 
       {/* Cards de métricas */}
@@ -58,7 +58,7 @@ export default function Dashboard() {
       {/* Ações rápidas */}
       <Card>
         <CardHeader>
-          <CardTitle>Ações Rápidas</CardTitle>
+          <CardTitle>Bora acelerar? 🚀</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4 flex-wrap">

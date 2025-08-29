@@ -45,7 +45,7 @@ export default function NFSe() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">NFS-e</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Parabéns! Sua primeira nota 🎉</h1>
         <p className="text-muted-foreground">Emita suas notas fiscais de serviço</p>
       </div>
 

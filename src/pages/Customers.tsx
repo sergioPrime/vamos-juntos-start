@@ -43,8 +43,8 @@ export default function Customers() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Clientes</h1>
-          <p className="text-muted-foreground">Gerencie seus clientes e relacionamentos</p>
+          <h1 className="text-3xl font-bold tracking-tight">Seus clientes especiais 👥</h1>
+          <p className="text-muted-foreground">Relacionamentos que geram resultados</p>
         </div>
         
         <Drawer>

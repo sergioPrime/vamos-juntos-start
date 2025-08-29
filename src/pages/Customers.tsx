@@ -209,13 +209,13 @@ export default function Customers() {
     // Check for duplicate document
     if (newCustomer.document.trim()) {
       const cleanDoc = newCustomer.document.replace(/\D/g, '')
-      const { data: existingCustomer, error: checkError } = await supabase
+      const { data: existingCustomers, error: checkError } = await supabase
         .from('customers')
         .select('id')
         .eq('document', cleanDoc)
-        .single()
       
-      if (checkError && checkError.code !== 'PGRST116') {
+      if (checkError) {
+        console.error('Error checking duplicate document:', checkError)
         toast({
           title: "Erro",
           description: "Erro ao verificar duplicação de documento",
@@ -224,7 +224,7 @@ export default function Customers() {
         return
       }
       
-      if (existingCustomer) {
+      if (existingCustomers && existingCustomers.length > 0) {
         toast({
           title: "Erro",
           description: "Já existe um cliente cadastrado com este CPF/CNPJ",

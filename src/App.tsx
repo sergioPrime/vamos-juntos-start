@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
+import { PageTransition } from "./components/layout/PageTransition";
 import Dashboard from "./pages/Dashboard";
 import Receivables from "./pages/finance/Receivables";
 import Payables from "./pages/finance/Payables";
@@ -37,17 +38,83 @@ const App = () => (
           <Route path="/onboarding/tutorial" element={<Tutorial />} />
           
           {/* Main app routes */}
-          <Route path="/dashboard" element={<AppLayout><Dashboard /></AppLayout>} />
-          <Route path="/finance/receivables" element={<AppLayout><Receivables /></AppLayout>} />
-          <Route path="/finance/payables" element={<AppLayout><Payables /></AppLayout>} />
-          <Route path="/charges" element={<AppLayout><Charges /></AppLayout>} />
-          <Route path="/charges/new" element={<AppLayout><Receivables /></AppLayout>} />
-          <Route path="/nfse" element={<AppLayout><NFSe /></AppLayout>} />
-          <Route path="/quotes" element={<AppLayout><Quotes /></AppLayout>} />
-          <Route path="/quotes/new" element={<AppLayout><Quotes /></AppLayout>} />
-          <Route path="/customers" element={<AppLayout><Customers /></AppLayout>} />
-          <Route path="/reports" element={<AppLayout><Reports /></AppLayout>} />
-          <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />
+          <Route path="/dashboard" element={
+            <AppLayout>
+              <PageTransition direction="right">
+                <Dashboard />
+              </PageTransition>
+            </AppLayout>
+          } />
+          <Route path="/finance/receivables" element={
+            <AppLayout>
+              <PageTransition direction="left">
+                <Receivables />
+              </PageTransition>
+            </AppLayout>
+          } />
+          <Route path="/finance/payables" element={
+            <AppLayout>
+              <PageTransition direction="left">
+                <Payables />
+              </PageTransition>
+            </AppLayout>
+          } />
+          <Route path="/charges" element={
+            <AppLayout>
+              <PageTransition direction="left">
+                <Charges />
+              </PageTransition>
+            </AppLayout>
+          } />
+          <Route path="/charges/new" element={
+            <AppLayout>
+              <PageTransition direction="left">
+                <Receivables />
+              </PageTransition>
+            </AppLayout>
+          } />
+          <Route path="/nfse" element={
+            <AppLayout>
+              <PageTransition direction="left">
+                <NFSe />
+              </PageTransition>
+            </AppLayout>
+          } />
+          <Route path="/quotes" element={
+            <AppLayout>
+              <PageTransition direction="left">
+                <Quotes />
+              </PageTransition>
+            </AppLayout>
+          } />
+          <Route path="/quotes/new" element={
+            <AppLayout>
+              <PageTransition direction="left">
+                <Quotes />
+              </PageTransition>
+            </AppLayout>
+          } />
+          <Route path="/customers" element={
+            <AppLayout>
+              <PageTransition direction="left">
+                <Customers />
+              </PageTransition>
+            </AppLayout>
+          } />
+          <Route path="/reports" element={
+            <AppLayout>
+              <PageTransition direction="fade">
+                <Reports />
+              </PageTransition>
+            </AppLayout>
+          } />
+          <Route path="/settings" element={
+            <AppLayout>
+              <PageTransition direction="left">
+                <Settings />
+              </PageTransition>
+            </AppLayout>
+          } />
           
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />

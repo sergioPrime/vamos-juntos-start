@@ -110,16 +110,16 @@ export default function Reports() {
         </Card>
       </div>
 
-      {/* Bar Chart */}
-      <Card>
+      {/* Bar Chart with animation */}
+      <Card className="animate-fade-in">
         <CardHeader>
           <CardTitle>Faturamento por Mês</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-80">
+          <div className="h-80 animate-[slideInUp_0.6s_ease-out_0.2s_both]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyRevenue}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                 <XAxis dataKey="month" />
                 <YAxis 
                   tickFormatter={(value) => `R$ ${value.toLocaleString()}`}
@@ -137,6 +137,7 @@ export default function Reports() {
                   dataKey="revenue" 
                   fill="hsl(var(--primary))" 
                   radius={[4, 4, 0, 0]}
+                  className="animate-[fillUp_0.8s_ease-out_0.4s_both]"
                 />
               </BarChart>
             </ResponsiveContainer>

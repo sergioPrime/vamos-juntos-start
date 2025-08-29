@@ -55,8 +55,7 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Botão Principal PIX */}
-      <div className="flex justify-center">
+      <div className="flex justify-center animate-fade-in">{/* Botão Principal PIX */}
         <Button 
           onClick={() => navigate("/finance/receivables")}
           className="bg-primary text-primary-foreground hover:bg-primary/90 h-14 px-8 text-lg font-semibold"
@@ -70,10 +69,10 @@ export default function Dashboard() {
       {/* Cards de Navegação */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card 
-          className="cursor-pointer hover:shadow-card-hover transition-all duration-200 hover:scale-105"
+          className="cursor-pointer card-hover transition-all duration-200"
           onClick={() => navigate("/nfse")}
         >
-          <CardContent className="p-6 text-center">
+          <CardContent className="p-6 text-center animate-[staggerFadeIn_0.5s_ease-out_0.1s_both]">
             <FileText className="h-12 w-12 text-primary mx-auto mb-4" />
             <h3 className="font-semibold text-lg mb-2">Emitir Nota Fiscal</h3>
             <p className="text-sm text-muted-foreground">NFS-e para seus serviços</p>
@@ -81,10 +80,10 @@ export default function Dashboard() {
         </Card>
 
         <Card 
-          className="cursor-pointer hover:shadow-card-hover transition-all duration-200 hover:scale-105"
+          className="cursor-pointer card-hover transition-all duration-200"
           onClick={() => navigate("/quotes")}
         >
-          <CardContent className="p-6 text-center">
+          <CardContent className="p-6 text-center animate-[staggerFadeIn_0.5s_ease-out_0.2s_both]">
             <Quote className="h-12 w-12 text-primary mx-auto mb-4" />
             <h3 className="font-semibold text-lg mb-2">Novo Orçamento</h3>
             <p className="text-sm text-muted-foreground">Crie propostas profissionais</p>
@@ -92,10 +91,10 @@ export default function Dashboard() {
         </Card>
 
         <Card 
-          className="cursor-pointer hover:shadow-card-hover transition-all duration-200 hover:scale-105"
+          className="cursor-pointer card-hover transition-all duration-200"
           onClick={() => navigate("/customers")}
         >
-          <CardContent className="p-6 text-center">
+          <CardContent className="p-6 text-center animate-[staggerFadeIn_0.5s_ease-out_0.3s_both]">
             <Users className="h-12 w-12 text-primary mx-auto mb-4" />
             <h3 className="font-semibold text-lg mb-2">Meus Clientes</h3>
             <p className="text-sm text-muted-foreground">Gerencie relacionamentos</p>
@@ -103,10 +102,10 @@ export default function Dashboard() {
         </Card>
 
         <Card 
-          className="cursor-pointer hover:shadow-card-hover transition-all duration-200 hover:scale-105"
+          className="cursor-pointer card-hover transition-all duration-200"
           onClick={() => navigate("/reports")}
         >
-          <CardContent className="p-6 text-center">
+          <CardContent className="p-6 text-center animate-[staggerFadeIn_0.5s_ease-out_0.4s_both]">
             <BarChart3 className="h-12 w-12 text-primary mx-auto mb-4" />
             <h3 className="font-semibold text-lg mb-2">Relatórios</h3>
             <p className="text-sm text-muted-foreground">Acompanhe performance</p>

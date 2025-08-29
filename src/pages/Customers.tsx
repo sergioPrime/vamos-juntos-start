@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -55,6 +55,20 @@ export default function Customers() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null)
   const [showNewCustomer, setShowNewCustomer] = useState(false)
+  const [visibleItems, setVisibleItems] = useState<number[]>([])
+
+  // Staggered animation for customer list
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      mockCustomers.forEach((_, index) => {
+        setTimeout(() => {
+          setVisibleItems(prev => [...prev, index])
+        }, index * 100) // 0.1s delay between each item
+      })
+    }, 200) // Initial delay
+
+    return () => clearTimeout(timer)
+  }, [])
 
   const getServiceStatusBadge = (status: string) => {
     switch (status) {
@@ -126,10 +140,17 @@ export default function Customers() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockCustomers.map((customer) => (
+              {mockCustomers.map((customer, index) => (
                 <TableRow 
                   key={customer.id} 
-                  className="cursor-pointer hover:bg-accent/50"
+                  className={`cursor-pointer hover:bg-accent/50 transition-all duration-300 ${
+                    visibleItems.includes(index) 
+                      ? 'opacity-100 translate-y-0' 
+                      : 'opacity-0 translate-y-4'
+                  }`}
+                  style={{
+                    transitionDelay: visibleItems.includes(index) ? '0ms' : `${index * 100}ms`
+                  }}
                   onClick={() => handleCustomerClick(customer)}
                 >
                   <TableCell className="font-medium">{customer.name}</TableCell>

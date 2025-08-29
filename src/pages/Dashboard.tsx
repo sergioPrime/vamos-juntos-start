@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { DollarSign, Calendar, TrendingUp, Wallet, FileText, Quote, Users, BarChart3, Zap } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useToast } from "@/hooks/use-toast"
+import { useCountUp, formatCurrency } from "@/hooks/useCountUp"
 
 const mockActivities = [
   { id: 1, type: "payment", client: "João Silva", value: "R$ 850,00", date: "Hoje", status: "paid" },
@@ -15,6 +16,11 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const { toast } = useToast()
   const [isPulsing, setIsPulsing] = useState(false)
+  
+  // Count-up animations for metrics
+  const currentBalance = useCountUp(12580, 800)
+  const todayReceivables = useCountUp(2350, 800, 0)
+  const weeklyReceivables = useCountUp(8750, 800, 0)
 
   const handlePixClick = () => {
     setIsPulsing(true)
@@ -39,7 +45,9 @@ export default function Dashboard() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">R$ 12.580,00</div>
+            <div className="text-2xl font-bold text-primary currency">
+              {formatCurrency(currentBalance)}
+            </div>
             <p className="text-xs text-muted-foreground">+20.1% em relação ao mês passado</p>
           </CardContent>
         </Card>
@@ -50,7 +58,9 @@ export default function Dashboard() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">R$ 2.350,00</div>
+            <div className="text-2xl font-bold text-primary currency">
+              {formatCurrency(todayReceivables)}
+            </div>
             <p className="text-xs text-muted-foreground">3 cobranças pendentes</p>
           </CardContent>
         </Card>
@@ -61,7 +71,9 @@ export default function Dashboard() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">R$ 8.750,00</div>
+            <div className="text-2xl font-bold text-primary currency">
+              {formatCurrency(weeklyReceivables)}
+            </div>
             <p className="text-xs text-muted-foreground">12 cobranças em aberto</p>
           </CardContent>
         </Card>

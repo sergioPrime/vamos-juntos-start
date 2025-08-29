@@ -5,9 +5,10 @@ import { Badge } from "@/components/ui/badge"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { ArrowLeft, TrendingUp, DollarSign, AlertTriangle, Download, Eye } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { useCountUp, formatCurrency } from "@/hooks/useCountUp"
 
 // Mock data for the chart
-const monthlyRevenue = [
+const monthlyRevenueData = [
   { month: "Jul", revenue: 8500 },
   { month: "Ago", revenue: 12000 },
   { month: "Set", revenue: 9800 },
@@ -24,6 +25,11 @@ const mockOverdueClients = [
 
 export default function Reports() {
   const navigate = useNavigate()
+  
+  // Count-up animations for metrics
+  const monthlyRevenue = useCountUp(15750, 800)
+  const receivedAmount = useCountUp(12580, 800)
+  const overdueAmount = useCountUp(7000, 800)
 
   const handleExportCSV = () => {
     // Here you would implement CSV export logic
@@ -82,7 +88,9 @@ export default function Reports() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">R$ 15.750,00</div>
+            <div className="text-2xl font-bold text-primary currency">
+              {formatCurrency(monthlyRevenue)}
+            </div>
             <p className="text-xs text-muted-foreground">+12% em relação ao mês anterior</p>
           </CardContent>
         </Card>
@@ -93,7 +101,9 @@ export default function Reports() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">R$ 12.580,00</div>
+            <div className="text-2xl font-bold text-primary currency">
+              {formatCurrency(receivedAmount)}
+            </div>
             <p className="text-xs text-muted-foreground">80% do faturamento</p>
           </CardContent>
         </Card>
@@ -104,7 +114,9 @@ export default function Reports() {
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">R$ 7.000,00</div>
+            <div className="text-2xl font-bold text-destructive currency">
+              {formatCurrency(overdueAmount)}
+            </div>
             <p className="text-xs text-muted-foreground">3 clientes em atraso</p>
           </CardContent>
         </Card>
@@ -118,7 +130,7 @@ export default function Reports() {
         <CardContent>
           <div className="h-80 animate-[slideInUp_0.6s_ease-out_0.2s_both]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyRevenue}>
+              <BarChart data={monthlyRevenueData}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                 <XAxis dataKey="month" />
                 <YAxis 

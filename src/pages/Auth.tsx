@@ -51,33 +51,41 @@ export default function Auth() {
   const handleSignUp = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`
-        }
+      // Call edge function to create user with confirmed email
+      const { data: createUserData, error: createUserError } = await supabase.functions.invoke('create-user', {
+        body: { email, password }
       })
 
-      if (error) {
+      if (createUserError || createUserData?.error) {
         toast({
           title: "Erro no cadastro",
-          description: error.message,
+          description: createUserData?.error || createUserError?.message || "Erro ao criar usuário",
           variant: "destructive",
         })
-      } else if (data.user && data.session) {
-        // User is automatically signed in
+        return
+      }
+
+      // Now sign in the user immediately
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (signInError) {
+        toast({
+          title: "Erro no login",
+          description: "Usuário criado, mas erro ao fazer login automático: " + signInError.message,
+          variant: "destructive",
+        })
+        return
+      }
+
+      if (signInData.user && signInData.session) {
         toast({
           title: "Cadastro realizado",
           description: "Bem-vindo ao sistema!",
         })
         navigate("/dashboard")
-      } else if (data.user && !data.session) {
-        // Email confirmation required - show message
-        toast({
-          title: "Cadastro realizado",
-          description: "Verifique seu email para confirmar a conta.",
-        })
       }
     } catch (error) {
       toast({

@@ -59,8 +59,22 @@ export default {
 				
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					hover: 'hsl(var(--primary-hover))',
+					active: 'hsl(var(--primary-active))'
 				},
+				
+				/* Cores de ação com mais presença */
+				action: {
+					primary: 'hsl(var(--action-primary))',
+					'primary-hover': 'hsl(var(--action-primary-hover))',
+					'primary-active': 'hsl(var(--action-primary-active))',
+					secondary: 'hsl(var(--action-secondary))',
+					'secondary-hover': 'hsl(var(--action-secondary-hover))',
+					destructive: 'hsl(var(--action-destructive))',
+					'destructive-hover': 'hsl(var(--action-destructive-hover))'
+				},
+				
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
 					foreground: 'hsl(var(--secondary-foreground))'

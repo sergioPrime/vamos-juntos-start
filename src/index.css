@@ -24,22 +24,34 @@ All colors MUST be HSL.
     --popover: 220 18% 24%;
     --popover-foreground: 210 20% 98%;
 
-    --primary: 217 91% 65%;
+    --primary: 217 91% 68%;
     --primary-foreground: 210 20% 98%;
+    --primary-hover: 217 91% 72%;
+    --primary-active: 217 91% 60%;
 
+    /* Cores de ação com mais presença */
+    --action-primary: 217 91% 68%;
+    --action-primary-hover: 217 91% 72%;
+    --action-primary-active: 217 91% 60%;
+    --action-secondary: 158 84% 60%;
+    --action-secondary-hover: 158 84% 65%;
+    --action-destructive: 0 84% 65%;
+    --action-destructive-hover: 0 84% 70%;
+
+    
     --secondary: 220 22% 20%;
     --secondary-foreground: 210 20% 98%;
 
     --muted: 220 22% 16%;
     --muted-foreground: 210 20% 70%;
 
-    --accent: 217 91% 65%;
+    --accent: 217 91% 68%;
     --accent-foreground: 220 26% 12%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 84% 65%;
     --destructive-foreground: 210 20% 98%;
 
-    --success: 158 84% 57%;
+    --success: 158 84% 60%;
     --success-foreground: 220 26% 12%;
 
     --border: 220 22% 22%;
@@ -87,8 +99,19 @@ All colors MUST be HSL.
     --popover: 220 20% 22%;
     --popover-foreground: 210 20% 98%;
 
-    --primary: 217 91% 65%;
+    --primary: 217 91% 68%;
     --primary-foreground: 210 20% 98%;
+    --primary-hover: 217 91% 72%;
+    --primary-active: 217 91% 60%;
+
+    /* Cores de ação com mais presença no modo escuro */
+    --action-primary: 217 91% 68%;
+    --action-primary-hover: 217 91% 72%;
+    --action-primary-active: 217 91% 60%;
+    --action-secondary: 158 84% 60%;
+    --action-secondary-hover: 158 84% 65%;
+    --action-destructive: 0 84% 65%;
+    --action-destructive-hover: 0 84% 70%;
 
     --secondary: 220 24% 18%;
     --secondary-foreground: 210 20% 98%;
@@ -96,13 +119,13 @@ All colors MUST be HSL.
     --muted: 220 24% 14%;
     --muted-foreground: 210 20% 70%;
 
-    --accent: 217 91% 65%;
+    --accent: 217 91% 68%;
     --accent-foreground: 220 28% 10%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 84% 65%;
     --destructive-foreground: 210 20% 98%;
 
-    --success: 158 84% 57%;
+    --success: 158 84% 60%;
     --success-foreground: 220 28% 10%;
 
     --border: 220 24% 20%;
@@ -256,25 +279,26 @@ All colors MUST be HSL.
   /* Utilitários para hierarquia visual com espaçamento confortável */
   .bg-level-1 {
     background: hsl(var(--background));
-    @apply p-4 sm:p-6 lg:p-8;
+    @apply px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-12;
   }
 
+  /* === CARDS COM PADDING 16-20PX === */
   .bg-level-2 {
     background: hsl(var(--card));
     box-shadow: var(--shadow-card);
-    @apply p-4 sm:p-5 lg:p-6 rounded-card;
+    @apply px-4 py-4 sm:px-5 sm:py-5 lg:px-5 lg:py-6 rounded-card;
   }
 
   .bg-level-3 {
     background: hsl(var(--elevated));
     box-shadow: var(--shadow-elevated);
-    @apply p-3 sm:p-4 lg:p-5 rounded-lg;
+    @apply px-4 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5 rounded-lg;
   }
 
   .bg-level-floating {
     background: hsl(var(--elevated));
     box-shadow: var(--shadow-floating);
-    @apply p-3 sm:p-4 lg:p-5 rounded-lg;
+    @apply px-4 py-3 sm:px-4 sm:py-4 lg:px-5 lg:py-5 rounded-lg;
   }
   
   /* === CLASSES UTILITÁRIAS DE TIPOGRAFIA === */
@@ -325,28 +349,86 @@ All colors MUST be HSL.
   
   /* === ESPAÇAMENTOS CONFORTÁVEIS === */
   
-  /* Containers principais */
+  /* Container principal - evita texto grudado nos limites */
   .container-comfortable {
-    @apply px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12;
+    @apply px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-12 mx-auto max-w-7xl;
   }
   
-  /* Cards com espaçamento confortável */
+  /* Cards com padding 16-20px conforme especificação */
   .card-comfortable {
-    @apply p-4 sm:p-5 lg:p-6 space-y-3 sm:space-y-4;
+    @apply px-4 py-4 sm:px-5 sm:py-5 lg:px-5 lg:py-6;
   }
   
-  /* Seções com espaçamento vertical */
+  /* Separação vertical entre seções 12-16px */
   .section-spacing {
+    @apply space-y-3 sm:space-y-4; /* 12px mobile, 16px+ desktop */
+  }
+  
+  .section-spacing-lg {
     @apply space-y-4 sm:space-y-6 lg:space-y-8;
   }
   
-  /* Elementos de formulário */
+  /* Elementos de formulário com espaçamento confortável */
   .form-comfortable {
-    @apply space-y-4 sm:space-y-5;
+    @apply space-y-4 sm:space-y-5 px-4 sm:px-0; /* Evita texto grudado */
   }
   
   .form-field {
     @apply space-y-2;
+  }
+  
+  /* Layout responsivo que evita texto grudado */
+  .content-wrapper {
+    @apply px-4 sm:px-6 lg:px-8 mx-auto max-w-6xl;
+  }
+  
+  .page-wrapper {
+    @apply min-h-screen px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-12;
+  }
+  
+  /* === CORES DE AÇÃO COM MAIS PRESENÇA === */
+  
+  /* Botões de ação primários */
+  .btn-action-primary {
+    @apply bg-action-primary hover:bg-action-primary-hover active:bg-action-primary-active;
+    @apply text-white font-semibold shadow-lg hover:shadow-xl;
+    @apply transition-all duration-200 ease-in-out;
+    @apply px-6 py-3 rounded-lg;
+  }
+  
+  .btn-action-secondary {
+    @apply bg-action-secondary hover:bg-action-secondary-hover;
+    @apply text-white font-semibold shadow-md hover:shadow-lg;
+    @apply transition-all duration-200 ease-in-out;
+    @apply px-5 py-2.5 rounded-lg;
+  }
+  
+  .btn-action-destructive {
+    @apply bg-action-destructive hover:bg-action-destructive-hover;
+    @apply text-white font-semibold shadow-md hover:shadow-lg;
+    @apply transition-all duration-200 ease-in-out;
+    @apply px-5 py-2.5 rounded-lg;
+  }
+  
+  /* Estados de hover para ações importantes */
+  .action-hover {
+    @apply transition-all duration-200 ease-in-out;
+    @apply hover:scale-105 hover:shadow-lg;
+  }
+  
+  /* Indicadores visuais para ações importantes */
+  .action-indicator {
+    @apply relative overflow-hidden;
+  }
+  
+  .action-indicator::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent;
+    @apply opacity-0 transition-opacity duration-300;
+  }
+  
+  .action-indicator:hover::before {
+    @apply opacity-100;
   }
 
   /* Action button animations */

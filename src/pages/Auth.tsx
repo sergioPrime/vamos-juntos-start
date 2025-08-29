@@ -51,13 +51,11 @@ export default function Auth() {
   const handleSignUp = async () => {
     setLoading(true)
     try {
-      const redirectUrl = `${window.location.origin}/dashboard`
-      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: redirectUrl
+          emailRedirectTo: `${window.location.origin}/dashboard`
         }
       })
 
@@ -67,7 +65,15 @@ export default function Auth() {
           description: error.message,
           variant: "destructive",
         })
-      } else {
+      } else if (data.user && data.session) {
+        // User is automatically signed in
+        toast({
+          title: "Cadastro realizado",
+          description: "Bem-vindo ao sistema!",
+        })
+        navigate("/dashboard")
+      } else if (data.user && !data.session) {
+        // Email confirmation required - show message
         toast({
           title: "Cadastro realizado",
           description: "Verifique seu email para confirmar a conta.",

@@ -123,8 +123,11 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Vamos Juntos</CardTitle>
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <img src="/lovable-uploads/61604d4b-329d-45cb-b4f7-386f93edfb14.png" alt="Prime ERP" className="h-16 w-auto" />
+          </div>
+          <CardTitle className="text-2xl font-bold">Prime ERP</CardTitle>
           <CardDescription>
             Entre na sua conta ou crie uma nova para continuar
           </CardDescription>

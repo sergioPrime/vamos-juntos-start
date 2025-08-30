@@ -62,7 +62,7 @@ export function AppSidebar() {
       <SidebarContent>
         <div className="p-4">
           <h2 className={`font-bold text-sidebar-primary ${collapsed ? "text-center text-xs" : "text-lg"}`}>
-            {collapsed ? "MEI" : "MEI ERP"}
+            {collapsed ? "Prime" : "Prime ERP"}
           </h2>
         </div>
 

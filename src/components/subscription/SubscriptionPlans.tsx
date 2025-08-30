@@ -2,10 +2,11 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Check } from "lucide-react"
+import { Check, Edit } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
+import { useSuperAdmin } from "@/hooks/useSuperAdmin"
 import { toast } from "sonner"
 
 interface SubscriptionPlan {
@@ -27,6 +28,7 @@ export function SubscriptionPlans() {
   const [currentPlanId, setCurrentPlanId] = useState<string | null>(null)
   const { user } = useAuth()
   const { currentOrg: organization } = useOrganization()
+  const { isSuperAdmin } = useSuperAdmin()
 
   useEffect(() => {
     fetchPlans()
@@ -155,6 +157,17 @@ export function SubscriptionPlans() {
                   <Badge className="absolute -top-3 right-4 bg-green-500">
                     Plano Atual
                   </Badge>
+                )}
+
+                {isSuperAdmin && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="absolute top-2 right-2"
+                    onClick={() => window.open('/admin', '_blank')}
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
                 )}
 
                 <div className="text-center">

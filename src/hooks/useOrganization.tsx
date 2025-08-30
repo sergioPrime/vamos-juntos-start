@@ -18,14 +18,14 @@ interface OrganizationContextType {
   currentOrg: Organization | null
   userOrgs: UserOrganization[]
   loading: boolean
-  switchOrganization: (orgId: string) => void
+  setCurrentOrg: (org: Organization) => void
 }
 
 const OrganizationContext = createContext<OrganizationContextType>({
   currentOrg: null,
   userOrgs: [],
   loading: true,
-  switchOrganization: () => {}
+  setCurrentOrg: () => {}
 })
 
 export function OrganizationProvider({ children }: { children: ReactNode }) {
@@ -35,66 +35,56 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
 
   useEffect(() => {
-    async function loadUserOrganizations() {
-      if (!user) {
-        setCurrentOrg(null)
-        setUserOrgs([])
-        setLoading(false)
+    if (!user) {
+      setCurrentOrg(null)
+      setUserOrgs([])
+      setLoading(false)
+      return
+    }
+
+    fetchUserOrganizations()
+  }, [user])
+
+  const fetchUserOrganizations = async () => {
+    try {
+      setLoading(true)
+      
+      // Buscar organizações do usuário
+      const { data: userOrganizations, error } = await supabase
+        .from('user_organizations')
+        .select(`
+          org_id,
+          role,
+          organization:organizations(id, name, slug)
+        `)
+        .eq('user_id', user?.id)
+
+      if (error) {
+        console.error('Error fetching user organizations:', error)
         return
       }
 
-      try {
-        // Buscar organizações do usuário
-        const { data: userOrganizations, error } = await supabase
-          .from('user_organizations')
-          .select(`
-            org_id,
-            role,
-            organization:organizations(
-              id,
-              name,
-              slug
-            )
-          `)
-          .eq('user_id', user.id)
+      const formattedOrgs = userOrganizations?.map(uo => ({
+        org_id: uo.org_id,
+        role: uo.role,
+        organization: uo.organization as Organization
+      })) || []
 
-        if (error) {
-          console.error('Erro ao carregar organizações:', error)
-          setLoading(false)
-          return
-        }
-
-        const formattedOrgs = userOrganizations?.map(uo => ({
-          org_id: uo.org_id,
-          role: uo.role,
-          organization: uo.organization as Organization
-        })) || []
-
-        setUserOrgs(formattedOrgs)
-
-        // Definir organização atual (primeira da lista por padrão)
-        if (formattedOrgs.length > 0) {
-          setCurrentOrg(formattedOrgs[0].organization)
-        }
-      } catch (error) {
-        console.error('Erro ao carregar organizações:', error)
-      } finally {
-        setLoading(false)
+      setUserOrgs(formattedOrgs)
+      
+      // Definir a primeira organização como atual se ainda não houver uma definida
+      if (formattedOrgs.length > 0 && !currentOrg) {
+        setCurrentOrg(formattedOrgs[0].organization)
       }
-    }
-
-    loadUserOrganizations()
-  }, [user])
-
-  const switchOrganization = (orgId: string) => {
-    const targetOrg = userOrgs.find(uo => uo.organization.id === orgId)
-    if (targetOrg) {
-      setCurrentOrg(targetOrg.organization)
+    } catch (error) {
+      console.error('Error in fetchUserOrganizations:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
-    <OrganizationContext.Provider value={{ currentOrg, userOrgs, loading, switchOrganization }}>
+    <OrganizationContext.Provider value={{ currentOrg, userOrgs, loading, setCurrentOrg }}>
       {children}
     </OrganizationContext.Provider>
   )

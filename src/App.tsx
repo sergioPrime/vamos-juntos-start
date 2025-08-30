@@ -7,6 +7,7 @@ import { AppLayout } from "./components/layout/AppLayout";
 import { PageTransition } from "./components/layout/PageTransition";
 import { NotificationProvider } from "./components/ui/notification-system";
 import { AuthProvider } from "./hooks/useAuth";
+import { OrganizationProvider } from "./hooks/useOrganization";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AuthRedirect } from "./components/auth/AuthRedirect";
 import Dashboard from "./pages/Dashboard";
@@ -18,6 +19,7 @@ import Quotes from "./pages/Quotes";
 import Customers from "./pages/Customers";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import Welcome from "./pages/onboarding/Welcome";
 import Signup from "./pages/onboarding/Signup";
 import BusinessType from "./pages/onboarding/BusinessType";
@@ -30,8 +32,9 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <NotificationProvider>
+      <OrganizationProvider>
+        <TooltipProvider>
+          <NotificationProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -145,6 +148,15 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <AdminDashboard />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
           
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />
@@ -152,6 +164,7 @@ const App = () => (
           </BrowserRouter>
         </NotificationProvider>
       </TooltipProvider>
+    </OrganizationProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

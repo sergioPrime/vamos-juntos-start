@@ -8,78 +8,78 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* === HIERARQUIA VISUAL DE 3 NÍVEIS === */
-    /* Nível 1: Fundo Principal (mais escuro - base) */
-    --background: 220 26% 12%;
-    --foreground: 210 20% 98%;
+    /* === MODO CLARO - CORES AZUIS E VERDES === */
+    /* Nível 1: Fundo Principal (muito claro) */
+    --background: 210 40% 98%;
+    --foreground: 215 25% 27%;
 
     /* Nível 2: Cards e Containers (intermediário) */
-    --card: 220 22% 18%;
-    --card-foreground: 210 20% 98%;
+    --card: 210 40% 95%;
+    --card-foreground: 215 25% 27%;
     
     /* Nível 3: Elementos Flutuantes/Destaques (mais claro) */
-    --elevated: 220 18% 24%;
-    --elevated-foreground: 210 20% 98%;
+    --elevated: 210 40% 92%;
+    --elevated-foreground: 215 25% 27%;
 
-    --popover: 220 18% 24%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 210 40% 92%;
+    --popover-foreground: 215 25% 27%;
 
-    --primary: 217 91% 68%;
-    --primary-foreground: 210 20% 98%;
-    --primary-hover: 217 91% 72%;
-    --primary-active: 217 91% 60%;
+    --primary: 213 94% 68%;
+    --primary-foreground: 210 40% 98%;
+    --primary-hover: 213 94% 72%;
+    --primary-active: 213 94% 60%;
 
     /* Cores de ação com mais presença */
-    --action-primary: 217 91% 68%;
-    --action-primary-hover: 217 91% 72%;
-    --action-primary-active: 217 91% 60%;
-    --action-secondary: 158 84% 60%;
-    --action-secondary-hover: 158 84% 65%;
+    --action-primary: 213 94% 68%;
+    --action-primary-hover: 213 94% 72%;
+    --action-primary-active: 213 94% 60%;
+    --action-secondary: 158 64% 52%;
+    --action-secondary-hover: 158 64% 57%;
     --action-destructive: 0 84% 65%;
     --action-destructive-hover: 0 84% 70%;
 
     
-    --secondary: 220 22% 20%;
-    --secondary-foreground: 210 20% 98%;
+    --secondary: 210 40% 85%;
+    --secondary-foreground: 215 25% 27%;
 
-    --muted: 220 22% 16%;
-    --muted-foreground: 210 20% 70%;
+    --muted: 210 40% 88%;
+    --muted-foreground: 215 25% 55%;
 
-    --accent: 217 91% 68%;
-    --accent-foreground: 220 26% 12%;
+    --accent: 213 94% 68%;
+    --accent-foreground: 210 40% 98%;
 
     --destructive: 0 84% 65%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive-foreground: 210 40% 98%;
 
-    --success: 158 84% 60%;
-    --success-foreground: 220 26% 12%;
+    --success: 158 64% 52%;
+    --success-foreground: 210 40% 98%;
 
-    --border: 220 22% 22%;
-    --input: 220 22% 20%;
-    --ring: 217 91% 65%;
+    --border: 210 40% 82%;
+    --input: 210 40% 90%;
+    --ring: 213 94% 65%;
 
     /* Gradientes para hierarquia visual */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 65%), hsl(217 91% 55%));
-    --gradient-card: linear-gradient(135deg, hsl(220 22% 18%), hsl(220 18% 20%));
-    --gradient-elevated: linear-gradient(135deg, hsl(220 18% 24%), hsl(220 14% 26%));
+    --gradient-primary: linear-gradient(135deg, hsl(213 94% 65%), hsl(158 64% 52%));
+    --gradient-card: linear-gradient(135deg, hsl(210 40% 95%), hsl(210 40% 92%));
+    --gradient-elevated: linear-gradient(135deg, hsl(210 40% 92%), hsl(210 40% 88%));
 
     /* Sombras para profundidade */
-    --shadow-card: 0 4px 12px -3px hsl(220 100% 8% / 0.3);
-    --shadow-elevated: 0 8px 24px -6px hsl(220 100% 8% / 0.4);
-    --shadow-floating: 0 12px 32px -8px hsl(220 100% 8% / 0.5);
+    --shadow-card: 0 4px 12px -3px hsl(213 94% 68% / 0.15);
+    --shadow-elevated: 0 8px 24px -6px hsl(213 94% 68% / 0.2);
+    --shadow-floating: 0 12px 32px -8px hsl(213 94% 68% / 0.25);
 
     --radius: 0.75rem;
     --radius-lg: 1rem;
     --radius-card: 1rem;
 
-    --sidebar-background: 220 26% 12%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 217 91% 65%;
-    --sidebar-primary-foreground: 210 20% 98%;
-    --sidebar-accent: 220 22% 18%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 220 22% 22%;
-    --sidebar-ring: 217 91% 65%;
+    --sidebar-background: 210 40% 98%;
+    --sidebar-foreground: 215 25% 27%;
+    --sidebar-primary: 213 94% 65%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 210 40% 95%;
+    --sidebar-accent-foreground: 215 25% 27%;
+    --sidebar-border: 210 40% 82%;
+    --sidebar-ring: 213 94% 65%;
   }
 
   .dark {

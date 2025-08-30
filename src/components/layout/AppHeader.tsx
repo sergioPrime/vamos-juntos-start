@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Plus, FileText, Calculator, User, MoreHorizontal, LogOut } from "lucide-react"
+import { Plus, FileText, Calculator, User, MoreHorizontal, LogOut, Moon, Sun } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
 import {
@@ -9,15 +9,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
+import { Switch } from "@/components/ui/switch"
 import { UserProfileDialog } from "@/components/UserProfileDialog"
 import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/use-toast"
+import { useTheme } from "@/hooks/useTheme"
 
 export function AppHeader() {
   const navigate = useNavigate()
   const { signOut, user } = useAuth()
   const { toast } = useToast()
+  const { theme, toggleTheme } = useTheme()
   const [showProfile, setShowProfile] = useState(false)
 
   const handleSignOut = async () => {
@@ -81,11 +85,28 @@ export function AppHeader() {
               <User className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem onClick={() => setShowProfile(true)}>
               <User className="h-4 w-4 mr-2" />
               Perfil
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex items-center justify-between py-1">
+                <div className="flex items-center space-x-2">
+                  {theme === 'dark' ? (
+                    <Moon className="h-4 w-4" />
+                  ) : (
+                    <Sun className="h-4 w-4" />
+                  )}
+                  <span className="text-sm">Modo Dark</span>
+                </div>
+                <Switch
+                  checked={theme === 'dark'}
+                  onCheckedChange={toggleTheme}
+                />
+              </div>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-2" />
@@ -125,6 +146,23 @@ export function AppHeader() {
               <User className="h-4 w-4 mr-2" />
               Perfil
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <div className="px-3 py-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  {theme === 'dark' ? (
+                    <Moon className="h-4 w-4" />
+                  ) : (
+                    <Sun className="h-4 w-4" />
+                  )}
+                  <span className="text-sm">Modo Dark</span>
+                </div>
+                <Switch
+                  checked={theme === 'dark'}
+                  onCheckedChange={toggleTheme}
+                />
+              </div>
+            </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-2" />

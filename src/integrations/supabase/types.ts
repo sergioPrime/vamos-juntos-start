@@ -430,62 +430,116 @@ export type Database = {
       products: {
         Row: {
           active: boolean
+          assembly_fee_amount: number | null
+          assembly_fee_percent: number | null
           barcode: string | null
           category: string | null
+          cost_calculation_method: string | null
           cost_price: number | null
+          cost_with_additions: number | null
           created_at: string
           description: string | null
           dimensions: string | null
+          fcp_st_purchase_percent: number | null
+          freight_purchase_percent: number | null
+          icms_purchase_percent: number | null
+          icms_st_purchase_percent: number | null
           id: string
+          insurance_purchase_percent: number | null
+          ipi_purchase_percent: number | null
+          last_purchase_value: number | null
           min_stock_level: number | null
+          minimum_sale_price: number | null
           name: string
+          operational_expenses_percent: number | null
           org_id: string
           owner_id: string
+          profit_amount: number | null
+          profit_percent: number | null
+          representation_commission_percent: number | null
           sku: string | null
           stock_quantity: number
           unit: string | null
           unit_price: number
           updated_at: string
+          vendor_commission_amount: number | null
+          vendor_commission_percent: number | null
           weight: number | null
         }
         Insert: {
           active?: boolean
+          assembly_fee_amount?: number | null
+          assembly_fee_percent?: number | null
           barcode?: string | null
           category?: string | null
+          cost_calculation_method?: string | null
           cost_price?: number | null
+          cost_with_additions?: number | null
           created_at?: string
           description?: string | null
           dimensions?: string | null
+          fcp_st_purchase_percent?: number | null
+          freight_purchase_percent?: number | null
+          icms_purchase_percent?: number | null
+          icms_st_purchase_percent?: number | null
           id?: string
+          insurance_purchase_percent?: number | null
+          ipi_purchase_percent?: number | null
+          last_purchase_value?: number | null
           min_stock_level?: number | null
+          minimum_sale_price?: number | null
           name: string
+          operational_expenses_percent?: number | null
           org_id: string
           owner_id: string
+          profit_amount?: number | null
+          profit_percent?: number | null
+          representation_commission_percent?: number | null
           sku?: string | null
           stock_quantity?: number
           unit?: string | null
           unit_price?: number
           updated_at?: string
+          vendor_commission_amount?: number | null
+          vendor_commission_percent?: number | null
           weight?: number | null
         }
         Update: {
           active?: boolean
+          assembly_fee_amount?: number | null
+          assembly_fee_percent?: number | null
           barcode?: string | null
           category?: string | null
+          cost_calculation_method?: string | null
           cost_price?: number | null
+          cost_with_additions?: number | null
           created_at?: string
           description?: string | null
           dimensions?: string | null
+          fcp_st_purchase_percent?: number | null
+          freight_purchase_percent?: number | null
+          icms_purchase_percent?: number | null
+          icms_st_purchase_percent?: number | null
           id?: string
+          insurance_purchase_percent?: number | null
+          ipi_purchase_percent?: number | null
+          last_purchase_value?: number | null
           min_stock_level?: number | null
+          minimum_sale_price?: number | null
           name?: string
+          operational_expenses_percent?: number | null
           org_id?: string
           owner_id?: string
+          profit_amount?: number | null
+          profit_percent?: number | null
+          representation_commission_percent?: number | null
           sku?: string | null
           stock_quantity?: number
           unit?: string | null
           unit_price?: number
           updated_at?: string
+          vendor_commission_amount?: number | null
+          vendor_commission_percent?: number | null
           weight?: number | null
         }
         Relationships: []

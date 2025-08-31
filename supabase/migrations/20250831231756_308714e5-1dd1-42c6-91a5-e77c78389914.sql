@@ -1,0 +1,20 @@
+-- Add new columns for costs and pricing to products table
+ALTER TABLE public.products 
+ADD COLUMN IF NOT EXISTS operational_expenses_percent NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS cost_with_additions NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS freight_purchase_percent NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS insurance_purchase_percent NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS ipi_purchase_percent NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS icms_purchase_percent NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS icms_st_purchase_percent NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS fcp_st_purchase_percent NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS minimum_sale_price NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS profit_amount NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS profit_percent NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS representation_commission_percent NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS vendor_commission_amount NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS vendor_commission_percent NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS assembly_fee_amount NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS assembly_fee_percent NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS last_purchase_value NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS cost_calculation_method TEXT DEFAULT 'manual';

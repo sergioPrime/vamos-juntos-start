@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Plus, Search, Edit, Trash2, Package } from "lucide-react"
+import { Plus, Search, Edit, Trash2, Package, HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
@@ -31,6 +33,25 @@ interface Product {
   active: boolean
   created_at: string
   updated_at: string
+  // New cost and pricing fields
+  operational_expenses_percent?: number
+  cost_with_additions?: number
+  freight_purchase_percent?: number
+  insurance_purchase_percent?: number
+  ipi_purchase_percent?: number
+  icms_purchase_percent?: number
+  icms_st_purchase_percent?: number
+  fcp_st_purchase_percent?: number
+  minimum_sale_price?: number
+  profit_amount?: number
+  profit_percent?: number
+  representation_commission_percent?: number
+  vendor_commission_amount?: number
+  vendor_commission_percent?: number
+  assembly_fee_amount?: number
+  assembly_fee_percent?: number
+  last_purchase_value?: number
+  cost_calculation_method?: string
 }
 
 const Products = () => {
@@ -61,7 +82,26 @@ const Products = () => {
     unit: "un",
     weight: 0,
     dimensions: "",
-    active: true
+    active: true,
+    // New cost and pricing fields
+    operational_expenses_percent: 0,
+    cost_with_additions: 0,
+    freight_purchase_percent: 0,
+    insurance_purchase_percent: 0,
+    ipi_purchase_percent: 0,
+    icms_purchase_percent: 0,
+    icms_st_purchase_percent: 0,
+    fcp_st_purchase_percent: 0,
+    minimum_sale_price: 0,
+    profit_amount: 0,
+    profit_percent: 0,
+    representation_commission_percent: 0,
+    vendor_commission_amount: 0,
+    vendor_commission_percent: 0,
+    assembly_fee_amount: 0,
+    assembly_fee_percent: 0,
+    last_purchase_value: 0,
+    cost_calculation_method: "manual"
   })
 
   useEffect(() => {
@@ -114,7 +154,25 @@ const Products = () => {
       unit: "un",
       weight: 0,
       dimensions: "",
-      active: true
+      active: true,
+      operational_expenses_percent: 0,
+      cost_with_additions: 0,
+      freight_purchase_percent: 0,
+      insurance_purchase_percent: 0,
+      ipi_purchase_percent: 0,
+      icms_purchase_percent: 0,
+      icms_st_purchase_percent: 0,
+      fcp_st_purchase_percent: 0,
+      minimum_sale_price: 0,
+      profit_amount: 0,
+      profit_percent: 0,
+      representation_commission_percent: 0,
+      vendor_commission_amount: 0,
+      vendor_commission_percent: 0,
+      assembly_fee_amount: 0,
+      assembly_fee_percent: 0,
+      last_purchase_value: 0,
+      cost_calculation_method: "manual"
     })
     setEditingProduct(null)
   }
@@ -135,7 +193,25 @@ const Products = () => {
         unit: product.unit,
         weight: product.weight || 0,
         dimensions: product.dimensions || "",
-        active: product.active
+        active: product.active,
+        operational_expenses_percent: product.operational_expenses_percent || 0,
+        cost_with_additions: product.cost_with_additions || 0,
+        freight_purchase_percent: product.freight_purchase_percent || 0,
+        insurance_purchase_percent: product.insurance_purchase_percent || 0,
+        ipi_purchase_percent: product.ipi_purchase_percent || 0,
+        icms_purchase_percent: product.icms_purchase_percent || 0,
+        icms_st_purchase_percent: product.icms_st_purchase_percent || 0,
+        fcp_st_purchase_percent: product.fcp_st_purchase_percent || 0,
+        minimum_sale_price: product.minimum_sale_price || 0,
+        profit_amount: product.profit_amount || 0,
+        profit_percent: product.profit_percent || 0,
+        representation_commission_percent: product.representation_commission_percent || 0,
+        vendor_commission_amount: product.vendor_commission_amount || 0,
+        vendor_commission_percent: product.vendor_commission_percent || 0,
+        assembly_fee_amount: product.assembly_fee_amount || 0,
+        assembly_fee_percent: product.assembly_fee_percent || 0,
+        last_purchase_value: product.last_purchase_value || 0,
+        cost_calculation_method: product.cost_calculation_method || "manual"
       })
     } else {
       resetForm()
@@ -227,6 +303,81 @@ const Products = () => {
     }
   }
 
+  // Calculation functions
+  const calculateCostWithAdditions = () => {
+    const base = formData.cost_price || 0
+    const operational = (base * (formData.operational_expenses_percent || 0)) / 100
+    const freight = (base * (formData.freight_purchase_percent || 0)) / 100
+    const insurance = (base * (formData.insurance_purchase_percent || 0)) / 100
+    const ipi = (base * (formData.ipi_purchase_percent || 0)) / 100
+    const icms = (base * (formData.icms_purchase_percent || 0)) / 100
+    const icmsSt = (base * (formData.icms_st_purchase_percent || 0)) / 100
+    const fcpSt = (base * (formData.fcp_st_purchase_percent || 0)) / 100
+    
+    return base + operational + freight + insurance + ipi + icms + icmsSt + fcpSt
+  }
+
+  const calculateProfitFromSalePrice = () => {
+    const salePrice = formData.unit_price || 0
+    const costWithAdditions = calculateCostWithAdditions()
+    const profitAmount = salePrice - costWithAdditions
+    const profitPercent = costWithAdditions > 0 ? (profitAmount / costWithAdditions) * 100 : 0
+    
+    return { profitAmount, profitPercent }
+  }
+
+  const updateFormField = (field: string, value: any) => {
+    const newFormData = { ...formData, [field]: value }
+    
+    // Auto-calculate cost with additions
+    if (['cost_price', 'operational_expenses_percent', 'freight_purchase_percent', 
+         'insurance_purchase_percent', 'ipi_purchase_percent', 'icms_purchase_percent',
+         'icms_st_purchase_percent', 'fcp_st_purchase_percent'].includes(field)) {
+      const base = field === 'cost_price' ? value : formData.cost_price || 0
+      const operational = (base * (field === 'operational_expenses_percent' ? value : formData.operational_expenses_percent || 0)) / 100
+      const freight = (base * (field === 'freight_purchase_percent' ? value : formData.freight_purchase_percent || 0)) / 100
+      const insurance = (base * (field === 'insurance_purchase_percent' ? value : formData.insurance_purchase_percent || 0)) / 100
+      const ipi = (base * (field === 'ipi_purchase_percent' ? value : formData.ipi_purchase_percent || 0)) / 100
+      const icms = (base * (field === 'icms_purchase_percent' ? value : formData.icms_purchase_percent || 0)) / 100
+      const icmsSt = (base * (field === 'icms_st_purchase_percent' ? value : formData.icms_st_purchase_percent || 0)) / 100
+      const fcpSt = (base * (field === 'fcp_st_purchase_percent' ? value : formData.fcp_st_purchase_percent || 0)) / 100
+      
+      newFormData.cost_with_additions = base + operational + freight + insurance + ipi + icms + icmsSt + fcpSt
+    }
+    
+    // Auto-calculate profit when sale price changes
+    if (field === 'unit_price') {
+      const costWithAdditions = newFormData.cost_with_additions || calculateCostWithAdditions()
+      const profitAmount = value - costWithAdditions
+      const profitPercent = costWithAdditions > 0 ? (profitAmount / costWithAdditions) * 100 : 0
+      
+      newFormData.profit_amount = profitAmount
+      newFormData.profit_percent = profitPercent
+    }
+    
+    // Auto-calculate sale price when profit amount changes
+    if (field === 'profit_amount') {
+      const costWithAdditions = newFormData.cost_with_additions || calculateCostWithAdditions()
+      const salePrice = costWithAdditions + value
+      const profitPercent = costWithAdditions > 0 ? (value / costWithAdditions) * 100 : 0
+      
+      newFormData.unit_price = salePrice
+      newFormData.profit_percent = profitPercent
+    }
+    
+    // Auto-calculate sale price when profit percent changes
+    if (field === 'profit_percent') {
+      const costWithAdditions = newFormData.cost_with_additions || calculateCostWithAdditions()
+      const profitAmount = (costWithAdditions * value) / 100
+      const salePrice = costWithAdditions + profitAmount
+      
+      newFormData.profit_amount = profitAmount
+      newFormData.unit_price = salePrice
+    }
+    
+    setFormData(newFormData)
+  }
+
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -278,154 +429,660 @@ const Products = () => {
                 {editingProduct ? "Editar Produto" : "Novo Produto"}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name">Nome *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="sku">SKU</Label>
-                  <Input
-                    id="sku"
-                    value={formData.sku}
-                    onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                  />
-                </div>
-              </div>
+            <TooltipProvider>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <Tabs defaultValue="dados" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="dados">Dados</TabsTrigger>
+                    <TabsTrigger value="custos">Custos e Precificação</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="dados" className="space-y-4 mt-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="name">Nome *</Label>
+                        <Input
+                          id="name"
+                          value={formData.name}
+                          onChange={(e) => updateFormField('name', e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="sku">SKU</Label>
+                        <Input
+                          id="sku"
+                          value={formData.sku}
+                          onChange={(e) => updateFormField('sku', e.target.value)}
+                        />
+                      </div>
+                    </div>
 
-              <div>
-                <Label htmlFor="description">Descrição</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                />
-              </div>
+                    <div>
+                      <Label htmlFor="description">Descrição</Label>
+                      <Textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={(e) => updateFormField('description', e.target.value)}
+                      />
+                    </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="barcode">Código de Barras</Label>
-                  <Input
-                    id="barcode"
-                    value={formData.barcode}
-                    onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="category">Categoria</Label>
-                  <Input
-                    id="category"
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  />
-                </div>
-              </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="barcode">Código de Barras</Label>
+                        <Input
+                          id="barcode"
+                          value={formData.barcode}
+                          onChange={(e) => updateFormField('barcode', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="category">Categoria</Label>
+                        <Input
+                          id="category"
+                          value={formData.category}
+                          onChange={(e) => updateFormField('category', e.target.value)}
+                        />
+                      </div>
+                    </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="unit_price">Preço de Venda</Label>
-                  <Input
-                    id="unit_price"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.unit_price}
-                    onChange={(e) => setFormData({ ...formData, unit_price: Number(e.target.value) })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="cost_price">Preço de Custo</Label>
-                  <Input
-                    id="cost_price"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.cost_price}
-                    onChange={(e) => setFormData({ ...formData, cost_price: Number(e.target.value) })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="unit">Unidade</Label>
-                  <Select value={formData.unit} onValueChange={(value) => setFormData({ ...formData, unit: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="un">Unidade</SelectItem>
-                      <SelectItem value="kg">Quilograma</SelectItem>
-                      <SelectItem value="g">Grama</SelectItem>
-                      <SelectItem value="l">Litro</SelectItem>
-                      <SelectItem value="ml">Mililitro</SelectItem>
-                      <SelectItem value="m">Metro</SelectItem>
-                      <SelectItem value="cm">Centímetro</SelectItem>
-                      <SelectItem value="m2">Metro Quadrado</SelectItem>
-                      <SelectItem value="m3">Metro Cúbico</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="unit_price">Preço de Venda (R$)</Label>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Preço final de venda do produto</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <Input
+                          id="unit_price"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.unit_price}
+                          onChange={(e) => updateFormField('unit_price', Number(e.target.value))}
+                        />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="cost_price">Preço de Custo (R$)</Label>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Custo base do produto</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <Input
+                          id="cost_price"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.cost_price}
+                          onChange={(e) => updateFormField('cost_price', Number(e.target.value))}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="unit">Unidade</Label>
+                        <Select value={formData.unit} onValueChange={(value) => updateFormField('unit', value)}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="un">Unidade</SelectItem>
+                            <SelectItem value="kg">Quilograma</SelectItem>
+                            <SelectItem value="g">Grama</SelectItem>
+                            <SelectItem value="l">Litro</SelectItem>
+                            <SelectItem value="ml">Mililitro</SelectItem>
+                            <SelectItem value="m">Metro</SelectItem>
+                            <SelectItem value="cm">Centímetro</SelectItem>
+                            <SelectItem value="m2">Metro Quadrado</SelectItem>
+                            <SelectItem value="m3">Metro Cúbico</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="stock_quantity">Quantidade em Estoque</Label>
-                  <Input
-                    id="stock_quantity"
-                    type="number"
-                    min="0"
-                    value={formData.stock_quantity}
-                    onChange={(e) => setFormData({ ...formData, stock_quantity: Number(e.target.value) })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="min_stock_level">Estoque Mínimo</Label>
-                  <Input
-                    id="min_stock_level"
-                    type="number"
-                    min="0"
-                    value={formData.min_stock_level}
-                    onChange={(e) => setFormData({ ...formData, min_stock_level: Number(e.target.value) })}
-                  />
-                </div>
-              </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="stock_quantity">Quantidade em Estoque</Label>
+                        <Input
+                          id="stock_quantity"
+                          type="number"
+                          min="0"
+                          value={formData.stock_quantity}
+                          onChange={(e) => updateFormField('stock_quantity', Number(e.target.value))}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="min_stock_level">Estoque Mínimo</Label>
+                        <Input
+                          id="min_stock_level"
+                          type="number"
+                          min="0"
+                          value={formData.min_stock_level}
+                          onChange={(e) => updateFormField('min_stock_level', Number(e.target.value))}
+                        />
+                      </div>
+                    </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="weight">Peso (kg)</Label>
-                  <Input
-                    id="weight"
-                    type="number"
-                    step="0.001"
-                    min="0"
-                    value={formData.weight}
-                    onChange={(e) => setFormData({ ...formData, weight: Number(e.target.value) })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="dimensions">Dimensões</Label>
-                  <Input
-                    id="dimensions"
-                    placeholder="Ex: 10x20x30 cm"
-                    value={formData.dimensions}
-                    onChange={(e) => setFormData({ ...formData, dimensions: e.target.value })}
-                  />
-                </div>
-              </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="weight">Peso (kg)</Label>
+                        <Input
+                          id="weight"
+                          type="number"
+                          step="0.001"
+                          min="0"
+                          value={formData.weight}
+                          onChange={(e) => updateFormField('weight', Number(e.target.value))}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="dimensions">Dimensões</Label>
+                        <Input
+                          id="dimensions"
+                          placeholder="Ex: 10x20x30 cm"
+                          value={formData.dimensions}
+                          onChange={(e) => updateFormField('dimensions', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </TabsContent>
 
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  {editingProduct ? "Atualizar" : "Criar"} Produto
-                </Button>
-              </div>
-            </form>
+                  <TabsContent value="custos" className="space-y-6 mt-6">
+                    {/* Grupo 1: Custos Base */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-foreground">Custos Base</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="cost_price_tab2">Preço de Custo (R$)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Custo base do produto antes dos acréscimos</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="cost_price_tab2"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={formData.cost_price}
+                            onChange={(e) => updateFormField('cost_price', Number(e.target.value))}
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="operational_expenses">Desp. Operacionais (%)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Percentual de despesas operacionais</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="operational_expenses"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            value={formData.operational_expenses_percent}
+                            onChange={(e) => updateFormField('operational_expenses_percent', Number(e.target.value))}
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="cost_with_additions">Preço de Custo com Acréscimos (R$)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Custo total incluindo todos os acréscimos (calculado automaticamente)</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="cost_with_additions"
+                            type="number"
+                            step="0.01"
+                            value={formData.cost_with_additions.toFixed(2)}
+                            readOnly
+                            className="bg-muted text-muted-foreground"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Grupo 2: Custos de Compra */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-foreground">Custos de Compra</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="freight_purchase">Frete pago na Compra (%)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Percentual do frete pago na compra</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="freight_purchase"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            value={formData.freight_purchase_percent}
+                            onChange={(e) => updateFormField('freight_purchase_percent', Number(e.target.value))}
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="insurance_purchase">Seguro pago na Compra (%)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Percentual do seguro pago na compra</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="insurance_purchase"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            value={formData.insurance_purchase_percent}
+                            onChange={(e) => updateFormField('insurance_purchase_percent', Number(e.target.value))}
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="ipi_purchase">IPI pago na Compra (%)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Percentual do IPI pago na compra</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="ipi_purchase"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            value={formData.ipi_purchase_percent}
+                            onChange={(e) => updateFormField('ipi_purchase_percent', Number(e.target.value))}
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="icms_purchase">ICMS pago na Compra (%)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Percentual do ICMS pago na compra</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="icms_purchase"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            value={formData.icms_purchase_percent}
+                            onChange={(e) => updateFormField('icms_purchase_percent', Number(e.target.value))}
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="icms_st_purchase">ICMS ST pago na Compra (%)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Percentual do ICMS ST pago na compra</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="icms_st_purchase"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            value={formData.icms_st_purchase_percent}
+                            onChange={(e) => updateFormField('icms_st_purchase_percent', Number(e.target.value))}
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="fcp_st_purchase">FCP ST pago na Compra (%)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Percentual do FCP ST pago na compra</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="fcp_st_purchase"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            value={formData.fcp_st_purchase_percent}
+                            onChange={(e) => updateFormField('fcp_st_purchase_percent', Number(e.target.value))}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Grupo 3: Precificação */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-foreground">Precificação</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="minimum_sale_price">Preço Mínimo Para Venda (R$)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Preço mínimo recomendado para venda</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="minimum_sale_price"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={formData.minimum_sale_price}
+                            onChange={(e) => updateFormField('minimum_sale_price', Number(e.target.value))}
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="profit_amount">Lucro R$ (MVA)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Margem de valor agregado em reais</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="profit_amount"
+                            type="number"
+                            step="0.01"
+                            value={formData.profit_amount}
+                            onChange={(e) => updateFormField('profit_amount', Number(e.target.value))}
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="profit_percent">Lucro % (MVA)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Margem de valor agregado em percentual</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="profit_percent"
+                            type="number"
+                            step="0.01"
+                            value={formData.profit_percent}
+                            onChange={(e) => updateFormField('profit_percent', Number(e.target.value))}
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="sale_price_fixed" className="text-primary font-semibold">Preço de Venda (R$) - Fixado</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Preço final de venda do produto</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="sale_price_fixed"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={formData.unit_price}
+                            onChange={(e) => updateFormField('unit_price', Number(e.target.value))}
+                            className="border-primary bg-primary/5 focus:ring-primary"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Grupo 4: Comissões */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-foreground">Comissões</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="representation_commission">Comissão Representação (%)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Percentual de comissão para representação</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="representation_commission"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            value={formData.representation_commission_percent}
+                            onChange={(e) => updateFormField('representation_commission_percent', Number(e.target.value))}
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="vendor_commission_amount">Comissão Vendedor (R$)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Comissão do vendedor em reais</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="vendor_commission_amount"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={formData.vendor_commission_amount}
+                            onChange={(e) => updateFormField('vendor_commission_amount', Number(e.target.value))}
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="vendor_commission_percent">Comissão Vendedor (%)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Comissão do vendedor em percentual</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="vendor_commission_percent"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            value={formData.vendor_commission_percent}
+                            onChange={(e) => updateFormField('vendor_commission_percent', Number(e.target.value))}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Grupo 5: Custos Adicionais */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-foreground">Custos Adicionais</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="assembly_fee_amount">Taxa Montagem (R$)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Taxa de montagem em reais</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="assembly_fee_amount"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={formData.assembly_fee_amount}
+                            onChange={(e) => updateFormField('assembly_fee_amount', Number(e.target.value))}
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="assembly_fee_percent">Taxa Montagem (%)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Taxa de montagem em percentual</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="assembly_fee_percent"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            value={formData.assembly_fee_percent}
+                            onChange={(e) => updateFormField('assembly_fee_percent', Number(e.target.value))}
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="last_purchase_value">Valor Última Compra (R$)</Label>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Valor da última compra registrada (somente leitura)</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                          <Input
+                            id="last_purchase_value"
+                            type="number"
+                            step="0.01"
+                            value={formData.last_purchase_value.toFixed(2)}
+                            readOnly
+                            className="bg-muted text-muted-foreground"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Grupo 6: Configuração Automática */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-foreground">Configuração Automática</h3>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="cost_calculation_method">Forma de Cálculo Automático do Custo do Produto</Label>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Método de cálculo automático para o custo do produto</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <Select value={formData.cost_calculation_method} onValueChange={(value) => updateFormField('cost_calculation_method', value)}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="manual">Manual</SelectItem>
+                            <SelectItem value="nfe_config">Aplicar regras das configurações de NFe</SelectItem>
+                            <SelectItem value="historical_average">Tomar como base a média histórica</SelectItem>
+                            <SelectItem value="last_entry">Tomar como base a última nota de entrada</SelectItem>
+                            <SelectItem value="stock_cost">Tomar como base custo do saldo em estoque</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+
+                <div className="flex justify-end gap-2 pt-4 border-t">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit">
+                    {editingProduct ? "Atualizar" : "Criar"} Produto
+                  </Button>
+                </div>
+              </form>
+            </TooltipProvider>
           </DialogContent>
         </Dialog>
       </div>

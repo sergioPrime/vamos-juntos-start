@@ -60,7 +60,7 @@ export function MembersTab() {
       if (orgsError) throw orgsError
       setOrganizations(orgsData || [])
 
-      // Load members (users with their organizations and profiles)
+      // Load members - only users with organizations and profiles
       const { data: userOrgs, error: userOrgsError } = await supabase
         .from('user_organizations')
         .select(`
@@ -75,28 +75,40 @@ export function MembersTab() {
 
       if (userOrgsError) throw userOrgsError
 
-      // Group by user_id and create friendly email addresses
+      // Get user profiles for existing user_organizations
+      const userIds = [...new Set(userOrgs?.map((uo: any) => uo.user_id) || [])]
+      
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, email, first_name, last_name')
+        .in('id', userIds)
+
+      if (profilesError) throw profilesError
+
+      // Group by user_id - only include users that have profiles
       const memberMap = new Map<string, Member>()
       
       userOrgs?.forEach((uo: any) => {
         const userId = uo.user_id
-        if (!memberMap.has(userId)) {
-          // Create a more friendly email format
-          const shortId = userId.slice(0, 8)
-          const friendlyEmail = `user-${shortId}@primegestor.com.br`
-          memberMap.set(userId, {
-            id: userId,
-            email: friendlyEmail,
-            organizations: []
+        const userProfile = profiles?.find(p => p.id === userId)
+        
+        // Only include users that have profiles (real users)
+        if (userProfile) {
+          if (!memberMap.has(userId)) {
+            memberMap.set(userId, {
+              id: userId,
+              email: userProfile.email,
+              organizations: []
+            })
+          }
+          
+          memberMap.get(userId)!.organizations.push({
+            user_id: uo.user_id,
+            org_id: uo.org_id,
+            role: uo.role,
+            organization: uo.organizations
           })
         }
-        
-        memberMap.get(userId)!.organizations.push({
-          user_id: uo.user_id,
-          org_id: uo.org_id,
-          role: uo.role,
-          organization: uo.organizations
-        })
       })
 
       setMembers(Array.from(memberMap.values()))

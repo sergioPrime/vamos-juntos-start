@@ -37,7 +37,7 @@ interface PaymentMethod {
 
 const PDV = () => {
   const { user } = useAuth()
-  const { currentOrg } = useOrganization()
+  const { currentOrg, loading: orgLoading } = useOrganization()
   const { toast } = useToast()
   const navigate = useNavigate()
   
@@ -49,16 +49,22 @@ const PDV = () => {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("")
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    console.log('PDV useEffect - currentOrg:', currentOrg, 'orgLoading:', orgLoading)
     if (currentOrg?.id) {
       loadProducts()
       loadPaymentMethods()
+    } else if (!orgLoading && !currentOrg) {
+      console.log('No organization found, products loading disabled')
+      setLoading(false)
     }
-  }, [currentOrg])
+  }, [currentOrg, orgLoading])
 
   const loadProducts = async () => {
+    if (!currentOrg?.id) return
+    setLoading(true)
     try {
       const { data, error } = await supabase
         .from('products')
@@ -72,9 +78,10 @@ const PDV = () => {
       setProducts(data || [])
       
       // Extract unique categories
-      const uniqueCategories = [...new Set(data?.map(p => p.category).filter(Boolean))]
+      const uniqueCategories = [...new Set(data?.map(p => p.category).filter(Boolean) as string[])]
       setCategories(uniqueCategories)
     } catch (error) {
+      console.error('Error loading products:', error)
       toast({
         title: "Erro ao carregar produtos",
         description: "Não foi possível carregar os produtos.",
@@ -86,6 +93,7 @@ const PDV = () => {
   }
 
   const loadPaymentMethods = async () => {
+    if (!currentOrg?.id) return
     try {
       const { data, error } = await supabase
         .from('payment_methods')
@@ -266,10 +274,28 @@ const PDV = () => {
     }
   }
 
-  if (loading) {
+  // Show loading if organization is still loading or if products are loading
+  if (orgLoading || loading) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-lg">Carregando produtos...</div>
+      </div>
+    )
+  }
+
+  // Show message if no organization is found
+  if (!currentOrg) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="text-lg mb-4">Nenhuma organização encontrada</div>
+          <p className="text-muted-foreground mb-4">
+            Você precisa estar associado a uma organização para usar o PDV.
+          </p>
+          <Button onClick={() => navigate('/dashboard')}>
+            Voltar ao Dashboard
+          </Button>
+        </div>
       </div>
     )
   }
@@ -336,7 +362,7 @@ const PDV = () => {
             ))}
           </div>
 
-          {filteredProducts.length === 0 && (
+          {filteredProducts.length === 0 && !loading && (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center text-muted-foreground">
                 <ShoppingCart className="h-12 w-12 mx-auto mb-4 opacity-50" />

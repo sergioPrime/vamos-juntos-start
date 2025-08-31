@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { Plus, Search, Edit, Trash2, Package } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -33,12 +34,13 @@ interface Product {
 }
 
 const Products = () => {
+  const navigate = useNavigate()
   const { user } = useAuth()
-  const { currentOrg } = useOrganization()
+  const { currentOrg, loading: orgLoading } = useOrganization()
   const { toast } = useToast()
   
   const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [categories, setCategories] = useState<string[]>([])
@@ -65,10 +67,14 @@ const Products = () => {
   useEffect(() => {
     if (currentOrg?.id) {
       loadProducts()
+    } else if (!orgLoading && !currentOrg) {
+      setLoading(false)
     }
-  }, [currentOrg])
+  }, [currentOrg, orgLoading])
 
   const loadProducts = async () => {
+    if (!currentOrg?.id) return
+    setLoading(true)
     try {
       const { data, error } = await supabase
         .from('products')
@@ -229,10 +235,28 @@ const Products = () => {
     return matchesSearch && matchesCategory
   })
 
-  if (loading) {
+  // Show loading if organization is still loading or if products are loading
+  if (orgLoading || loading) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-lg">Carregando produtos...</div>
+      </div>
+    )
+  }
+
+  // Show message if no organization is found
+  if (!currentOrg) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="text-lg mb-4">Nenhuma organização encontrada</div>
+          <p className="text-muted-foreground mb-4">
+            Você precisa estar associado a uma organização para gerenciar produtos.
+          </p>
+          <Button onClick={() => navigate('/dashboard')}>
+            Voltar ao Dashboard
+          </Button>
+        </div>
       </div>
     )
   }

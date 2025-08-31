@@ -71,12 +71,12 @@ const paymentStatusLabels = {
 
 const Orders = () => {
   const { user } = useAuth()
-  const { currentOrg } = useOrganization()
+  const { currentOrg, loading: orgLoading } = useOrganization()
   const { toast } = useToast()
   const navigate = useNavigate()
   
   const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [paymentFilter, setPaymentFilter] = useState("all")
@@ -86,10 +86,14 @@ const Orders = () => {
   useEffect(() => {
     if (currentOrg?.id) {
       loadOrders()
+    } else if (!orgLoading && !currentOrg) {
+      setLoading(false)
     }
-  }, [currentOrg])
+  }, [currentOrg, orgLoading])
 
   const loadOrders = async () => {
+    if (!currentOrg?.id) return
+    setLoading(true)
     try {
       const { data, error } = await supabase
         .from('orders')
@@ -145,10 +149,28 @@ const Orders = () => {
     return matchesSearch && matchesStatus && matchesPayment
   })
 
-  if (loading) {
+  // Show loading if organization is still loading or if orders are loading
+  if (orgLoading || loading) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-lg">Carregando pedidos...</div>
+      </div>
+    )
+  }
+
+  // Show message if no organization is found
+  if (!currentOrg) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="text-lg mb-4">Nenhuma organização encontrada</div>
+          <p className="text-muted-foreground mb-4">
+            Você precisa estar associado a uma organização para gerenciar pedidos.
+          </p>
+          <Button onClick={() => navigate('/dashboard')}>
+            Voltar ao Dashboard
+          </Button>
+        </div>
       </div>
     )
   }

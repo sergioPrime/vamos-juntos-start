@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Users, Mail, Eye, Edit } from 'lucide-react'
+import { Plus, Users, Mail, Eye, Edit, Building2 } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
@@ -45,6 +45,13 @@ export function MembersTab() {
   const [editSelectedOrgId, setEditSelectedOrgId] = useState('')
   const [editSelectedRole, setEditSelectedRole] = useState('')
   const [updating, setUpdating] = useState(false)
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [viewingMember, setViewingMember] = useState<Member | null>(null)
+  const [isOrgsDialogOpen, setIsOrgsDialogOpen] = useState(false)
+  const [managingMember, setManagingMember] = useState<Member | null>(null)
+  const [selectedNewOrgId, setSelectedNewOrgId] = useState('')
+  const [selectedNewRole, setSelectedNewRole] = useState('member')
+  const [managingOrgs, setManagingOrgs] = useState(false)
   const { toast } = useToast()
   const { user } = useAuth()
   const { isSuperAdmin, loading: superAdminLoading } = useSuperAdmin()
@@ -179,6 +186,11 @@ export function MembersTab() {
     }
   }
 
+  const openViewDialog = (member: Member) => {
+    setViewingMember(member)
+    setIsViewDialogOpen(true)
+  }
+
   const openEditDialog = (member: Member) => {
     setEditingMember(member)
     setEditMemberEmail(member.email || '')
@@ -187,6 +199,74 @@ export function MembersTab() {
       setEditSelectedRole(member.organizations[0].role)
     }
     setIsEditDialogOpen(true)
+  }
+
+  const openOrgsManagement = (member: Member) => {
+    setManagingMember(member)
+    setIsOrgsDialogOpen(true)
+  }
+
+  const addOrgToMember = async () => {
+    if (!selectedNewOrgId || !managingMember) return
+
+    setManagingOrgs(true)
+    try {
+      const { error } = await supabase
+        .from('user_organizations')
+        .insert({
+          user_id: managingMember.id,
+          org_id: selectedNewOrgId,
+          role: selectedNewRole
+        })
+
+      if (error) throw error
+
+      toast({
+        title: "Sucesso",
+        description: "Empresa adicionada ao membro"
+      })
+
+      setSelectedNewOrgId('')
+      setSelectedNewRole('member')
+      await loadData()
+    } catch (error) {
+      console.error('Error adding organization:', error)
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar empresa",
+        variant: "destructive"
+      })
+    } finally {
+      setManagingOrgs(false)
+    }
+  }
+
+  const removeOrgFromMember = async (orgId: string) => {
+    if (!managingMember) return
+
+    try {
+      const { error } = await supabase
+        .from('user_organizations')
+        .delete()
+        .eq('user_id', managingMember.id)
+        .eq('org_id', orgId)
+
+      if (error) throw error
+
+      toast({
+        title: "Sucesso",
+        description: "Empresa removida do membro"
+      })
+
+      await loadData()
+    } catch (error) {
+      console.error('Error removing organization:', error)
+      toast({
+        title: "Erro",
+        description: "Erro ao remover empresa",
+        variant: "destructive"
+      })
+    }
   }
 
   const updateMember = async () => {
@@ -301,11 +381,50 @@ export function MembersTab() {
         </Dialog>
         )}
 
+        {/* View Member Dialog */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Visualizar Membro</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Email</Label>
+                <Input
+                  value={viewingMember?.email || ''}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+              <div>
+                <Label>Empresas Associadas</Label>
+                <div className="space-y-2 mt-2 max-h-40 overflow-y-auto">
+                  {viewingMember?.organizations.length ? (
+                    viewingMember.organizations.map((userOrg) => (
+                      <div key={`${userOrg.user_id}-${userOrg.org_id}`} className="flex items-center justify-between p-2 border rounded">
+                        <span>{userOrg.organization.name}</span>
+                        <Badge variant="secondary">{userOrg.role}</Badge>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Nenhuma empresa encontrada</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+                  Fechar
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Edit Member Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{isSuperAdmin ? 'Editar Membro' : 'Visualizar Membro'}</DialogTitle>
+              <DialogTitle>Editar Membro</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -321,7 +440,7 @@ export function MembersTab() {
               
               <div>
                 <Label htmlFor="editOrganization">Empresa</Label>
-                <Select value={editSelectedOrgId} onValueChange={setEditSelectedOrgId} disabled={!isSuperAdmin}>
+                <Select value={editSelectedOrgId} onValueChange={setEditSelectedOrgId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione uma empresa" />
                   </SelectTrigger>
@@ -337,7 +456,7 @@ export function MembersTab() {
 
               <div>
                 <Label htmlFor="editRole">Função</Label>
-                <Select value={editSelectedRole} onValueChange={setEditSelectedRole} disabled={!isSuperAdmin}>
+                <Select value={editSelectedRole} onValueChange={setEditSelectedRole}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -351,13 +470,87 @@ export function MembersTab() {
 
               <div className="flex justify-end space-x-2">
                 <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                  {isSuperAdmin ? 'Cancelar' : 'Fechar'}
+                  Cancelar
                 </Button>
-                {isSuperAdmin && (
-                  <Button onClick={updateMember} disabled={updating}>
-                    {updating ? 'Salvando...' : 'Salvar'}
+                <Button onClick={updateMember} disabled={updating}>
+                  {updating ? 'Salvando...' : 'Salvar'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Manage Organizations Dialog */}
+        <Dialog open={isOrgsDialogOpen} onOpenChange={setIsOrgsDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Gerenciar Empresas - {managingMember?.email}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {/* Add Organization Section */}
+              <div className="border-b pb-4">
+                <h4 className="text-sm font-medium mb-3">Adicionar Empresa</h4>
+                <div className="grid grid-cols-3 gap-2">
+                  <Select value={selectedNewOrgId} onValueChange={setSelectedNewOrgId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecionar empresa" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {organizations
+                        .filter(org => !managingMember?.organizations.some(userOrg => userOrg.org_id === org.id))
+                        .map((org) => (
+                        <SelectItem key={org.id} value={org.id}>
+                          {org.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={selectedNewRole} onValueChange={setSelectedNewRole}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="member">Membro</SelectItem>
+                      <SelectItem value="admin">Administrador</SelectItem>
+                      <SelectItem value="owner">Proprietário</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button onClick={addOrgToMember} disabled={!selectedNewOrgId || managingOrgs}>
+                    {managingOrgs ? 'Adicionando...' : 'Adicionar'}
                   </Button>
-                )}
+                </div>
+              </div>
+
+              {/* Current Organizations */}
+              <div>
+                <h4 className="text-sm font-medium mb-3">Empresas Atuais</h4>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {managingMember?.organizations.length ? (
+                    managingMember.organizations.map((userOrg) => (
+                      <div key={`${userOrg.user_id}-${userOrg.org_id}`} className="flex items-center justify-between p-2 border rounded">
+                        <div className="flex items-center gap-2">
+                          <span>{userOrg.organization.name}</span>
+                          <Badge variant="secondary">{userOrg.role}</Badge>
+                        </div>
+                        <Button 
+                          variant="destructive" 
+                          size="sm"
+                          onClick={() => removeOrgFromMember(userOrg.org_id)}
+                        >
+                          Remover
+                        </Button>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Nenhuma empresa encontrada</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setIsOrgsDialogOpen(false)}>
+                  Fechar
+                </Button>
               </div>
             </div>
           </DialogContent>
@@ -388,15 +581,21 @@ export function MembersTab() {
                       <span className="font-medium">{member.email}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Button variant="ghost" size="sm" onClick={() => openEditDialog(member)}>
+                      <Button variant="ghost" size="sm" onClick={() => openViewDialog(member)}>
                         <Eye className="h-4 w-4 mr-1" />
                         Ver
                       </Button>
                       {isSuperAdmin && (
-                        <Button variant="ghost" size="sm" onClick={() => openEditDialog(member)}>
-                          <Edit className="h-4 w-4 mr-1" />
-                          Editar
-                        </Button>
+                        <>
+                          <Button variant="ghost" size="sm" onClick={() => openEditDialog(member)}>
+                            <Edit className="h-4 w-4 mr-1" />
+                            Editar
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => openOrgsManagement(member)}>
+                            <Building2 className="h-4 w-4 mr-1" />
+                            Empresas
+                          </Button>
+                        </>
                       )}
                     </div>
                   </div>

@@ -49,16 +49,24 @@ export function OrganizationsTab() {
   const createOrganization = async () => {
     if (!newOrgName.trim() || !user) return
 
+    console.log('Creating organization...', { name: newOrgName.trim(), user: user?.id })
     setCreating(true)
     try {
       const slug = newOrgName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+      
+      console.log('Calling RPC with:', { org_name: newOrgName.trim(), org_slug: slug })
       
       const { data, error } = await supabase.rpc('create_organization_with_owner', {
         org_name: newOrgName.trim(),
         org_slug: slug
       })
 
-      if (error) throw error
+      console.log('RPC response:', { data, error })
+
+      if (error) {
+        console.error('RPC error details:', error)
+        throw error
+      }
 
       toast({
         title: "Sucesso",
@@ -70,6 +78,7 @@ export function OrganizationsTab() {
       loadOrganizations()
     } catch (error) {
       console.error('Error creating organization:', error)
+      console.error('Full error object:', JSON.stringify(error, null, 2))
       toast({
         title: "Erro",
         description: "Erro ao criar organização",

@@ -127,38 +127,45 @@ export function OrganizationsTab() {
   const loadOrgMembers = async (orgId: string) => {
     console.log('Loading members for org:', orgId)
     try {
-      const { data, error } = await supabase
+      // 1) Get memberships (no joins to avoid PostgREST relationship errors)
+      const { data: memberships, error: membershipsError } = await supabase
         .from('user_organizations')
-        .select(`
-          user_id,
-          role,
-          profiles (
-            email
-          )
-        `)
+        .select('user_id, role')
         .eq('org_id', orgId)
 
-      console.log('Query result:', { data, error })
+      console.log('Memberships result:', { memberships, membershipsError })
+      if (membershipsError) throw membershipsError
 
-      if (error) {
-        console.error('Supabase error:', error)
-        throw error
+      const ids = Array.from(new Set((memberships || []).map((m: any) => m.user_id).filter(Boolean)))
+      if (ids.length === 0) {
+        setOrgMembers([])
+        return
       }
 
-      const members = data?.map((item: any) => ({
-        id: item.user_id,
-        email: item.profiles?.email || null,
-        role: item.role
-      })) || []
+      // 2) Fetch profiles for those user IDs
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, email')
+        .in('id', ids)
+
+      console.log('Profiles result:', { profilesData, profilesError })
+      if (profilesError) throw profilesError
+
+      const emailById = new Map((profilesData || []).map((p: any) => [p.id, p.email]))
+      const members = (memberships || []).map((m: any) => ({
+        id: m.user_id,
+        email: emailById.get(m.user_id) ?? null,
+        role: m.role
+      }))
 
       console.log('Mapped members:', members)
       setOrgMembers(members)
     } catch (error) {
       console.error('Error loading org members:', error)
       toast({
-        title: "Erro",
-        description: "Erro ao carregar membros da organização",
-        variant: "destructive"
+        title: 'Erro',
+        description: 'Erro ao carregar membros da organização',
+        variant: 'destructive'
       })
     }
   }
@@ -368,11 +375,11 @@ export function OrganizationsTab() {
 
         {/* Edit Organization Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent>
+          <DialogContent aria-describedby="edit-dialog-description">
             <DialogHeader>
               <DialogTitle>Editar Empresa</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div id="edit-dialog-description" className="space-y-4">
               <div>
                 <Label htmlFor="editName">Nome da Empresa</Label>
                 <Input
@@ -396,11 +403,11 @@ export function OrganizationsTab() {
 
         {/* Manage Members Dialog */}
         <Dialog open={isMembersDialogOpen} onOpenChange={setIsMembersDialogOpen}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl" aria-describedby="members-dialog-description">
             <DialogHeader>
               <DialogTitle>Gerenciar Membros - {managingOrg?.name}</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div id="members-dialog-description" className="space-y-4">
               {/* Add Member Section */}
               <div className="border-b pb-4">
                 <h4 className="text-sm font-medium mb-3">Adicionar Membro</h4>

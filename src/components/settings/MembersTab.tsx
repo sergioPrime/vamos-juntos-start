@@ -10,6 +10,7 @@ import { Plus, Users, Mail } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
+import { useSuperAdmin } from '@/hooks/useSuperAdmin'
 
 interface Organization {
   id: string
@@ -40,6 +41,7 @@ export function MembersTab() {
   const [creating, setCreating] = useState(false)
   const { toast } = useToast()
   const { user } = useAuth()
+  const { isSuperAdmin, loading: superAdminLoading } = useSuperAdmin()
 
   const loadData = async () => {
     try {
@@ -160,7 +162,7 @@ export function MembersTab() {
     loadData()
   }, [])
 
-  if (loading) {
+  if (loading || superAdminLoading) {
     return <div className="text-center">Carregando membros...</div>
   }
 
@@ -168,13 +170,14 @@ export function MembersTab() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Membros Cadastrados</h3>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Adicionar Membro
-            </Button>
-          </DialogTrigger>
+        {isSuperAdmin && (
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar Membro
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Adicionar Novo Membro</DialogTitle>
@@ -232,6 +235,7 @@ export function MembersTab() {
             </div>
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       {members.length === 0 ? (

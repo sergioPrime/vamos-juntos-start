@@ -8,6 +8,7 @@ import { Plus, Building2 } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
+import { useSuperAdmin } from '@/hooks/useSuperAdmin'
 
 interface Organization {
   id: string
@@ -24,6 +25,7 @@ export function OrganizationsTab() {
   const [creating, setCreating] = useState(false)
   const { toast } = useToast()
   const { user } = useAuth()
+  const { isSuperAdmin, loading: superAdminLoading } = useSuperAdmin()
 
   const loadOrganizations = async () => {
     try {
@@ -93,7 +95,7 @@ export function OrganizationsTab() {
     loadOrganizations()
   }, [])
 
-  if (loading) {
+  if (loading || superAdminLoading) {
     return <div className="text-center">Carregando organizações...</div>
   }
 
@@ -101,13 +103,14 @@ export function OrganizationsTab() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Empresas Cadastradas</h3>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Nova Empresa
-            </Button>
-          </DialogTrigger>
+        {isSuperAdmin && (
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Empresa
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Criar Nova Empresa</DialogTitle>
@@ -133,6 +136,7 @@ export function OrganizationsTab() {
             </div>
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       {organizations.length === 0 ? (

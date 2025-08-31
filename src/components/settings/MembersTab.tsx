@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Users, Mail } from 'lucide-react'
+import { Plus, Users, Mail, Eye, Edit } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
@@ -26,7 +26,7 @@ interface UserOrganization {
 
 interface Member {
   id: string
-  email: string
+  email: string | null
   organizations: UserOrganization[]
 }
 
@@ -39,6 +39,12 @@ export function MembersTab() {
   const [selectedOrgId, setSelectedOrgId] = useState('')
   const [selectedRole, setSelectedRole] = useState('member')
   const [creating, setCreating] = useState(false)
+  const [editingMember, setEditingMember] = useState<Member | null>(null)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [editMemberEmail, setEditMemberEmail] = useState('')
+  const [editSelectedOrgId, setEditSelectedOrgId] = useState('')
+  const [editSelectedRole, setEditSelectedRole] = useState('')
+  const [updating, setUpdating] = useState(false)
   const { toast } = useToast()
   const { user } = useAuth()
   const { isSuperAdmin, loading: superAdminLoading } = useSuperAdmin()
@@ -54,7 +60,7 @@ export function MembersTab() {
       if (orgsError) throw orgsError
       setOrganizations(orgsData || [])
 
-      // Load members (users with their organizations)
+      // Load members (users with their organizations and profiles)
       const { data: userOrgs, error: userOrgsError } = await supabase
         .from('user_organizations')
         .select(`
@@ -69,15 +75,18 @@ export function MembersTab() {
 
       if (userOrgsError) throw userOrgsError
 
-      // Group by user_id
+      // Group by user_id and create friendly email addresses
       const memberMap = new Map<string, Member>()
       
       userOrgs?.forEach((uo: any) => {
         const userId = uo.user_id
         if (!memberMap.has(userId)) {
+          // Create a more friendly email format
+          const shortId = userId.slice(0, 8)
+          const friendlyEmail = `user-${shortId}@primegestor.com.br`
           memberMap.set(userId, {
             id: userId,
-            email: `user-${userId.slice(0, 8)}`, // Placeholder since we can't access auth.users
+            email: friendlyEmail,
             organizations: []
           })
         }
@@ -155,6 +164,49 @@ export function MembersTab() {
       })
     } finally {
       setCreating(false)
+    }
+  }
+
+  const openEditDialog = (member: Member) => {
+    setEditingMember(member)
+    setEditMemberEmail(member.email || '')
+    if (member.organizations.length > 0) {
+      setEditSelectedOrgId(member.organizations[0].org_id)
+      setEditSelectedRole(member.organizations[0].role)
+    }
+    setIsEditDialogOpen(true)
+  }
+
+  const updateMember = async () => {
+    if (!editingMember || !editSelectedOrgId) return
+
+    setUpdating(true)
+    try {
+      const { error } = await supabase
+        .from('user_organizations')
+        .update({ role: editSelectedRole })
+        .eq('user_id', editingMember.id)
+        .eq('org_id', editSelectedOrgId)
+
+      if (error) throw error
+
+      toast({
+        title: "Sucesso",
+        description: "Membro atualizado com sucesso"
+      })
+
+      setEditingMember(null)
+      setIsEditDialogOpen(false)
+      loadData()
+    } catch (error) {
+      console.error('Error updating member:', error)
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar membro",
+        variant: "destructive"
+      })
+    } finally {
+      setUpdating(false)
     }
   }
 
@@ -236,6 +288,68 @@ export function MembersTab() {
           </DialogContent>
         </Dialog>
         )}
+
+        {/* Edit Member Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{isSuperAdmin ? 'Editar Membro' : 'Visualizar Membro'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="editEmail">Email</Label>
+                <Input
+                  id="editEmail"
+                  type="email"
+                  value={editMemberEmail}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="editOrganization">Empresa</Label>
+                <Select value={editSelectedOrgId} onValueChange={setEditSelectedOrgId} disabled={!isSuperAdmin}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma empresa" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {organizations.map((org) => (
+                      <SelectItem key={org.id} value={org.id}>
+                        {org.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="editRole">Função</Label>
+                <Select value={editSelectedRole} onValueChange={setEditSelectedRole} disabled={!isSuperAdmin}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="member">Membro</SelectItem>
+                    <SelectItem value="admin">Administrador</SelectItem>
+                    <SelectItem value="owner">Proprietário</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                  {isSuperAdmin ? 'Cancelar' : 'Fechar'}
+                </Button>
+                {isSuperAdmin && (
+                  <Button onClick={updateMember} disabled={updating}>
+                    {updating ? 'Salvando...' : 'Salvar'}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {members.length === 0 ? (
@@ -255,10 +369,24 @@ export function MembersTab() {
           {members.map((member) => (
             <Card key={member.id}>
               <CardContent className="pt-4">
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <Mail className="h-5 w-5 text-muted-foreground" />
-                    <span className="font-medium">{member.email}</span>
+                  <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3 flex-1">
+                      <Mail className="h-5 w-5 text-muted-foreground" />
+                      <span className="font-medium">{member.email}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button variant="ghost" size="sm" onClick={() => openEditDialog(member)}>
+                        <Eye className="h-4 w-4 mr-1" />
+                        Ver
+                      </Button>
+                      {isSuperAdmin && (
+                        <Button variant="ghost" size="sm" onClick={() => openEditDialog(member)}>
+                          <Edit className="h-4 w-4 mr-1" />
+                          Editar
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   
                   <div>

@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Plus, Building2 } from 'lucide-react'
+import { Plus, Building2, Eye, Edit } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
@@ -23,6 +23,10 @@ export function OrganizationsTab() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [newOrgName, setNewOrgName] = useState('')
   const [creating, setCreating] = useState(false)
+  const [editingOrg, setEditingOrg] = useState<Organization | null>(null)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [editOrgName, setEditOrgName] = useState('')
+  const [updating, setUpdating] = useState(false)
   const { toast } = useToast()
   const { user } = useAuth()
   const { isSuperAdmin, loading: superAdminLoading } = useSuperAdmin()
@@ -91,6 +95,45 @@ export function OrganizationsTab() {
     }
   }
 
+  const openEditDialog = (org: Organization) => {
+    setEditingOrg(org)
+    setEditOrgName(org.name)
+    setIsEditDialogOpen(true)
+  }
+
+  const updateOrganization = async () => {
+    if (!editingOrg || !editOrgName.trim() || !user) return
+
+    setUpdating(true)
+    try {
+      const { error } = await supabase
+        .from('organizations')
+        .update({ name: editOrgName.trim() })
+        .eq('id', editingOrg.id)
+
+      if (error) throw error
+
+      toast({
+        title: "Sucesso",
+        description: "Organização atualizada com sucesso"
+      })
+
+      setEditOrgName('')
+      setEditingOrg(null)
+      setIsEditDialogOpen(false)
+      loadOrganizations()
+    } catch (error) {
+      console.error('Error updating organization:', error)
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar organização",
+        variant: "destructive"
+      })
+    } finally {
+      setUpdating(false)
+    }
+  }
+
   useEffect(() => {
     loadOrganizations()
   }, [])
@@ -137,6 +180,37 @@ export function OrganizationsTab() {
           </DialogContent>
         </Dialog>
         )}
+
+        {/* Edit Organization Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{isSuperAdmin ? 'Editar Empresa' : 'Visualizar Empresa'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="editName">Nome da Empresa</Label>
+                <Input
+                  id="editName"
+                  value={editOrgName}
+                  onChange={(e) => setEditOrgName(e.target.value)}
+                  placeholder="Digite o nome da empresa"
+                  disabled={!isSuperAdmin}
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                  {isSuperAdmin ? 'Cancelar' : 'Fechar'}
+                </Button>
+                {isSuperAdmin && (
+                  <Button onClick={updateOrganization} disabled={updating}>
+                    {updating ? 'Salvando...' : 'Salvar'}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {organizations.length === 0 ? (
@@ -157,13 +231,25 @@ export function OrganizationsTab() {
             <Card key={org.id}>
               <CardContent className="pt-4">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1">
                     <h4 className="font-semibold">{org.name}</h4>
                     <p className="text-sm text-muted-foreground">
                       Criada em {new Date(org.created_at).toLocaleDateString('pt-BR')}
                     </p>
                   </div>
-                  <Building2 className="h-8 w-8 text-muted-foreground" />
+                  <div className="flex items-center space-x-2">
+                    <Button variant="ghost" size="sm" onClick={() => openEditDialog(org)}>
+                      <Eye className="h-4 w-4 mr-1" />
+                      Ver
+                    </Button>
+                    {isSuperAdmin && (
+                      <Button variant="ghost" size="sm" onClick={() => openEditDialog(org)}>
+                        <Edit className="h-4 w-4 mr-1" />
+                        Editar
+                      </Button>
+                    )}
+                    <Building2 className="h-6 w-6 text-muted-foreground" />
+                  </div>
                 </div>
               </CardContent>
             </Card>

@@ -14,6 +14,165 @@ export type Database = {
   }
   public: {
     Tables: {
+      approval_policies: {
+        Row: {
+          cost_center: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          org_id: string
+          policy_name: string
+          updated_at: string
+        }
+        Insert: {
+          cost_center?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          org_id: string
+          policy_name: string
+          updated_at?: string
+        }
+        Update: {
+          cost_center?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          org_id?: string
+          policy_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      approval_policy_levels: {
+        Row: {
+          approver_count: number
+          created_at: string
+          id: string
+          level_name: string
+          level_order: number
+          max_amount: number | null
+          min_amount: number
+          policy_id: string
+          required_role: string | null
+          timeout_days: number | null
+        }
+        Insert: {
+          approver_count?: number
+          created_at?: string
+          id?: string
+          level_name: string
+          level_order: number
+          max_amount?: number | null
+          min_amount?: number
+          policy_id: string
+          required_role?: string | null
+          timeout_days?: number | null
+        }
+        Update: {
+          approver_count?: number
+          created_at?: string
+          id?: string
+          level_name?: string
+          level_order?: number
+          max_amount?: number | null
+          min_amount?: number
+          policy_id?: string
+          required_role?: string | null
+          timeout_days?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_policy_levels_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "approval_policies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budget_alerts: {
+        Row: {
+          alert_type: string
+          budget_id: string
+          created_at: string
+          id: string
+          is_triggered: boolean
+          message: string | null
+          threshold_percentage: number | null
+          triggered_at: string | null
+        }
+        Insert: {
+          alert_type: string
+          budget_id: string
+          created_at?: string
+          id?: string
+          is_triggered?: boolean
+          message?: string | null
+          threshold_percentage?: number | null
+          triggered_at?: string | null
+        }
+        Update: {
+          alert_type?: string
+          budget_id?: string
+          created_at?: string
+          id?: string
+          is_triggered?: boolean
+          message?: string | null
+          threshold_percentage?: number | null
+          triggered_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_alerts_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_budgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budget_monthly_breakdown: {
+        Row: {
+          budget_id: string
+          created_at: string
+          id: string
+          month: number
+          planned_amount: number
+          spent_amount: number
+          updated_at: string
+        }
+        Insert: {
+          budget_id: string
+          created_at?: string
+          id?: string
+          month: number
+          planned_amount?: number
+          spent_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          budget_id?: string
+          created_at?: string
+          id?: string
+          month?: number
+          planned_amount?: number
+          spent_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_monthly_breakdown_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_budgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           created_at: string
@@ -571,6 +730,57 @@ export type Database = {
         }
         Relationships: []
       }
+      purchase_budgets: {
+        Row: {
+          available_amount: number
+          budget_name: string
+          budget_year: number
+          category: string | null
+          cost_center: string | null
+          created_at: string
+          created_by: string
+          id: string
+          org_id: string
+          planned_amount: number
+          reserved_amount: number
+          spent_amount: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          available_amount?: number
+          budget_name: string
+          budget_year: number
+          category?: string | null
+          cost_center?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          org_id: string
+          planned_amount?: number
+          reserved_amount?: number
+          spent_amount?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          available_amount?: number
+          budget_name?: string
+          budget_year?: number
+          category?: string | null
+          cost_center?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          org_id?: string
+          planned_amount?: number
+          reserved_amount?: number
+          spent_amount?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       quote_items: {
         Row: {
           created_at: string
@@ -674,6 +884,110 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      recurring_purchase_template_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          estimated_unit_price: number
+          id: string
+          justification: string | null
+          product_name: string
+          quantity: number
+          supplier_suggestion: string | null
+          template_id: string
+          unit: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          estimated_unit_price?: number
+          id?: string
+          justification?: string | null
+          product_name: string
+          quantity?: number
+          supplier_suggestion?: string | null
+          template_id: string
+          unit?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          estimated_unit_price?: number
+          id?: string
+          justification?: string | null
+          product_name?: string
+          quantity?: number
+          supplier_suggestion?: string | null
+          template_id?: string
+          unit?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_purchase_template_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "recurring_purchase_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recurring_purchase_templates: {
+        Row: {
+          auto_submit: boolean
+          cost_center: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          frequency_interval: number
+          frequency_type: string
+          id: string
+          is_active: boolean
+          last_executed_date: string | null
+          next_execution_date: string | null
+          org_id: string
+          priority: string
+          project_code: string | null
+          template_name: string
+          updated_at: string
+        }
+        Insert: {
+          auto_submit?: boolean
+          cost_center?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          frequency_interval?: number
+          frequency_type: string
+          id?: string
+          is_active?: boolean
+          last_executed_date?: string | null
+          next_execution_date?: string | null
+          org_id: string
+          priority?: string
+          project_code?: string | null
+          template_name: string
+          updated_at?: string
+        }
+        Update: {
+          auto_submit?: boolean
+          cost_center?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          frequency_interval?: number
+          frequency_type?: string
+          id?: string
+          is_active?: boolean
+          last_executed_date?: string | null
+          next_execution_date?: string | null
+          org_id?: string
+          priority?: string
+          project_code?: string | null
+          template_name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       services: {
         Row: {

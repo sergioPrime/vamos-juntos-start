@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, Shield } from "lucide-react"
+import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, Shield, ShoppingCart } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import { useSuperAdmin } from "@/hooks/useSuperAdmin"
 
@@ -33,6 +33,10 @@ const businessItems = [
   { title: "Orçamentos", url: "/quotes", icon: Quote },
   { title: "Clientes", url: "/customers", icon: Users },
   { title: "Relatórios", url: "/reports", icon: BarChart3 },
+]
+
+const purchaseItems = [
+  { title: "Solicitações", url: "/purchases/requests", icon: ShoppingCart },
 ]
 
 const configItems = [
@@ -109,6 +113,24 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {businessItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} className={getNavClass}>
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Compras</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {purchaseItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>

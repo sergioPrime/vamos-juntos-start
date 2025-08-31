@@ -23,6 +23,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import PDV from "./pages/PDV";
 import Products from "./pages/Products";
 import Orders from "./pages/Orders";
+import PurchaseRequests from "./pages/purchases/PurchaseRequests";
 import Welcome from "./pages/onboarding/Welcome";
 import Signup from "./pages/onboarding/Signup";
 import BusinessType from "./pages/onboarding/BusinessType";
@@ -129,6 +130,15 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <Orders />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/purchases/requests" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <PurchaseRequests />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

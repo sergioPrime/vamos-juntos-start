@@ -131,7 +131,7 @@ export function OrganizationsTab() {
         .select(`
           user_id,
           role,
-          profiles:user_id (
+          profiles!user_organizations_user_id_fkey (
             email
           )
         `)

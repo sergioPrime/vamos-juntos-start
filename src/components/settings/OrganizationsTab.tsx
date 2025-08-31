@@ -125,19 +125,25 @@ export function OrganizationsTab() {
   }
 
   const loadOrgMembers = async (orgId: string) => {
+    console.log('Loading members for org:', orgId)
     try {
       const { data, error } = await supabase
         .from('user_organizations')
         .select(`
           user_id,
           role,
-          profiles!user_organizations_user_id_fkey (
+          profiles (
             email
           )
         `)
         .eq('org_id', orgId)
 
-      if (error) throw error
+      console.log('Query result:', { data, error })
+
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
 
       const members = data?.map((item: any) => ({
         id: item.user_id,
@@ -145,6 +151,7 @@ export function OrganizationsTab() {
         role: item.role
       })) || []
 
+      console.log('Mapped members:', members)
       setOrgMembers(members)
     } catch (error) {
       console.error('Error loading org members:', error)
@@ -293,11 +300,11 @@ export function OrganizationsTab() {
                 Nova Empresa
               </Button>
             </DialogTrigger>
-          <DialogContent>
+          <DialogContent aria-describedby="create-dialog-description">
             <DialogHeader>
               <DialogTitle>Criar Nova Empresa</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div id="create-dialog-description" className="space-y-4">
               <div>
                 <Label htmlFor="name">Nome da Empresa</Label>
                 <Input
@@ -321,12 +328,12 @@ export function OrganizationsTab() {
         )}
 
         {/* View Organization Dialog */}
-        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Visualizar Empresa</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
+         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+           <DialogContent className="max-w-2xl" aria-describedby="view-dialog-description">
+             <DialogHeader>
+               <DialogTitle>Visualizar Empresa</DialogTitle>
+             </DialogHeader>
+             <div id="view-dialog-description" className="space-y-4">
               <div>
                 <Label>Nome da Empresa</Label>
                 <Input

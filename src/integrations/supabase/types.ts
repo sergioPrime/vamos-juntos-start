@@ -271,6 +271,111 @@ export type Database = {
           },
         ]
       }
+      order_items: {
+        Row: {
+          created_at: string
+          discount_amount: number | null
+          id: string
+          order_id: string
+          product_id: string | null
+          product_name: string
+          product_sku: string | null
+          quantity: number
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          discount_amount?: number | null
+          id?: string
+          order_id: string
+          product_id?: string | null
+          product_name: string
+          product_sku?: string | null
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          discount_amount?: number | null
+          id?: string
+          order_id?: string
+          product_id?: string | null
+          product_name?: string
+          product_sku?: string | null
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          customer_id: string | null
+          delivery_date: string | null
+          discount_amount: number | null
+          id: string
+          notes: string | null
+          order_date: string
+          order_number: string
+          order_type: string
+          org_id: string
+          owner_id: string
+          payment_method: string | null
+          payment_status: string | null
+          status: string
+          subtotal: number
+          tax_amount: number | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          customer_id?: string | null
+          delivery_date?: string | null
+          discount_amount?: number | null
+          id?: string
+          notes?: string | null
+          order_date?: string
+          order_number: string
+          order_type?: string
+          org_id: string
+          owner_id: string
+          payment_method?: string | null
+          payment_status?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          customer_id?: string | null
+          delivery_date?: string | null
+          discount_amount?: number | null
+          id?: string
+          notes?: string | null
+          order_date?: string
+          order_number?: string
+          order_type?: string
+          org_id?: string
+          owner_id?: string
+          payment_method?: string | null
+          payment_status?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       organizations: {
         Row: {
           created_at: string
@@ -292,6 +397,96 @@ export type Database = {
           name?: string
           slug?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      payment_methods: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          org_id: string
+          type: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          org_id: string
+          type: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          org_id?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          active: boolean
+          barcode: string | null
+          category: string | null
+          cost_price: number | null
+          created_at: string
+          description: string | null
+          dimensions: string | null
+          id: string
+          min_stock_level: number | null
+          name: string
+          org_id: string
+          owner_id: string
+          sku: string | null
+          stock_quantity: number
+          unit: string | null
+          unit_price: number
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          active?: boolean
+          barcode?: string | null
+          category?: string | null
+          cost_price?: number | null
+          created_at?: string
+          description?: string | null
+          dimensions?: string | null
+          id?: string
+          min_stock_level?: number | null
+          name: string
+          org_id: string
+          owner_id: string
+          sku?: string | null
+          stock_quantity?: number
+          unit?: string | null
+          unit_price?: number
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          active?: boolean
+          barcode?: string | null
+          category?: string | null
+          cost_price?: number | null
+          created_at?: string
+          description?: string | null
+          dimensions?: string | null
+          id?: string
+          min_stock_level?: number | null
+          name?: string
+          org_id?: string
+          owner_id?: string
+          sku?: string | null
+          stock_quantity?: number
+          unit?: string | null
+          unit_price?: number
+          updated_at?: string
+          weight?: number | null
         }
         Relationships: []
       }
@@ -438,6 +633,45 @@ export type Database = {
           unit?: string | null
           unit_price?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      stock_movements: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          movement_type: string
+          notes: string | null
+          org_id: string
+          product_id: string
+          quantity: number
+          reference_id: string | null
+          reference_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          movement_type: string
+          notes?: string | null
+          org_id: string
+          product_id: string
+          quantity: number
+          reference_id?: string | null
+          reference_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          movement_type?: string
+          notes?: string | null
+          org_id?: string
+          product_id?: string
+          quantity?: number
+          reference_id?: string | null
+          reference_type?: string | null
         }
         Relationships: []
       }

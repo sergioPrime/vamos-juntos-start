@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Plus, FileText, Calculator, User, MoreHorizontal, LogOut, Moon, Sun } from "lucide-react"
+import { Plus, FileText, Calculator, User, MoreHorizontal, LogOut, Moon, Sun, Zap } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
 import {
@@ -59,6 +59,15 @@ export function AppHeader() {
         >
           <Plus className="h-4 w-4 mr-2" />
           Cobrança Pix
+        </Button>
+        
+        <Button 
+          variant="outline"
+          onClick={() => navigate("/pdv")}
+          size="sm"
+        >
+          <Zap className="h-4 w-4 mr-2" />
+          PDV
         </Button>
         
         <Button 
@@ -134,6 +143,10 @@ export function AppHeader() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={() => navigate("/pdv")}>
+              <Zap className="h-4 w-4 mr-2" />
+              PDV
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/nfse")}>
               <FileText className="h-4 w-4 mr-2" />
               Emitir NFS-e

@@ -20,6 +20,9 @@ import Customers from "./pages/Customers";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import PDV from "./pages/PDV";
+import Products from "./pages/Products";
+import Orders from "./pages/Orders";
 import Welcome from "./pages/onboarding/Welcome";
 import Signup from "./pages/onboarding/Signup";
 import BusinessType from "./pages/onboarding/BusinessType";
@@ -99,6 +102,33 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <NFSe />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/pdv" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <PDV />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/products" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Products />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/orders" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Orders />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

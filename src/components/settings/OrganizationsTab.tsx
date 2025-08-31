@@ -53,27 +53,12 @@ export function OrganizationsTab() {
     try {
       const slug = newOrgName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
       
-      const { data: orgData, error: orgError } = await supabase
-        .from('organizations')
-        .insert({
-          name: newOrgName.trim(),
-          slug: slug
-        })
-        .select()
-        .single()
+      const { data, error } = await supabase.rpc('create_organization_with_owner', {
+        org_name: newOrgName.trim(),
+        org_slug: slug
+      })
 
-      if (orgError) throw orgError
-
-      // Create user organization association
-      const { error: userOrgError } = await supabase
-        .from('user_organizations')
-        .insert({
-          user_id: user.id,
-          org_id: orgData.id,
-          role: 'owner'
-        })
-
-      if (userOrgError) throw userOrgError
+      if (error) throw error
 
       toast({
         title: "Sucesso",

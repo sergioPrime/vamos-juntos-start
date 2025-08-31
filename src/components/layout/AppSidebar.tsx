@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, Shield, ShoppingCart } from "lucide-react"
+import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, Shield, ShoppingCart, TrendingUp } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import { useSuperAdmin } from "@/hooks/useSuperAdmin"
 
@@ -37,6 +37,7 @@ const businessItems = [
 
 const purchaseItems = [
   { title: "Solicitações", url: "/purchases/requests", icon: ShoppingCart },
+  { title: "Relatórios", url: "/purchases/reports", icon: TrendingUp },
 ]
 
 const configItems = [

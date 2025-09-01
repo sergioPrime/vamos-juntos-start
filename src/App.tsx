@@ -8,6 +8,7 @@ import { PageTransition } from "./components/layout/PageTransition";
 import { NotificationProvider } from "./components/ui/notification-system";
 import { AuthProvider } from "./hooks/useAuth";
 import { OrganizationProvider } from "./hooks/useOrganization";
+import { SubscriptionProvider } from "./hooks/useSubscription";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AuthRedirect } from "./components/auth/AuthRedirect";
 import Dashboard from "./pages/Dashboard";
@@ -40,7 +41,8 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <OrganizationProvider>
-        <TooltipProvider>
+        <SubscriptionProvider>
+          <TooltipProvider>
           <NotificationProvider>
           <Toaster />
           <Sonner />
@@ -233,8 +235,9 @@ const App = () => (
         </Routes>
           </BrowserRouter>
         </NotificationProvider>
-      </TooltipProvider>
-    </OrganizationProvider>
+          </TooltipProvider>
+        </SubscriptionProvider>
+      </OrganizationProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

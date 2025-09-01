@@ -108,11 +108,27 @@ serve(async (req) => {
     }
 
     // Update user organization with subscription info
-    await supabaseClient.from("user_organizations").update({
+    const updateData: any = {
       subscription_plan_id: subscriptionPlanId,
-      subscription_started_at: hasActiveSub ? new Date().toISOString() : null,
       subscription_status: hasActiveSub ? 'active' : 'inactive'
-    }).eq('user_id', user.id);
+    }
+    
+    // Only update subscription_started_at if it's a new subscription
+    if (hasActiveSub) {
+      const { data: existingData } = await supabaseClient
+        .from("user_organizations")
+        .select('subscription_started_at')
+        .eq('user_id', user.id)
+        .single()
+      
+      if (!existingData?.subscription_started_at) {
+        updateData.subscription_started_at = new Date().toISOString()
+      }
+    } else {
+      updateData.subscription_started_at = null
+    }
+    
+    await supabaseClient.from("user_organizations").update(updateData).eq('user_id', user.id);
 
     logStep("Updated database with subscription info", { 
       subscribed: hasActiveSub, 

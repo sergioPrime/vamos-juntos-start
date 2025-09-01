@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_integrations: {
+        Row: {
+          api_key_encrypted: string | null
+          api_url: string | null
+          created_at: string
+          id: string
+          integration_name: string
+          integration_type: string
+          is_active: boolean
+          last_sync_at: string | null
+          org_id: string
+          sync_frequency: number | null
+          updated_at: string
+        }
+        Insert: {
+          api_key_encrypted?: string | null
+          api_url?: string | null
+          created_at?: string
+          id?: string
+          integration_name: string
+          integration_type: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          org_id: string
+          sync_frequency?: number | null
+          updated_at?: string
+        }
+        Update: {
+          api_key_encrypted?: string | null
+          api_url?: string | null
+          created_at?: string
+          id?: string
+          integration_name?: string
+          integration_type?: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          org_id?: string
+          sync_frequency?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       approval_policies: {
         Row: {
           cost_center: string | null
@@ -94,6 +136,51 @@ export type Database = {
           },
         ]
       }
+      bank_accounts: {
+        Row: {
+          account_number: string
+          account_type: string
+          agency: string | null
+          balance: number
+          bank_code: string | null
+          bank_name: string
+          company_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          org_id: string
+          updated_at: string
+        }
+        Insert: {
+          account_number: string
+          account_type?: string
+          agency?: string | null
+          balance?: number
+          bank_code?: string | null
+          bank_name: string
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          org_id: string
+          updated_at?: string
+        }
+        Update: {
+          account_number?: string
+          account_type?: string
+          agency?: string | null
+          balance?: number
+          bank_code?: string | null
+          bank_name?: string
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          org_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       budget_alerts: {
         Row: {
           alert_type: string
@@ -173,6 +260,102 @@ export type Database = {
           },
         ]
       }
+      cash_flow_projections: {
+        Row: {
+          bank_account_id: string | null
+          company_id: string | null
+          confidence_level: number
+          created_at: string
+          id: string
+          org_id: string
+          projected_balance: number
+          projected_inflow: number
+          projected_outflow: number
+          projection_date: string
+          projection_type: string
+          updated_at: string
+        }
+        Insert: {
+          bank_account_id?: string | null
+          company_id?: string | null
+          confidence_level?: number
+          created_at?: string
+          id?: string
+          org_id: string
+          projected_balance?: number
+          projected_inflow?: number
+          projected_outflow?: number
+          projection_date: string
+          projection_type?: string
+          updated_at?: string
+        }
+        Update: {
+          bank_account_id?: string | null
+          company_id?: string | null
+          confidence_level?: number
+          created_at?: string
+          id?: string
+          org_id?: string
+          projected_balance?: number
+          projected_inflow?: number
+          projected_outflow?: number
+          projection_date?: string
+          projection_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      companies: {
+        Row: {
+          address: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          document: string | null
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          org_id: string
+          phone: string | null
+          state: string | null
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          org_id: string
+          phone?: string | null
+          state?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          org_id?: string
+          phone?: string | null
+          state?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           created_at: string
@@ -225,6 +408,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      financial_transactions: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          category: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          org_id: string
+          reference_id: string | null
+          reference_type: string | null
+          transaction_date: string
+          transaction_type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          bank_account_id?: string | null
+          category?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          org_id: string
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_date?: string
+          transaction_type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          category?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          org_id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_date?: string
+          transaction_type?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       invoice_items: {
         Row: {
@@ -1184,6 +1418,15 @@ export type Database = {
           name: string
           slug: string
           updated_at: string
+        }[]
+      }
+      generate_cash_flow_projections: {
+        Args: { p_days_ahead?: number; p_org_id: string }
+        Returns: {
+          projected_balance: number
+          projected_inflow: number
+          projected_outflow: number
+          projection_date: string
         }[]
       }
       has_role: {

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, Shield, ShoppingCart, TrendingUp, PieChart } from "lucide-react"
+import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, Shield, ShoppingCart, TrendingUp, PieChart, Building2, Link } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import { useSuperAdmin } from "@/hooks/useSuperAdmin"
 
@@ -20,10 +20,11 @@ const navigationItems = [
 ]
 
 const financeItems = [
+  { title: "Dashboard", url: "/finance/dashboard", icon: PieChart },
   { title: "Receber", url: "/finance/receivables", icon: Wallet },
   { title: "Pagar", url: "/finance/payables", icon: CreditCard },
   { title: "Cobranças", url: "/charges", icon: Receipt },
-  { title: "Relatórios", url: "/finance/reports", icon: PieChart },
+  { title: "Relatórios", url: "/finance/reports", icon: BarChart3 },
 ]
 
 const businessItems = [
@@ -39,6 +40,11 @@ const businessItems = [
 const purchaseItems = [
   { title: "Solicitações", url: "/purchases/requests", icon: ShoppingCart },
   { title: "Relatórios", url: "/purchases/reports", icon: TrendingUp },
+]
+
+const integrationItems = [
+  { title: "Multi-empresas", url: "/settings?tab=companies", icon: Building2 },
+  { title: "Integrações", url: "/settings?tab=integrations", icon: Link },
 ]
 
 const configItems = [
@@ -133,6 +139,24 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {purchaseItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} className={getNavClass}>
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Integrações</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {integrationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>

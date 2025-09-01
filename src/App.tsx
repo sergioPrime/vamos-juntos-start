@@ -14,6 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import Receivables from "./pages/finance/Receivables";
 import Payables from "./pages/finance/Payables";
 import FinancialReports from "./pages/finance/FinancialReports";
+import FinancialDashboard from "./pages/FinancialDashboard";
 import Charges from "./pages/Charges";
 import NFSe from "./pages/NFSe";
 import Quotes from "./pages/Quotes";
@@ -87,6 +88,15 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <FinancialReports />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/finance/dashboard" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <FinancialDashboard />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

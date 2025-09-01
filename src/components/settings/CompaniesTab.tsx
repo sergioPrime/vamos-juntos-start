@@ -145,6 +145,7 @@ export function CompaniesTab() {
           .from("companies")
           .update({ is_default: false })
           .eq("org_id", organization.currentOrg.id)
+          .neq("id", editingCompany?.id || '')
       }
 
       if (editingCompany) {

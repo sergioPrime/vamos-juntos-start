@@ -46,15 +46,31 @@ serve(async (req) => {
     if (!planId) throw new Error("planId is required");
     logStep("Plan ID received", { planId });
 
+    // Create Supabase client with service role key for database access
+    const supabaseService = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+
     // Fetch plan details from database
-    const { data: plan, error: planError } = await supabaseClient
+    const { data: plan, error: planError } = await supabaseService
       .from('subscription_plans')
       .select('*')
       .eq('id', planId)
       .eq('is_active', true)
       .single();
 
-    if (planError || !plan) throw new Error("Plan not found or inactive");
+    if (planError) {
+      logStep("Database error fetching plan", { planId, error: planError });
+      throw new Error(`Database error: ${planError.message}`);
+    }
+    
+    if (!plan) {
+      logStep("Plan not found", { planId });
+      throw new Error("Plan not found or inactive");
+    }
+    
     logStep("Plan found", { planName: plan.name, price: plan.price });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });

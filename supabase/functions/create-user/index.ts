@@ -62,27 +62,38 @@ serve(async (req) => {
       )
     }
 
-    // Associate user with default company
+    // Create a brand-new organization and default company for this user
     try {
-      const { data: defaultCompany, error: companyError } = await supabaseAdmin
-        .from('companies')
-        .select('id, org_id')
-        .eq('is_default', true)
-        .single()
+      if (user.user) {
+        const orgName = `Empresa ${email.split('@')[0]}`
+        const slug = generateUniqueSlug(email)
 
-      if (defaultCompany && user.user) {
-        // Add user to default company's organization
-        await supabaseAdmin
+        // 1) Create organization
+        const { data: org, error: orgError } = await supabaseAdmin
+          .from('organizations')
+          .insert({ name: orgName, slug })
+          .select('id, name')
+          .single()
+
+        if (orgError) throw orgError
+
+        // 2) Link user as owner of the organization
+        const { error: linkError } = await supabaseAdmin
           .from('user_organizations')
-          .insert({
-            user_id: user.user.id,
-            org_id: defaultCompany.org_id,
-            role: 'member'
-          })
+          .insert({ user_id: user.user.id, org_id: org.id, role: 'owner' })
+
+        if (linkError) throw linkError
+
+        // 3) Create default company for this organization
+        const { error: companyInsertError } = await supabaseAdmin
+          .from('companies')
+          .insert({ name: org.name, org_id: org.id, is_default: true })
+
+        if (companyInsertError) throw companyInsertError
       }
-    } catch (orgError) {
-      console.log('Warning: Could not associate user with default company:', orgError)
-      // Continue with user creation even if company association fails
+    } catch (orgAssocError) {
+      console.error('Erro ao criar organização/empresa padrão para o usuário:', orgAssocError)
+      // Seguimos mesmo se esta etapa falhar, para não bloquear o cadastro
     }
 
     return new Response(

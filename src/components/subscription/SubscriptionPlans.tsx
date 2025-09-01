@@ -27,6 +27,7 @@ export function SubscriptionPlans() {
   const [loading, setLoading] = useState(true)
   const [currentPlanId, setCurrentPlanId] = useState<string | null>(null)
   const [subscriptionStatus, setSubscriptionStatus] = useState<string>('inactive')
+  const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null)
   const [processing, setProcessing] = useState<string | null>(null)
   const { user } = useAuth()
   const { currentOrg: organization } = useOrganization()
@@ -42,8 +43,25 @@ export function SubscriptionPlans() {
     // Check for success/canceled URL params
     const urlParams = new URLSearchParams(window.location.search)
     if (urlParams.get('success') === 'true') {
-      toast.success('Assinatura ativada com sucesso!')
-      checkSubscriptionStatus()
+      // Wait for subscription status to be checked first
+      const checkAndShowSuccess = async () => {
+        await checkSubscriptionStatus()
+        // Get updated subscription data after a short delay
+        setTimeout(async () => {
+          const updatedData = await getLatestSubscriptionData()
+          if (updatedData?.subscription_end) {
+            const endDate = new Date(updatedData.subscription_end).toLocaleDateString('pt-BR')
+            toast.success(`🎉 Assinatura ativada com sucesso! Válida até ${endDate}`, {
+              duration: 6000,
+            })
+          } else {
+            toast.success('🎉 Assinatura ativada com sucesso!', {
+              duration: 4000,
+            })
+          }
+        }, 1000)
+      }
+      checkAndShowSuccess()
       // Clean URL
       window.history.replaceState({}, document.title, window.location.pathname)
     } else if (urlParams.get('canceled') === 'true') {
@@ -100,10 +118,24 @@ export function SubscriptionPlans() {
       
       if (data) {
         setCurrentPlanId(data.subscription_plan_id)
-        setSubscriptionStatus(data.subscription_status || 'inactive')
+        setSubscriptionStatus(data.subscribed ? 'active' : 'inactive')
+        setSubscriptionEnd(data.subscription_end)
       }
     } catch (error) {
       console.error('Erro ao verificar status da assinatura:', error)
+    }
+  }
+
+  const getLatestSubscriptionData = async () => {
+    if (!user) return null
+
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription')
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('Erro ao obter dados da assinatura:', error)
+      return null
     }
   }
 
@@ -191,9 +223,16 @@ export function SubscriptionPlans() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Status da Assinatura:</p>
-              <Badge variant={subscriptionStatus === 'active' ? 'default' : 'secondary'}>
-                {subscriptionStatus === 'active' ? 'Ativa' : 'Inativa'}
-              </Badge>
+              <div className="space-y-1">
+                <Badge variant={subscriptionStatus === 'active' ? 'default' : 'secondary'}>
+                  {subscriptionStatus === 'active' ? 'Ativa' : 'Inativa'}
+                </Badge>
+                {subscriptionStatus === 'active' && subscriptionEnd && (
+                  <p className="text-xs text-muted-foreground">
+                    Válida até: {new Date(subscriptionEnd).toLocaleDateString('pt-BR')}
+                  </p>
+                )}
+              </div>
             </div>
             {subscriptionStatus === 'active' && (
               <Button onClick={manageSubscription} variant="outline" size="sm">

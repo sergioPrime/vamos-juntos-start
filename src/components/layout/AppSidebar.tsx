@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, Shield, ShoppingCart, TrendingUp } from "lucide-react"
+import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, Shield, ShoppingCart, TrendingUp, PieChart } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import { useSuperAdmin } from "@/hooks/useSuperAdmin"
 
@@ -23,6 +23,7 @@ const financeItems = [
   { title: "Receber", url: "/finance/receivables", icon: Wallet },
   { title: "Pagar", url: "/finance/payables", icon: CreditCard },
   { title: "Cobranças", url: "/charges", icon: Receipt },
+  { title: "Relatórios", url: "/finance/reports", icon: PieChart },
 ]
 
 const businessItems = [

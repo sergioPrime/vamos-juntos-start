@@ -1,196 +1,474 @@
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Zap, Copy, QrCode, Check, Eye, Search, Filter } from "lucide-react"
-import { useNavigate } from "react-router-dom"
-import { useToast } from "@/hooks/use-toast"
-import { useNotifications } from "@/components/ui/notification-system"
-import { ResponsiveTable } from "@/components/ui/responsive-table"
+import React, { useState, useEffect } from 'react'
+import { supabase } from '@/integrations/supabase/client'
+import { useOrganization } from '@/hooks/useOrganization'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
+import { DollarSign, CheckCircle, Clock, AlertTriangle, Plus, Search, Filter, Download, Eye, Edit, Zap, Copy, QrCode, Target } from 'lucide-react'
+import { toast } from '@/hooks/use-toast'
+import { ResponsiveTable } from '@/components/ui/responsive-table'
 
+interface ReceivableItem {
+  id: string
+  customer: string
+  description: string
+  amount: number
+  dueDate: string
+  status: 'pending' | 'overdue' | 'paid' | 'partial'
+  invoice?: string
+  paymentMethod?: string
+  notes?: string
+  createdAt: string
+  paidAt?: string
+  pixCode?: string
+}
+
+interface ReceivablesSummary {
+  totalPending: number
+  totalOverdue: number
+  totalPaid: number
+  dueThisWeek: number
+  dueNextWeek: number
+  avgCollectionTime: number
+}
 
 export default function Receivables() {
-  const navigate = useNavigate()
-  const { toast } = useToast()
-  const { addNotification } = useNotifications()
+  const { currentOrg: currentOrganization } = useOrganization()
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  const [selectedItem, setSelectedItem] = useState<any>(null)
-  const [showPixFlow, setShowPixFlow] = useState(false)
+  const [customerFilter, setCustomerFilter] = useState("all")
+  const [selectedReceivable, setSelectedReceivable] = useState<ReceivableItem | null>(null)
+  const [showAddDialog, setShowAddDialog] = useState(false)
+  const [showPixDialog, setShowPixDialog] = useState(false)
   const [pixCode, setPixCode] = useState("")
-  const [animatingItems, setAnimatingItems] = useState<Set<number>>(new Set())
+
+  // Mock data
+  const [receivablesSummary] = useState<ReceivablesSummary>({
+    totalPending: 89450.00,
+    totalOverdue: 15280.00,
+    totalPaid: 156780.00,
+    dueThisWeek: 18650.00,
+    dueNextWeek: 28900.00,
+    avgCollectionTime: 24.5
+  })
+
+  const [receivables] = useState<ReceivableItem[]>([
+    {
+      id: '1',
+      customer: 'Empresa Alpha Ltda',
+      description: 'Desenvolvimento de sistema',
+      amount: 15000.00,
+      dueDate: '2024-09-18',
+      status: 'pending',
+      invoice: 'FAT-2024-001',
+      notes: 'Pagamento via transferência',
+      createdAt: '2024-08-18'
+    },
+    {
+      id: '2',
+      customer: 'Beta Corp S.A.',
+      description: 'Consultoria empresarial',
+      amount: 8500.00,
+      dueDate: '2024-09-10',
+      status: 'overdue',
+      invoice: 'FAT-2024-002',
+      paymentMethod: 'PIX',
+      createdAt: '2024-08-10'
+    },
+    {
+      id: '3',
+      customer: 'Gamma Tech',
+      description: 'Licenças de software',
+      amount: 12000.00,
+      dueDate: '2024-09-15',
+      status: 'paid',
+      invoice: 'FAT-2024-003',
+      paymentMethod: 'Transferência',
+      paidAt: '2024-09-14',
+      createdAt: '2024-08-15'
+    },
+    {
+      id: '4',
+      customer: 'Delta Solutions',
+      description: 'Suporte técnico mensal',
+      amount: 3500.00,
+      dueDate: '2024-09-25',
+      status: 'partial',
+      invoice: 'FAT-2024-004',
+      notes: 'Pagamento parcial de R$ 2.000,00 recebido',
+      createdAt: '2024-08-25'
+    }
+  ])
+
+  useEffect(() => {
+    if (currentOrganization) {
+      setLoading(false)
+    }
+  }, [currentOrganization])
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "paid":
-        return <Badge className="bg-success/20 text-success border-success/30">Pago</Badge>
-      case "pending":
-        return <Badge className="bg-warning/20 text-warning border-warning/30">Pendente</Badge>
-      case "overdue":
-        return <Badge className="bg-destructive/20 text-destructive border-destructive/30">Atrasado</Badge>
+      case 'paid':
+        return <Badge className="bg-green-600">Pago</Badge>
+      case 'pending':
+        return <Badge className="bg-yellow-600">Pendente</Badge>
+      case 'overdue':
+        return <Badge variant="destructive">Vencido</Badge>
+      case 'partial':
+        return <Badge className="bg-blue-600">Parcial</Badge>
       default:
-        return <Badge>-</Badge>
+        return <Badge variant="outline">-</Badge>
     }
   }
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'paid':
+        return <CheckCircle className="h-4 w-4 text-green-600" />
+      case 'pending':
+        return <Clock className="h-4 w-4 text-yellow-600" />
+      case 'overdue':
+        return <AlertTriangle className="h-4 w-4 text-red-600" />
+      case 'partial':
+        return <Target className="h-4 w-4 text-blue-600" />
+      default:
+        return null
+    }
+  }
+
+  const formatCurrency = (value: number) => {
+    return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR')
+  }
+
+  const filteredReceivables = receivables.filter(receivable => {
+    const matchesSearch = receivable.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         receivable.description.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || receivable.status === statusFilter
+    const matchesCustomer = customerFilter === 'all' || receivable.customer === customerFilter
+    
+    return matchesSearch && matchesStatus && matchesCustomer
+  })
 
   const generatePixCode = () => {
     const randomCode = `00020126360014BR.GOV.BCB.PIX0114+5511999999999520400005303986540${Math.random().toString().slice(2,8)}.005802BR5925Nome do Recebedor6009SAO PAULO62070503***6304`
     setPixCode(randomCode)
+    toast({
+      title: "Código PIX gerado",
+      description: "O código PIX foi gerado com sucesso",
+    })
   }
 
-  const markAsPaid = (id: number) => {
-    setAnimatingItems(prev => new Set(prev).add(id))
-    
-    setTimeout(() => {
-      addNotification({
-        type: 'success',
-        title: '✅ Pagamento confirmado!',
-        message: 'A cobrança foi marcada como paga.',
-        duration: 4000
-      })
-      setAnimatingItems(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(id)
-        return newSet
-      })
-    }, 400)
-    
-    setSelectedItem(null)
+  const markAsPaid = (id: string) => {
+    toast({
+      title: "Pagamento confirmado",
+      description: "A cobrança foi marcada como paga com sucesso",
+    })
+    setSelectedReceivable(null)
   }
 
-  const handleRowClick = (item: any) => {
-    setSelectedItem(item)
+  const sendReminder = (id: string) => {
+    toast({
+      title: "Lembrete enviado",
+      description: "Lembrete de pagamento foi enviado ao cliente",
+    })
+  }
+
+  if (loading) {
+    return <div className="p-6">Carregando contas a receber...</div>
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
-      {/* Back Navigation */}
-      <div className="flex items-center gap-2 sm:gap-4">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate("/")}
-          className="p-1 sm:p-2 hover:bg-accent"
-          size="sm"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div className="min-w-0 flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">Bora cobrar? 💰</h1>
-          <p className="text-muted-foreground text-sm sm:text-base">Seus recebimentos e cobranças</p>
+    <div className="container mx-auto p-6">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Contas a Receber</h1>
+          <p className="text-muted-foreground">Gerencie seus recebimentos e cobranças</p>
+        </div>
+        
+        <div className="flex gap-2">
+          <Button variant="outline">
+            <Download className="h-4 w-4 mr-2" />
+            Exportar
+          </Button>
+          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Nova Cobrança
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Nova Conta a Receber</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="customer">Cliente</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um cliente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="alpha">Empresa Alpha Ltda</SelectItem>
+                      <SelectItem value="beta">Beta Corp S.A.</SelectItem>
+                      <SelectItem value="gamma">Gamma Tech</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="description">Descrição</Label>
+                  <Input id="description" placeholder="Descrição do serviço/produto" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="amount">Valor</Label>
+                    <Input id="amount" type="number" placeholder="0,00" />
+                  </div>
+                  <div>
+                    <Label htmlFor="dueDate">Vencimento</Label>
+                    <Input id="dueDate" type="date" />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="paymentMethod">Forma de Pagamento</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pix">PIX</SelectItem>
+                      <SelectItem value="transfer">Transferência</SelectItem>
+                      <SelectItem value="boleto">Boleto</SelectItem>
+                      <SelectItem value="card">Cartão</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="notes">Observações</Label>
+                  <Textarea id="notes" placeholder="Observações adicionais" />
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <Button variant="outline" onClick={() => setShowAddDialog(false)} className="flex-1">
+                    Cancelar
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      setShowAddDialog(false)
+                      setShowPixDialog(true)
+                    }} 
+                    className="flex-1"
+                  >
+                    Salvar & Gerar PIX
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
-      {/* Nova Cobrança Button */}
-      <div className="flex justify-center sm:justify-end">
-        <Button 
-          onClick={() => setShowPixFlow(true)} 
-          className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
-          size="sm"
-        >
-          <Zap className="h-4 w-4 mr-2" />
-          Nova Cobrança
-        </Button>
+      {/* Resumo KPIs */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total a Receber</p>
+                <p className="text-2xl font-bold">{formatCurrency(receivablesSummary.totalPending)}</p>
+              </div>
+              <Clock className="h-8 w-8 text-yellow-600" />
+            </div>
+            <div className="mt-2 flex items-center text-sm">
+              <span className="text-muted-foreground">
+                Vence esta semana: {formatCurrency(receivablesSummary.dueThisWeek)}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Em Atraso</p>
+                <p className="text-2xl font-bold text-red-600">{formatCurrency(receivablesSummary.totalOverdue)}</p>
+              </div>
+              <AlertTriangle className="h-8 w-8 text-red-600" />
+            </div>
+            <div className="mt-2 flex items-center text-sm">
+              <span className="text-red-600">Requer cobrança</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Recebido este Mês</p>
+                <p className="text-2xl font-bold text-green-600">{formatCurrency(receivablesSummary.totalPaid)}</p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-green-600" />
+            </div>
+            <div className="mt-2 flex items-center text-sm">
+              <span className="text-muted-foreground">
+                Prazo médio: {receivablesSummary.avgCollectionTime} dias
+              </span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Search and Filters */}
+      {/* Filtros e Pesquisa */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-lg">Filtros</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-4 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar cliente ou descrição"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="pending">Pendente</SelectItem>
+                <SelectItem value="overdue">Vencido</SelectItem>
+                <SelectItem value="paid">Pago</SelectItem>
+                <SelectItem value="partial">Parcial</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={customerFilter} onValueChange={setCustomerFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Cliente" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="Empresa Alpha Ltda">Empresa Alpha Ltda</SelectItem>
+                <SelectItem value="Beta Corp S.A.">Beta Corp S.A.</SelectItem>
+                <SelectItem value="Gamma Tech">Gamma Tech</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Button variant="outline" className="w-full">
+              <Filter className="h-4 w-4 mr-2" />
+              Limpar Filtros
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tabela de Contas */}
       <Card>
         <CardHeader>
-          <div className="p-3 sm:p-0">
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar por cliente ou descrição"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-40">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="pending">Pendente</SelectItem>
-                  <SelectItem value="paid">Pago</SelectItem>
-                  <SelectItem value="overdue">Atrasado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <CardTitle>Contas a Receber</CardTitle>
+          <CardDescription>
+            {filteredReceivables.length} conta(s) encontrada(s)
+          </CardDescription>
         </CardHeader>
-        <CardContent className="p-0 sm:p-6">
+        <CardContent>
           <ResponsiveTable>
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Status</TableHead>
                   <TableHead>Cliente</TableHead>
                   <TableHead>Descrição</TableHead>
                   <TableHead>Valor</TableHead>
                   <TableHead>Vencimento</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Fatura</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    Nenhuma cobrança encontrada
-                  </TableCell>
-                </TableRow>
+                {filteredReceivables.map((receivable) => (
+                  <TableRow key={receivable.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {getStatusIcon(receivable.status)}
+                        {getStatusBadge(receivable.status)}
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium">{receivable.customer}</TableCell>
+                    <TableCell>{receivable.description}</TableCell>
+                    <TableCell>{formatCurrency(receivable.amount)}</TableCell>
+                    <TableCell>{formatDate(receivable.dueDate)}</TableCell>
+                    <TableCell>
+                      {receivable.invoice && (
+                        <Badge variant="outline">{receivable.invoice}</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setSelectedReceivable(receivable)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        {receivable.status !== 'paid' && (
+                          <>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => markAsPaid(receivable.id)}
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => sendReminder(receivable.id)}
+                            >
+                              <Zap className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </ResponsiveTable>
         </CardContent>
       </Card>
 
-      {/* PIX Flow Dialog */}
-      <Dialog open={showPixFlow} onOpenChange={setShowPixFlow}>
-        <DialogContent className="mx-4 max-w-md sm:max-w-lg">
+      {/* Dialog PIX */}
+      <Dialog open={showPixDialog} onOpenChange={setShowPixDialog}>
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Nova Cobrança Pix</DialogTitle>
+            <DialogTitle>Cobrança PIX</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="client">Cliente</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um cliente" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="joao">João Silva</SelectItem>
-                  <SelectItem value="maria">Maria Santos</SelectItem>
-                  <SelectItem value="empresa">Empresa ABC</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label htmlFor="description">Descrição do Serviço</Label>
-              <Input placeholder="Ex: Desenvolvimento de sistema" />
-            </div>
-            
-            <div>
-              <Label htmlFor="value">Valor</Label>
-              <Input placeholder="R$ 0,00" />
-            </div>
-            
-            <div>
-              <Label htmlFor="dueDate">Vencimento</Label>
-              <Input type="date" />
-            </div>
-            
             {!pixCode ? (
-              <Button onClick={generatePixCode} className="w-full bg-primary hover:bg-primary/90">
+              <Button onClick={generatePixCode} className="w-full">
                 <Zap className="h-4 w-4 mr-2" />
-                Gerar Pix
+                Gerar Código PIX
               </Button>
             ) : (
               <div className="space-y-3">
@@ -202,7 +480,13 @@ export default function Receivables() {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => navigator.clipboard.writeText(pixCode)}
+                    onClick={() => {
+                      navigator.clipboard.writeText(pixCode)
+                      toast({
+                        title: "Código copiado",
+                        description: "Código PIX copiado para área de transferência",
+                      })
+                    }}
                   >
                     <Copy className="h-3 w-3 mr-1" />
                     Copiar código
@@ -214,49 +498,59 @@ export default function Receivables() {
         </DialogContent>
       </Dialog>
 
-      {/* Detail Dialog */}
-      <Dialog open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>
-        <DialogContent className="mx-4 max-w-md sm:max-w-lg">
+      {/* Dialog de Detalhes */}
+      <Dialog open={!!selectedReceivable} onOpenChange={() => setSelectedReceivable(null)}>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Detalhes da Cobrança</DialogTitle>
           </DialogHeader>
-          {selectedItem && (
+          {selectedReceivable && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Cliente</Label>
-                  <p className="font-medium">{selectedItem.client}</p>
+                  <p className="font-medium">{selectedReceivable.customer}</p>
                 </div>
                 <div>
                   <Label>Valor</Label>
-                  <p className="font-medium">{selectedItem.value}</p>
+                  <p className="font-medium">{formatCurrency(selectedReceivable.amount)}</p>
                 </div>
                 <div>
                   <Label>Vencimento</Label>
-                  <p>{new Date(selectedItem.dueDate).toLocaleDateString()}</p>
+                  <p>{formatDate(selectedReceivable.dueDate)}</p>
                 </div>
                 <div>
                   <Label>Status</Label>
-                  <div className="mt-1">{getStatusBadge(selectedItem.status)}</div>
+                  <div className="mt-1">{getStatusBadge(selectedReceivable.status)}</div>
                 </div>
               </div>
               <div>
                 <Label>Descrição</Label>
-                <p>{selectedItem.description}</p>
+                <p>{selectedReceivable.description}</p>
               </div>
+              {selectedReceivable.notes && (
+                <div>
+                  <Label>Observações</Label>
+                  <p className="text-sm text-muted-foreground">{selectedReceivable.notes}</p>
+                </div>
+              )}
               
-              {selectedItem.status !== "paid" && (
+              {selectedReceivable.status !== 'paid' && (
                 <div className="flex gap-2 pt-4">
                   <Button 
-                    onClick={() => markAsPaid(selectedItem.id)}
-                    className="bg-success hover:bg-success/90"
+                    onClick={() => markAsPaid(selectedReceivable.id)}
+                    className="flex-1"
                   >
-                    <Check className="h-4 w-4 mr-2" />
+                    <CheckCircle className="h-4 w-4 mr-2" />
                     Marcar como Pago
                   </Button>
-                  <Button variant="outline">
+                  <Button 
+                    variant="outline"
+                    onClick={() => sendReminder(selectedReceivable.id)}
+                    className="flex-1"
+                  >
                     <Zap className="h-4 w-4 mr-2" />
-                    Gerar novo Pix
+                    Enviar Lembrete
                   </Button>
                 </div>
               )}

@@ -13,6 +13,7 @@ import { AuthRedirect } from "./components/auth/AuthRedirect";
 import Dashboard from "./pages/Dashboard";
 import Receivables from "./pages/finance/Receivables";
 import Payables from "./pages/finance/Payables";
+import FinancialReports from "./pages/finance/FinancialReports";
 import Charges from "./pages/Charges";
 import NFSe from "./pages/NFSe";
 import Quotes from "./pages/Quotes";
@@ -77,6 +78,15 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <Payables />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/finance/reports" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <FinancialReports />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

@@ -62,38 +62,38 @@ serve(async (req) => {
       )
     }
 
-    // Create a brand-new organization and default company for this user
+    // Associate user with the existing default company (primegestor)
     try {
       if (user.user) {
-        const orgName = `Empresa ${email.split('@')[0]}`
-        const slug = generateUniqueSlug(email)
-
-        // 1) Create organization
-        const { data: org, error: orgError } = await supabaseAdmin
-          .from('organizations')
-          .insert({ name: orgName, slug })
-          .select('id, name')
+        // Find the default company
+        const { data: defaultCompany, error: companyError } = await supabaseAdmin
+          .from('companies')
+          .select('id, org_id')
+          .eq('is_default', true)
           .single()
 
-        if (orgError) throw orgError
+        if (defaultCompany) {
+          // Add user to default company's organization as member
+          const { error: linkError } = await supabaseAdmin
+            .from('user_organizations')
+            .insert({
+              user_id: user.user.id,
+              org_id: defaultCompany.org_id,
+              role: 'member'
+            })
 
-        // 2) Link user as owner of the organization
-        const { error: linkError } = await supabaseAdmin
-          .from('user_organizations')
-          .insert({ user_id: user.user.id, org_id: org.id, role: 'owner' })
-
-        if (linkError) throw linkError
-
-        // 3) Create default company for this organization
-        const { error: companyInsertError } = await supabaseAdmin
-          .from('companies')
-          .insert({ name: org.name, org_id: org.id, is_default: true })
-
-        if (companyInsertError) throw companyInsertError
+          if (linkError) {
+            console.error('Erro ao associar usuário à organização padrão:', linkError)
+          } else {
+            console.log('Usuário associado com sucesso à empresa padrão')
+          }
+        } else {
+          console.error('Empresa padrão não encontrada')
+        }
       }
     } catch (orgAssocError) {
-      console.error('Erro ao criar organização/empresa padrão para o usuário:', orgAssocError)
-      // Seguimos mesmo se esta etapa falhar, para não bloquear o cadastro
+      console.error('Erro ao associar usuário à empresa padrão:', orgAssocError)
+      // Continue with user creation even if company association fails
     }
 
     return new Response(

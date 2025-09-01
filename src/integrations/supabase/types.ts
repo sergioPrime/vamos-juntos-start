@@ -1358,6 +1358,9 @@ export type Database = {
           id: string
           org_id: string
           role: string
+          subscription_plan_id: string | null
+          subscription_started_at: string | null
+          subscription_status: string | null
           user_id: string
         }
         Insert: {
@@ -1365,6 +1368,9 @@ export type Database = {
           id?: string
           org_id: string
           role?: string
+          subscription_plan_id?: string | null
+          subscription_started_at?: string | null
+          subscription_status?: string | null
           user_id: string
         }
         Update: {
@@ -1372,6 +1378,9 @@ export type Database = {
           id?: string
           org_id?: string
           role?: string
+          subscription_plan_id?: string | null
+          subscription_started_at?: string | null
+          subscription_status?: string | null
           user_id?: string
         }
         Relationships: [
@@ -1380,6 +1389,13 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_organizations_subscription_plan_id_fkey"
+            columns: ["subscription_plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
             referencedColumns: ["id"]
           },
         ]

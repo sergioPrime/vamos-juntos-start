@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Check, Edit } from "lucide-react"
+import { Check, Edit, CreditCard, Settings } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
@@ -26,6 +26,8 @@ export function SubscriptionPlans() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([])
   const [loading, setLoading] = useState(true)
   const [currentPlanId, setCurrentPlanId] = useState<string | null>(null)
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string>('inactive')
+  const [processing, setProcessing] = useState<string | null>(null)
   const { user } = useAuth()
   const { currentOrg: organization } = useOrganization()
   const { isSuperAdmin } = useSuperAdmin()
@@ -33,7 +35,23 @@ export function SubscriptionPlans() {
   useEffect(() => {
     fetchPlans()
     fetchCurrentPlan()
+    checkSubscriptionStatus()
   }, [organization])
+
+  useEffect(() => {
+    // Check for success/canceled URL params
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('success') === 'true') {
+      toast.success('Assinatura ativada com sucesso!')
+      checkSubscriptionStatus()
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname)
+    } else if (urlParams.get('canceled') === 'true') {
+      toast.error('Assinatura cancelada')
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
+  }, [])
 
   const fetchPlans = async () => {
     try {
@@ -59,42 +77,80 @@ export function SubscriptionPlans() {
     try {
       const { data, error } = await supabase
         .from('user_organizations')
-        .select('*')
+        .select('subscription_plan_id, subscription_status')
         .eq('org_id', organization.id)
         .eq('user_id', user?.id)
         .single()
 
       if (error && error.code !== 'PGRST116') throw error
       setCurrentPlanId((data as any)?.subscription_plan_id || null)
+      setSubscriptionStatus((data as any)?.subscription_status || 'inactive')
     } catch (error) {
       console.error('Erro ao carregar plano atual:', error)
     }
   }
 
+  const checkSubscriptionStatus = async () => {
+    if (!user) return
+
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription')
+      
+      if (error) throw error
+      
+      if (data) {
+        setCurrentPlanId(data.subscription_plan_id)
+        setSubscriptionStatus(data.subscription_status || 'inactive')
+      }
+    } catch (error) {
+      console.error('Erro ao verificar status da assinatura:', error)
+    }
+  }
+
   const selectPlan = async (planId: string) => {
-    if (!organization || !user) {
+    if (!user) {
+      toast.error('Erro: usuário não autenticado')
+      return
+    }
+
+    setProcessing(planId)
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { planId }
+      })
+      
+      if (error) throw error
+      
+      if (data?.url) {
+        // Open Stripe checkout in new tab
+        window.open(data.url, '_blank')
+      }
+    } catch (error) {
+      console.error('Erro ao criar checkout:', error)
+      toast.error('Erro ao processar pagamento')
+    } finally {
+      setProcessing(null)
+    }
+  }
+
+  const manageSubscription = async () => {
+    if (!user) {
       toast.error('Erro: usuário não autenticado')
       return
     }
 
     try {
-      const { error } = await supabase
-        .from('user_organizations')
-        .update({
-          subscription_plan_id: planId,
-          subscription_started_at: new Date().toISOString(),
-          subscription_status: 'active'
-        } as any)
-        .eq('org_id', organization.id)
-        .eq('user_id', user.id)
-
+      const { data, error } = await supabase.functions.invoke('customer-portal')
+      
       if (error) throw error
-
-      setCurrentPlanId(planId)
-      toast.success('Plano selecionado com sucesso!')
+      
+      if (data?.url) {
+        // Open Stripe customer portal in new tab
+        window.open(data.url, '_blank')
+      }
     } catch (error) {
-      console.error('Erro ao selecionar plano:', error)
-      toast.error('Erro ao selecionar plano')
+      console.error('Erro ao abrir portal do cliente:', error)
+      toast.error('Erro ao abrir gerenciamento de assinatura')
     }
   }
 
@@ -131,22 +187,39 @@ export function SubscriptionPlans() {
         </p>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {plans.map((plan) => {
-            const isCurrentPlan = plan.id === currentPlanId
-            const isRecommended = plan.name === 'Profissional'
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Status da Assinatura:</p>
+              <Badge variant={subscriptionStatus === 'active' ? 'default' : 'secondary'}>
+                {subscriptionStatus === 'active' ? 'Ativa' : 'Inativa'}
+              </Badge>
+            </div>
+            {subscriptionStatus === 'active' && (
+              <Button onClick={manageSubscription} variant="outline" size="sm">
+                <Settings className="h-4 w-4 mr-2" />
+                Gerenciar Assinatura
+              </Button>
+            )}
+          </div>
 
-            return (
-              <div
-                key={plan.id}
-                className={`relative rounded-lg border-2 p-6 ${
-                  isCurrentPlan
-                    ? 'border-primary bg-primary/5'
-                    : isRecommended
-                    ? 'border-primary/50'
-                    : 'border-border'
-                } transition-all hover:border-primary/50`}
-              >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {plans.map((plan) => {
+              const isCurrentPlan = plan.id === currentPlanId && subscriptionStatus === 'active'
+              const isRecommended = plan.name === 'Profissional'
+              const isProcessing = processing === plan.id
+
+              return (
+                <div
+                  key={plan.id}
+                  className={`relative rounded-lg border-2 p-6 ${
+                    isCurrentPlan
+                      ? 'border-primary bg-primary/5'
+                      : isRecommended
+                      ? 'border-primary/50'
+                      : 'border-border'
+                  } transition-all hover:border-primary/50`}
+                >
                 {isRecommended && (
                   <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary">
                     Recomendado
@@ -210,15 +283,28 @@ export function SubscriptionPlans() {
 
                 <Button
                   onClick={() => selectPlan(plan.id)}
-                  disabled={isCurrentPlan}
+                  disabled={isCurrentPlan || isProcessing}
                   className="w-full mt-6"
                   variant={isCurrentPlan ? "secondary" : "default"}
                 >
-                  {isCurrentPlan ? 'Plano Atual' : 'Selecionar Plano'}
+                  {isProcessing ? (
+                    <>
+                      <CreditCard className="h-4 w-4 mr-2 animate-pulse" />
+                      Processando...
+                    </>
+                  ) : isCurrentPlan ? (
+                    'Plano Atual'
+                  ) : (
+                    <>
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      Assinar Plano
+                    </>
+                  )}
                 </Button>
-              </div>
-            )
-          })}
+                </div>
+              )
+            })}
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -98,7 +98,7 @@ export function CompaniesTab() {
     try {
       setLoading(true)
       
-      // Carregar empresas existentes
+      // Carregar apenas empresas da tabela companies
       const { data: companiesData, error: companiesError } = await supabase
         .from("companies")
         .select("*")
@@ -107,42 +107,7 @@ export function CompaniesTab() {
 
       if (companiesError) throw companiesError
 
-      // Carregar organizações e converter para empresas
-      const { data: orgsData, error: orgsError } = await supabase
-        .from('organizations')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (orgsError) throw orgsError
-
-      // Combinar dados das organizações com empresas
-      const mergedCompanies = [...(companiesData || [])]
-      
-      // Adicionar organizações como empresas (se não existem empresas correspondentes)
-      for (const org of orgsData || []) {
-        const existingCompany = mergedCompanies.find(c => c.name === org.name)
-        if (!existingCompany) {
-          mergedCompanies.push({
-            id: org.id,
-            name: org.name,
-            country: 'BR',
-            is_active: true,
-            is_default: false,
-            created_at: org.created_at,
-            org_id: organization?.currentOrg?.id || '',
-            updated_at: org.updated_at,
-            email: '',
-            document: '',
-            phone: '',
-            address: '',
-            city: '',
-            state: '',
-            zip_code: ''
-          })
-        }
-      }
-
-      setCompanies(mergedCompanies)
+      setCompanies(companiesData || [])
     } catch (error) {
       console.error("Error loading companies:", error)
       toast({

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
 import { Check, Edit, CreditCard, Settings } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
@@ -28,6 +30,7 @@ export function SubscriptionPlans() {
   const [currentPlanId, setCurrentPlanId] = useState<string | null>(null)
   const [subscriptionStatus, setSubscriptionStatus] = useState<string>('inactive')
   const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null)
+  const [isAnnual, setIsAnnual] = useState(false)
   const [processing, setProcessing] = useState<string | null>(null)
   const { user } = useAuth()
   const { currentOrg: organization } = useOrganization()
@@ -148,7 +151,10 @@ export function SubscriptionPlans() {
     setProcessing(planId)
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { planId }
+        body: { 
+          planId,
+          billingCycle: isAnnual ? 'annual' : 'monthly'
+        }
       })
       
       if (error) throw error
@@ -187,10 +193,18 @@ export function SubscriptionPlans() {
   }
 
   const formatPrice = (price: number) => {
+    const finalPrice = isAnnual ? price * 12 * 0.8 : price // 20% desconto anual
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
-    }).format(price)
+    }).format(finalPrice)
+  }
+
+  const getOriginalAnnualPrice = (price: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(price * 12)
   }
 
   const formatLimit = (limit: number) => {
@@ -217,6 +231,24 @@ export function SubscriptionPlans() {
         <p className="text-muted-foreground">
           Escolha o plano que melhor atende às suas necessidades
         </p>
+        
+        {/* Toggle between Monthly and Annual */}
+        <div className="flex items-center justify-center space-x-4 py-4">
+          <Label htmlFor="billing-toggle" className={!isAnnual ? 'font-semibold' : ''}>
+            Mensal
+          </Label>
+          <Switch
+            id="billing-toggle"
+            checked={isAnnual}
+            onCheckedChange={setIsAnnual}
+          />
+          <Label htmlFor="billing-toggle" className={isAnnual ? 'font-semibold' : ''}>
+            Anual
+            <Badge variant="secondary" className="ml-2">
+              20% desconto
+            </Badge>
+          </Label>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -289,10 +321,30 @@ export function SubscriptionPlans() {
                   </p>
                   
                   <div className="mt-4">
+                    {isAnnual && (
+                      <div className="mb-2">
+                        <span className="text-lg text-muted-foreground line-through">
+                          {getOriginalAnnualPrice(plan.price)}
+                        </span>
+                        <Badge variant="destructive" className="ml-2 text-xs">
+                          -20%
+                        </Badge>
+                      </div>
+                    )}
                     <span className="text-3xl font-bold">
                       {formatPrice(plan.price)}
                     </span>
-                    <span className="text-muted-foreground">/mês</span>
+                    <span className="text-muted-foreground">
+                      /{isAnnual ? 'ano' : 'mês'}
+                    </span>
+                    {isAnnual && (
+                      <div className="text-sm text-muted-foreground mt-1">
+                        {new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL'
+                        }).format(plan.price * 0.8)} por mês
+                      </div>
+                    )}
                   </div>
                 </div>
 

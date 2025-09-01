@@ -42,9 +42,9 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { planId } = await req.json();
+    const { planId, billingCycle = 'monthly' } = await req.json();
     if (!planId) throw new Error("planId is required");
-    logStep("Plan ID received", { planId });
+    logStep("Plan ID and billing cycle received", { planId, billingCycle });
 
     // Create Supabase client with service role key for database access
     const supabaseService = createClient(
@@ -73,6 +73,12 @@ serve(async (req) => {
     
     logStep("Plan found", { planName: plan.name, price: plan.price });
 
+    // Calculate price based on billing cycle
+    const finalPrice = billingCycle === 'annual' ? Math.round(plan.price * 12 * 0.8) : plan.price;
+    const interval = billingCycle === 'annual' ? 'year' : 'month';
+    
+    logStep("Price calculated", { originalPrice: plan.price, finalPrice, interval, billingCycle });
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     
     // Check if customer already exists
@@ -95,10 +101,10 @@ serve(async (req) => {
             currency: "brl",
             product_data: { 
               name: plan.name,
-              description: plan.description 
+              description: `${plan.description}${billingCycle === 'annual' ? ' - Plano Anual (20% desconto)' : ' - Plano Mensal'}`
             },
-            unit_amount: Math.round(plan.price * 100), // Convert to centavos
-            recurring: { interval: "month" },
+            unit_amount: Math.round(finalPrice * 100), // Convert to centavos
+            recurring: { interval: interval as 'month' | 'year' },
           },
           quantity: 1,
         },

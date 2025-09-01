@@ -62,6 +62,29 @@ serve(async (req) => {
       )
     }
 
+    // Associate user with default company
+    try {
+      const { data: defaultCompany, error: companyError } = await supabaseAdmin
+        .from('companies')
+        .select('id, org_id')
+        .eq('is_default', true)
+        .single()
+
+      if (defaultCompany && user.user) {
+        // Add user to default company's organization
+        await supabaseAdmin
+          .from('user_organizations')
+          .insert({
+            user_id: user.user.id,
+            org_id: defaultCompany.org_id,
+            role: 'member'
+          })
+      }
+    } catch (orgError) {
+      console.log('Warning: Could not associate user with default company:', orgError)
+      // Continue with user creation even if company association fails
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 

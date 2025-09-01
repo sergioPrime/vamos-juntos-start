@@ -315,6 +315,7 @@ export type Database = {
           email: string | null
           id: string
           is_active: boolean
+          is_default: boolean
           name: string
           org_id: string
           phone: string | null
@@ -331,6 +332,7 @@ export type Database = {
           email?: string | null
           id?: string
           is_active?: boolean
+          is_default?: boolean
           name: string
           org_id: string
           phone?: string | null
@@ -347,6 +349,7 @@ export type Database = {
           email?: string | null
           id?: string
           is_active?: boolean
+          is_default?: boolean
           name?: string
           org_id?: string
           phone?: string | null

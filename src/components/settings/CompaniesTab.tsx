@@ -28,11 +28,10 @@ interface Company {
   zip_code?: string
   country: string
   is_active: boolean
+  is_default?: boolean
   created_at: string
   org_id?: string
   updated_at?: string
-  // Dados importados das organizações
-  slug?: string
   members?: Member[]
 }
 
@@ -47,7 +46,7 @@ interface CompanyFormData {
   zip_code: string
   country: string
   is_active: boolean
-  slug?: string
+  is_default: boolean
 }
 
 interface Member {
@@ -77,7 +76,8 @@ export function CompaniesTab() {
     state: "",
     zip_code: "",
     country: "BR",
-    is_active: true
+    is_active: true,
+    is_default: false
   })
 
   // Members management
@@ -127,8 +127,9 @@ export function CompaniesTab() {
             name: org.name,
             country: 'BR',
             is_active: true,
+            is_default: false,
             created_at: org.created_at,
-            org_id: organization?.currentOrg?.id,
+            org_id: organization?.currentOrg?.id || '',
             updated_at: org.updated_at,
             email: '',
             document: '',
@@ -136,12 +137,8 @@ export function CompaniesTab() {
             address: '',
             city: '',
             state: '',
-            zip_code: '',
-            slug: org.slug
-          } as Company)
-        } else {
-          // Adicionar slug da organização à empresa existente
-          existingCompany.slug = org.slug
+            zip_code: ''
+          })
         }
       }
 
@@ -158,21 +155,31 @@ export function CompaniesTab() {
     }
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+
     try {
-      if (!formData.name) {
+      if (!organization?.currentOrg?.id) {
         toast({
-          title: "Erro",
-          description: "Nome da empresa é obrigatório",
           variant: "destructive",
+          title: "Erro",
+          description: "Organização não encontrada"
         })
         return
       }
 
-      const { slug, ...companyDataWithoutSlug } = formData
       const companyData = {
-        ...companyDataWithoutSlug,
-        org_id: organization?.currentOrg?.id
+        ...formData,
+        org_id: organization.currentOrg.id
+      }
+
+      // If setting as default, remove default from other companies first
+      if (formData.is_default) {
+        await supabase
+          .from("companies")
+          .update({ is_default: false })
+          .eq("org_id", organization.currentOrg.id)
       }
 
       if (editingCompany) {
@@ -185,18 +192,18 @@ export function CompaniesTab() {
 
         toast({
           title: "Sucesso",
-          description: "Empresa atualizada com sucesso",
+          description: "Empresa atualizada com sucesso!"
         })
       } else {
         const { error } = await supabase
           .from("companies")
-          .insert(companyData)
+          .insert([companyData])
 
         if (error) throw error
 
         toast({
           title: "Sucesso",
-          description: "Empresa criada com sucesso",
+          description: "Empresa criada com sucesso!"
         })
       }
 
@@ -206,10 +213,12 @@ export function CompaniesTab() {
     } catch (error) {
       console.error("Error saving company:", error)
       toast({
-        title: "Erro",
-        description: "Erro ao salvar empresa",
         variant: "destructive",
+        title: "Erro",
+        description: "Erro ao salvar empresa"
       })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -272,13 +281,13 @@ export function CompaniesTab() {
       state: "",
       zip_code: "",
       country: "BR",
-      is_active: true
+      is_active: true,
+      is_default: false
     })
     setEditingCompany(null)
   }
 
   const openEditDialog = (company: Company) => {
-    setEditingCompany(company)
     setFormData({
       name: company.name,
       document: company.document || "",
@@ -290,8 +299,9 @@ export function CompaniesTab() {
       zip_code: company.zip_code || "",
       country: company.country,
       is_active: company.is_active,
-      slug: company.slug
+      is_default: company.is_default || false
     })
+    setEditingCompany(company)
     setDialogOpen(true)
   }
 
@@ -563,6 +573,15 @@ export function CompaniesTab() {
                 />
                 <Label htmlFor="is_active">Empresa ativa</Label>
               </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="is_default"
+                  checked={formData.is_default}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_default: checked }))}
+                />
+                <Label htmlFor="is_default">Empresa padrão</Label>
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
@@ -591,9 +610,9 @@ export function CompaniesTab() {
                 <div className="flex items-center space-x-2">
                   <Building2 className="h-5 w-5" />
                   <CardTitle className="text-lg">{company.name}</CardTitle>
-                  {company.slug && (
-                    <Badge variant="secondary" className="text-xs">
-                      {company.slug}
+                  {company.is_default && (
+                    <Badge variant="default" className="text-xs">
+                      Padrão
                     </Badge>
                   )}
                 </div>

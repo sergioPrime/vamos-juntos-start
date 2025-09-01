@@ -110,6 +110,12 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
+      payment_method_types: ["card", "boleto"],
+      payment_method_options: {
+        boleto: {
+          expires_after_days: 7,
+        },
+      },
       success_url: `${req.headers.get("origin")}/settings?tab=planos&success=true`,
       cancel_url: `${req.headers.get("origin")}/settings?tab=planos&canceled=true`,
       metadata: {

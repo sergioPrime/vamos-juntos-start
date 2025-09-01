@@ -74,9 +74,28 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
 
       setUserOrgs(mappedOrgs)
       
-      // Definir a organização atual (primeira organização do usuário)
+      // Priorizar a organização da empresa padrão ativa
       if (mappedOrgs.length > 0) {
-        setCurrentOrg(mappedOrgs[0].organization)
+        // Primeiro, tentar encontrar a organização que tem a empresa padrão ativa
+        const { data: defaultCompany } = await supabase
+          .from('companies')
+          .select('org_id')
+          .eq('is_default', true)
+          .eq('is_active', true)
+          .single()
+
+        if (defaultCompany) {
+          const defaultOrg = mappedOrgs.find(org => org.org_id === defaultCompany.org_id)
+          if (defaultOrg) {
+            setCurrentOrg(defaultOrg.organization)
+          } else {
+            // Se não encontrou, usar a primeira organização
+            setCurrentOrg(mappedOrgs[0].organization)
+          }
+        } else {
+          // Se não há empresa padrão, usar a primeira organização
+          setCurrentOrg(mappedOrgs[0].organization)
+        }
       } else {
         setCurrentOrg(null)
       }

@@ -12,93 +12,32 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useOrganization } from "@/hooks/useOrganization"
 import { formatCurrency, useCountUp } from "@/hooks/useCountUp"
-
-interface CashFlowData {
-  date: string
-  inflow: number
-  outflow: number
-  balance: number
-}
-
-interface CategoryData {
-  category: string
-  amount: number
-  color: string
-}
-
-interface ComparisonData {
-  period: string
-  revenue: number
-  expenses: number
-  profit: number
-}
+import { useFinancialData } from "@/hooks/useFinancialData"
 
 export default function FinancialDashboard() {
   const navigate = useNavigate()
   const { toast } = useToast()
   const organization = useOrganization()
-  const [loading, setLoading] = useState(true)
   const [selectedPeriod, setSelectedPeriod] = useState("30")
   const [selectedCompany, setSelectedCompany] = useState("all")
-  
-  // Mock data for demonstration
-  const [dashboardData, setDashboardData] = useState({
-    totalBalance: 125500,
-    monthlyRevenue: 45200,
-    monthlyExpenses: 28300,
-    cashFlowProjection: 97200
-  })
-
-  const balanceCount = useCountUp(dashboardData.totalBalance)
-  const revenueCount = useCountUp(dashboardData.monthlyRevenue)
-  const expensesCount = useCountUp(dashboardData.monthlyExpenses)
-  const projectionCount = useCountUp(dashboardData.cashFlowProjection)
-
-  const [cashFlowData] = useState<CashFlowData[]>([
-    { date: "01/01", inflow: 15000, outflow: 8000, balance: 125000 },
-    { date: "02/01", inflow: 18000, outflow: 12000, balance: 131000 },
-    { date: "03/01", inflow: 22000, outflow: 9000, balance: 144000 },
-    { date: "04/01", inflow: 19000, outflow: 11000, balance: 152000 },
-    { date: "05/01", inflow: 25000, outflow: 15000, balance: 162000 },
-    { date: "06/01", inflow: 20000, outflow: 13000, balance: 169000 }
-  ])
-
-  const [revenueByCategory] = useState<CategoryData[]>([
-    { category: "Produtos", amount: 28500, color: "hsl(var(--primary))" },
-    { category: "Serviços", amount: 16700, color: "hsl(var(--secondary))" },
-    { category: "Consultoria", amount: 8200, color: "hsl(var(--accent))" },
-    { category: "Outros", amount: 5800, color: "hsl(var(--muted))" }
-  ])
-
-  const [expensesByCategory] = useState<CategoryData[]>([
-    { category: "Folha de Pagamento", amount: 15200, color: "hsl(var(--destructive))" },
-    { category: "Fornecedores", amount: 8300, color: "hsl(var(--warning))" },
-    { category: "Operacional", amount: 4800, color: "hsl(var(--info))" },
-    { category: "Impostos", amount: 6200, color: "hsl(var(--muted))" }
-  ])
-
-  const [historicalComparison] = useState<ComparisonData[]>([
-    { period: "Jan 2024", revenue: 38500, expenses: 22300, profit: 16200 },
-    { period: "Fev 2024", revenue: 41200, expenses: 24800, profit: 16400 },
-    { period: "Mar 2024", revenue: 45200, expenses: 28300, profit: 16900 },
-    { period: "Abr 2024", revenue: 43800, expenses: 26100, profit: 17700 },
-    { period: "Mai 2024", revenue: 48300, expenses: 29500, profit: 18800 },
-    { period: "Jun 2024", revenue: 52100, expenses: 31200, profit: 20900 }
-  ])
-
   const [companies, setCompanies] = useState([])
   const [bankAccounts, setBankAccounts] = useState([])
+  
+  const { metrics, cashFlowData, revenueByCategory, expensesByCategory, loading } = useFinancialData()
+
+  const balanceCount = useCountUp(metrics.totalBalance)
+  const revenueCount = useCountUp(metrics.monthlyRevenue)
+  const expensesCount = useCountUp(metrics.monthlyExpenses)
+  const projectionCount = useCountUp(metrics.pendingReceivables)
 
   useEffect(() => {
     if (organization?.currentOrg?.id) {
-      loadDashboardData()
+      loadAdditionalData()
     }
   }, [organization, selectedPeriod, selectedCompany])
 
-  const loadDashboardData = async () => {
+  const loadAdditionalData = async () => {
     try {
-      setLoading(true)
-      
       // Load companies
       const { data: companiesData } = await supabase
         .from("companies")
@@ -117,21 +56,13 @@ export default function FinancialDashboard() {
 
       setBankAccounts(accountsData || [])
 
-      // Calculate totals from bank accounts
-      if (accountsData?.length) {
-        const totalBalance = accountsData.reduce((sum, account) => sum + Number(account.balance), 0)
-        setDashboardData(prev => ({ ...prev, totalBalance }))
-      }
-
     } catch (error) {
-      console.error("Error loading dashboard data:", error)
+      console.error("Error loading additional data:", error)
       toast({
         title: "Erro",
-        description: "Erro ao carregar dados do dashboard",
+        description: "Erro ao carregar dados adicionais",
         variant: "destructive",
       })
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -277,7 +208,7 @@ export default function FinancialDashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(balanceCount)}</div>
             <p className="text-xs text-muted-foreground">
-              +12.5% em relação ao mês anterior
+              Saldo total nas contas
             </p>
           </CardContent>
         </Card>
@@ -290,33 +221,20 @@ export default function FinancialDashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(revenueCount)}</div>
             <p className="text-xs text-muted-foreground">
-              +8.2% em relação ao mês anterior
+              Faturamento deste mês
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Despesas Mensais</CardTitle>
+            <CardTitle className="text-sm font-medium">A Receber</CardTitle>
             <TrendingDown className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(expensesCount)}</div>
-            <p className="text-xs text-muted-foreground">
-              +3.1% em relação ao mês anterior
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Projeção 90 dias</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(projectionCount)}</div>
             <p className="text-xs text-muted-foreground">
-              Baseado em histórico e tendências
+              Valores pendentes de recebimento
             </p>
           </CardContent>
         </Card>
@@ -443,24 +361,15 @@ export default function FinancialDashboard() {
         <TabsContent value="comparison" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Comparativo Histórico</CardTitle>
-              <CardDescription>Evolução mensal de receitas, despesas e lucro</CardDescription>
+              <CardTitle>Dados Históricos</CardTitle>
+              <CardDescription>Informações baseadas em dados reais do sistema</CardDescription>
             </CardHeader>
             <CardContent>
-              <ChartContainer config={chartConfig} className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={historicalComparison}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="period" />
-                    <YAxis />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Legend />
-                    <Bar dataKey="revenue" fill="hsl(var(--primary))" name="Receita" />
-                    <Bar dataKey="expenses" fill="hsl(var(--destructive))" name="Despesas" />
-                    <Bar dataKey="profit" fill="hsl(var(--secondary))" name="Lucro" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">
+                  Os dados históricos serão exibidos conforme mais transações forem registradas no sistema.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -468,47 +377,38 @@ export default function FinancialDashboard() {
         <TabsContent value="projection" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Projeções Inteligentes</CardTitle>
-              <CardDescription>Previsão baseada em histórico e tendências</CardDescription>
+              <CardTitle>Informações Financeiras</CardTitle>
+              <CardDescription>Dados reais baseados nas informações do sistema</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="text-center p-4 border rounded-lg">
                   <div className="text-2xl font-bold text-primary">
-                    {formatCurrency(97200)}
+                    {formatCurrency(metrics.totalBalance)}
                   </div>
-                  <div className="text-sm text-muted-foreground">Saldo em 30 dias</div>
-                  <Badge variant="secondary" className="mt-2">
-                    Confiança: 85%
-                  </Badge>
+                  <div className="text-sm text-muted-foreground">Saldo Total</div>
                 </div>
                 <div className="text-center p-4 border rounded-lg">
                   <div className="text-2xl font-bold text-primary">
-                    {formatCurrency(142800)}
+                    {formatCurrency(metrics.monthlyRevenue)}
                   </div>
-                  <div className="text-sm text-muted-foreground">Saldo em 60 dias</div>
-                  <Badge variant="secondary" className="mt-2">
-                    Confiança: 78%
-                  </Badge>
+                  <div className="text-sm text-muted-foreground">Receita Mensal</div>
                 </div>
                 <div className="text-center p-4 border rounded-lg">
                   <div className="text-2xl font-bold text-primary">
-                    {formatCurrency(188500)}
+                    {formatCurrency(metrics.pendingReceivables)}
                   </div>
-                  <div className="text-sm text-muted-foreground">Saldo em 90 dias</div>
-                  <Badge variant="secondary" className="mt-2">
-                    Confiança: 72%
-                  </Badge>
+                  <div className="text-sm text-muted-foreground">A Receber</div>
                 </div>
               </div>
               
               <div className="mt-6 p-4 bg-muted/30 rounded-lg">
-                <h4 className="font-semibold mb-2">Insights da IA</h4>
+                <h4 className="font-semibold mb-2">Resumo Financeiro</h4>
                 <ul className="space-y-1 text-sm text-muted-foreground">
-                  <li>• Tendência de crescimento de 8% no faturamento mensal</li>
-                  <li>• Despesas operacionais estáveis, representando 62% da receita</li>
-                  <li>• Recomendação: Reserva de emergência para 3 meses identificada</li>
-                  <li>• Oportunidade de investimento em marketing para acelerar crescimento</li>
+                  <li>• Total de clientes: {metrics.totalCustomers}</li>
+                  <li>• Total de faturas: {metrics.totalInvoices}</li>
+                  <li>• Total de produtos: {metrics.totalProducts}</li>
+                  <li>• Valores em atraso: {formatCurrency(metrics.overdueAmount)}</li>
                 </ul>
               </div>
             </CardContent>

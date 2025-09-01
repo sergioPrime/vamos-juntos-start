@@ -32,7 +32,7 @@ export default function Settings() {
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="permissions">Permissões</TabsTrigger>
-          <TabsTrigger value="companies">Multi-empresas</TabsTrigger>
+          <TabsTrigger value="companies">Empresas</TabsTrigger>
           <TabsTrigger value="integrations">Integrações</TabsTrigger>
           <TabsTrigger value="subscription">Planos</TabsTrigger>
         </TabsList>

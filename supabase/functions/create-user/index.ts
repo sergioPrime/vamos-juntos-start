@@ -62,17 +62,40 @@ serve(async (req) => {
       )
     }
 
-    // Associate user with the existing default company (primegestor)
+    // Associate user with the active default company
     try {
       if (user.user) {
-        // Find the default company
+        console.log('Buscando empresa padrão ativa para o usuário:', user.user.email)
+        
+        // Find the active default company
         const { data: defaultCompany, error: companyError } = await supabaseAdmin
           .from('companies')
-          .select('id, org_id')
+          .select('id, org_id, name')
           .eq('is_default', true)
+          .eq('is_active', true)
           .single()
 
-        if (defaultCompany) {
+        if (companyError) {
+          console.error('Erro ao buscar empresa padrão:', companyError)
+          throw companyError
+        }
+
+        if (!defaultCompany) {
+          console.error('Nenhuma empresa padrão ativa encontrada')
+          throw new Error('Empresa padrão não encontrada')
+        }
+
+        console.log('Empresa padrão encontrada:', defaultCompany.name, 'org_id:', defaultCompany.org_id)
+
+        // Check if user is already associated with this organization
+        const { data: existingAssociation } = await supabaseAdmin
+          .from('user_organizations')
+          .select('id')
+          .eq('user_id', user.user.id)
+          .eq('org_id', defaultCompany.org_id)
+          .single()
+
+        if (!existingAssociation) {
           // Add user to default company's organization as member
           const { error: linkError } = await supabaseAdmin
             .from('user_organizations')
@@ -84,15 +107,16 @@ serve(async (req) => {
 
           if (linkError) {
             console.error('Erro ao associar usuário à organização padrão:', linkError)
+            throw linkError
           } else {
-            console.log('Usuário associado com sucesso à empresa padrão')
+            console.log('Usuário associado com sucesso à empresa padrão:', defaultCompany.name)
           }
         } else {
-          console.error('Empresa padrão não encontrada')
+          console.log('Usuário já estava associado à empresa padrão')
         }
       }
     } catch (orgAssocError) {
-      console.error('Erro ao associar usuário à empresa padrão:', orgAssocError)
+      console.error('Erro crítico ao associar usuário à empresa padrão:', orgAssocError)
       // Continue with user creation even if company association fails
     }
 

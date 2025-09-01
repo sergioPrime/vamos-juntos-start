@@ -7,6 +7,13 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Function to generate unique slug
+const generateUniqueSlug = (email: string): string => {
+  const baseSlug = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-')
+  const timestamp = Date.now().toString()
+  return `${baseSlug}-${timestamp}`
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -37,6 +44,11 @@ serve(async (req) => {
       email,
       password,
       email_confirm: true, // This bypasses email confirmation
+      user_metadata: {
+        company_name: `Empresa ${email.split('@')[0]}`,
+        first_name: email.split('@')[0],
+        last_name: ''
+      }
     })
 
     if (error) {

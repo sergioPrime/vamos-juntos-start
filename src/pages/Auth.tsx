@@ -105,9 +105,10 @@ export default function Auth() {
       if (signInData.user && signInData.session) {
         toast({
           title: "Cadastro realizado",
-          description: "Bem-vindo ao sistema!",
+          description: "Bem-vindo ao sistema! Escolha seu plano de assinatura.",
         })
-        navigate("/dashboard")
+        // Novos usuários vão para a tela de escolha de planos
+        navigate("/planos-novos-usuarios")
       }
     } catch (error) {
       toast({

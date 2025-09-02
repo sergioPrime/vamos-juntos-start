@@ -33,6 +33,7 @@ import Signup from "./pages/onboarding/Signup";
 import BusinessType from "./pages/onboarding/BusinessType";
 import Tutorial from "./pages/onboarding/Tutorial";
 import Auth from "./pages/Auth";
+import NewUserPlans from "./pages/NewUserPlans";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,13 @@ const App = () => (
         <Routes>
           <Route path="/" element={<AuthRedirect />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/planos-novos-usuarios" element={
+            <ProtectedRoute>
+              <PageTransition direction="right">
+                <NewUserPlans />
+              </PageTransition>
+            </ProtectedRoute>
+          } />
           
           {/* Onboarding routes */}
           <Route path="/onboarding" element={<Welcome />} />

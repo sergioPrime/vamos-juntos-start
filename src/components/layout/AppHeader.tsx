@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Plus, FileText, Calculator, User, MoreHorizontal, LogOut, Moon, Sun, Zap, Shield } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +25,32 @@ export function AppHeader() {
   const { theme, toggleTheme } = useTheme()
   const { isSuperAdmin } = useSuperAdmin()
   const [showProfile, setShowProfile] = useState(false)
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true)
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout
+
+    const handleMouseMove = (e: MouseEvent) => {
+      // Show header when mouse is in top 50px of the screen
+      if (e.clientY <= 50) {
+        setIsHeaderVisible(true)
+        clearTimeout(timeout)
+      } else if (e.clientY > 100) {
+        // Hide header after 2 seconds when mouse moves away from top
+        clearTimeout(timeout)
+        timeout = setTimeout(() => {
+          setIsHeaderVisible(false)
+        }, 2000)
+      }
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      clearTimeout(timeout)
+    }
+  }, [])
 
   const handleSignOut = async () => {
     try {
@@ -44,7 +70,9 @@ export function AppHeader() {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-14 sm:h-16 border-b bg-background/80 backdrop-blur-sm flex items-center justify-between px-3 sm:px-4 lg:px-6 shrink-0 z-50">
+    <header className={`fixed left-0 right-0 h-14 sm:h-16 border-b bg-background/80 backdrop-blur-sm flex items-center justify-between px-3 sm:px-4 lg:px-6 shrink-0 z-50 transition-transform duration-300 ease-in-out ${
+      isHeaderVisible ? 'top-0 translate-y-0' : '-top-16 -translate-y-full'
+    }`}>
       <div className="flex items-center gap-2 sm:gap-4">
         <SidebarTrigger />
         <h1 className="font-semibold text-sm sm:text-base lg:text-lg truncate">

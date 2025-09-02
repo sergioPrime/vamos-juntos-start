@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, ShoppingCart, TrendingUp, PieChart, Building2, Link } from "lucide-react"
+import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, ShoppingCart, TrendingUp, PieChart } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
 import {
@@ -41,10 +41,6 @@ const purchaseItems = [
   { title: "Relatórios", url: "/purchases/reports", icon: TrendingUp },
 ]
 
-const integrationItems = [
-  { title: "Multi-empresas", url: "/settings?tab=companies", icon: Building2 },
-  { title: "Integrações", url: "/settings?tab=integrations", icon: Link },
-]
 
 const configItems = [
   { title: "Configurações", url: "/settings", icon: Settings },
@@ -147,23 +143,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Integrações</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {integrationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavClass}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
 
         <SidebarGroup>
           <SidebarGroupContent>

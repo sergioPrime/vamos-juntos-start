@@ -1,7 +1,6 @@
 import { useState } from "react"
-import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, Shield, ShoppingCart, TrendingUp, PieChart, Building2, Link } from "lucide-react"
+import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, ShoppingCart, TrendingUp, PieChart, Building2, Link } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
-import { useSuperAdmin } from "@/hooks/useSuperAdmin"
 
 import {
   Sidebar,
@@ -51,16 +50,12 @@ const configItems = [
   { title: "Configurações", url: "/settings", icon: Settings },
 ]
 
-const adminItems = [
-  { title: "Admin", url: "/admin", icon: Shield },
-]
 
 export function AppSidebar() {
   const { state } = useSidebar()
   const location = useLocation()
   const currentPath = location.pathname
   const collapsed = state === "collapsed"
-  const { isSuperAdmin } = useSuperAdmin()
 
   const isActive = (path: string) => currentPath === path
   const isFinanceExpanded = financeItems.some((i) => isActive(i.url))
@@ -187,24 +182,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {isSuperAdmin && (
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {adminItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink to={item.url} className={getNavClass}>
-                        <item.icon className="h-4 w-4" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
       </SidebarContent>
     </Sidebar>
   )

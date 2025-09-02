@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Plus, FileText, Calculator, User, MoreHorizontal, LogOut, Moon, Sun, Zap } from "lucide-react"
+import { Plus, FileText, Calculator, User, MoreHorizontal, LogOut, Moon, Sun, Zap, Shield } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
 import {
@@ -16,12 +16,14 @@ import { UserProfileDialog } from "@/components/UserProfileDialog"
 import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/use-toast"
 import { useTheme } from "@/hooks/useTheme"
+import { useSuperAdmin } from "@/hooks/useSuperAdmin"
 
 export function AppHeader() {
   const navigate = useNavigate()
   const { signOut, user } = useAuth()
   const { toast } = useToast()
   const { theme, toggleTheme } = useTheme()
+  const { isSuperAdmin } = useSuperAdmin()
   const [showProfile, setShowProfile] = useState(false)
 
   const handleSignOut = async () => {
@@ -117,6 +119,15 @@ export function AppHeader() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            {isSuperAdmin && (
+              <>
+                <DropdownMenuItem onClick={() => navigate("/admin")}>
+                  <Shield className="h-4 w-4 mr-2" />
+                  Admin
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuItem onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-2" />
               Sair
@@ -177,6 +188,15 @@ export function AppHeader() {
               </div>
             </div>
             <DropdownMenuSeparator />
+            {isSuperAdmin && (
+              <>
+                <DropdownMenuItem onClick={() => navigate("/admin")}>
+                  <Shield className="h-4 w-4 mr-2" />
+                  Admin
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuItem onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-2" />
               Sair

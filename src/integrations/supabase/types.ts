@@ -823,6 +823,141 @@ export type Database = {
         }
         Relationships: []
       }
+      product_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          org_id: string
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          org_id: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          org_id?: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      product_lots: {
+        Row: {
+          created_at: string
+          created_by: string
+          expiration_date: string | null
+          id: string
+          lot_number: string
+          org_id: string
+          product_id: string
+          quantity: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          expiration_date?: string | null
+          id?: string
+          lot_number: string
+          org_id: string
+          product_id: string
+          quantity?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expiration_date?: string | null
+          id?: string
+          lot_number?: string
+          org_id?: string
+          product_id?: string
+          quantity?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      product_serials: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          org_id: string
+          product_id: string
+          serial_number: string
+          status: string
+          updated_at: string
+          warehouse_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          org_id: string
+          product_id: string
+          serial_number: string
+          status?: string
+          updated_at?: string
+          warehouse_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          org_id?: string
+          product_id?: string
+          serial_number?: string
+          status?: string
+          updated_at?: string
+          warehouse_id?: string | null
+        }
+        Relationships: []
+      }
+      product_warehouse_stock: {
+        Row: {
+          id: string
+          product_id: string
+          quantity: number
+          reserved_quantity: number
+          updated_at: string
+          warehouse_id: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          quantity?: number
+          reserved_quantity?: number
+          updated_at?: string
+          warehouse_id: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          quantity?: number
+          reserved_quantity?: number
+          updated_at?: string
+          warehouse_id?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           active: boolean
@@ -830,20 +965,26 @@ export type Database = {
           assembly_fee_percent: number | null
           barcode: string | null
           category: string | null
+          category_id: string | null
           cost_calculation_method: string | null
           cost_price: number | null
           cost_with_additions: number | null
           created_at: string
+          default_warehouse_id: string | null
           description: string | null
           dimensions: string | null
           fcp_st_purchase_percent: number | null
           freight_purchase_percent: number | null
+          has_lot_control: boolean | null
+          has_serial_control: boolean | null
           icms_purchase_percent: number | null
           icms_st_purchase_percent: number | null
           id: string
           insurance_purchase_percent: number | null
           ipi_purchase_percent: number | null
+          is_perishable: boolean | null
           last_purchase_value: number | null
+          max_stock_level: number | null
           min_stock_level: number | null
           minimum_sale_price: number | null
           name: string
@@ -852,10 +993,13 @@ export type Database = {
           owner_id: string
           profit_amount: number | null
           profit_percent: number | null
+          reorder_point: number | null
           representation_commission_percent: number | null
           sku: string | null
           stock_quantity: number
+          supplier_id: string | null
           unit: string | null
+          unit_id: string | null
           unit_price: number
           updated_at: string
           vendor_commission_amount: number | null
@@ -868,20 +1012,26 @@ export type Database = {
           assembly_fee_percent?: number | null
           barcode?: string | null
           category?: string | null
+          category_id?: string | null
           cost_calculation_method?: string | null
           cost_price?: number | null
           cost_with_additions?: number | null
           created_at?: string
+          default_warehouse_id?: string | null
           description?: string | null
           dimensions?: string | null
           fcp_st_purchase_percent?: number | null
           freight_purchase_percent?: number | null
+          has_lot_control?: boolean | null
+          has_serial_control?: boolean | null
           icms_purchase_percent?: number | null
           icms_st_purchase_percent?: number | null
           id?: string
           insurance_purchase_percent?: number | null
           ipi_purchase_percent?: number | null
+          is_perishable?: boolean | null
           last_purchase_value?: number | null
+          max_stock_level?: number | null
           min_stock_level?: number | null
           minimum_sale_price?: number | null
           name: string
@@ -890,10 +1040,13 @@ export type Database = {
           owner_id: string
           profit_amount?: number | null
           profit_percent?: number | null
+          reorder_point?: number | null
           representation_commission_percent?: number | null
           sku?: string | null
           stock_quantity?: number
+          supplier_id?: string | null
           unit?: string | null
+          unit_id?: string | null
           unit_price?: number
           updated_at?: string
           vendor_commission_amount?: number | null
@@ -906,20 +1059,26 @@ export type Database = {
           assembly_fee_percent?: number | null
           barcode?: string | null
           category?: string | null
+          category_id?: string | null
           cost_calculation_method?: string | null
           cost_price?: number | null
           cost_with_additions?: number | null
           created_at?: string
+          default_warehouse_id?: string | null
           description?: string | null
           dimensions?: string | null
           fcp_st_purchase_percent?: number | null
           freight_purchase_percent?: number | null
+          has_lot_control?: boolean | null
+          has_serial_control?: boolean | null
           icms_purchase_percent?: number | null
           icms_st_purchase_percent?: number | null
           id?: string
           insurance_purchase_percent?: number | null
           ipi_purchase_percent?: number | null
+          is_perishable?: boolean | null
           last_purchase_value?: number | null
+          max_stock_level?: number | null
           min_stock_level?: number | null
           minimum_sale_price?: number | null
           name?: string
@@ -928,10 +1087,13 @@ export type Database = {
           owner_id?: string
           profit_amount?: number | null
           profit_percent?: number | null
+          reorder_point?: number | null
           representation_commission_percent?: number | null
           sku?: string | null
           stock_quantity?: number
+          supplier_id?: string | null
           unit?: string | null
+          unit_id?: string | null
           unit_price?: number
           updated_at?: string
           vendor_commission_amount?: number | null
@@ -1272,7 +1434,9 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string
+          expiration_date: string | null
           id: string
+          lot_id: string | null
           movement_type: string
           notes: string | null
           org_id: string
@@ -1280,11 +1444,15 @@ export type Database = {
           quantity: number
           reference_id: string | null
           reference_type: string | null
+          serial_id: string | null
+          warehouse_id: string | null
         }
         Insert: {
           created_at?: string
           created_by: string
+          expiration_date?: string | null
           id?: string
+          lot_id?: string | null
           movement_type: string
           notes?: string | null
           org_id: string
@@ -1292,11 +1460,15 @@ export type Database = {
           quantity: number
           reference_id?: string | null
           reference_type?: string | null
+          serial_id?: string | null
+          warehouse_id?: string | null
         }
         Update: {
           created_at?: string
           created_by?: string
+          expiration_date?: string | null
           id?: string
+          lot_id?: string | null
           movement_type?: string
           notes?: string | null
           org_id?: string
@@ -1304,6 +1476,8 @@ export type Database = {
           quantity?: number
           reference_id?: string | null
           reference_type?: string | null
+          serial_id?: string | null
+          warehouse_id?: string | null
         }
         Relationships: []
       }
@@ -1605,6 +1779,33 @@ export type Database = {
         }
         Relationships: []
       }
+      units_of_measurement: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          symbol: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          symbol: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          symbol?: string
+        }
+        Relationships: []
+      }
       user_organizations: {
         Row: {
           created_at: string
@@ -1671,6 +1872,42 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      warehouses: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          location: string | null
+          name: string
+          org_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          name: string
+          org_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          name?: string
+          org_id?: string
+          updated_at?: string
         }
         Relationships: []
       }

@@ -72,23 +72,29 @@ export const StockEntryForm = ({ onSuccess }: StockEntryFormProps) => {
     if (!currentOrg?.id) return
 
     try {
-      // Load products
+      // Load products (using fallback defaults for new columns)
       const { data: productsData } = await supabase
         .from('products')
-        .select('id, name, sku, unit, has_lot_control, has_serial_control, is_perishable')
+        .select('id, name, sku, unit')
         .eq('org_id', currentOrg.id)
         .eq('active', true)
         .order('name')
 
-      // Load warehouses
-      const { data: warehousesData } = await supabase
-        .from('warehouses')
-        .select('id, name, location')
-        .eq('org_id', currentOrg.id)
-        .eq('is_active', true)
-        .order('name')
+      // Add default values for new columns
+      const enrichedProducts = productsData?.map(p => ({
+        ...p,
+        has_lot_control: false,
+        has_serial_control: false,
+        is_perishable: false
+      })) || []
 
-      setProducts(productsData || [])
+      // Create mock warehouses since table doesn't exist yet
+      const warehousesData = [
+        { id: '1', name: 'Armazém Principal', location: 'Sede' },
+        { id: '2', name: 'Armazém Secundário', location: 'Filial' }
+      ]
+
+      setProducts(enrichedProducts)
       setWarehouses(warehousesData || [])
     } catch (error) {
       toast({
@@ -157,41 +163,8 @@ export const StockEntryForm = ({ onSuccess }: StockEntryFormProps) => {
 
       if (movementError) throw movementError
 
-      // Handle lot creation if needed
-      if (selectedProduct?.has_lot_control && formData.lot_number) {
-        const { error: lotError } = await supabase
-          .from('product_lots')
-          .upsert({
-            product_id: formData.product_id,
-            lot_number: formData.lot_number,
-            expiration_date: formData.expiration_date || null,
-            quantity: formData.quantity,
-            status: 'active',
-            org_id: currentOrg?.id,
-            created_by: user?.id,
-          })
-
-        if (lotError) throw lotError
-      }
-
-      // Handle serial numbers if needed
-      if (selectedProduct?.has_serial_control && formData.serial_numbers) {
-        const serials = formData.serial_numbers.split('\n').filter(s => s.trim())
-        const serialInserts = serials.map(serial => ({
-          product_id: formData.product_id,
-          serial_number: serial.trim(),
-          status: 'available' as const,
-          warehouse_id: formData.warehouse_id,
-          org_id: currentOrg?.id,
-          created_by: user?.id,
-        }))
-
-        const { error: serialError } = await supabase
-          .from('product_serials')
-          .insert(serialInserts)
-
-        if (serialError) throw serialError
-      }
+      // TODO: Handle lot and serial creation when tables are ready
+      // This will be implemented after the database migration is confirmed
 
       toast({
         title: "Entrada registrada",

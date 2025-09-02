@@ -301,11 +301,27 @@ const Inventory = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Gestão de Estoque</h1>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={() => window.open('/inventory/entry', '_blank')}>
+            <TrendingUp className="mr-2 h-4 w-4 text-green-600" />
+            Entrada de Estoque
+          </Button>
+          <Button variant="outline" onClick={() => window.open('/inventory/exit', '_blank')}>
+            <TrendingDown className="mr-2 h-4 w-4 text-red-600" />
+            Saída de Estoque
+          </Button>
+          <Button variant="outline" onClick={() => window.open('/inventory/transfer', '_blank')}>
+            <RotateCcw className="mr-2 h-4 w-4 text-blue-600" />
+            Transferência
+          </Button>
+          <Button variant="outline" onClick={() => window.open('/inventory/returns', '_blank')}>
+            <RotateCcw className="mr-2 h-4 w-4 text-orange-600" />
+            Devoluções
+          </Button>
           <Dialog open={isMovementDialogOpen} onOpenChange={setIsMovementDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline">
-                <RotateCcw className="mr-2 h-4 w-4" />
-                Nova Movimentação
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Movimento Rápido
               </Button>
             </DialogTrigger>
             <DialogContent>

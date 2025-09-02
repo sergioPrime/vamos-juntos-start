@@ -39,6 +39,10 @@ import NewUserPlans from "./pages/NewUserPlans";
 import NotFound from "./pages/NotFound";
 import Inventory from "./pages/Inventory";
 import StockReports from "./pages/StockReports";
+import StockEntryPage from "./pages/inventory/StockEntry";
+import StockExitPage from "./pages/inventory/StockExit";
+import StockTransferPage from "./pages/inventory/StockTransfer";
+import ReturnsPage from "./pages/inventory/Returns";
 
 const queryClient = new QueryClient();
 
@@ -214,6 +218,10 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
+          <Route path="/inventory/entry" element={<StockEntryPage />} />
+          <Route path="/inventory/exit" element={<StockExitPage />} />
+          <Route path="/inventory/transfer" element={<StockTransferPage />} />
+          <Route path="/inventory/returns" element={<ReturnsPage />} />
           <Route path="/quotes" element={
             <ProtectedRoute>
               <AppLayout>

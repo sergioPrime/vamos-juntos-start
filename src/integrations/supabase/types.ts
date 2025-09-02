@@ -1355,71 +1355,252 @@ export type Database = {
         }
         Relationships: []
       }
+      supplier_documents: {
+        Row: {
+          document_name: string
+          document_type: string
+          file_path: string | null
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          org_id: string
+          supplier_id: string
+          uploaded_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          document_name: string
+          document_type: string
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          org_id: string
+          supplier_id: string
+          uploaded_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          document_name?: string
+          document_type?: string
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          org_id?: string
+          supplier_id?: string
+          uploaded_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_documents_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_history: {
+        Row: {
+          action_type: string
+          changed_at: string
+          changed_by: string
+          field_name: string | null
+          id: string
+          new_value: string | null
+          old_value: string | null
+          org_id: string
+          supplier_id: string
+        }
+        Insert: {
+          action_type: string
+          changed_at?: string
+          changed_by: string
+          field_name?: string | null
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          org_id: string
+          supplier_id: string
+        }
+        Update: {
+          action_type?: string
+          changed_at?: string
+          changed_by?: string
+          field_name?: string | null
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          org_id?: string
+          supplier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_history_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           address: string | null
+          average_delivery_time: string | null
+          bank_account: string | null
+          bank_agency: string | null
+          bank_name: string | null
+          billing_email: string | null
+          business_activity: string | null
           city: string | null
+          cnae_code: string | null
+          commercial_notes: string | null
+          complement: string | null
           contact_person: string | null
           country: string | null
           created_at: string
           created_by: string
           credit_limit: number | null
+          default_payment_terms: string | null
           document: string | null
+          documents_folder: string | null
           email: string | null
+          full_name: string | null
+          general_observations: string | null
           id: string
           is_active: boolean
+          landline_phone: string | null
+          last_modified_at: string | null
+          last_modified_by: string | null
+          legal_name: string | null
+          main_contact_name: string | null
+          mobile_phone: string | null
+          municipal_registration: string | null
           name: string
+          neighborhood: string | null
           notes: string | null
           org_id: string
           payment_terms: string | null
           phone: string | null
+          pix_key: string | null
           state: string | null
+          state_registration: string | null
+          status: string
+          street_name: string | null
+          street_number: string | null
+          street_type: string | null
           supplier_type: string | null
+          trade_name: string | null
           updated_at: string
+          website_url: string | null
+          whatsapp_phone: string | null
           zip_code: string | null
         }
         Insert: {
           address?: string | null
+          average_delivery_time?: string | null
+          bank_account?: string | null
+          bank_agency?: string | null
+          bank_name?: string | null
+          billing_email?: string | null
+          business_activity?: string | null
           city?: string | null
+          cnae_code?: string | null
+          commercial_notes?: string | null
+          complement?: string | null
           contact_person?: string | null
           country?: string | null
           created_at?: string
           created_by: string
           credit_limit?: number | null
+          default_payment_terms?: string | null
           document?: string | null
+          documents_folder?: string | null
           email?: string | null
+          full_name?: string | null
+          general_observations?: string | null
           id?: string
           is_active?: boolean
+          landline_phone?: string | null
+          last_modified_at?: string | null
+          last_modified_by?: string | null
+          legal_name?: string | null
+          main_contact_name?: string | null
+          mobile_phone?: string | null
+          municipal_registration?: string | null
           name: string
+          neighborhood?: string | null
           notes?: string | null
           org_id: string
           payment_terms?: string | null
           phone?: string | null
+          pix_key?: string | null
           state?: string | null
+          state_registration?: string | null
+          status?: string
+          street_name?: string | null
+          street_number?: string | null
+          street_type?: string | null
           supplier_type?: string | null
+          trade_name?: string | null
           updated_at?: string
+          website_url?: string | null
+          whatsapp_phone?: string | null
           zip_code?: string | null
         }
         Update: {
           address?: string | null
+          average_delivery_time?: string | null
+          bank_account?: string | null
+          bank_agency?: string | null
+          bank_name?: string | null
+          billing_email?: string | null
+          business_activity?: string | null
           city?: string | null
+          cnae_code?: string | null
+          commercial_notes?: string | null
+          complement?: string | null
           contact_person?: string | null
           country?: string | null
           created_at?: string
           created_by?: string
           credit_limit?: number | null
+          default_payment_terms?: string | null
           document?: string | null
+          documents_folder?: string | null
           email?: string | null
+          full_name?: string | null
+          general_observations?: string | null
           id?: string
           is_active?: boolean
+          landline_phone?: string | null
+          last_modified_at?: string | null
+          last_modified_by?: string | null
+          legal_name?: string | null
+          main_contact_name?: string | null
+          mobile_phone?: string | null
+          municipal_registration?: string | null
           name?: string
+          neighborhood?: string | null
           notes?: string | null
           org_id?: string
           payment_terms?: string | null
           phone?: string | null
+          pix_key?: string | null
           state?: string | null
+          state_registration?: string | null
+          status?: string
+          street_name?: string | null
+          street_number?: string | null
+          street_type?: string | null
           supplier_type?: string | null
+          trade_name?: string | null
           updated_at?: string
+          website_url?: string | null
+          whatsapp_phone?: string | null
           zip_code?: string | null
         }
         Relationships: []

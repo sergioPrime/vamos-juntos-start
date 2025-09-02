@@ -3,6 +3,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Plus, FileText, Calculator, User, MoreHorizontal, LogOut, Moon, Sun, Zap, Shield } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
+import { AlertNotificationBell } from "@/components/inventory/AlertNotificationBell"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -117,6 +118,9 @@ export function AppHeader() {
           <Calculator className="h-4 w-4 mr-2" />
           Orçamento
         </Button>
+        
+        {/* Alert Notification Bell */}
+        <AlertNotificationBell />
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

@@ -44,6 +44,7 @@ import StockExitPage from "./pages/inventory/StockExit";
 import StockTransferPage from "./pages/inventory/StockTransfer";
 import ReturnsPage from "./pages/inventory/Returns";
 import InventoryReportsPage from "./pages/inventory/InventoryReports";
+import InventoryAlertsPage from "./pages/inventory/InventoryAlerts";
 
 const queryClient = new QueryClient();
 
@@ -224,6 +225,7 @@ const App = () => (
           <Route path="/inventory/transfer" element={<StockTransferPage />} />
           <Route path="/inventory/returns" element={<ReturnsPage />} />
           <Route path="/inventory/advanced-reports" element={<InventoryReportsPage />} />
+          <Route path="/inventory/alerts" element={<InventoryAlertsPage />} />
           <Route path="/quotes" element={
             <ProtectedRoute>
               <AppLayout>

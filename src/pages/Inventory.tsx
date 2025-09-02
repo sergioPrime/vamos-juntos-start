@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Search, Package, TrendingUp, TrendingDown, RotateCcw, AlertTriangle, BarChart3, FileText, Plus, Eye, Edit, Trash2, Settings } from "lucide-react"
+import { Search, Package, TrendingUp, TrendingDown, RotateCcw, AlertTriangle, BarChart3, FileText, Plus, Eye, Edit, Trash2, Settings, Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { IntegrationStatus } from "@/components/integration/IntegrationStatus"
 import { Input } from "@/components/ui/input"
@@ -314,9 +314,13 @@ const Inventory = () => {
             <RotateCcw className="mr-2 h-4 w-4 text-blue-600" />
             Transferência
           </Button>
-          <Button variant="outline" onClick={() => window.open('/inventory/advanced-reports', '_blank')}>
+          <Button variant="outline" onClick={() => window.open('/inventory/reports', '_blank')}>
             <BarChart3 className="mr-2 h-4 w-4 text-purple-600" />
             Relatórios Avançados
+          </Button>
+          <Button variant="outline" onClick={() => window.open('/inventory/alerts', '_blank')}>
+            <Bell className="mr-2 h-4 w-4 text-orange-600" />
+            Central de Alertas
           </Button>
           <Dialog open={isMovementDialogOpen} onOpenChange={setIsMovementDialogOpen}>
             <DialogTrigger asChild>

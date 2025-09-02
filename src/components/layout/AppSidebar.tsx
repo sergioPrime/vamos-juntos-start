@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, ShoppingCart, TrendingUp, PieChart, Package } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
@@ -57,10 +57,16 @@ const configItems = [
 
 
 export function AppSidebar() {
-  const { state } = useSidebar()
+  const { state, setOpen } = useSidebar()
   const location = useLocation()
   const currentPath = location.pathname
   const collapsed = state === "collapsed"
+  const [isHovered, setIsHovered] = useState(false)
+
+  // Auto-collapse when navigating to new routes
+  useEffect(() => {
+    setOpen(false)
+  }, [currentPath, setOpen])
 
   const isActive = (path: string) => currentPath === path
   const isFinanceExpanded = financeItems.some((i) => isActive(i.url))
@@ -69,15 +75,20 @@ export function AppSidebar() {
   const getNavClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "hover:bg-sidebar-accent/50"
 
+  // Show expanded content when hovered or not collapsed
+  const showContent = !collapsed || isHovered
+
   return (
     <Sidebar
-      className={collapsed ? "w-14" : "w-60"}
+      className={`${collapsed ? "w-14" : "w-60"} transition-all duration-300 ${isHovered && collapsed ? "w-60" : ""}`}
       collapsible="icon"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <SidebarContent>
         <div className="p-4">
-          <h2 className={`font-bold text-sidebar-primary ${collapsed ? "text-center text-xs" : "text-lg"}`}>
-            {collapsed ? "Prime" : "Prime ERP"}
+          <h2 className={`font-bold text-sidebar-primary ${!showContent ? "text-center text-xs" : "text-lg"}`}>
+            {!showContent ? "Prime" : "Prime ERP"}
           </h2>
         </div>
 
@@ -89,7 +100,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                       {showContent && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -99,7 +110,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Financeiro</SidebarGroupLabel>
+          {showContent && <SidebarGroupLabel>Financeiro</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {financeItems.map((item) => (
@@ -107,7 +118,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {showContent && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -117,7 +128,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Vendas</SidebarGroupLabel>
+          {showContent && <SidebarGroupLabel>Vendas</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {businessItems.map((item) => (
@@ -125,7 +136,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {showContent && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -135,7 +146,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Compras</SidebarGroupLabel>
+          {showContent && <SidebarGroupLabel>Compras</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {purchaseItems.map((item) => (
@@ -143,7 +154,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {showContent && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -160,7 +171,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {showContent && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -170,7 +181,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Estoque</SidebarGroupLabel>
+          {showContent && <SidebarGroupLabel>Estoque</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {inventoryItems.map((item) => (
@@ -178,7 +189,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {showContent && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -195,7 +206,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {showContent && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

@@ -313,9 +313,9 @@ const Inventory = () => {
             <RotateCcw className="mr-2 h-4 w-4 text-blue-600" />
             Transferência
           </Button>
-          <Button variant="outline" onClick={() => window.open('/inventory/returns', '_blank')}>
-            <RotateCcw className="mr-2 h-4 w-4 text-orange-600" />
-            Devoluções
+          <Button variant="outline" onClick={() => window.open('/inventory/advanced-reports', '_blank')}>
+            <BarChart3 className="mr-2 h-4 w-4 text-purple-600" />
+            Relatórios Avançados
           </Button>
           <Dialog open={isMovementDialogOpen} onOpenChange={setIsMovementDialogOpen}>
             <DialogTrigger asChild>

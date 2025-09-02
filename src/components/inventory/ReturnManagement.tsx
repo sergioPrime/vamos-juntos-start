@@ -103,13 +103,12 @@ export const ReturnManagement = ({ onSuccess }: ReturnManagementProps) => {
         .eq('org_id', currentOrg.id)
         .order('name')
 
-      // Create mock suppliers since we need to match the expected structure
+      // Use mock data for suppliers and warehouses until tables are ready
       const suppliersData = [
         { id: '1', company_name: 'Fornecedor A', contact_person: 'João Silva' },
         { id: '2', company_name: 'Fornecedor B', contact_person: 'Maria Santos' }
       ]
 
-      // Create mock warehouses since table doesn't exist yet
       const warehousesData = [
         { id: '1', name: 'Armazém Principal', location: 'Sede' },
         { id: '2', name: 'Armazém Secundário', location: 'Filial' }
@@ -117,8 +116,8 @@ export const ReturnManagement = ({ onSuccess }: ReturnManagementProps) => {
 
       setProducts(productsData || [])
       setCustomers(customersData || [])
-      setSuppliers(suppliersData || [])
-      setWarehouses(warehousesData || [])
+      setSuppliers(suppliersData)
+      setWarehouses(warehousesData)
     } catch (error) {
       toast({
         title: "Erro ao carregar dados",

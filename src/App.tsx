@@ -37,6 +37,8 @@ import Tutorial from "./pages/onboarding/Tutorial";
 import Auth from "./pages/Auth";
 import NewUserPlans from "./pages/NewUserPlans";
 import NotFound from "./pages/NotFound";
+import Inventory from "./pages/Inventory";
+import StockReports from "./pages/StockReports";
 
 const queryClient = new QueryClient();
 
@@ -190,6 +192,24 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <Suppliers />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/inventory" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Inventory />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/inventory/reports" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <StockReports />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

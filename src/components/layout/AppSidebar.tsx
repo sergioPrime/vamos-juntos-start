@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, ShoppingCart, TrendingUp, PieChart } from "lucide-react"
+import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, ShoppingCart, TrendingUp, PieChart, Package } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
 import {
@@ -43,6 +43,11 @@ const purchaseItems = [
 
 const supplierItems = [
   { title: "Fornecedores", url: "/suppliers", icon: Users },
+]
+
+const inventoryItems = [
+  { title: "Gestão de Estoque", url: "/inventory", icon: Package },
+  { title: "Relatórios", url: "/inventory/reports", icon: BarChart3 },
 ]
 
 
@@ -151,6 +156,24 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {supplierItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} className={getNavClass}>
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Estoque</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {inventoryItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>

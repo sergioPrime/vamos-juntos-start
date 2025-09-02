@@ -45,68 +45,72 @@ export default function Payables() {
   const [selectedPayable, setSelectedPayable] = useState<PayableItem | null>(null)
   const [showAddDialog, setShowAddDialog] = useState(false)
 
-  // Mock data
-  const [payablesSummary] = useState<PayablesSummary>({
-    totalPending: 125450.00,
-    totalOverdue: 18920.00,
-    totalPaid: 89650.00,
-    dueThisWeek: 23850.00,
-    dueNextWeek: 41200.00,
-    avgPaymentTerm: 28.5
+  const [payablesSummary, setPayablesSummary] = useState<PayablesSummary>({
+    totalPending: 0,
+    totalOverdue: 0,
+    totalPaid: 0,
+    dueThisWeek: 0,
+    dueNextWeek: 0,
+    avgPaymentTerm: 0
   })
 
-  const [payables] = useState<PayableItem[]>([
-    {
-      id: '1',
-      supplier: 'Fornecedor ABC Ltda',
-      description: 'Material de escritório',
-      amount: 2850.00,
-      dueDate: '2024-09-15',
-      status: 'overdue',
-      category: 'Material',
-      notes: 'Pagamento urgente - negociação especial',
-      createdAt: '2024-08-15'
-    },
-    {
-      id: '2',
-      supplier: 'Tech Solutions Corp',
-      description: 'Licenças de software',
-      amount: 8500.00,
-      dueDate: '2024-09-20',
-      status: 'pending',
-      category: 'TI',
-      paymentMethod: 'Transferência',
-      createdAt: '2024-08-20'
-    },
-    {
-      id: '3',
-      supplier: 'Energia Elétrica S.A.',
-      description: 'Conta de luz - Agosto',
-      amount: 1250.00,
-      dueDate: '2024-09-10',
-      status: 'paid',
-      category: 'Utilidades',
-      paymentMethod: 'Débito automático',
-      createdAt: '2024-08-10'
-    },
-    {
-      id: '4',
-      supplier: 'Consultoria Empresarial',
-      description: 'Serviços de consultoria',
-      amount: 15000.00,
-      dueDate: '2024-09-25',
-      status: 'scheduled',
-      category: 'Serviços',
-      notes: 'Pagamento agendado para dia 25',
-      createdAt: '2024-08-25'
-    }
-  ])
+  const [payables, setPayables] = useState<PayableItem[]>([])
 
   useEffect(() => {
-    if (currentOrganization) {
-      setLoading(false)
+    if (currentOrganization?.id) {
+      loadPayablesData()
     }
   }, [currentOrganization])
+
+  const loadPayablesData = async () => {
+    if (!currentOrganization?.id) return
+
+    setLoading(true)
+    try {
+      // Load actual payables data from financial_transactions table
+      const { data: transactions, error } = await supabase
+        .from('financial_transactions')
+        .select('*')
+        .eq('org_id', currentOrganization.id)
+        .eq('transaction_type', 'outflow')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error loading payables:', error)
+        return
+      }
+
+      // Transform transactions into payables format
+      const payablesData: PayableItem[] = (transactions || []).map(transaction => ({
+        id: transaction.id,
+        supplier: transaction.description || 'Fornecedor não informado',
+        description: transaction.description || '',
+        amount: Number(transaction.amount),
+        dueDate: transaction.transaction_date,
+        status: 'paid', // Since these are completed transactions
+        category: transaction.category || 'Outros',
+        createdAt: transaction.created_at
+      }))
+
+      setPayables(payablesData)
+
+      // Calculate summary
+      const totalPaid = payablesData.reduce((sum, item) => sum + item.amount, 0)
+      setPayablesSummary({
+        totalPending: 0,
+        totalOverdue: 0,
+        totalPaid,
+        dueThisWeek: 0,
+        dueNextWeek: 0,
+        avgPaymentTerm: 0
+      })
+
+    } catch (error) {
+      console.error('Error loading payables data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const getStatusBadge = (status: string) => {
     switch (status) {

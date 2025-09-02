@@ -50,69 +50,82 @@ export default function Receivables() {
   const [showPixDialog, setShowPixDialog] = useState(false)
   const [pixCode, setPixCode] = useState("")
 
-  // Mock data
-  const [receivablesSummary] = useState<ReceivablesSummary>({
-    totalPending: 89450.00,
-    totalOverdue: 15280.00,
-    totalPaid: 156780.00,
-    dueThisWeek: 18650.00,
-    dueNextWeek: 28900.00,
-    avgCollectionTime: 24.5
+  const [receivablesSummary, setReceivablesSummary] = useState<ReceivablesSummary>({
+    totalPending: 0,
+    totalOverdue: 0,
+    totalPaid: 0,
+    dueThisWeek: 0,
+    dueNextWeek: 0,
+    avgCollectionTime: 0
   })
 
-  const [receivables] = useState<ReceivableItem[]>([
-    {
-      id: '1',
-      customer: 'Empresa Alpha Ltda',
-      description: 'Desenvolvimento de sistema',
-      amount: 15000.00,
-      dueDate: '2024-09-18',
-      status: 'pending',
-      invoice: 'FAT-2024-001',
-      notes: 'Pagamento via transferência',
-      createdAt: '2024-08-18'
-    },
-    {
-      id: '2',
-      customer: 'Beta Corp S.A.',
-      description: 'Consultoria empresarial',
-      amount: 8500.00,
-      dueDate: '2024-09-10',
-      status: 'overdue',
-      invoice: 'FAT-2024-002',
-      paymentMethod: 'PIX',
-      createdAt: '2024-08-10'
-    },
-    {
-      id: '3',
-      customer: 'Gamma Tech',
-      description: 'Licenças de software',
-      amount: 12000.00,
-      dueDate: '2024-09-15',
-      status: 'paid',
-      invoice: 'FAT-2024-003',
-      paymentMethod: 'Transferência',
-      paidAt: '2024-09-14',
-      createdAt: '2024-08-15'
-    },
-    {
-      id: '4',
-      customer: 'Delta Solutions',
-      description: 'Suporte técnico mensal',
-      amount: 3500.00,
-      dueDate: '2024-09-25',
-      status: 'partial',
-      invoice: 'FAT-2024-004',
-      notes: 'Pagamento parcial de R$ 2.000,00 recebido',
-      createdAt: '2024-08-25'
-    }
-  ])
+  const [receivables, setReceivables] = useState<ReceivableItem[]>([])
 
   useEffect(() => {
-    if (currentOrganization) {
-      setLoading(false)
+    if (currentOrganization?.id) {
+      loadReceivablesData()
     }
   }, [currentOrganization])
+
+  const loadReceivablesData = async () => {
+    if (!currentOrganization?.id) return
+
+    setLoading(true)
+    try {
+      // Load actual receivables data from invoices table
+      const { data: invoices, error } = await supabase
+        .from('invoices')
+        .select(`
+          *,
+          customers (name)
+        `)
+        .eq('org_id', currentOrganization.id)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error loading receivables:', error)
+        return
+      }
+
+      // Transform invoices into receivables format
+      const receivablesData: ReceivableItem[] = (invoices || []).map(invoice => ({
+        id: invoice.id,
+        customer: invoice.customers?.name || 'Cliente não informado',
+        description: invoice.description || invoice.title,
+        amount: Number(invoice.total_amount),
+        dueDate: invoice.due_date || invoice.created_at,
+        status: invoice.status === 'paid' ? 'paid' : invoice.status === 'pending' ? 'pending' : 'pending',
+        invoice: invoice.number,
+        createdAt: invoice.created_at,
+        paidAt: invoice.paid_at
+      }))
+
+      setReceivables(receivablesData)
+
+      // Calculate summary
+      const totalPaid = receivablesData
+        .filter(item => item.status === 'paid')
+        .reduce((sum, item) => sum + item.amount, 0)
+      
+      const totalPending = receivablesData
+        .filter(item => item.status === 'pending')
+        .reduce((sum, item) => sum + item.amount, 0)
+
+      setReceivablesSummary({
+        totalPending,
+        totalOverdue: 0,
+        totalPaid,
+        dueThisWeek: 0,
+        dueNextWeek: 0,
+        avgCollectionTime: 0
+      })
+
+    } catch (error) {
+      console.error('Error loading receivables data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const getStatusBadge = (status: string) => {
     switch (status) {

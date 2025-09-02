@@ -329,7 +329,7 @@ export function APIIntegrations() {
                   id="api_url"
                   value={formData.api_url}
                   onChange={(e) => setFormData(prev => ({ ...prev, api_url: e.target.value }))}
-                  placeholder="https://api.exemplo.com/v1"
+                  placeholder="https://api.suaempresa.com/v1"
                 />
               </div>
               <div>

@@ -66,57 +66,25 @@ const PurchaseReports = () => {
   const [dateTo, setDateTo] = useState('')
   const [selectedCostCenter, setSelectedCostCenter] = useState<string>('all')
   
-  // Mock data for demonstration (will be replaced with real data when types are updated)
-  const [kpiData] = useState<KPIData>({
-    totalRequests: 156,
-    pendingApproval: 23,
-    approved: 118,
-    rejected: 15,
-    avgDeliveryTime: 5.2,
-    totalSavings: 45780.50,
-    topSupplier: 'Fornecedor ABC Ltda',
-    avgApprovalTime: 2.1
+  const [kpiData, setKpiData] = useState<KPIData>({
+    totalRequests: 0,
+    pendingApproval: 0,
+    approved: 0,
+    rejected: 0,
+    avgDeliveryTime: 0,
+    totalSavings: 0,
+    topSupplier: '',
+    avgApprovalTime: 0
   })
 
-  const [requestsByStatus] = useState<RequestsByStatus[]>([
-    { status: 'Aprovadas', count: 118, percentage: 75.6 },
-    { status: 'Pendentes', count: 23, percentage: 14.7 },
-    { status: 'Rejeitadas', count: 15, percentage: 9.6 }
-  ])
-
-  const [requestsByPriority] = useState<RequestsByPriority[]>([
-    { priority: 'Baixa', count: 45, color: '#10B981' },
-    { priority: 'Média', count: 67, color: '#F59E0B' },
-    { priority: 'Alta', count: 32, color: '#EF4444' },
-    { priority: 'Urgente', count: 12, color: '#8B5CF6' }
-  ])
-
-  const [supplierRanking] = useState<SupplierRanking[]>([
-    { supplier: 'Fornecedor ABC Ltda', totalOrders: 45, avgDeliveryTime: 3.2, avgPrice: 1250.00, rating: 4.8 },
-    { supplier: 'Empresa XYZ S.A.', totalOrders: 38, avgDeliveryTime: 4.1, avgPrice: 980.00, rating: 4.5 },
-    { supplier: 'Distribuidora 123', totalOrders: 29, avgDeliveryTime: 5.8, avgPrice: 1850.00, rating: 4.2 },
-    { supplier: 'Suprimentos Tech', totalOrders: 22, avgDeliveryTime: 6.2, avgPrice: 2100.00, rating: 3.9 },
-    { supplier: 'Material Express', totalOrders: 18, avgDeliveryTime: 4.5, avgPrice: 750.00, rating: 4.6 }
-  ])
-
-  const [costCenterAnalysis] = useState<CostCenterAnalysis[]>([
-    { costCenter: 'ADM', totalSpent: 85420.50, requests: 45, avgRequestValue: 1898.23 },
-    { costCenter: 'VEN', totalSpent: 72150.00, requests: 38, avgRequestValue: 1898.68 },
-    { costCenter: 'PRO', totalSpent: 156780.25, requests: 52, avgRequestValue: 3015.00 },
-    { costCenter: 'TI', totalSpent: 45920.00, requests: 21, avgRequestValue: 2187.62 }
-  ])
-
-  const [monthlyTrend] = useState<MonthlyTrend[]>([
-    { month: 'Jan', requests: 28, approved: 24, rejected: 4, totalValue: 45200 },
-    { month: 'Fev', requests: 32, approved: 28, rejected: 4, totalValue: 52100 },
-    { month: 'Mar', requests: 38, approved: 33, rejected: 5, totalValue: 61800 },
-    { month: 'Abr', requests: 29, approved: 25, rejected: 4, totalValue: 48900 },
-    { month: 'Mai', requests: 35, approved: 31, rejected: 4, totalValue: 58700 },
-    { month: 'Jun', requests: 42, approved: 37, rejected: 5, totalValue: 67400 }
-  ])
+  const [requestsByStatus, setRequestsByStatus] = useState<RequestsByStatus[]>([])
+  const [requestsByPriority, setRequestsByPriority] = useState<RequestsByPriority[]>([])
+  const [supplierRanking, setSupplierRanking] = useState<SupplierRanking[]>([])
+  const [costCenterAnalysis, setCostCenterAnalysis] = useState<CostCenterAnalysis[]>([])
+  const [monthlyTrend, setMonthlyTrend] = useState<MonthlyTrend[]>([])
 
   useEffect(() => {
-    if (currentOrganization) {
+    if (currentOrganization?.id) {
       // Set default date range (last 6 months)
       const today = new Date()
       const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, 1)
@@ -124,9 +92,41 @@ const PurchaseReports = () => {
       setDateFrom(sixMonthsAgo.toISOString().split('T')[0])
       setDateTo(today.toISOString().split('T')[0])
       
-      setLoading(false)
+      loadPurchaseReportsData()
     }
   }, [currentOrganization])
+
+  const loadPurchaseReportsData = async () => {
+    if (!currentOrganization?.id) return
+
+    setLoading(true)
+    try {
+      // Since purchase request tables don't exist yet, show empty state
+      // When the purchase module is implemented, load real data here
+      
+      setKpiData({
+        totalRequests: 0,
+        pendingApproval: 0,
+        approved: 0,
+        rejected: 0,
+        avgDeliveryTime: 0,
+        totalSavings: 0,
+        topSupplier: '',
+        avgApprovalTime: 0
+      })
+
+      setRequestsByStatus([])
+      setRequestsByPriority([])
+      setSupplierRanking([])
+      setCostCenterAnalysis([])
+      setMonthlyTrend([])
+
+    } catch (error) {
+      console.error('Error loading purchase reports data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const exportReport = (reportType: string) => {
     toast({
@@ -381,22 +381,9 @@ const PurchaseReports = () => {
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                      <TableCell className="font-mono">SOL-202412-001</TableCell>
-                      <TableCell>Material de Escritório</TableCell>
-                      <TableCell>3 dias</TableCell>
-                      <TableCell>R$ 1.250,00</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-mono">SOL-202412-002</TableCell>
-                      <TableCell>Equipamentos TI</TableCell>
-                      <TableCell>5 dias</TableCell>
-                      <TableCell>R$ 8.500,00</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-mono">SOL-202412-003</TableCell>
-                      <TableCell>Materiais de Limpeza</TableCell>
-                      <TableCell>1 dia</TableCell>
-                      <TableCell>R$ 420,00</TableCell>
+                      <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                        Nenhuma solicitação pendente encontrada
+                      </TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
@@ -420,16 +407,9 @@ const PurchaseReports = () => {
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                      <TableCell className="font-mono">PED-202411-015</TableCell>
-                      <TableCell>Fornecedor ABC</TableCell>
-                      <TableCell>7 dias</TableCell>
-                      <TableCell><Badge variant="destructive">Atrasado</Badge></TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-mono">PED-202411-018</TableCell>
-                      <TableCell>Empresa XYZ</TableCell>
-                      <TableCell>3 dias</TableCell>
-                      <TableCell><Badge variant="destructive">Atrasado</Badge></TableCell>
+                      <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                        Nenhum pedido atrasado encontrado
+                      </TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>

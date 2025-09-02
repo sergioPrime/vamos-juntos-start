@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
-import { Search, Package, TrendingUp, TrendingDown, RotateCcw, AlertTriangle, BarChart3, FileText, Plus, Eye, Edit, Trash2 } from "lucide-react"
+import { Search, Package, TrendingUp, TrendingDown, RotateCcw, AlertTriangle, BarChart3, FileText, Plus, Eye, Edit, Trash2, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { IntegrationStatus } from "@/components/integration/IntegrationStatus"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -761,6 +762,12 @@ const Inventory = () => {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Integration Status Section */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4">Integrações Automáticas</h2>
+        <IntegrationStatus />
+      </div>
     </div>
   )
 }

@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
+import { useOrderIntegration } from "@/hooks/useOrderIntegration"
 
 interface Order {
   id: string
@@ -74,6 +75,7 @@ const Orders = () => {
   const { currentOrg, loading: orgLoading } = useOrganization()
   const { toast } = useToast()
   const navigate = useNavigate()
+  const { completeOrderWithIntegration } = useOrderIntegration()
   
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(false)
@@ -133,12 +135,21 @@ const Orders = () => {
     setIsDetailDialogOpen(true)
   }
 
-  const goToPDV = (order: Order) => {
-    // TODO: Implementar funcionalidade de abrir pedido no PDV
-    toast({
-      title: "Funcionalidade em desenvolvimento",
-      description: "A funcionalidade de finalizar venda no PDV será implementada em breve.",
-    })
+  const completeOrder = async (order: Order) => {
+    try {
+      await completeOrderWithIntegration(order.id)
+      toast({
+        title: "Pedido finalizado",
+        description: "Pedido finalizado com sucesso. Estoque atualizado automaticamente.",
+      })
+      loadOrders()
+    } catch (error) {
+      toast({
+        title: "Erro ao finalizar pedido",
+        description: "Não foi possível finalizar o pedido.",
+        variant: "destructive",
+      })
+    }
   }
 
   const filteredOrders = orders.filter(order => {
@@ -294,10 +305,10 @@ const Orders = () => {
                     {order.status === 'confirmed' && order.payment_status === 'pending' && (
                       <Button
                         size="sm"
-                        onClick={() => goToPDV(order)}
+                        onClick={() => completeOrder(order)}
                       >
                         <Zap className="mr-2 h-4 w-4" />
-                        Finalizar no PDV
+                        Finalizar Pedido
                       </Button>
                     )}
                   </div>

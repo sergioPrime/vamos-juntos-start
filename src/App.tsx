@@ -10,6 +10,7 @@ import { AuthProvider } from "./hooks/useAuth";
 import { OrganizationProvider } from "./hooks/useOrganization";
 import { SubscriptionProvider } from "./hooks/useSubscription";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { SuperAdminRoute } from "./components/auth/SuperAdminRoute";
 import { AuthRedirect } from "./components/auth/AuthRedirect";
 import Dashboard from "./pages/Dashboard";
 import Receivables from "./pages/finance/Receivables";
@@ -230,11 +231,13 @@ const App = () => (
           } />
           <Route path="/admin" element={
             <ProtectedRoute>
-              <AppLayout>
-                <PageTransition direction="left">
-                  <AdminDashboard />
-                </PageTransition>
-              </AppLayout>
+              <SuperAdminRoute>
+                <AppLayout>
+                  <PageTransition direction="left">
+                    <AdminDashboard />
+                  </PageTransition>
+                </AppLayout>
+              </SuperAdminRoute>
             </ProtectedRoute>
           } />
           

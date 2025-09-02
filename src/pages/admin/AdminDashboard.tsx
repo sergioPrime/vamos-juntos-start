@@ -1,84 +1,84 @@
-import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
-import { supabase } from "@/integrations/supabase/client"
-import { useAuth } from "@/hooks/useAuth"
-import { toast } from "sonner"
 import { PlanManagement } from "@/components/admin/PlanManagement"
+import { useSuperAdmin } from "@/hooks/useSuperAdmin"
+import { useAuth } from "@/hooks/useAuth"
+import { useNavigate } from "react-router-dom"
+import { useEffect } from "react"
+import { Shield, Lock } from "lucide-react"
 
 export default function AdminDashboard() {
-  const [userRole, setUserRole] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
   const { user } = useAuth()
+  const { isSuperAdmin, loading } = useSuperAdmin()
+  const navigate = useNavigate()
 
   useEffect(() => {
-    checkSuperAdminRole()
-  }, [user])
-
-  const checkSuperAdminRole = async () => {
-    if (!user) {
-      setLoading(false)
-      return
+    // Se não tiver usuário logado, redireciona para login
+    if (!loading && !user) {
+      navigate("/auth")
     }
-
-    try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'superadmin')
-        .single()
-
-      if (error && error.code !== 'PGRST116') throw error
-      setUserRole(data?.role || null)
-    } catch (error) {
-      console.error('Erro ao verificar role:', error)
-      setUserRole(null)
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [user, loading, navigate])
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
-          <p className="text-muted-foreground">Verificando permissões...</p>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center space-y-4">
+          <Shield className="h-12 w-12 mx-auto text-muted-foreground animate-pulse" />
+          <div>
+            <h2 className="text-xl font-semibold">Verificando Permissões</h2>
+            <p className="text-muted-foreground">
+              Aguarde enquanto verificamos seus privilégios de acesso...
+            </p>
+          </div>
         </div>
       </div>
     )
   }
 
-  if (userRole !== 'superadmin') {
+  if (!isSuperAdmin) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Acesso Negado</h1>
-          <p className="text-muted-foreground">
-            Você não tem permissão para acessar o painel administrativo.
-          </p>
-        </div>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">
-              Apenas usuários com perfil de Super Administrador podem acessar esta área.
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center space-y-6">
+          <div className="mx-auto w-24 h-24 bg-destructive/10 rounded-full flex items-center justify-center">
+            <Lock className="h-12 w-12 text-destructive" />
+          </div>
+          
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold text-destructive">Acesso Negado</h1>
+            <p className="text-muted-foreground max-w-md">
+              Você não possui privilégios de Super Administrador necessários para acessar o painel administrativo.
             </p>
-          </CardContent>
-        </Card>
+          </div>
+          
+          <Card className="max-w-md mx-auto border-destructive/20">
+            <CardContent className="pt-6">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Shield className="h-4 w-4" />
+                  <span>Acesso restrito a Super Administradores</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Se você acredita que deveria ter acesso, entre em contato com um administrador do sistema.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
-        <p className="text-muted-foreground">
-          Gerencie planos de assinatura e configurações do sistema
-        </p>
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+          <Shield className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
+          <p className="text-muted-foreground">
+            Gerencie planos de assinatura e configurações do sistema
+          </p>
+        </div>
       </div>
 
       <PlanManagement />

@@ -1355,6 +1355,75 @@ export type Database = {
         }
         Relationships: []
       }
+      suppliers: {
+        Row: {
+          address: string | null
+          city: string | null
+          contact_person: string | null
+          country: string | null
+          created_at: string
+          created_by: string
+          credit_limit: number | null
+          document: string | null
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          org_id: string
+          payment_terms: string | null
+          phone: string | null
+          state: string | null
+          supplier_type: string | null
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          contact_person?: string | null
+          country?: string | null
+          created_at?: string
+          created_by: string
+          credit_limit?: number | null
+          document?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          org_id: string
+          payment_terms?: string | null
+          phone?: string | null
+          state?: string | null
+          supplier_type?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          contact_person?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string
+          credit_limit?: number | null
+          document?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          org_id?: string
+          payment_terms?: string | null
+          phone?: string | null
+          state?: string | null
+          supplier_type?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
       user_organizations: {
         Row: {
           created_at: string

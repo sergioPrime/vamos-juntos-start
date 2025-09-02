@@ -56,6 +56,7 @@ interface NewRequestForm {
   project_code: string
   expected_delivery_date: string
   justification: string
+  supplier_id: string
   items: Omit<PurchaseRequestItem, 'id' | 'estimated_total_price'>[]
 }
 
@@ -67,6 +68,7 @@ const PurchaseRequests = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [suppliers, setSuppliers] = useState<Array<{id: string, name: string}>>([])
   const [newRequest, setNewRequest] = useState<NewRequestForm>({
     title: '',
     description: '',
@@ -75,14 +77,38 @@ const PurchaseRequests = () => {
     project_code: '',
     expected_delivery_date: '',
     justification: '',
+    supplier_id: '',
     items: []
   })
 
   useEffect(() => {
     if (currentOrganization) {
       fetchPurchaseRequests()
+      fetchSuppliers()
     }
   }, [currentOrganization])
+
+  const fetchSuppliers = async () => {
+    if (!currentOrganization) return
+
+    try {
+      const { data, error } = await supabase
+        .from('suppliers')
+        .select('id, name')
+        .eq('org_id', currentOrganization.id)
+        .eq('is_active', true)
+        .order('name', { ascending: true })
+
+      if (error) {
+        console.error('Error fetching suppliers:', error)
+        return
+      }
+
+      setSuppliers(data || [])
+    } catch (error) {
+      console.error('Error fetching suppliers:', error)
+    }
+  }
 
   const fetchPurchaseRequests = async () => {
     if (!currentOrganization) return
@@ -224,6 +250,7 @@ const PurchaseRequests = () => {
         project_code: '',
         expected_delivery_date: '',
         justification: '',
+        supplier_id: '',
         items: []
       })
       fetchPurchaseRequests()
@@ -399,6 +426,22 @@ const PurchaseRequests = () => {
                     value={newRequest.expected_delivery_date}
                     onChange={(e) => setNewRequest(prev => ({ ...prev, expected_delivery_date: e.target.value }))}
                   />
+                </div>
+                
+                <div>
+                  <Label htmlFor="supplier_id">Fornecedor</Label>
+                  <Select value={newRequest.supplier_id} onValueChange={(value) => setNewRequest(prev => ({ ...prev, supplier_id: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um fornecedor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {suppliers.map((supplier) => (
+                        <SelectItem key={supplier.id} value={supplier.id}>
+                          {supplier.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div>

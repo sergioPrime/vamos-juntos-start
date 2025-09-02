@@ -41,6 +41,10 @@ const purchaseItems = [
   { title: "Relatórios", url: "/purchases/reports", icon: TrendingUp },
 ]
 
+const supplierItems = [
+  { title: "Fornecedores", url: "/suppliers", icon: Users },
+]
+
 
 const configItems = [
   { title: "Configurações", url: "/settings", icon: Settings },
@@ -108,7 +112,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Negócio</SidebarGroupLabel>
+          <SidebarGroupLabel>Vendas</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {businessItems.map((item) => (
@@ -143,6 +147,22 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {supplierItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} className={getNavClass}>
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
         <SidebarGroup>
           <SidebarGroupContent>

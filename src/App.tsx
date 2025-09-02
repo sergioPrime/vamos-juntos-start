@@ -29,6 +29,7 @@ import Products from "./pages/Products";
 import Orders from "./pages/Orders";
 import PurchaseRequests from "./pages/purchases/PurchaseRequests";
 import PurchaseReports from "./pages/purchases/PurchaseReports";
+import Suppliers from "./pages/Suppliers";
 import Welcome from "./pages/onboarding/Welcome";
 import Signup from "./pages/onboarding/Signup";
 import BusinessType from "./pages/onboarding/BusinessType";
@@ -180,6 +181,15 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <PurchaseReports />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/suppliers" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Suppliers />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

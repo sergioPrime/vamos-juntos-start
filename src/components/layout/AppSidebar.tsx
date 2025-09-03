@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, ShoppingCart, TrendingUp, PieChart, Package } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
@@ -11,6 +11,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
 
@@ -80,6 +81,7 @@ export function AppSidebar() {
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
       >
+        <SidebarRail />
         <SidebarContent>
           <div className="p-4">
             <h2 className={`font-bold text-sidebar-primary ${open ? "text-lg" : "text-xs text-center"}`}>
@@ -95,7 +97,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-4 w-4" />
-                       {open && <span>{item.title}</span>}
+                       <span>{item.title}</span>
                      </NavLink>
                    </SidebarMenuButton>
                  </SidebarMenuItem>
@@ -104,16 +106,16 @@ export function AppSidebar() {
            </SidebarGroupContent>
          </SidebarGroup>
 
-         <SidebarGroup>
-           {open && <SidebarGroupLabel>Financeiro</SidebarGroupLabel>}
-           <SidebarGroupContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Financeiro</SidebarGroupLabel>
+          <SidebarGroupContent>
              <SidebarMenu>
                {financeItems.map((item) => (
                  <SidebarMenuItem key={item.title}>
                    <SidebarMenuButton asChild>
                      <NavLink to={item.url} className={getNavClass}>
-                       <item.icon className="h-4 w-4" />
-                         {open && <span>{item.title}</span>}
+                        <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
                      </NavLink>
                    </SidebarMenuButton>
                  </SidebarMenuItem>
@@ -123,15 +125,15 @@ export function AppSidebar() {
          </SidebarGroup>
 
          <SidebarGroup>
-           {open && <SidebarGroupLabel>Vendas</SidebarGroupLabel>}
+           <SidebarGroupLabel>Vendas</SidebarGroupLabel>
            <SidebarGroupContent>
              <SidebarMenu>
                {businessItems.map((item) => (
                  <SidebarMenuItem key={item.title}>
                    <SidebarMenuButton asChild>
-                     <NavLink to={item.url} className={getNavClass}>
-                       <item.icon className="h-4 w-4" />
-                       {open && <span>{item.title}</span>}
+                      <NavLink to={item.url} className={getNavClass}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
                      </NavLink>
                    </SidebarMenuButton>
                  </SidebarMenuItem>
@@ -140,16 +142,16 @@ export function AppSidebar() {
            </SidebarGroupContent>
          </SidebarGroup>
 
-         <SidebarGroup>
-           {open && <SidebarGroupLabel>Compras</SidebarGroupLabel>}
-           <SidebarGroupContent>
-             <SidebarMenu>
-               {purchaseItems.map((item) => (
-                 <SidebarMenuItem key={item.title}>
-                   <SidebarMenuButton asChild>
-                     <NavLink to={item.url} className={getNavClass}>
-                       <item.icon className="h-4 w-4" />
-                         {open && <span>{item.title}</span>}
+          <SidebarGroup>
+            <SidebarGroupLabel>Compras</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {purchaseItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink to={item.url} className={getNavClass}>
+                        <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
                      </NavLink>
                    </SidebarMenuButton>
                  </SidebarMenuItem>
@@ -164,9 +166,9 @@ export function AppSidebar() {
                {supplierItems.map((item) => (
                  <SidebarMenuItem key={item.title}>
                    <SidebarMenuButton asChild>
-                     <NavLink to={item.url} className={getNavClass}>
-                       <item.icon className="h-4 w-4" />
-                        {open && <span>{item.title}</span>}
+                      <NavLink to={item.url} className={getNavClass}>
+                        <item.icon className="h-4 w-4" />
+                         <span>{item.title}</span>
                      </NavLink>
                    </SidebarMenuButton>
                  </SidebarMenuItem>
@@ -175,16 +177,16 @@ export function AppSidebar() {
            </SidebarGroupContent>
          </SidebarGroup>
 
-         <SidebarGroup>
-           {open && <SidebarGroupLabel>Estoque</SidebarGroupLabel>}
-           <SidebarGroupContent>
-             <SidebarMenu>
-               {inventoryItems.map((item) => (
-                 <SidebarMenuItem key={item.title}>
-                   <SidebarMenuButton asChild>
-                     <NavLink to={item.url} className={getNavClass}>
-                       <item.icon className="h-4 w-4" />
-                        {open && <span>{item.title}</span>}
+          <SidebarGroup>
+            <SidebarGroupLabel>Estoque</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {inventoryItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink to={item.url} className={getNavClass}>
+                        <item.icon className="h-4 w-4" />
+                         <span>{item.title}</span>
                      </NavLink>
                    </SidebarMenuButton>
                  </SidebarMenuItem>
@@ -199,9 +201,9 @@ export function AppSidebar() {
                {configItems.map((item) => (
                  <SidebarMenuItem key={item.title}>
                    <SidebarMenuButton asChild>
-                     <NavLink to={item.url} className={getNavClass}>
-                       <item.icon className="h-4 w-4" />
-                       {open && <span>{item.title}</span>}
+                      <NavLink to={item.url} className={getNavClass}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

@@ -79,13 +79,16 @@ export function AppSidebar() {
   const showContent = !collapsed || isHovered
 
   return (
-    <Sidebar
-      className={`${collapsed ? "w-14" : "w-60"} transition-all duration-300 ${isHovered && collapsed ? "w-60" : ""}`}
-      collapsible="icon"
+    <div 
+      className="relative"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <SidebarContent>
+      <Sidebar
+        className={`${collapsed ? "w-14" : "w-60"} transition-all duration-300 ${isHovered && collapsed ? "w-60" : ""}`}
+        collapsible="icon"
+      >
+        <SidebarContent>
         <div className="p-4">
           <h2 className={`font-bold text-sidebar-primary ${!showContent ? "text-center text-xs" : "text-lg"}`}>
             {!showContent ? "Prime" : "Prime ERP"}
@@ -216,6 +219,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
       </SidebarContent>
-    </Sidebar>
+      </Sidebar>
+    </div>
   )
 }

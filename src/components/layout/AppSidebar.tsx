@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, ShoppingCart, TrendingUp, PieChart, Package } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
@@ -57,10 +57,10 @@ const configItems = [
 
 
 export function AppSidebar() {
-  const { state, setOpen, open } = useSidebar()
+  const { setOpen, open } = useSidebar()
   const location = useLocation()
   const currentPath = location.pathname
-  const [isHovered, setIsHovered] = useState(false)
+  
 
   // Auto-collapse when navigating to new routes
   useEffect(() => {
@@ -68,33 +68,25 @@ export function AppSidebar() {
   }, [currentPath, setOpen])
 
   const isActive = (path: string) => currentPath === path
-  const isFinanceExpanded = financeItems.some((i) => isActive(i.url))
-  const isBusinessExpanded = businessItems.some((i) => isActive(i.url))
 
   const getNavClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "hover:bg-sidebar-accent/50"
 
-  // Show expanded content when hovered or open
-  const showContent = open || isHovered
-  const shouldExpand = isHovered && !open
-  
-  console.log('Sidebar state:', { open, isHovered, showContent, shouldExpand })
 
   return (
     <div 
-      className="relative group"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="relative"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
     >
       <Sidebar
-        className={`${!open ? "w-14 group-hover:w-60" : "w-60"} transition-all duration-300`}
+        className={`${open ? "w-60" : "w-14"} transition-all duration-300`}
         collapsible="icon"
       >
         <SidebarContent>
           <div className="p-4">
-            <h2 className={`font-bold text-sidebar-primary transition-all duration-300 ${!open ? "opacity-0 text-xs text-center group-hover:opacity-100 group-hover:text-lg" : "opacity-100 text-lg"}`}>
-              <span className={!open ? "group-hover:inline hidden" : "inline"}>Prime ERP</span>
-              <span className={!open ? "group-hover:hidden inline" : "hidden"}>Prime</span>
+            <h2 className={`font-bold text-sidebar-primary ${open ? "text-lg" : "text-xs text-center"}`}>
+              {open ? "Prime ERP" : "Prime"}
             </h2>
           </div>
 
@@ -106,7 +98,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-4 w-4" />
-                       <span className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:inline" : "opacity-100"} transition-opacity duration-300`}>{item.title}</span>
+                       {open && <span>{item.title}</span>}
                      </NavLink>
                    </SidebarMenuButton>
                  </SidebarMenuItem>
@@ -116,7 +108,7 @@ export function AppSidebar() {
          </SidebarGroup>
 
          <SidebarGroup>
-           <SidebarGroupLabel className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:block" : "opacity-100"} transition-opacity duration-300`}>Financeiro</SidebarGroupLabel>
+           {open && <SidebarGroupLabel>Financeiro</SidebarGroupLabel>}
            <SidebarGroupContent>
              <SidebarMenu>
                {financeItems.map((item) => (
@@ -124,7 +116,7 @@ export function AppSidebar() {
                    <SidebarMenuButton asChild>
                      <NavLink to={item.url} className={getNavClass}>
                        <item.icon className="h-4 w-4" />
-                        <span className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:inline" : "opacity-100"} transition-opacity duration-300`}>{item.title}</span>
+                         {open && <span>{item.title}</span>}
                      </NavLink>
                    </SidebarMenuButton>
                  </SidebarMenuItem>
@@ -134,7 +126,7 @@ export function AppSidebar() {
          </SidebarGroup>
 
          <SidebarGroup>
-           <SidebarGroupLabel className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:block" : "opacity-100"} transition-opacity duration-300`}>Vendas</SidebarGroupLabel>
+           {open && <SidebarGroupLabel>Vendas</SidebarGroupLabel>}
            <SidebarGroupContent>
              <SidebarMenu>
                {businessItems.map((item) => (
@@ -142,7 +134,7 @@ export function AppSidebar() {
                    <SidebarMenuButton asChild>
                      <NavLink to={item.url} className={getNavClass}>
                        <item.icon className="h-4 w-4" />
-                       <span className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:inline" : "opacity-100"} transition-opacity duration-300`}>{item.title}</span>
+                       {open && <span>{item.title}</span>}
                      </NavLink>
                    </SidebarMenuButton>
                  </SidebarMenuItem>
@@ -152,7 +144,7 @@ export function AppSidebar() {
          </SidebarGroup>
 
          <SidebarGroup>
-           <SidebarGroupLabel className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:block" : "opacity-100"} transition-opacity duration-300`}>Compras</SidebarGroupLabel>
+           {open && <SidebarGroupLabel>Compras</SidebarGroupLabel>}
            <SidebarGroupContent>
              <SidebarMenu>
                {purchaseItems.map((item) => (
@@ -160,7 +152,7 @@ export function AppSidebar() {
                    <SidebarMenuButton asChild>
                      <NavLink to={item.url} className={getNavClass}>
                        <item.icon className="h-4 w-4" />
-                       <span className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:inline" : "opacity-100"} transition-opacity duration-300`}>{item.title}</span>
+                         {open && <span>{item.title}</span>}
                      </NavLink>
                    </SidebarMenuButton>
                  </SidebarMenuItem>
@@ -177,7 +169,7 @@ export function AppSidebar() {
                    <SidebarMenuButton asChild>
                      <NavLink to={item.url} className={getNavClass}>
                        <item.icon className="h-4 w-4" />
-                       <span className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:inline" : "opacity-100"} transition-opacity duration-300`}>{item.title}</span>
+                        {open && <span>{item.title}</span>}
                      </NavLink>
                    </SidebarMenuButton>
                  </SidebarMenuItem>
@@ -187,7 +179,7 @@ export function AppSidebar() {
          </SidebarGroup>
 
          <SidebarGroup>
-           <SidebarGroupLabel className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:block" : "opacity-100"} transition-opacity duration-300`}>Estoque</SidebarGroupLabel>
+           {open && <SidebarGroupLabel>Estoque</SidebarGroupLabel>}
            <SidebarGroupContent>
              <SidebarMenu>
                {inventoryItems.map((item) => (
@@ -195,7 +187,7 @@ export function AppSidebar() {
                    <SidebarMenuButton asChild>
                      <NavLink to={item.url} className={getNavClass}>
                        <item.icon className="h-4 w-4" />
-                       <span className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:inline" : "opacity-100"} transition-opacity duration-300`}>{item.title}</span>
+                        {open && <span>{item.title}</span>}
                      </NavLink>
                    </SidebarMenuButton>
                  </SidebarMenuItem>
@@ -212,7 +204,7 @@ export function AppSidebar() {
                    <SidebarMenuButton asChild>
                      <NavLink to={item.url} className={getNavClass}>
                        <item.icon className="h-4 w-4" />
-                       <span className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:inline" : "opacity-100"} transition-opacity duration-300`}>{item.title}</span>
+                       {open && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

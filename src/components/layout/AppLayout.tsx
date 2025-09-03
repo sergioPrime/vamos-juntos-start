@@ -11,7 +11,7 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   return (
     <SidebarProvider
-      defaultOpen={true} // Allow open by default for desktop
+      defaultOpen={true} // Keep sidebar open by default
       style={{
         "--sidebar-width": "240px",
         "--sidebar-width-mobile": "280px",

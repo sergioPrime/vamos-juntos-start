@@ -63,10 +63,10 @@ export function AppSidebar() {
   const currentPath = location.pathname
   
 
-  // Auto-collapse when navigating to new routes
-  useEffect(() => {
-    setOpen(false)
-  }, [currentPath, setOpen])
+  // Auto-collapse when navigating to new routes (disabled)
+  // useEffect(() => {
+  //   setOpen(false)
+  // }, [currentPath, setOpen])
 
   const isActive = (path: string) => currentPath === path
 
@@ -76,11 +76,7 @@ export function AppSidebar() {
 
   return (
     <div className="relative">
-      <Sidebar
-        collapsible="icon"
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
-      >
+      <Sidebar collapsible="icon">
         <SidebarRail />
         <SidebarContent>
           <div className="p-4">

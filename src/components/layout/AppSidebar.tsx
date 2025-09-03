@@ -57,10 +57,9 @@ const configItems = [
 
 
 export function AppSidebar() {
-  const { state, setOpen } = useSidebar()
+  const { state, setOpen, open } = useSidebar()
   const location = useLocation()
   const currentPath = location.pathname
-  const collapsed = state === "collapsed"
   const [isHovered, setIsHovered] = useState(false)
 
   // Auto-collapse when navigating to new routes
@@ -75,8 +74,9 @@ export function AppSidebar() {
   const getNavClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "hover:bg-sidebar-accent/50"
 
-  // Show expanded content when hovered or not collapsed
-  const showContent = !collapsed || isHovered
+  // Show expanded content when hovered or open
+  const showContent = open || isHovered
+  const shouldExpand = isHovered && !open
 
   return (
     <div 
@@ -85,7 +85,7 @@ export function AppSidebar() {
       onMouseLeave={() => setIsHovered(false)}
     >
       <Sidebar
-        className={`${collapsed ? "w-14" : "w-60"} transition-all duration-300 ${isHovered && collapsed ? "w-60" : ""}`}
+        className={`${!open ? "w-14" : "w-60"} transition-all duration-300 ${shouldExpand ? "!w-60" : ""}`}
         collapsible="icon"
       >
         <SidebarContent>

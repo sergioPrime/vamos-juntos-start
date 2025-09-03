@@ -11,10 +11,10 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   return (
     <SidebarProvider
-      defaultOpen={false} // Start collapsed on mobile
+      defaultOpen={true} // Allow open by default for desktop
       style={{
-        "--sidebar-width": "280px",
-        "--sidebar-width-mobile": "320px",
+        "--sidebar-width": "240px",
+        "--sidebar-width-mobile": "280px",
       } as React.CSSProperties}
     >
       <div className="min-h-screen flex w-full relative">

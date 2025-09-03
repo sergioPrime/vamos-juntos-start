@@ -89,11 +89,11 @@ export function AppSidebar() {
         collapsible="icon"
       >
         <SidebarContent>
-        <div className="p-4">
-          <h2 className={`font-bold text-sidebar-primary ${!showContent ? "text-center text-xs" : "text-lg"}`}>
-            {!showContent ? "Prime" : "Prime ERP"}
-          </h2>
-        </div>
+          <div className="p-4">
+            <h2 className={`font-bold text-sidebar-primary transition-opacity duration-300 ${!showContent ? "opacity-0 text-center text-xs" : "opacity-100 text-lg"}`}>
+              {!showContent ? "Prime" : "Prime ERP"}
+            </h2>
+          </div>
 
         <SidebarGroup>
           <SidebarGroupContent>
@@ -103,7 +103,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-4 w-4" />
-                       {showContent && <span>{item.title}</span>}
+                       {showContent && <span className="transition-opacity duration-300">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -121,7 +121,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-4 w-4" />
-                      {showContent && <span>{item.title}</span>}
+                       {showContent && <span className="transition-opacity duration-300">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -131,7 +131,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          {showContent && <SidebarGroupLabel>Vendas</SidebarGroupLabel>}
+          {showContent && <SidebarGroupLabel className="transition-opacity duration-300">Vendas</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {businessItems.map((item) => (
@@ -139,7 +139,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-4 w-4" />
-                      {showContent && <span>{item.title}</span>}
+                      {showContent && <span className="transition-opacity duration-300">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -149,7 +149,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          {showContent && <SidebarGroupLabel>Compras</SidebarGroupLabel>}
+          {showContent && <SidebarGroupLabel className="transition-opacity duration-300">Compras</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {purchaseItems.map((item) => (
@@ -157,7 +157,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-4 w-4" />
-                      {showContent && <span>{item.title}</span>}
+                      {showContent && <span className="transition-opacity duration-300">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -174,7 +174,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-4 w-4" />
-                      {showContent && <span>{item.title}</span>}
+                      {showContent && <span className="transition-opacity duration-300">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -184,7 +184,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          {showContent && <SidebarGroupLabel>Estoque</SidebarGroupLabel>}
+          {showContent && <SidebarGroupLabel className="transition-opacity duration-300">Estoque</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {inventoryItems.map((item) => (
@@ -192,7 +192,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-4 w-4" />
-                      {showContent && <span>{item.title}</span>}
+                      {showContent && <span className="transition-opacity duration-300">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -209,7 +209,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-4 w-4" />
-                      {showContent && <span>{item.title}</span>}
+                      {showContent && <span className="transition-opacity duration-300">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

@@ -74,14 +74,11 @@ export function AppSidebar() {
 
 
   return (
-    <div 
-      className="relative"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-    >
+    <div className="relative">
       <Sidebar
-        className={`${open ? "w-60" : "w-14"} transition-all duration-300`}
         collapsible="icon"
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
       >
         <SidebarContent>
           <div className="p-4">

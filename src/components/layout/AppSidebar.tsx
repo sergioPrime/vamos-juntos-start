@@ -77,21 +77,24 @@ export function AppSidebar() {
   // Show expanded content when hovered or open
   const showContent = open || isHovered
   const shouldExpand = isHovered && !open
+  
+  console.log('Sidebar state:', { open, isHovered, showContent, shouldExpand })
 
   return (
     <div 
-      className="relative"
+      className="relative group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <Sidebar
-        className={`${!open ? "w-14" : "w-60"} transition-all duration-300 ${shouldExpand ? "!w-60" : ""}`}
+        className={`${!open ? "w-14 group-hover:w-60" : "w-60"} transition-all duration-300`}
         collapsible="icon"
       >
         <SidebarContent>
           <div className="p-4">
-            <h2 className={`font-bold text-sidebar-primary transition-opacity duration-300 ${!showContent ? "opacity-0 text-center text-xs" : "opacity-100 text-lg"}`}>
-              {!showContent ? "Prime" : "Prime ERP"}
+            <h2 className={`font-bold text-sidebar-primary transition-all duration-300 ${!open ? "opacity-0 text-xs text-center group-hover:opacity-100 group-hover:text-lg" : "opacity-100 text-lg"}`}>
+              <span className={!open ? "group-hover:inline hidden" : "inline"}>Prime ERP</span>
+              <span className={!open ? "group-hover:hidden inline" : "hidden"}>Prime</span>
             </h2>
           </div>
 
@@ -103,113 +106,113 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClass}>
                       <item.icon className="h-4 w-4" />
-                       {showContent && <span className="transition-opacity duration-300">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                       <span className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:inline" : "opacity-100"} transition-opacity duration-300`}>{item.title}</span>
+                     </NavLink>
+                   </SidebarMenuButton>
+                 </SidebarMenuItem>
+               ))}
+             </SidebarMenu>
+           </SidebarGroupContent>
+         </SidebarGroup>
 
-        <SidebarGroup>
-          {showContent && <SidebarGroupLabel>Financeiro</SidebarGroupLabel>}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {financeItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavClass}>
-                      <item.icon className="h-4 w-4" />
-                       {showContent && <span className="transition-opacity duration-300">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+         <SidebarGroup>
+           <SidebarGroupLabel className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:block" : "opacity-100"} transition-opacity duration-300`}>Financeiro</SidebarGroupLabel>
+           <SidebarGroupContent>
+             <SidebarMenu>
+               {financeItems.map((item) => (
+                 <SidebarMenuItem key={item.title}>
+                   <SidebarMenuButton asChild>
+                     <NavLink to={item.url} className={getNavClass}>
+                       <item.icon className="h-4 w-4" />
+                        <span className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:inline" : "opacity-100"} transition-opacity duration-300`}>{item.title}</span>
+                     </NavLink>
+                   </SidebarMenuButton>
+                 </SidebarMenuItem>
+               ))}
+             </SidebarMenu>
+           </SidebarGroupContent>
+         </SidebarGroup>
 
-        <SidebarGroup>
-          {showContent && <SidebarGroupLabel className="transition-opacity duration-300">Vendas</SidebarGroupLabel>}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {businessItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavClass}>
-                      <item.icon className="h-4 w-4" />
-                      {showContent && <span className="transition-opacity duration-300">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+         <SidebarGroup>
+           <SidebarGroupLabel className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:block" : "opacity-100"} transition-opacity duration-300`}>Vendas</SidebarGroupLabel>
+           <SidebarGroupContent>
+             <SidebarMenu>
+               {businessItems.map((item) => (
+                 <SidebarMenuItem key={item.title}>
+                   <SidebarMenuButton asChild>
+                     <NavLink to={item.url} className={getNavClass}>
+                       <item.icon className="h-4 w-4" />
+                       <span className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:inline" : "opacity-100"} transition-opacity duration-300`}>{item.title}</span>
+                     </NavLink>
+                   </SidebarMenuButton>
+                 </SidebarMenuItem>
+               ))}
+             </SidebarMenu>
+           </SidebarGroupContent>
+         </SidebarGroup>
 
-        <SidebarGroup>
-          {showContent && <SidebarGroupLabel className="transition-opacity duration-300">Compras</SidebarGroupLabel>}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {purchaseItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavClass}>
-                      <item.icon className="h-4 w-4" />
-                      {showContent && <span className="transition-opacity duration-300">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+         <SidebarGroup>
+           <SidebarGroupLabel className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:block" : "opacity-100"} transition-opacity duration-300`}>Compras</SidebarGroupLabel>
+           <SidebarGroupContent>
+             <SidebarMenu>
+               {purchaseItems.map((item) => (
+                 <SidebarMenuItem key={item.title}>
+                   <SidebarMenuButton asChild>
+                     <NavLink to={item.url} className={getNavClass}>
+                       <item.icon className="h-4 w-4" />
+                       <span className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:inline" : "opacity-100"} transition-opacity duration-300`}>{item.title}</span>
+                     </NavLink>
+                   </SidebarMenuButton>
+                 </SidebarMenuItem>
+               ))}
+             </SidebarMenu>
+           </SidebarGroupContent>
+         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {supplierItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavClass}>
-                      <item.icon className="h-4 w-4" />
-                      {showContent && <span className="transition-opacity duration-300">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+         <SidebarGroup>
+           <SidebarGroupContent>
+             <SidebarMenu>
+               {supplierItems.map((item) => (
+                 <SidebarMenuItem key={item.title}>
+                   <SidebarMenuButton asChild>
+                     <NavLink to={item.url} className={getNavClass}>
+                       <item.icon className="h-4 w-4" />
+                       <span className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:inline" : "opacity-100"} transition-opacity duration-300`}>{item.title}</span>
+                     </NavLink>
+                   </SidebarMenuButton>
+                 </SidebarMenuItem>
+               ))}
+             </SidebarMenu>
+           </SidebarGroupContent>
+         </SidebarGroup>
 
-        <SidebarGroup>
-          {showContent && <SidebarGroupLabel className="transition-opacity duration-300">Estoque</SidebarGroupLabel>}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {inventoryItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavClass}>
-                      <item.icon className="h-4 w-4" />
-                      {showContent && <span className="transition-opacity duration-300">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+         <SidebarGroup>
+           <SidebarGroupLabel className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:block" : "opacity-100"} transition-opacity duration-300`}>Estoque</SidebarGroupLabel>
+           <SidebarGroupContent>
+             <SidebarMenu>
+               {inventoryItems.map((item) => (
+                 <SidebarMenuItem key={item.title}>
+                   <SidebarMenuButton asChild>
+                     <NavLink to={item.url} className={getNavClass}>
+                       <item.icon className="h-4 w-4" />
+                       <span className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:inline" : "opacity-100"} transition-opacity duration-300`}>{item.title}</span>
+                     </NavLink>
+                   </SidebarMenuButton>
+                 </SidebarMenuItem>
+               ))}
+             </SidebarMenu>
+           </SidebarGroupContent>
+         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {configItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavClass}>
-                      <item.icon className="h-4 w-4" />
-                      {showContent && <span className="transition-opacity duration-300">{item.title}</span>}
+         <SidebarGroup>
+           <SidebarGroupContent>
+             <SidebarMenu>
+               {configItems.map((item) => (
+                 <SidebarMenuItem key={item.title}>
+                   <SidebarMenuButton asChild>
+                     <NavLink to={item.url} className={getNavClass}>
+                       <item.icon className="h-4 w-4" />
+                       <span className={`${!open ? "opacity-0 group-hover:opacity-100 hidden group-hover:inline" : "opacity-100"} transition-opacity duration-300`}>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

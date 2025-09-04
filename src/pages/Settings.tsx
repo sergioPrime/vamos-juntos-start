@@ -1,6 +1,7 @@
 import { PermissionsAndAccess } from "@/components/settings/PermissionsAndAccess"
 import { CompaniesTab } from "@/components/settings/CompaniesTab"
 import { APIIntegrations } from "@/components/integrations/APIIntegrations"
+import { ERPSettings } from "@/components/settings/ERPSettings"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 export default function Settings() {
@@ -36,9 +37,7 @@ export default function Settings() {
         <AccordionItem value="erp-config" className="border rounded-lg">
           <AccordionTrigger className="px-6">Configurações do ERP</AccordionTrigger>
           <AccordionContent className="px-6">
-            <div className="p-4 text-center text-muted-foreground">
-              Configurações específicas do sistema ERP serão implementadas aqui.
-            </div>
+            <ERPSettings />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

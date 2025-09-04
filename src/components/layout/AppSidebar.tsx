@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react"
 import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, ShoppingCart, TrendingUp, PieChart, Package, RefreshCw } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
+import { useSidebarConfig } from "@/contexts/SidebarConfigContext"
 
 import {
   Sidebar,
@@ -63,6 +64,7 @@ const configItems = [
 
 export function AppSidebar() {
   const { setOpen, open } = useSidebar()
+  const { clickOnlyMode } = useSidebarConfig()
   const location = useLocation()
   const currentPath = location.pathname
   
@@ -77,10 +79,25 @@ export function AppSidebar() {
   const getNavClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "hover:bg-sidebar-accent/50"
 
+  const handleMouseEnter = () => {
+    if (!clickOnlyMode && !open) {
+      setOpen(true)
+    }
+  }
+
+  const handleMouseLeave = () => {
+    if (!clickOnlyMode && open) {
+      setOpen(false)
+    }
+  }
 
   return (
     <div className="relative">
-      <Sidebar collapsible="icon">
+      <Sidebar 
+        collapsible="icon"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
         <SidebarRail />
         <SidebarContent>
           <div className="p-4">

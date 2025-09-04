@@ -9,6 +9,7 @@ import { NotificationProvider } from "./components/ui/notification-system";
 import { AuthProvider } from "./hooks/useAuth";
 import { OrganizationProvider } from "./hooks/useOrganization";
 import { SubscriptionProvider } from "./hooks/useSubscription";
+import { SidebarConfigProvider } from "./contexts/SidebarConfigContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { SuperAdminRoute } from "./components/auth/SuperAdminRoute";
 import { AuthRedirect } from "./components/auth/AuthRedirect";
@@ -54,8 +55,9 @@ const App = () => (
     <AuthProvider>
       <OrganizationProvider>
         <SubscriptionProvider>
-          <TooltipProvider>
-          <NotificationProvider>
+          <SidebarConfigProvider>
+            <TooltipProvider>
+            <NotificationProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -297,8 +299,9 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
           </BrowserRouter>
-        </NotificationProvider>
-          </TooltipProvider>
+          </NotificationProvider>
+            </TooltipProvider>
+          </SidebarConfigProvider>
         </SubscriptionProvider>
       </OrganizationProvider>
     </AuthProvider>

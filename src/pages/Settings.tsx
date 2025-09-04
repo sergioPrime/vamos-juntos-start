@@ -1,27 +1,9 @@
-import { useState, useEffect } from "react"
-import { useSearchParams } from "react-router-dom"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { SubscriptionPlans } from "@/components/subscription/SubscriptionPlans"
 import { PermissionsAndAccess } from "@/components/settings/PermissionsAndAccess"
 import { CompaniesTab } from "@/components/settings/CompaniesTab"
 import { APIIntegrations } from "@/components/integrations/APIIntegrations"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 export default function Settings() {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [activeTab, setActiveTab] = useState("permissions")
-
-  useEffect(() => {
-    const tab = searchParams.get("tab")
-    if (tab) {
-      setActiveTab(tab)
-    }
-  }, [searchParams])
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value)
-    setSearchParams(value === "permissions" ? {} : { tab: value })
-  }
-
   return (
     <div className="space-y-6">
       <div>
@@ -29,30 +11,28 @@ export default function Settings() {
         <p className="text-muted-foreground">Gerencie as configurações do sistema</p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="permissions">Permissões</TabsTrigger>
-          <TabsTrigger value="companies">Empresas</TabsTrigger>
-          <TabsTrigger value="integrations">Integrações</TabsTrigger>
-          <TabsTrigger value="subscription">Planos</TabsTrigger>
-        </TabsList>
+      <Accordion type="single" collapsible className="w-full space-y-4">
+        <AccordionItem value="permissions" className="border rounded-lg">
+          <AccordionTrigger className="px-6">Permissões e Acessos</AccordionTrigger>
+          <AccordionContent className="px-6">
+            <PermissionsAndAccess />
+          </AccordionContent>
+        </AccordionItem>
         
-        <TabsContent value="permissions" className="space-y-6">
-          <PermissionsAndAccess />
-        </TabsContent>
+        <AccordionItem value="companies" className="border rounded-lg">
+          <AccordionTrigger className="px-6">Empresas</AccordionTrigger>
+          <AccordionContent className="px-6">
+            <CompaniesTab />
+          </AccordionContent>
+        </AccordionItem>
         
-        <TabsContent value="companies" className="space-y-6">
-          <CompaniesTab />
-        </TabsContent>
-        
-        <TabsContent value="integrations" className="space-y-6">
-          <APIIntegrations />
-        </TabsContent>
-        
-        <TabsContent value="subscription" className="space-y-6">
-          <SubscriptionPlans />
-        </TabsContent>
-      </Tabs>
+        <AccordionItem value="integrations" className="border rounded-lg">
+          <AccordionTrigger className="px-6">Integrações</AccordionTrigger>
+          <AccordionContent className="px-6">
+            <APIIntegrations />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
   )
 }

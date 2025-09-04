@@ -23,6 +23,7 @@ import Quotes from "./pages/Quotes";
 import Customers from "./pages/Customers";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import RenovarLicenca from "./pages/RenovarLicenca";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import PDV from "./pages/PDV";
 import Products from "./pages/Products";
@@ -267,6 +268,15 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <Settings />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/renovar-licenca" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <RenovarLicenca />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react"
-import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, ShoppingCart, TrendingUp, PieChart, Package } from "lucide-react"
+import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, ShoppingCart, TrendingUp, PieChart, Package, RefreshCw } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
 import {
@@ -51,6 +51,10 @@ const inventoryItems = [
   { title: "Relatórios", url: "/inventory/reports", icon: BarChart3 },
 ]
 
+
+const licenseItems = [
+  { title: "Renovar Licença", url: "/renovar-licenca", icon: RefreshCw },
+]
 
 const configItems = [
   { title: "Configurações", url: "/settings", icon: Settings },
@@ -189,12 +193,29 @@ export function AppSidebar() {
                ))}
              </SidebarMenu>
            </SidebarGroupContent>
-         </SidebarGroup>
+        </SidebarGroup>
 
-         <SidebarGroup>
-           <SidebarGroupContent>
-             <SidebarMenu>
-               {configItems.map((item) => (
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {licenseItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                     <NavLink to={item.url} className={getNavClass}>
+                       <item.icon className="h-4 w-4" />
+                       <span>{item.title}</span>
+                   </NavLink>
+                 </SidebarMenuButton>
+               </SidebarMenuItem>
+             ))}
+           </SidebarMenu>
+         </SidebarGroupContent>
+       </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {configItems.map((item) => (
                  <SidebarMenuItem key={item.title}>
                    <SidebarMenuButton asChild>
                       <NavLink to={item.url} className={getNavClass}>

@@ -18,6 +18,12 @@ import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/use-toast"
 import { useTheme } from "@/hooks/useTheme"
 import { useSuperAdmin } from "@/hooks/useSuperAdmin"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export function AppHeader() {
   const navigate = useNavigate()
@@ -45,61 +51,86 @@ export function AppHeader() {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-14 sm:h-16 border-b bg-background/80 backdrop-blur-sm flex items-center justify-between px-3 sm:px-4 lg:px-6 shrink-0 z-50">
-      <div className="flex items-center gap-2 sm:gap-4">
-        <SidebarTrigger />
-        <h1 className="font-semibold text-sm sm:text-base lg:text-lg truncate">
-          Vamos Juntos
-        </h1>
-      </div>
-      
-      {/* Desktop Actions */}
-      <div className="hidden lg:flex items-center gap-2">
-        <Button 
-          onClick={() => navigate("/finance/receivables")}
-          className="bg-primary text-primary-foreground hover:bg-primary/90"
-          size="sm"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Cobrança Pix
-        </Button>
+    <TooltipProvider>
+      <header className="fixed top-0 left-0 right-0 h-14 sm:h-16 border-b bg-background/80 backdrop-blur-sm flex items-center justify-between px-3 sm:px-4 lg:px-6 shrink-0 z-50">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <SidebarTrigger />
+          <h1 className="font-semibold text-sm sm:text-base lg:text-lg truncate">
+            Vamos Juntos
+          </h1>
+        </div>
         
-        <Button 
-          variant="outline"
-          onClick={() => navigate("/pdv")}
-          size="sm"
-        >
-          <Zap className="h-4 w-4 mr-2" />
-          PDV
-        </Button>
-        
-        <Button 
-          variant="outline"
-          onClick={() => navigate("/nfse")}
-          size="sm"
-        >
-          <FileText className="h-4 w-4 mr-2" />
-          Emitir NFS-e
-        </Button>
-        
-        <Button 
-          variant="outline"
-          onClick={() => navigate("/quotes")}
-          size="sm"
-        >
-          <Calculator className="h-4 w-4 mr-2" />
-          Orçamento
-        </Button>
-        
-        {/* Alert Notification Bell */}
-        <AlertNotificationBell />
-        
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <User className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
+        {/* Desktop Actions */}
+        <div className="hidden lg:flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                onClick={() => navigate("/finance/receivables")}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+                size="icon"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Cobrança Pix</p>
+            </TooltipContent>
+          </Tooltip>
+          
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="outline"
+                onClick={() => navigate("/pdv")}
+                size="icon"
+              >
+                <Zap className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>PDV</p>
+            </TooltipContent>
+          </Tooltip>
+          
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="outline"
+                onClick={() => navigate("/nfse")}
+                size="icon"
+              >
+                <FileText className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Emitir NFS-e</p>
+            </TooltipContent>
+          </Tooltip>
+          
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="outline"
+                onClick={() => navigate("/quotes")}
+                size="icon"
+              >
+                <Calculator className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Orçamento</p>
+            </TooltipContent>
+          </Tooltip>
+          
+          {/* Alert Notification Bell */}
+          <AlertNotificationBell />
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <User className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem onClick={() => setShowProfile(true)}>
               <User className="h-4 w-4 mr-2" />
@@ -140,23 +171,29 @@ export function AppHeader() {
         </DropdownMenu>
       </div>
 
-      {/* Mobile Actions */}
-      <div className="flex lg:hidden items-center gap-2">
-        <Button 
-          onClick={() => navigate("/finance/receivables")}
-          className="bg-primary text-primary-foreground hover:bg-primary/90"
-          size="sm"
-        >
-          <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline ml-2">Pix</span>
-        </Button>
-        
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
+        {/* Mobile Actions */}
+        <div className="flex lg:hidden items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                onClick={() => navigate("/finance/receivables")}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+                size="icon"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Cobrança Pix</p>
+            </TooltipContent>
+          </Tooltip>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={() => navigate("/pdv")}>
               <Zap className="h-4 w-4 mr-2" />
@@ -205,14 +242,15 @@ export function AppHeader() {
               <LogOut className="h-4 w-4 mr-2" />
               Sair
             </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      
-      <UserProfileDialog 
-        open={showProfile} 
-        onOpenChange={setShowProfile}
-      />
-    </header>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        
+        <UserProfileDialog 
+          open={showProfile} 
+          onOpenChange={setShowProfile}
+        />
+      </header>
+    </TooltipProvider>
   )
 }

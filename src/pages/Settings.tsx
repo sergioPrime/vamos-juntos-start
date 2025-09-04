@@ -32,6 +32,15 @@ export default function Settings() {
             <APIIntegrations />
           </AccordionContent>
         </AccordionItem>
+        
+        <AccordionItem value="erp-config" className="border rounded-lg">
+          <AccordionTrigger className="px-6">Configurações do ERP</AccordionTrigger>
+          <AccordionContent className="px-6">
+            <div className="p-4 text-center text-muted-foreground">
+              Configurações específicas do sistema ERP serão implementadas aqui.
+            </div>
+          </AccordionContent>
+        </AccordionItem>
       </Accordion>
     </div>
   )

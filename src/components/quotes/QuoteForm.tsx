@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { useSidebarConfig } from "@/contexts/SidebarConfigContext"
+import { supabase } from "@/integrations/supabase/client"
 
 interface QuoteItem {
   id?: string
@@ -62,6 +63,7 @@ const QuoteForm = () => {
   const { lockNumberFields } = useSidebarConfig()
   
   const [loading, setLoading] = useState(false)
+  const [customers, setCustomers] = useState<any[]>([])
   const [formData, setFormData] = useState<QuoteFormData>({
     number: "",
     title: "",
@@ -130,7 +132,25 @@ const QuoteForm = () => {
     } else {
       generateQuoteNumber()
     }
+    loadCustomers()
   }, [id])
+
+  const loadCustomers = async () => {
+    if (!currentOrg?.id) return
+    
+    try {
+      const { data, error } = await supabase
+        .from('customers')
+        .select('id, name, email, phone')
+        .eq('org_id', currentOrg.id)
+        .order('name')
+      
+      if (error) throw error
+      setCustomers(data || [])
+    } catch (error) {
+      console.error('Error loading customers:', error)
+    }
+  }
 
   const generateQuoteNumber = () => {
     // Generate sequential number starting from 1
@@ -321,9 +341,11 @@ const QuoteForm = () => {
                       <SelectValue placeholder="Selecione um cliente" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="client-1">João Silva</SelectItem>
-                      <SelectItem value="client-2">Maria Santos</SelectItem>
-                      <SelectItem value="client-3">Empresa ABC</SelectItem>
+                      {customers.map((customer) => (
+                        <SelectItem key={customer.id} value={customer.id}>
+                          {customer.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

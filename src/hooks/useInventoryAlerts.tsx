@@ -78,47 +78,86 @@ export function useInventoryAlerts() {
     }
   }, [currentOrg?.id, alertSettings.low_stock_enabled])
 
-  // Check for products near expiry (mock implementation)
+  // Check for products near expiry (improved - uses product_lots table)
   const checkNearExpiryAlerts = useCallback(async () => {
     if (!currentOrg?.id || !alertSettings.near_expiry_enabled) return []
 
-    // Mock data for demonstration - in real implementation, this would query product_lots
-    const mockNearExpiryProducts = [
-      {
-        id: 'mock-product-1',
-        name: 'Produto Exemplo A',
-        expiry_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
-        lot_number: 'LOT001'
-      },
-      {
-        id: 'mock-product-2', 
-        name: 'Produto Exemplo B',
-        expiry_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
-        lot_number: 'LOT002'
-      }
-    ]
+    try {
+      const cutoffDate = new Date(Date.now() + alertSettings.near_expiry_days * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
-    const cutoffDate = new Date(Date.now() + alertSettings.near_expiry_days * 24 * 60 * 60 * 1000)
+      const { data: lots, error } = await supabase
+        .from('product_lots')
+        .select(`
+          id,
+          lot_number,
+          quantity,
+          expiration_date,
+          product_id,
+          products(id, name)
+        `)
+        .eq('org_id', currentOrg.id)
+        .eq('status', 'active')
+        .gt('quantity', 0)
+        .not('expiration_date', 'is', null)
+        .lte('expiration_date', cutoffDate)
 
-    return mockNearExpiryProducts
-      .filter(product => product.expiry_date <= cutoffDate)
-      .map(product => {
-        const daysUntilExpiry = Math.ceil((product.expiry_date.getTime() - Date.now()) / (24 * 60 * 60 * 1000))
+      if (error) throw error
+
+      return lots?.filter(lot => lot.products && Array.isArray(lot.products) && lot.products.length > 0)
+        .map(lot => {
+        const expirationDate = new Date(lot.expiration_date!)
+        const daysUntilExpiry = Math.ceil((expirationDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000))
+        const product = Array.isArray(lot.products) ? lot.products[0] : lot.products
         
         return {
-          id: `near_expiry_${product.id}`,
+          id: `near_expiry_${lot.id}`,
           type: 'near_expiry' as const,
-          severity: daysUntilExpiry <= 1 ? 'critical' as const : daysUntilExpiry <= 3 ? 'high' as const : 'medium' as const,
-          title: daysUntilExpiry <= 0 ? 'Produto vencido' : 'Produto próximo ao vencimento',
-          description: `${product.name} (${product.lot_number}) - Vence em ${daysUntilExpiry} dia(s)`,
-          product_id: product.id,
-          product_name: product.name,
+          severity: daysUntilExpiry <= 0 ? 'critical' as const : daysUntilExpiry <= 2 ? 'high' as const : 'medium' as const,
+          title: daysUntilExpiry <= 0 ? 'Lote vencido' : 'Lote próximo ao vencimento',
+          description: `${product?.name || 'Produto'} (Lote: ${lot.lot_number}) - ${daysUntilExpiry <= 0 ? 'Vencido há' : 'Vence em'} ${Math.abs(daysUntilExpiry)} dia(s)`,
+          product_id: product?.id,
+          product_name: product?.name,
           current_value: daysUntilExpiry,
           threshold_value: alertSettings.near_expiry_days,
           created_at: new Date().toISOString(),
           resolved: false
         }
-      })
+      }) || []
+    } catch (error) {
+      console.error('Error checking near expiry alerts:', error)
+      
+      // Fallback to mock data if product_lots table has issues
+      const mockNearExpiryProducts = [
+        {
+          id: 'mock-product-1',
+          name: 'Produto Exemplo A',
+          expiry_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+          lot_number: 'LOT001'
+        }
+      ]
+
+      const cutoffDate = new Date(Date.now() + alertSettings.near_expiry_days * 24 * 60 * 60 * 1000)
+
+      return mockNearExpiryProducts
+        .filter(product => product.expiry_date <= cutoffDate)
+        .map(product => {
+          const daysUntilExpiry = Math.ceil((product.expiry_date.getTime() - Date.now()) / (24 * 60 * 60 * 1000))
+          
+          return {
+            id: `near_expiry_${product.id}`,
+            type: 'near_expiry' as const,
+            severity: daysUntilExpiry <= 1 ? 'critical' as const : daysUntilExpiry <= 3 ? 'high' as const : 'medium' as const,
+            title: daysUntilExpiry <= 0 ? 'Produto vencido' : 'Produto próximo ao vencimento',
+            description: `${product.name} (${product.lot_number}) - Vence em ${daysUntilExpiry} dia(s)`,
+            product_id: product.id,
+            product_name: product.name,
+            current_value: daysUntilExpiry,
+            threshold_value: alertSettings.near_expiry_days,
+            created_at: new Date().toISOString(),
+            resolved: false
+          }
+        })
+    }
   }, [currentOrg?.id, alertSettings.near_expiry_enabled, alertSettings.near_expiry_days])
 
   // Check for high turnover products

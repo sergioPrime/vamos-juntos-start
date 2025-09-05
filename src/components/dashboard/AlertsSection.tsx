@@ -20,7 +20,11 @@ import {
   Zap,
   FileX,
   Settings,
-  RefreshCw
+  RefreshCw,
+  Clock,
+  Users,
+  Package2,
+  CreditCard
 } from 'lucide-react'
 
 export function AlertsSection() {
@@ -66,6 +70,8 @@ export function AlertsSection() {
       switch (alert.type) {
         case 'overdue_receivables':
           return <DollarSign className="h-4 w-4" />
+        case 'overdue_payables':
+          return <CreditCard className="h-4 w-4" />
         case 'low_balance':
           return <Wallet className="h-4 w-4" />
         case 'budget_exceeded':
@@ -74,6 +80,12 @@ export function AlertsSection() {
           return <Zap className="h-4 w-4" />
         case 'rejected_nfse':
           return <FileX className="h-4 w-4" />
+        case 'pending_orders':
+          return <Clock className="h-4 w-4" />
+        case 'inactive_customers':
+          return <Users className="h-4 w-4" />
+        case 'stagnant_products':
+          return <Package2 className="h-4 w-4" />
         default:
           return <AlertCircle className="h-4 w-4" />
       }

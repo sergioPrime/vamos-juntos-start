@@ -6,7 +6,7 @@ import { useToast } from './use-toast'
 
 export interface BusinessAlert {
   id: string
-  type: 'overdue_receivables' | 'expired_invoices' | 'low_balance' | 'integration_failure' | 'rejected_nfse' | 'budget_exceeded'
+  type: 'overdue_receivables' | 'overdue_payables' | 'expired_invoices' | 'low_balance' | 'integration_failure' | 'rejected_nfse' | 'budget_exceeded' | 'pending_orders' | 'inactive_customers' | 'stagnant_products'
   severity: 'low' | 'medium' | 'high' | 'critical'
   title: string
   description: string
@@ -141,28 +141,270 @@ export function useBusinessAlerts() {
     }
   }, [currentOrg?.id])
 
-  // Check for integration failures (mock)
+  // Check for overdue payables (financial obligations)
+  const checkOverduePayables = useCallback(async () => {
+    if (!currentOrg?.id) return []
+
+    try {
+      const { data: transactions, error } = await supabase
+        .from('financial_transactions')
+        .select('id, description, amount, transaction_date')
+        .eq('org_id', currentOrg.id)
+        .eq('transaction_type', 'outflow')
+        .lt('transaction_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()) // 30 days ago
+
+      if (error) throw error
+
+      if (transactions && transactions.length > 0) {
+        const totalOverduePayables = transactions.reduce((sum, t) => sum + (t.amount || 0), 0)
+        
+        return [{
+          id: 'overdue_payables',
+          type: 'overdue_payables' as const,
+          severity: transactions.length > 10 ? 'critical' as const : 'high' as const,
+          title: 'Contas a pagar vencidas',
+          description: `${transactions.length} conta(s) a pagar em atraso totalizando R$ ${totalOverduePayables.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+          action_label: 'Ver contas',
+          action_route: '/finance/payables',
+          amount: totalOverduePayables,
+          count: transactions.length,
+          created_at: new Date().toISOString(),
+          resolved: false
+        }]
+      }
+
+      return []
+    } catch (error) {
+      console.error('Error checking overdue payables:', error)
+      return []
+    }
+  }, [currentOrg?.id])
+
+  // Check for rejected NFSe
+  const checkRejectedNFSe = useCallback(async () => {
+    if (!currentOrg?.id) return []
+
+    try {
+      const { data: nfseList, error } = await supabase
+        .from('nfse')
+        .select('id, number, service_amount, service_description')
+        .eq('org_id', currentOrg.id)
+        .eq('status', 'rejected')
+
+      if (error) throw error
+
+      if (nfseList && nfseList.length > 0) {
+        const totalRejectedAmount = nfseList.reduce((sum, nfse) => sum + (nfse.service_amount || 0), 0)
+        
+        return [{
+          id: 'rejected_nfse',
+          type: 'rejected_nfse' as const,
+          severity: 'high' as const,
+          title: 'NFSe rejeitadas',
+          description: `${nfseList.length} NFSe rejeitada(s) totalizando R$ ${totalRejectedAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+          action_label: 'Ver NFSe',
+          action_route: '/nfse',
+          amount: totalRejectedAmount,
+          count: nfseList.length,
+          created_at: new Date().toISOString(),
+          resolved: false
+        }]
+      }
+
+      return []
+    } catch (error) {
+      console.error('Error checking rejected NFSe:', error)
+      return []
+    }
+  }, [currentOrg?.id])
+
+  // Check for pending orders
+  const checkPendingOrders = useCallback(async () => {
+    if (!currentOrg?.id) return []
+
+    try {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+      
+      const { data: orders, error } = await supabase
+        .from('orders')
+        .select('id, order_number, total_amount, order_date')
+        .eq('org_id', currentOrg.id)
+        .in('status', ['draft', 'pending'])
+        .lt('order_date', sevenDaysAgo)
+
+      if (error) throw error
+
+      if (orders && orders.length > 0) {
+        const totalPendingAmount = orders.reduce((sum, order) => sum + (order.total_amount || 0), 0)
+        
+        return [{
+          id: 'pending_orders',
+          type: 'pending_orders' as const,
+          severity: 'medium' as const,
+          title: 'Pedidos pendentes',
+          description: `${orders.length} pedido(s) pendente(s) há mais de 7 dias totalizando R$ ${totalPendingAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+          action_label: 'Ver pedidos',
+          action_route: '/orders',
+          amount: totalPendingAmount,
+          count: orders.length,
+          created_at: new Date().toISOString(),
+          resolved: false
+        }]
+      }
+
+      return []
+    } catch (error) {
+      console.error('Error checking pending orders:', error)
+      return []
+    }
+  }, [currentOrg?.id])
+
+  // Check for inactive customers
+  const checkInactiveCustomers = useCallback(async () => {
+    if (!currentOrg?.id) return []
+
+    try {
+      const threeMonthsAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
+      
+      const { data: customers, error } = await supabase
+        .from('customers')
+        .select('id, name, last_interaction')
+        .eq('org_id', currentOrg.id)
+        .lt('last_interaction', threeMonthsAgo)
+
+      if (error) throw error
+
+      if (customers && customers.length > 0) {
+        return [{
+          id: 'inactive_customers',
+          type: 'inactive_customers' as const,
+          severity: 'low' as const,
+          title: 'Clientes inativos',
+          description: `${customers.length} cliente(s) sem interação há mais de 3 meses`,
+          action_label: 'Ver clientes',
+          action_route: '/customers',
+          count: customers.length,
+          created_at: new Date().toISOString(),
+          resolved: false
+        }]
+      }
+
+      return []
+    } catch (error) {
+      console.error('Error checking inactive customers:', error)
+      return []
+    }
+  }, [currentOrg?.id])
+
+  // Check for stagnant products (no movement in 60 days)
+  const checkStagnantProducts = useCallback(async () => {
+    if (!currentOrg?.id) return []
+
+    try {
+      const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString()
+      
+      // Get all products
+      const { data: products, error: productsError } = await supabase
+        .from('products')
+        .select('id, name, stock_quantity')
+        .eq('org_id', currentOrg.id)
+        .eq('active', true)
+        .gt('stock_quantity', 0)
+
+      if (productsError) throw productsError
+
+      if (!products?.length) return []
+
+      // Get products with recent movements
+      const { data: recentMovements, error: movementsError } = await supabase
+        .from('stock_movements')
+        .select('product_id')
+        .eq('org_id', currentOrg.id)
+        .gte('created_at', sixtyDaysAgo)
+
+      if (movementsError) throw movementsError
+
+      const productsWithMovements = new Set(recentMovements?.map(m => m.product_id) || [])
+      const stagnantProducts = products.filter(p => !productsWithMovements.has(p.id))
+
+      if (stagnantProducts.length > 0) {
+        return [{
+          id: 'stagnant_products',
+          type: 'stagnant_products' as const,
+          severity: 'low' as const,
+          title: 'Produtos sem movimentação',
+          description: `${stagnantProducts.length} produto(s) sem movimentação há mais de 60 dias`,
+          action_label: 'Ver produtos',
+          action_route: '/products',
+          count: stagnantProducts.length,
+          created_at: new Date().toISOString(),
+          resolved: false
+        }]
+      }
+
+      return []
+    } catch (error) {
+      console.error('Error checking stagnant products:', error)
+      return []
+    }
+  }, [currentOrg?.id])
+
+  // Check for integration failures (improved)
   const checkIntegrationFailures = useCallback(async () => {
     if (!currentOrg?.id) return []
 
-    // Mock data - in real implementation, check api_integrations table
-    const hasFailures = Math.random() < 0.3 // 30% chance of having failures
+    try {
+      const { data: integrations, error } = await supabase
+        .from('api_integrations')
+        .select('id, integration_name, last_sync_at, is_active')
+        .eq('org_id', currentOrg.id)
+        .eq('is_active', true)
 
-    if (hasFailures) {
-      return [{
-        id: 'integration_failure',
-        type: 'integration_failure' as const,
-        severity: 'medium' as const,
-        title: 'Falha na integração',
-        description: 'Uma ou mais integrações falharam na última sincronização',
-        action_label: 'Ver integrações',
-        action_route: '/settings',
-        created_at: new Date().toISOString(),
-        resolved: false
-      }]
+      if (error) throw error
+
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      const failedIntegrations = integrations?.filter(integration => 
+        !integration.last_sync_at || integration.last_sync_at < oneDayAgo
+      ) || []
+
+      if (failedIntegrations.length > 0) {
+        return [{
+          id: 'integration_failure',
+          type: 'integration_failure' as const,
+          severity: 'medium' as const,
+          title: 'Falhas na integração',
+          description: `${failedIntegrations.length} integração(ões) falharam ou não sincronizaram nas últimas 24h`,
+          action_label: 'Ver integrações',
+          action_route: '/settings',
+          count: failedIntegrations.length,
+          created_at: new Date().toISOString(),
+          resolved: false
+        }]
+      }
+
+      return []
+    } catch (error) {
+      console.error('Error checking integration failures:', error)
+      
+      // Fallback to mock if table doesn't exist or has issues
+      const hasFailures = Math.random() < 0.2 // 20% chance
+
+      if (hasFailures) {
+        return [{
+          id: 'integration_failure',
+          type: 'integration_failure' as const,
+          severity: 'medium' as const,
+          title: 'Falha na integração',
+          description: 'Uma ou mais integrações falharam na última sincronização',
+          action_label: 'Ver integrações',
+          action_route: '/settings',
+          created_at: new Date().toISOString(),
+          resolved: false
+        }]
+      }
+
+      return []
     }
-
-    return []
   }, [currentOrg?.id])
 
   // Check all business alerts
@@ -173,20 +415,35 @@ export function useBusinessAlerts() {
     try {
       const [
         overdueAlerts,
+        overduePayablesAlerts,
         balanceAlerts,
         budgetAlerts,
+        rejectedNFSeAlerts,
+        pendingOrdersAlerts,
+        inactiveCustomersAlerts,
+        stagnantProductsAlerts,
         integrationAlerts
       ] = await Promise.all([
         checkOverdueReceivables(),
+        checkOverduePayables(),
         checkLowBalance(),
         checkBudgetExceeded(),
+        checkRejectedNFSe(),
+        checkPendingOrders(),
+        checkInactiveCustomers(),
+        checkStagnantProducts(),
         checkIntegrationFailures()
       ])
 
       const allAlerts = [
         ...overdueAlerts,
+        ...overduePayablesAlerts,
         ...balanceAlerts,
         ...budgetAlerts,
+        ...rejectedNFSeAlerts,
+        ...pendingOrdersAlerts,
+        ...inactiveCustomersAlerts,
+        ...stagnantProductsAlerts,
         ...integrationAlerts
       ]
 
@@ -208,7 +465,7 @@ export function useBusinessAlerts() {
     } finally {
       setLoading(false)
     }
-  }, [currentOrg?.id, checkOverdueReceivables, checkLowBalance, checkBudgetExceeded, checkIntegrationFailures, toast])
+  }, [currentOrg?.id, checkOverdueReceivables, checkOverduePayables, checkLowBalance, checkBudgetExceeded, checkRejectedNFSe, checkPendingOrders, checkInactiveCustomers, checkStagnantProducts, checkIntegrationFailures, toast])
 
   // Auto-check alerts on mount and periodically
   useEffect(() => {

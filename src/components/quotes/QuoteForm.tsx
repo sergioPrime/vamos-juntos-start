@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
+import { useSidebarConfig } from "@/contexts/SidebarConfigContext"
 
 interface QuoteItem {
   id?: string
@@ -58,6 +59,7 @@ const QuoteForm = () => {
   const { toast } = useToast()
   const { user } = useAuth()
   const { currentOrg } = useOrganization()
+  const { lockNumberFields } = useSidebarConfig()
   
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState<QuoteFormData>({
@@ -131,9 +133,9 @@ const QuoteForm = () => {
   }, [id])
 
   const generateQuoteNumber = () => {
-    const now = new Date()
-    const quoteNumber = `ORC-${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`
-    setFormData(prev => ({ ...prev, number: quoteNumber }))
+    // Generate sequential number starting from 1
+    const nextNumber = "1" // In a real implementation, this would come from the database
+    setFormData(prev => ({ ...prev, number: nextNumber }))
   }
 
   const loadQuote = async (quoteId: string) => {
@@ -276,12 +278,15 @@ const QuoteForm = () => {
             <CardContent className="form-comfortable">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="form-field">
-                  <Label htmlFor="number">Número do Orçamento</Label>
+                  <Label htmlFor="number">Número</Label>
                   <Input
                     id="number"
+                    type="number"
+                    min="1"
                     value={formData.number}
                     onChange={(e) => setFormData(prev => ({ ...prev, number: e.target.value }))}
-                    placeholder="ORC-2024..."
+                    placeholder="1"
+                    disabled={lockNumberFields}
                   />
                 </div>
                 

@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
+import { useSidebarConfig } from "@/contexts/SidebarConfigContext"
 import { ProductionOrderDialog } from "@/components/production/ProductionOrderDialog"
 import { ShippingLabelTemplate } from "@/components/logistics/ShippingLabelTemplate"
 import { ExchangeVoucherTemplate } from "@/components/logistics/ExchangeVoucherTemplate"
@@ -31,7 +32,7 @@ interface OrderItem {
 }
 
 interface OrderFormData {
-  order_number: string
+  number: string
   status: string
   order_type: string
   customer_id?: string
@@ -68,10 +69,11 @@ const OrderForm = () => {
   const { toast } = useToast()
   const { user } = useAuth()
   const { currentOrg } = useOrganization()
+  const { lockNumberFields } = useSidebarConfig()
   
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState<OrderFormData>({
-    order_number: "",
+    number: "",
     status: "draft",
     order_type: "sale",
     subtotal: 0,
@@ -108,9 +110,9 @@ const OrderForm = () => {
   }, [id])
 
   const generateOrderNumber = () => {
-    const now = new Date()
-    const orderNumber = `ORD-${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`
-    setFormData(prev => ({ ...prev, order_number: orderNumber }))
+    // Generate sequential number starting from 1
+    const nextNumber = "1" // In a real implementation, this would come from the database
+    setFormData(prev => ({ ...prev, number: nextNumber }))
   }
 
   const loadOrder = async (orderId: string) => {
@@ -230,7 +232,7 @@ const OrderForm = () => {
           </Button>
           <div>
             <h1 className="title-xl">
-              {id === 'new' ? 'Novo Pedido' : `Pedido ${formData.order_number}`}
+              {id === 'new' ? 'Novo Pedido' : `Pedido ${formData.number}`}
             </h1>
             <p className="text-muted-foreground">
               {id === 'new' ? 'Criar novo pedido de venda' : 'Editar pedido existente'}
@@ -287,12 +289,15 @@ const OrderForm = () => {
             <CardContent className="form-comfortable">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="form-field">
-                  <Label htmlFor="order_number">Número do Pedido</Label>
+                  <Label htmlFor="number">Número</Label>
                   <Input
-                    id="order_number"
-                    value={formData.order_number}
-                    onChange={(e) => setFormData(prev => ({ ...prev, order_number: e.target.value }))}
-                    placeholder="ORD-2024..."
+                    id="number"
+                    type="number"
+                    min="1"
+                    value={formData.number}
+                    onChange={(e) => setFormData(prev => ({ ...prev, number: e.target.value }))}
+                    placeholder="1"
+                    disabled={lockNumberFields}
                   />
                 </div>
                 
@@ -498,7 +503,7 @@ const OrderForm = () => {
             <DialogTitle>Etiqueta de Expedição</DialogTitle>
           </DialogHeader>
           <ShippingLabelTemplate
-            orderNumber={formData.order_number}
+            orderNumber={formData.number}
             customerAddress="Rua das Flores, 123 - Centro - São Paulo/SP - 01234-567"
             onPrint={handlePrintShippingLabel}
           />
@@ -512,7 +517,7 @@ const OrderForm = () => {
             <DialogTitle>Cupom de Troca</DialogTitle>
           </DialogHeader>
           <ExchangeVoucherTemplate
-            orderNumber={formData.order_number}
+            orderNumber={formData.number}
             totalAmount={formData.total_amount}
             onPrint={handlePrintExchangeVoucher}
           />

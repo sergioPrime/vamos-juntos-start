@@ -3,6 +3,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 interface SidebarConfigContextType {
   clickOnlyMode: boolean
   setClickOnlyMode: (value: boolean) => void
+  lockNumberFields: boolean
+  setLockNumberFields: (value: boolean) => void
 }
 
 const SidebarConfigContext = createContext<SidebarConfigContextType | null>(null)
@@ -25,13 +27,28 @@ export function SidebarConfigProvider({ children }: SidebarConfigProviderProps) 
     return saved ? JSON.parse(saved) : false
   })
 
+  const [lockNumberFields, setLockNumberFieldsState] = useState(() => {
+    const saved = localStorage.getItem('lock-number-fields')
+    return saved ? JSON.parse(saved) : false
+  })
+
   const setClickOnlyMode = (value: boolean) => {
     setClickOnlyModeState(value)
     localStorage.setItem('sidebar-click-only-mode', JSON.stringify(value))
   }
 
+  const setLockNumberFields = (value: boolean) => {
+    setLockNumberFieldsState(value)
+    localStorage.setItem('lock-number-fields', JSON.stringify(value))
+  }
+
   return (
-    <SidebarConfigContext.Provider value={{ clickOnlyMode, setClickOnlyMode }}>
+    <SidebarConfigContext.Provider value={{ 
+      clickOnlyMode, 
+      setClickOnlyMode,
+      lockNumberFields,
+      setLockNumberFields
+    }}>
       {children}
     </SidebarConfigContext.Provider>
   )

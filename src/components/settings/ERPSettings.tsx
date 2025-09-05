@@ -1,10 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator"
 import { useSidebarConfig } from "@/contexts/SidebarConfigContext"
 
 export function ERPSettings() {
-  const { clickOnlyMode, setClickOnlyMode } = useSidebarConfig()
+  const { clickOnlyMode, setClickOnlyMode, lockNumberFields, setLockNumberFields } = useSidebarConfig()
 
   return (
     <Card>
@@ -29,6 +30,25 @@ export function ERPSettings() {
             id="sidebar-click-mode"
             checked={clickOnlyMode}
             onCheckedChange={setClickOnlyMode}
+          />
+        </div>
+        
+        <Separator />
+        
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <Label htmlFor="lock-number-fields" className="text-base">
+              Bloquear o campo número em pedidos e orçamentos
+            </Label>
+            <p className="text-sm text-muted-foreground">
+              Quando ativado, o campo número será bloqueado para edição mas permanecerá visível.
+              Quando desativado, o campo permanece editável.
+            </p>
+          </div>
+          <Switch
+            id="lock-number-fields"
+            checked={lockNumberFields}
+            onCheckedChange={setLockNumberFields}
           />
         </div>
       </CardContent>

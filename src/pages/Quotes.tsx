@@ -84,10 +84,14 @@ export default function Quotes() {
       </div>
 
       {/* New Quote Button */}
-      <div className="flex justify-end">
-        <Button onClick={() => setShowNewQuote(true)} className="bg-primary hover:bg-primary/90">
+      <div className="flex justify-end gap-2">
+        <Button onClick={() => navigate('/quotes/new')} className="bg-primary hover:bg-primary/90">
           <Plus className="h-4 w-4 mr-2" />
           Novo Orçamento
+        </Button>
+        <Button onClick={() => setShowNewQuote(true)} variant="outline">
+          <Plus className="h-4 w-4 mr-2" />
+          Orçamento Rápido
         </Button>
       </div>
 

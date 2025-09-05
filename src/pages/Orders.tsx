@@ -190,10 +190,15 @@ const Orders = () => {
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Pedidos</h1>
-        <Button onClick={() => navigate('/pdv')}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nova Venda
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => navigate('/orders/new')}>
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Pedido
+          </Button>
+          <Button variant="outline" onClick={() => navigate('/pdv')}>
+            Nova Venda (PDV)
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 mb-6">
@@ -246,10 +251,15 @@ const Orders = () => {
               : "Comece criando seu primeiro pedido no PDV."
             }
           </p>
-          <Button onClick={() => navigate('/pdv')}>
-            <Plus className="mr-2 h-4 w-4" />
-            Nova Venda
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => navigate('/orders/new')}>
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Pedido
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/pdv')}>
+              Nova Venda (PDV)
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="space-y-4">

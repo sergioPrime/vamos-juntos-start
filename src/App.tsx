@@ -47,6 +47,9 @@ import StockTransferPage from "./pages/inventory/StockTransfer";
 import ReturnsPage from "./pages/inventory/Returns";
 import InventoryReportsPage from "./pages/inventory/InventoryReports";
 import InventoryAlertsPage from "./pages/inventory/InventoryAlerts";
+import OrderForm from "./components/orders/OrderForm";
+import QuoteForm from "./components/quotes/QuoteForm";
+import ProductionOrders from "./pages/production/ProductionOrders";
 
 const queryClient = new QueryClient();
 
@@ -178,6 +181,15 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
+          <Route path="/orders/:id" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <OrderForm />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
           <Route path="/purchases/requests" element={
             <ProtectedRoute>
               <AppLayout>
@@ -238,11 +250,20 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/quotes/new" element={
+          <Route path="/quotes/:id" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">
-                  <Quotes />
+                  <QuoteForm />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/production/orders" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <ProductionOrders />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

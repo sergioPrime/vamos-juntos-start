@@ -24,6 +24,10 @@ import Quotes from "./pages/Quotes";
 import Customers from "./pages/Customers";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import Permissions from "./pages/settings/Permissions";
+import Companies from "./pages/settings/Companies";
+import Integrations from "./pages/settings/Integrations";
+import ERPConfig from "./pages/settings/ERPConfig";
 import RenovarLicenca from "./pages/RenovarLicenca";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import PDV from "./pages/PDV";
@@ -291,6 +295,42 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <Settings />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/settings/permissions" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Permissions />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/settings/companies" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Companies />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/settings/integrations" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Integrations />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/settings/erp-config" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <ERPConfig />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

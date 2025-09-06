@@ -64,7 +64,10 @@ const licenseItems = [
 ]
 
 const configItems = [
-  { title: "Configurações", url: "/settings", icon: Settings },
+  { title: "Permissões e Acessos", url: "/settings/permissions", icon: Settings },
+  { title: "Empresas", url: "/settings/companies", icon: Settings },
+  { title: "Integrações", url: "/settings/integrations", icon: Settings },
+  { title: "Configurações do ERP", url: "/settings/erp-config", icon: Settings },
 ]
 
 

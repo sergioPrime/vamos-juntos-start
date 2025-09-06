@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react"
-import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, ShoppingCart, TrendingUp, PieChart, Package, RefreshCw } from "lucide-react"
+import { useState } from "react"
+import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, ShoppingCart, TrendingUp, PieChart, Package, RefreshCw, ChevronDown } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import { useSidebarConfig } from "@/contexts/SidebarConfigContext"
 
@@ -15,6 +15,12 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
+
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 
 const navigationItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -68,16 +74,29 @@ export function AppSidebar() {
   const location = useLocation()
   const currentPath = location.pathname
   
-
-  // Auto-collapse when navigating to new routes (disabled)
-  // useEffect(() => {
-  //   setOpen(false)
-  // }, [currentPath, setOpen])
+  // State for module expansion
+  const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({
+    dashboard: true,
+    finance: false,
+    sales: false,
+    purchases: false,
+    suppliers: false,
+    inventory: false,
+    license: false,
+    settings: false,
+  })
 
   const isActive = (path: string) => currentPath === path
 
   const getNavClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "hover:bg-sidebar-accent/50"
+
+  const toggleModule = (moduleKey: string) => {
+    setExpandedModules(prev => ({
+      ...prev,
+      [moduleKey]: !prev[moduleKey]
+    }))
+  }
 
   const handleMouseEnter = () => {
     if (!clickOnlyMode && !open) {
@@ -99,152 +118,268 @@ export function AppSidebar() {
         onMouseLeave={handleMouseLeave}
       >
         <SidebarRail />
-        <SidebarContent>
+        <SidebarContent className="space-y-1">
           <div className="p-4">
             <h2 className={`font-bold text-sidebar-primary ${open ? "text-lg" : "text-xs text-center"}`}>
               {open ? "Prime ERP" : "Prime"}
             </h2>
           </div>
 
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navigationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavClass}>
-                      <item.icon className="h-4 w-4" />
-                       <span>{item.title}</span>
-                     </NavLink>
-                   </SidebarMenuButton>
-                 </SidebarMenuItem>
-               ))}
-             </SidebarMenu>
-           </SidebarGroupContent>
-         </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Financeiro</SidebarGroupLabel>
-          <SidebarGroupContent>
-             <SidebarMenu>
-               {financeItems.map((item) => (
-                 <SidebarMenuItem key={item.title}>
-                   <SidebarMenuButton asChild>
-                     <NavLink to={item.url} className={getNavClass}>
-                        <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                     </NavLink>
-                   </SidebarMenuButton>
-                 </SidebarMenuItem>
-               ))}
-             </SidebarMenu>
-           </SidebarGroupContent>
-         </SidebarGroup>
-
-         <SidebarGroup>
-           <SidebarGroupLabel>Vendas</SidebarGroupLabel>
-           <SidebarGroupContent>
-             <SidebarMenu>
-               {businessItems.map((item) => (
-                 <SidebarMenuItem key={item.title}>
-                   <SidebarMenuButton asChild>
-                      <NavLink to={item.url} className={getNavClass}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                     </NavLink>
-                   </SidebarMenuButton>
-                 </SidebarMenuItem>
-               ))}
-             </SidebarMenu>
-           </SidebarGroupContent>
-         </SidebarGroup>
-
-          <SidebarGroup>
-            <SidebarGroupLabel>Compras</SidebarGroupLabel>
+          {/* Dashboard - Always expanded */}
+          <SidebarGroup className="py-1">
             <SidebarGroupContent>
               <SidebarMenu>
-                {purchaseItems.map((item) => (
+                {navigationItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
                       <NavLink to={item.url} className={getNavClass}>
                         <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                     </NavLink>
-                   </SidebarMenuButton>
-                 </SidebarMenuItem>
-               ))}
-             </SidebarMenu>
-           </SidebarGroupContent>
-         </SidebarGroup>
-
-         <SidebarGroup>
-           <SidebarGroupContent>
-             <SidebarMenu>
-               {supplierItems.map((item) => (
-                 <SidebarMenuItem key={item.title}>
-                   <SidebarMenuButton asChild>
-                      <NavLink to={item.url} className={getNavClass}>
-                        <item.icon className="h-4 w-4" />
-                         <span>{item.title}</span>
-                     </NavLink>
-                   </SidebarMenuButton>
-                 </SidebarMenuItem>
-               ))}
-             </SidebarMenu>
-           </SidebarGroupContent>
-         </SidebarGroup>
-
-          <SidebarGroup>
-            <SidebarGroupLabel>Estoque</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {inventoryItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink to={item.url} className={getNavClass}>
-                        <item.icon className="h-4 w-4" />
-                         <span>{item.title}</span>
-                     </NavLink>
-                   </SidebarMenuButton>
-                 </SidebarMenuItem>
-               ))}
-             </SidebarMenu>
-           </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {licenseItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                     <NavLink to={item.url} className={getNavClass}>
-                       <item.icon className="h-4 w-4" />
-                       <span>{item.title}</span>
-                   </NavLink>
-                 </SidebarMenuButton>
-               </SidebarMenuItem>
-             ))}
-           </SidebarMenu>
-         </SidebarGroupContent>
-       </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {configItems.map((item) => (
-                 <SidebarMenuItem key={item.title}>
-                   <SidebarMenuButton asChild>
-                      <NavLink to={item.url} className={getNavClass}>
-                        <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          {/* Finance Module */}
+          <Collapsible 
+            open={expandedModules.finance} 
+            onOpenChange={() => toggleModule('finance')}
+          >
+            <SidebarGroup className="py-1">
+              <CollapsibleTrigger asChild>
+                <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md p-2 flex items-center justify-between transition-colors">
+                  <span className="flex items-center gap-2">
+                    <Wallet className="h-4 w-4" />
+                    Financeiro
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedModules.finance ? 'rotate-180' : ''}`} />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {financeItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink to={item.url} className={getNavClass}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+
+          {/* Sales Module */}
+          <Collapsible 
+            open={expandedModules.sales} 
+            onOpenChange={() => toggleModule('sales')}
+          >
+            <SidebarGroup className="py-1">
+              <CollapsibleTrigger asChild>
+                <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md p-2 flex items-center justify-between transition-colors">
+                  <span className="flex items-center gap-2">
+                    <ShoppingCart className="h-4 w-4" />
+                    Vendas
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedModules.sales ? 'rotate-180' : ''}`} />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {businessItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink to={item.url} className={getNavClass}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+
+          {/* Purchases Module */}
+          <Collapsible 
+            open={expandedModules.purchases} 
+            onOpenChange={() => toggleModule('purchases')}
+          >
+            <SidebarGroup className="py-1">
+              <CollapsibleTrigger asChild>
+                <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md p-2 flex items-center justify-between transition-colors">
+                  <span className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4" />
+                    Compras
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedModules.purchases ? 'rotate-180' : ''}`} />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {purchaseItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink to={item.url} className={getNavClass}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+
+          {/* Suppliers Module */}
+          <Collapsible 
+            open={expandedModules.suppliers} 
+            onOpenChange={() => toggleModule('suppliers')}
+          >
+            <SidebarGroup className="py-1">
+              <CollapsibleTrigger asChild>
+                <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md p-2 flex items-center justify-between transition-colors">
+                  <span className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Fornecedores
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedModules.suppliers ? 'rotate-180' : ''}`} />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {supplierItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink to={item.url} className={getNavClass}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+
+          {/* Inventory Module */}
+          <Collapsible 
+            open={expandedModules.inventory} 
+            onOpenChange={() => toggleModule('inventory')}
+          >
+            <SidebarGroup className="py-1">
+              <CollapsibleTrigger asChild>
+                <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md p-2 flex items-center justify-between transition-colors">
+                  <span className="flex items-center gap-2">
+                    <Package className="h-4 w-4" />
+                    Estoque
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedModules.inventory ? 'rotate-180' : ''}`} />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {inventoryItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink to={item.url} className={getNavClass}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+
+          {/* License Module */}
+          <Collapsible 
+            open={expandedModules.license} 
+            onOpenChange={() => toggleModule('license')}
+          >
+            <SidebarGroup className="py-1">
+              <CollapsibleTrigger asChild>
+                <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md p-2 flex items-center justify-between transition-colors">
+                  <span className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4" />
+                    Licença
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedModules.license ? 'rotate-180' : ''}`} />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {licenseItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink to={item.url} className={getNavClass}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+
+          {/* Settings Module */}
+          <Collapsible 
+            open={expandedModules.settings} 
+            onOpenChange={() => toggleModule('settings')}
+          >
+            <SidebarGroup className="py-1">
+              <CollapsibleTrigger asChild>
+                <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md p-2 flex items-center justify-between transition-colors">
+                  <span className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Configurações
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedModules.settings ? 'rotate-180' : ''}`} />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {configItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink to={item.url} className={getNavClass}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
 
       </SidebarContent>
       </Sidebar>

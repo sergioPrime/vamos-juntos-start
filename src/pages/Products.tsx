@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Plus, Search, Edit, Trash2, Package, HelpCircle, ArrowLeft, Save } from "lucide-react"
+import { Plus, Search, Edit, Trash2, Package, ArrowLeft, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,8 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
@@ -19,10 +20,21 @@ import { useOrganization } from "@/hooks/useOrganization"
 interface Product {
   id: string
   name: string
-  description?: string
+  brand?: string
+  validity_days?: number
+  product_type?: string
+  model?: string
+  sale_unit?: string
+  system_code?: string
+  supplier_code?: string
+  supplier_id?: string
   sku?: string
-  barcode?: string
   category?: string
+  product_genre?: string
+  inactive?: boolean
+  hide_in_sales?: boolean
+  visible_in_catalog?: boolean
+  description?: string
   unit_price: number
   cost_price: number
   stock_quantity: number
@@ -33,26 +45,44 @@ interface Product {
   active: boolean
   created_at: string
   updated_at: string
-  // New cost and pricing fields
-  operational_expenses_percent?: number
-  cost_with_additions?: number
-  freight_purchase_percent?: number
-  insurance_purchase_percent?: number
-  ipi_purchase_percent?: number
-  icms_purchase_percent?: number
-  icms_st_purchase_percent?: number
-  fcp_st_purchase_percent?: number
-  minimum_sale_price?: number
-  profit_amount?: number
-  profit_percent?: number
-  representation_commission_percent?: number
-  vendor_commission_amount?: number
-  vendor_commission_percent?: number
-  assembly_fee_amount?: number
-  assembly_fee_percent?: number
-  last_purchase_value?: number
-  cost_calculation_method?: string
+  org_id: string
+  owner_id: string
 }
+
+interface Supplier {
+  id: string
+  name: string
+}
+
+const PRODUCT_TYPES = [
+  { value: "simple", label: "Simples" },
+  { value: "compound", label: "Composto" },
+  { value: "service", label: "Serviço" },
+]
+
+const SALE_UNITS = [
+  { value: "unit", label: "Unidade" },
+  { value: "weight", label: "Peso" },
+  { value: "meter", label: "Metro" },
+  { value: "liter", label: "Litro" },
+  { value: "m2", label: "Metro Quadrado" },
+  { value: "m3", label: "Metro Cúbico" },
+]
+
+const PRODUCT_GENRES = [
+  { value: "00", label: "00 - Mercadoria para Revenda" },
+  { value: "01", label: "01 - Matéria-Prima" },
+  { value: "02", label: "02 - Embalagem" },
+  { value: "03", label: "03 - Produto em Processo" },
+  { value: "04", label: "04 - Produto Acabado" },
+  { value: "05", label: "05 - Subproduto" },
+  { value: "06", label: "06 - Produto Intermediário" },
+  { value: "07", label: "07 - Material de Uso e Consumo" },
+  { value: "08", label: "08 - Ativo Imobilizado" },
+  { value: "09", label: "09 - Serviços" },
+  { value: "10", label: "10 - Outros Insumos" },
+  { value: "99", label: "99 - Outras" },
+]
 
 const Products = () => {
   const navigate = useNavigate()
@@ -61,20 +91,32 @@ const Products = () => {
   const { toast } = useToast()
   
   const [products, setProducts] = useState<Product[]>([])
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [categories, setCategories] = useState<string[]>([])
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [showForm, setShowForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   
   // Form state
   const [formData, setFormData] = useState({
     name: "",
-    description: "",
+    brand: "",
+    validity_days: 0,
+    product_type: "simple",
+    model: "",
+    sale_unit: "unit",
+    system_code: "",
+    supplier_code: "",
+    supplier_id: "",
     sku: "",
-    barcode: "",
     category: "",
+    product_genre: "00",
+    inactive: false,
+    hide_in_sales: false,
+    visible_in_catalog: true,
+    description: "",
     unit_price: 0,
     cost_price: 0,
     stock_quantity: 0,
@@ -83,30 +125,12 @@ const Products = () => {
     weight: 0,
     dimensions: "",
     active: true,
-    // New cost and pricing fields
-    operational_expenses_percent: 0,
-    cost_with_additions: 0,
-    freight_purchase_percent: 0,
-    insurance_purchase_percent: 0,
-    ipi_purchase_percent: 0,
-    icms_purchase_percent: 0,
-    icms_st_purchase_percent: 0,
-    fcp_st_purchase_percent: 0,
-    minimum_sale_price: 0,
-    profit_amount: 0,
-    profit_percent: 0,
-    representation_commission_percent: 0,
-    vendor_commission_amount: 0,
-    vendor_commission_percent: 0,
-    assembly_fee_amount: 0,
-    assembly_fee_percent: 0,
-    last_purchase_value: 0,
-    cost_calculation_method: "manual"
   })
 
   useEffect(() => {
     if (currentOrg?.id) {
       loadProducts()
+      loadSuppliers()
     } else if (!orgLoading && !currentOrg) {
       setLoading(false)
     }
@@ -140,13 +164,40 @@ const Products = () => {
     }
   }
 
+  const loadSuppliers = async () => {
+    if (!currentOrg?.id) return
+    try {
+      const { data, error } = await supabase
+        .from('suppliers')
+        .select('id, name')
+        .eq('org_id', currentOrg?.id)
+        .order('name')
+
+      if (error) throw error
+      setSuppliers(data || [])
+    } catch (error) {
+      console.error('Error loading suppliers:', error)
+    }
+  }
+
   const resetForm = () => {
     setFormData({
       name: "",
-      description: "",
+      brand: "",
+      validity_days: 0,
+      product_type: "simple",
+      model: "",
+      sale_unit: "unit",
+      system_code: "",
+      supplier_code: "",
+      supplier_id: "",
       sku: "",
-      barcode: "",
       category: "",
+      product_genre: "00",
+      inactive: false,
+      hide_in_sales: false,
+      visible_in_catalog: true,
+      description: "",
       unit_price: 0,
       cost_price: 0,
       stock_quantity: 0,
@@ -155,37 +206,30 @@ const Products = () => {
       weight: 0,
       dimensions: "",
       active: true,
-      operational_expenses_percent: 0,
-      cost_with_additions: 0,
-      freight_purchase_percent: 0,
-      insurance_purchase_percent: 0,
-      ipi_purchase_percent: 0,
-      icms_purchase_percent: 0,
-      icms_st_purchase_percent: 0,
-      fcp_st_purchase_percent: 0,
-      minimum_sale_price: 0,
-      profit_amount: 0,
-      profit_percent: 0,
-      representation_commission_percent: 0,
-      vendor_commission_amount: 0,
-      vendor_commission_percent: 0,
-      assembly_fee_amount: 0,
-      assembly_fee_percent: 0,
-      last_purchase_value: 0,
-      cost_calculation_method: "manual"
     })
     setEditingProduct(null)
   }
 
-  const openDialog = (product?: Product) => {
+  const openForm = (product?: Product) => {
     if (product) {
       setEditingProduct(product)
       setFormData({
         name: product.name,
-        description: product.description || "",
+        brand: product.brand || "",
+        validity_days: product.validity_days || 0,
+        product_type: product.product_type || "simple",
+        model: product.model || "",
+        sale_unit: product.sale_unit || "unit",
+        system_code: product.system_code || "",
+        supplier_code: product.supplier_code || "",
+        supplier_id: product.supplier_id || "",
         sku: product.sku || "",
-        barcode: product.barcode || "",
         category: product.category || "",
+        product_genre: product.product_genre || "00",
+        inactive: product.inactive || false,
+        hide_in_sales: product.hide_in_sales || false,
+        visible_in_catalog: product.visible_in_catalog !== false,
+        description: product.description || "",
         unit_price: product.unit_price,
         cost_price: product.cost_price,
         stock_quantity: product.stock_quantity,
@@ -194,38 +238,39 @@ const Products = () => {
         weight: product.weight || 0,
         dimensions: product.dimensions || "",
         active: product.active,
-        operational_expenses_percent: product.operational_expenses_percent || 0,
-        cost_with_additions: product.cost_with_additions || 0,
-        freight_purchase_percent: product.freight_purchase_percent || 0,
-        insurance_purchase_percent: product.insurance_purchase_percent || 0,
-        ipi_purchase_percent: product.ipi_purchase_percent || 0,
-        icms_purchase_percent: product.icms_purchase_percent || 0,
-        icms_st_purchase_percent: product.icms_st_purchase_percent || 0,
-        fcp_st_purchase_percent: product.fcp_st_purchase_percent || 0,
-        minimum_sale_price: product.minimum_sale_price || 0,
-        profit_amount: product.profit_amount || 0,
-        profit_percent: product.profit_percent || 0,
-        representation_commission_percent: product.representation_commission_percent || 0,
-        vendor_commission_amount: product.vendor_commission_amount || 0,
-        vendor_commission_percent: product.vendor_commission_percent || 0,
-        assembly_fee_amount: product.assembly_fee_amount || 0,
-        assembly_fee_percent: product.assembly_fee_percent || 0,
-        last_purchase_value: product.last_purchase_value || 0,
-        cost_calculation_method: product.cost_calculation_method || "manual"
       })
     } else {
       resetForm()
     }
-    setIsDialogOpen(true)
+    setShowForm(true)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Validações obrigatórias
     if (!formData.name.trim()) {
       toast({
         title: "Nome obrigatório",
         description: "O nome do produto é obrigatório.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!formData.product_type) {
+      toast({
+        title: "Tipo de produto obrigatório",
+        description: "O tipo de produto é obrigatório.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!formData.product_genre) {
+      toast({
+        title: "Tipo/Gênero obrigatório",
+        description: "O tipo/gênero é obrigatório.",
         variant: "destructive",
       })
       return
@@ -263,7 +308,7 @@ const Products = () => {
         })
       }
 
-      setIsDialogOpen(false)
+      setShowForm(false)
       resetForm()
       loadProducts()
     } catch (error) {
@@ -303,86 +348,12 @@ const Products = () => {
     }
   }
 
-  // Calculation functions
-  const calculateCostWithAdditions = () => {
-    const base = formData.cost_price || 0
-    const operational = (base * (formData.operational_expenses_percent || 0)) / 100
-    const freight = (base * (formData.freight_purchase_percent || 0)) / 100
-    const insurance = (base * (formData.insurance_purchase_percent || 0)) / 100
-    const ipi = (base * (formData.ipi_purchase_percent || 0)) / 100
-    const icms = (base * (formData.icms_purchase_percent || 0)) / 100
-    const icmsSt = (base * (formData.icms_st_purchase_percent || 0)) / 100
-    const fcpSt = (base * (formData.fcp_st_purchase_percent || 0)) / 100
-    
-    return base + operational + freight + insurance + ipi + icms + icmsSt + fcpSt
-  }
-
-  const calculateProfitFromSalePrice = () => {
-    const salePrice = formData.unit_price || 0
-    const costWithAdditions = calculateCostWithAdditions()
-    const profitAmount = salePrice - costWithAdditions
-    const profitPercent = costWithAdditions > 0 ? (profitAmount / costWithAdditions) * 100 : 0
-    
-    return { profitAmount, profitPercent }
-  }
-
-  const updateFormField = (field: string, value: any) => {
-    const newFormData = { ...formData, [field]: value }
-    
-    // Auto-calculate cost with additions
-    if (['cost_price', 'operational_expenses_percent', 'freight_purchase_percent', 
-         'insurance_purchase_percent', 'ipi_purchase_percent', 'icms_purchase_percent',
-         'icms_st_purchase_percent', 'fcp_st_purchase_percent'].includes(field)) {
-      const base = field === 'cost_price' ? value : formData.cost_price || 0
-      const operational = (base * (field === 'operational_expenses_percent' ? value : formData.operational_expenses_percent || 0)) / 100
-      const freight = (base * (field === 'freight_purchase_percent' ? value : formData.freight_purchase_percent || 0)) / 100
-      const insurance = (base * (field === 'insurance_purchase_percent' ? value : formData.insurance_purchase_percent || 0)) / 100
-      const ipi = (base * (field === 'ipi_purchase_percent' ? value : formData.ipi_purchase_percent || 0)) / 100
-      const icms = (base * (field === 'icms_purchase_percent' ? value : formData.icms_purchase_percent || 0)) / 100
-      const icmsSt = (base * (field === 'icms_st_purchase_percent' ? value : formData.icms_st_purchase_percent || 0)) / 100
-      const fcpSt = (base * (field === 'fcp_st_purchase_percent' ? value : formData.fcp_st_purchase_percent || 0)) / 100
-      
-      newFormData.cost_with_additions = base + operational + freight + insurance + ipi + icms + icmsSt + fcpSt
-    }
-    
-    // Auto-calculate profit when sale price changes
-    if (field === 'unit_price') {
-      const costWithAdditions = newFormData.cost_with_additions || calculateCostWithAdditions()
-      const profitAmount = value - costWithAdditions
-      const profitPercent = costWithAdditions > 0 ? (profitAmount / costWithAdditions) * 100 : 0
-      
-      newFormData.profit_amount = profitAmount
-      newFormData.profit_percent = profitPercent
-    }
-    
-    // Auto-calculate sale price when profit amount changes
-    if (field === 'profit_amount') {
-      const costWithAdditions = newFormData.cost_with_additions || calculateCostWithAdditions()
-      const salePrice = costWithAdditions + value
-      const profitPercent = costWithAdditions > 0 ? (value / costWithAdditions) * 100 : 0
-      
-      newFormData.unit_price = salePrice
-      newFormData.profit_percent = profitPercent
-    }
-    
-    // Auto-calculate sale price when profit percent changes
-    if (field === 'profit_percent') {
-      const costWithAdditions = newFormData.cost_with_additions || calculateCostWithAdditions()
-      const profitAmount = (costWithAdditions * value) / 100
-      const salePrice = costWithAdditions + profitAmount
-      
-      newFormData.profit_amount = profitAmount
-      newFormData.unit_price = salePrice
-    }
-    
-    setFormData(newFormData)
-  }
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.barcode?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
+                         product.sku?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesCategory = selectedCategory === "all" || 
+                           product.category === selectedCategory
     return matchesSearch && matchesCategory
   })
 
@@ -412,12 +383,297 @@ const Products = () => {
     )
   }
 
+  if (showForm) {
+    return (
+      <div className="w-full h-full flex flex-col">
+        {/* Fixed header with buttons */}
+        <div className="flex justify-between items-center p-6 border-b bg-background">
+          <h1 className="text-3xl font-bold">
+            {editingProduct ? "Editar Produto" : "Novo Produto"}
+          </h1>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowForm(false)}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar
+            </Button>
+            <Button onClick={handleSubmit}>
+              <Save className="mr-2 h-4 w-4" />
+              Salvar
+            </Button>
+          </div>
+        </div>
+
+        {/* Form content */}
+        <div className="flex-1 p-6 overflow-auto">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <Tabs defaultValue="dados" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="dados">Dados</TabsTrigger>
+                <TabsTrigger value="outros" disabled className="opacity-50">
+                  Outros (Em breve)
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="dados" className="space-y-6 mt-6">
+                {/* Primeira linha */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="required">Nome do Produto</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Digite o nome do produto"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="brand">Marca</Label>
+                    <Input
+                      id="brand"
+                      value={formData.brand}
+                      onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
+                      placeholder="Digite a marca"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="validity_days">Validade (dias)</Label>
+                    <Input
+                      id="validity_days"
+                      type="number"
+                      value={formData.validity_days}
+                      onChange={(e) => setFormData(prev => ({ ...prev, validity_days: parseInt(e.target.value) || 0 }))}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+                {/* Segunda linha */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="product_type" className="required">Tipo do Produto</Label>
+                    <Select 
+                      value={formData.product_type} 
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, product_type: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PRODUCT_TYPES.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="model">Modelo</Label>
+                    <Input
+                      id="model"
+                      value={formData.model}
+                      onChange={(e) => setFormData(prev => ({ ...prev, model: e.target.value }))}
+                      placeholder="Digite o modelo"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="sale_unit">Produto é vendido por</Label>
+                    <Select 
+                      value={formData.sale_unit} 
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, sale_unit: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a unidade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SALE_UNITS.map((unit) => (
+                          <SelectItem key={unit.value} value={unit.value}>
+                            {unit.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Terceira linha */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="system_code">Código do Sistema</Label>
+                    <Input
+                      id="system_code"
+                      value={formData.system_code}
+                      onChange={(e) => setFormData(prev => ({ ...prev, system_code: e.target.value }))}
+                      placeholder="Código automático"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="supplier_code">Código do Fornecedor</Label>
+                    <Input
+                      id="supplier_code"
+                      value={formData.supplier_code}
+                      onChange={(e) => setFormData(prev => ({ ...prev, supplier_code: e.target.value }))}
+                      placeholder="Digite o código"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="supplier_id">Fornecedor Padrão</Label>
+                    <Select 
+                      value={formData.supplier_id} 
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, supplier_id: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o fornecedor" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {suppliers.map((supplier) => (
+                          <SelectItem key={supplier.id} value={supplier.id}>
+                            {supplier.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Quarta linha */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="sku">Código do Produto (SKU)</Label>
+                    <Input
+                      id="sku"
+                      value={formData.sku}
+                      onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value }))}
+                      placeholder="Digite o SKU"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Categoria</Label>
+                    <Input
+                      id="category"
+                      value={formData.category}
+                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                      placeholder="Digite a categoria"
+                    />
+                  </div>
+                </div>
+
+                {/* Quinta linha */}
+                <div className="space-y-2">
+                  <Label htmlFor="product_genre" className="required">Tipo/Gênero</Label>
+                  <Select 
+                    value={formData.product_genre} 
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, product_genre: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo/gênero" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PRODUCT_GENRES.map((genre) => (
+                        <SelectItem key={genre.value} value={genre.value}>
+                          {genre.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Switches */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="inactive"
+                      checked={formData.inactive}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, inactive: checked }))}
+                    />
+                    <Label htmlFor="inactive">Cadastro Inativo</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="hide_in_sales"
+                      checked={formData.hide_in_sales}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, hide_in_sales: checked }))}
+                    />
+                    <Label htmlFor="hide_in_sales">Ocultar nas Vendas</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="visible_in_catalog"
+                      checked={formData.visible_in_catalog}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, visible_in_catalog: checked }))}
+                    />
+                    <Label htmlFor="visible_in_catalog">Visível no Catálogo</Label>
+                  </div>
+                </div>
+
+                {/* Accordion para Custos e Precificação */}
+                <Accordion type="single" collapsible className="w-full border rounded-lg">
+                  <AccordionItem value="pricing">
+                    <AccordionTrigger className="px-4">Custos e Precificação</AccordionTrigger>
+                    <AccordionContent className="px-4 pb-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="cost_price">Preço de Custo</Label>
+                          <Input
+                            id="cost_price"
+                            type="number"
+                            step="0.01"
+                            value={formData.cost_price}
+                            onChange={(e) => setFormData(prev => ({ ...prev, cost_price: parseFloat(e.target.value) || 0 }))}
+                            placeholder="0.00"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="unit_price">Preço de Venda</Label>
+                          <Input
+                            id="unit_price"
+                            type="number"
+                            step="0.01"
+                            value={formData.unit_price}
+                            onChange={(e) => setFormData(prev => ({ ...prev, unit_price: parseFloat(e.target.value) || 0 }))}
+                            placeholder="0.00"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="stock_quantity">Quantidade em Estoque</Label>
+                          <Input
+                            id="stock_quantity"
+                            type="number"
+                            value={formData.stock_quantity}
+                            onChange={(e) => setFormData(prev => ({ ...prev, stock_quantity: parseInt(e.target.value) || 0 }))}
+                            placeholder="0"
+                          />
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </TabsContent>
+            </Tabs>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="w-full h-full flex flex-col">
       {/* Fixed header with buttons */}
       <div className="flex justify-between items-center p-6 border-b bg-background">
         <h1 className="text-3xl font-bold">Produtos</h1>
-        <Button onClick={() => openDialog()}>
+        <Button onClick={() => openForm()}>
           <Plus className="mr-2 h-4 w-4" />
           Novo Produto
         </Button>
@@ -466,7 +722,7 @@ const Products = () => {
                 : "Comece criando seu primeiro produto"}
             </p>
             {!searchTerm && selectedCategory === "all" && (
-              <Button onClick={() => openDialog()}>
+              <Button onClick={() => openForm()}>
                 <Plus className="mr-2 h-4 w-4" />
                 Criar Produto
               </Button>
@@ -483,7 +739,7 @@ const Products = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => openDialog(product)}
+                        onClick={() => openForm(product)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -496,406 +752,47 @@ const Products = () => {
                       </Button>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-2">
                   {product.sku && (
-                    <div className="text-sm text-muted-foreground">
-                      SKU: {product.sku}
+                    <p className="text-sm text-muted-foreground">SKU: {product.sku}</p>
+                  )}
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Preço:</span>
+                      <span className="font-medium">
+                        R$ {product.unit_price.toFixed(2)}
+                      </span>
                     </div>
-                  )}
-                  {product.category && (
-                    <Badge variant="secondary" className="text-xs">
-                      {product.category}
-                    </Badge>
-                  )}
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold">
-                      R$ {product.unit_price.toFixed(2)}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      {product.stock_quantity} {product.unit}
-                    </span>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Estoque:</span>
+                      <span className={`font-medium ${
+                        product.stock_quantity <= (product.min_stock_level || 0)
+                          ? 'text-destructive'
+                          : 'text-foreground'
+                      }`}>
+                        {product.stock_quantity} {product.unit}
+                      </span>
+                    </div>
+                    <div className="flex gap-1 flex-wrap">
+                      {product.category && (
+                        <Badge variant="outline" className="text-xs">
+                          {product.category}
+                        </Badge>
+                      )}
+                      {!product.active && (
+                        <Badge variant="destructive" className="text-xs">
+                          Inativo
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                  {product.stock_quantity <= product.min_stock_level && (
-                    <Badge variant="destructive" className="text-xs">
-                      Estoque baixo
-                    </Badge>
-                  )}
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
       </div>
-
-      {/* Product Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden flex flex-col">
-          <DialogHeader className="flex-shrink-0">
-            <DialogTitle className="flex justify-between items-center">
-              <span>{editingProduct ? "Editar Produto" : "Novo Produto"}</span>
-              <div className="flex gap-2">
-                <Button type="submit" form="product-form">
-                  <Save className="mr-2 h-4 w-4" />
-                  Salvar
-                </Button>
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Voltar
-                </Button>
-              </div>
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="flex-1 overflow-y-auto">
-            <TooltipProvider>
-              <form id="product-form" onSubmit={handleSubmit} className="space-y-6">
-                {/* Dados Section */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Dados do Produto</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="name">Nome *</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => updateFormField('name', e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="sku">SKU</Label>
-                      <Input
-                        id="sku"
-                        value={formData.sku}
-                        onChange={(e) => updateFormField('sku', e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="description">Descrição</Label>
-                    <Textarea
-                      id="description"
-                      value={formData.description}
-                      onChange={(e) => updateFormField('description', e.target.value)}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="barcode">Código de Barras</Label>
-                      <Input
-                        id="barcode"
-                        value={formData.barcode}
-                        onChange={(e) => updateFormField('barcode', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="category">Categoria</Label>
-                      <Input
-                        id="category"
-                        value={formData.category}
-                        onChange={(e) => updateFormField('category', e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor="unit_price">Preço de Venda (R$)</Label>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Preço final de venda do produto</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                      <Input
-                        id="unit_price"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={formData.unit_price}
-                        onChange={(e) => updateFormField('unit_price', Number(e.target.value))}
-                      />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor="cost_price">Preço de Custo (R$)</Label>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Custo base do produto</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                      <Input
-                        id="cost_price"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={formData.cost_price}
-                        onChange={(e) => updateFormField('cost_price', Number(e.target.value))}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="unit">Unidade</Label>
-                      <Select value={formData.unit} onValueChange={(value) => updateFormField('unit', value)}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="un">Unidade</SelectItem>
-                          <SelectItem value="kg">Quilograma</SelectItem>
-                          <SelectItem value="g">Grama</SelectItem>
-                          <SelectItem value="l">Litro</SelectItem>
-                          <SelectItem value="ml">Mililitro</SelectItem>
-                          <SelectItem value="m">Metro</SelectItem>
-                          <SelectItem value="cm">Centímetro</SelectItem>
-                          <SelectItem value="m2">Metro Quadrado</SelectItem>
-                          <SelectItem value="m3">Metro Cúbico</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="stock_quantity">Quantidade em Estoque</Label>
-                      <Input
-                        id="stock_quantity"
-                        type="number"
-                        min="0"
-                        value={formData.stock_quantity}
-                        onChange={(e) => updateFormField('stock_quantity', Number(e.target.value))}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="min_stock_level">Estoque Mínimo</Label>
-                      <Input
-                        id="min_stock_level"
-                        type="number"
-                        min="0"
-                        value={formData.min_stock_level}
-                        onChange={(e) => updateFormField('min_stock_level', Number(e.target.value))}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="weight">Peso (kg)</Label>
-                      <Input
-                        id="weight"
-                        type="number"
-                        step="0.001"
-                        min="0"
-                        value={formData.weight}
-                        onChange={(e) => updateFormField('weight', Number(e.target.value))}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="dimensions">Dimensões</Label>
-                      <Input
-                        id="dimensions"
-                        placeholder="Ex: 10x20x30 cm"
-                        value={formData.dimensions}
-                        onChange={(e) => updateFormField('dimensions', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Custos e Precificação Accordion */}
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="custos">
-                    <AccordionTrigger className="text-lg font-semibold">
-                      Custos e Precificação
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-6">
-                      {/* Custos Base */}
-                      <div className="space-y-4">
-                        <h4 className="text-md font-medium">Custos Base</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <Label htmlFor="operational_expenses">Desp. Operacionais (%)</Label>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Percentual de despesas operacionais</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <Input
-                              id="operational_expenses"
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              max="100"
-                              value={formData.operational_expenses_percent}
-                              onChange={(e) => updateFormField('operational_expenses_percent', Number(e.target.value))}
-                            />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <Label htmlFor="cost_with_additions">Preço de Custo com Acréscimos (R$)</Label>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Custo total incluindo todos os acréscimos (calculado automaticamente)</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <Input
-                              id="cost_with_additions"
-                              type="number"
-                              step="0.01"
-                              value={formData.cost_with_additions.toFixed(2)}
-                              readOnly
-                              className="bg-muted text-muted-foreground"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Custos de Compra */}
-                      <div className="space-y-4">
-                        <h4 className="text-md font-medium">Custos de Compra</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <Label htmlFor="freight_purchase">Frete pago na Compra (%)</Label>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Percentual do frete pago na compra</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <Input
-                              id="freight_purchase"
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              max="100"
-                              value={formData.freight_purchase_percent}
-                              onChange={(e) => updateFormField('freight_purchase_percent', Number(e.target.value))}
-                            />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <Label htmlFor="insurance_purchase">Seguro pago na Compra (%)</Label>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Percentual do seguro pago na compra</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <Input
-                              id="insurance_purchase"
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              max="100"
-                              value={formData.insurance_purchase_percent}
-                              onChange={(e) => updateFormField('insurance_purchase_percent', Number(e.target.value))}
-                            />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <Label htmlFor="ipi_purchase">IPI pago na Compra (%)</Label>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Percentual do IPI pago na compra</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <Input
-                              id="ipi_purchase"
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              max="100"
-                              value={formData.ipi_purchase_percent}
-                              onChange={(e) => updateFormField('ipi_purchase_percent', Number(e.target.value))}
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Margem de Lucro */}
-                      <div className="space-y-4">
-                        <h4 className="text-md font-medium">Margem de Lucro</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <Label htmlFor="profit_amount">Lucro (R$)</Label>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Valor do lucro em reais</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <Input
-                              id="profit_amount"
-                              type="number"
-                              step="0.01"
-                              value={formData.profit_amount}
-                              onChange={(e) => updateFormField('profit_amount', Number(e.target.value))}
-                            />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <Label htmlFor="profit_percent">Lucro (%)</Label>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Percentual de lucro sobre o custo</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <Input
-                              id="profit_percent"
-                              type="number"
-                              step="0.01"
-                              value={formData.profit_percent}
-                              onChange={(e) => updateFormField('profit_percent', Number(e.target.value))}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </form>
-            </TooltipProvider>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

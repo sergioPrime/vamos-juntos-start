@@ -126,7 +126,7 @@ export function AppSidebar() {
           </div>
 
           {/* Dashboard - Always expanded */}
-          <SidebarGroup className="py-1">
+          <SidebarGroup className="py-0">
             <SidebarGroupContent>
               <SidebarMenu>
                 {navigationItems.map((item) => (
@@ -148,7 +148,7 @@ export function AppSidebar() {
             open={expandedModules.finance} 
             onOpenChange={() => toggleModule('finance')}
           >
-            <SidebarGroup className="py-1">
+            <SidebarGroup className="py-0">
               <CollapsibleTrigger asChild>
                 <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md p-2 flex items-center justify-between transition-colors">
                   <span className="flex items-center gap-2">
@@ -182,7 +182,7 @@ export function AppSidebar() {
             open={expandedModules.sales} 
             onOpenChange={() => toggleModule('sales')}
           >
-            <SidebarGroup className="py-1">
+            <SidebarGroup className="py-0">
               <CollapsibleTrigger asChild>
                 <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md p-2 flex items-center justify-between transition-colors">
                   <span className="flex items-center gap-2">
@@ -216,7 +216,7 @@ export function AppSidebar() {
             open={expandedModules.purchases} 
             onOpenChange={() => toggleModule('purchases')}
           >
-            <SidebarGroup className="py-1">
+            <SidebarGroup className="py-0">
               <CollapsibleTrigger asChild>
                 <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md p-2 flex items-center justify-between transition-colors">
                   <span className="flex items-center gap-2">
@@ -250,7 +250,7 @@ export function AppSidebar() {
             open={expandedModules.suppliers} 
             onOpenChange={() => toggleModule('suppliers')}
           >
-            <SidebarGroup className="py-1">
+            <SidebarGroup className="py-0">
               <CollapsibleTrigger asChild>
                 <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md p-2 flex items-center justify-between transition-colors">
                   <span className="flex items-center gap-2">
@@ -284,7 +284,7 @@ export function AppSidebar() {
             open={expandedModules.inventory} 
             onOpenChange={() => toggleModule('inventory')}
           >
-            <SidebarGroup className="py-1">
+            <SidebarGroup className="py-0">
               <CollapsibleTrigger asChild>
                 <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md p-2 flex items-center justify-between transition-colors">
                   <span className="flex items-center gap-2">
@@ -319,7 +319,7 @@ export function AppSidebar() {
             open={expandedModules.settings} 
             onOpenChange={() => toggleModule('settings')}
           >
-            <SidebarGroup className="py-1">
+            <SidebarGroup className="py-0">
               <CollapsibleTrigger asChild>
                 <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md p-2 flex items-center justify-between transition-colors">
                   <span className="flex items-center gap-2">

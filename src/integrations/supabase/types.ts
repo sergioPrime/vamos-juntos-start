@@ -964,6 +964,7 @@ export type Database = {
           assembly_fee_amount: number | null
           assembly_fee_percent: number | null
           barcode: string | null
+          brand: string | null
           category: string | null
           category_id: string | null
           cost_calculation_method: string | null
@@ -977,9 +978,11 @@ export type Database = {
           freight_purchase_percent: number | null
           has_lot_control: boolean | null
           has_serial_control: boolean | null
+          hide_in_sales: boolean | null
           icms_purchase_percent: number | null
           icms_st_purchase_percent: number | null
           id: string
+          inactive: boolean | null
           insurance_purchase_percent: number | null
           ipi_purchase_percent: number | null
           is_perishable: boolean | null
@@ -987,23 +990,31 @@ export type Database = {
           max_stock_level: number | null
           min_stock_level: number | null
           minimum_sale_price: number | null
+          model: string | null
           name: string
           operational_expenses_percent: number | null
           org_id: string
           owner_id: string
+          product_genre: string | null
+          product_type: string | null
           profit_amount: number | null
           profit_percent: number | null
           reorder_point: number | null
           representation_commission_percent: number | null
+          sale_unit: string | null
           sku: string | null
           stock_quantity: number
+          supplier_code: string | null
           supplier_id: string | null
+          system_code: string | null
           unit: string | null
           unit_id: string | null
           unit_price: number
           updated_at: string
+          validity_days: number | null
           vendor_commission_amount: number | null
           vendor_commission_percent: number | null
+          visible_in_catalog: boolean | null
           weight: number | null
         }
         Insert: {
@@ -1011,6 +1022,7 @@ export type Database = {
           assembly_fee_amount?: number | null
           assembly_fee_percent?: number | null
           barcode?: string | null
+          brand?: string | null
           category?: string | null
           category_id?: string | null
           cost_calculation_method?: string | null
@@ -1024,9 +1036,11 @@ export type Database = {
           freight_purchase_percent?: number | null
           has_lot_control?: boolean | null
           has_serial_control?: boolean | null
+          hide_in_sales?: boolean | null
           icms_purchase_percent?: number | null
           icms_st_purchase_percent?: number | null
           id?: string
+          inactive?: boolean | null
           insurance_purchase_percent?: number | null
           ipi_purchase_percent?: number | null
           is_perishable?: boolean | null
@@ -1034,23 +1048,31 @@ export type Database = {
           max_stock_level?: number | null
           min_stock_level?: number | null
           minimum_sale_price?: number | null
+          model?: string | null
           name: string
           operational_expenses_percent?: number | null
           org_id: string
           owner_id: string
+          product_genre?: string | null
+          product_type?: string | null
           profit_amount?: number | null
           profit_percent?: number | null
           reorder_point?: number | null
           representation_commission_percent?: number | null
+          sale_unit?: string | null
           sku?: string | null
           stock_quantity?: number
+          supplier_code?: string | null
           supplier_id?: string | null
+          system_code?: string | null
           unit?: string | null
           unit_id?: string | null
           unit_price?: number
           updated_at?: string
+          validity_days?: number | null
           vendor_commission_amount?: number | null
           vendor_commission_percent?: number | null
+          visible_in_catalog?: boolean | null
           weight?: number | null
         }
         Update: {
@@ -1058,6 +1080,7 @@ export type Database = {
           assembly_fee_amount?: number | null
           assembly_fee_percent?: number | null
           barcode?: string | null
+          brand?: string | null
           category?: string | null
           category_id?: string | null
           cost_calculation_method?: string | null
@@ -1071,9 +1094,11 @@ export type Database = {
           freight_purchase_percent?: number | null
           has_lot_control?: boolean | null
           has_serial_control?: boolean | null
+          hide_in_sales?: boolean | null
           icms_purchase_percent?: number | null
           icms_st_purchase_percent?: number | null
           id?: string
+          inactive?: boolean | null
           insurance_purchase_percent?: number | null
           ipi_purchase_percent?: number | null
           is_perishable?: boolean | null
@@ -1081,23 +1106,31 @@ export type Database = {
           max_stock_level?: number | null
           min_stock_level?: number | null
           minimum_sale_price?: number | null
+          model?: string | null
           name?: string
           operational_expenses_percent?: number | null
           org_id?: string
           owner_id?: string
+          product_genre?: string | null
+          product_type?: string | null
           profit_amount?: number | null
           profit_percent?: number | null
           reorder_point?: number | null
           representation_commission_percent?: number | null
+          sale_unit?: string | null
           sku?: string | null
           stock_quantity?: number
+          supplier_code?: string | null
           supplier_id?: string | null
+          system_code?: string | null
           unit?: string | null
           unit_id?: string | null
           unit_price?: number
           updated_at?: string
+          validity_days?: number | null
           vendor_commission_amount?: number | null
           vendor_commission_percent?: number | null
+          visible_in_catalog?: boolean | null
           weight?: number | null
         }
         Relationships: []

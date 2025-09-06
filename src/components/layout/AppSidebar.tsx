@@ -118,7 +118,7 @@ export function AppSidebar() {
         onMouseLeave={handleMouseLeave}
       >
         <SidebarRail />
-        <SidebarContent className="space-y-1">
+        <SidebarContent className="space-y-0 -space-y-2">
           <div className="p-4">
             <h2 className={`font-bold text-sidebar-primary ${open ? "text-lg" : "text-xs text-center"}`}>
               {open ? "Prime ERP" : "Prime"}

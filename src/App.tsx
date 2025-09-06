@@ -335,7 +335,7 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/renovar-licenca" element={
+          <Route path="/settings/renovar-licenca" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">

@@ -59,15 +59,13 @@ const inventoryItems = [
 ]
 
 
-const licenseItems = [
-  { title: "Renovar Licença", url: "/renovar-licenca", icon: RefreshCw },
-]
 
 const configItems = [
   { title: "Permissões e Acessos", url: "/settings/permissions", icon: Settings },
   { title: "Empresas", url: "/settings/companies", icon: Settings },
   { title: "Integrações", url: "/settings/integrations", icon: Settings },
   { title: "Configurações do ERP", url: "/settings/erp-config", icon: Settings },
+  { title: "Renovar Licença", url: "/settings/renovar-licenca", icon: RefreshCw },
 ]
 
 
@@ -85,7 +83,6 @@ export function AppSidebar() {
     purchases: false,
     suppliers: false,
     inventory: false,
-    license: false,
     settings: false,
   })
 
@@ -316,39 +313,6 @@ export function AppSidebar() {
             </SidebarGroup>
           </Collapsible>
 
-          {/* License Module */}
-          <Collapsible 
-            open={expandedModules.license} 
-            onOpenChange={() => toggleModule('license')}
-          >
-            <SidebarGroup className="py-1">
-              <CollapsibleTrigger asChild>
-                <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md p-2 flex items-center justify-between transition-colors">
-                  <span className="flex items-center gap-2">
-                    <RefreshCw className="h-4 w-4" />
-                    Licença
-                  </span>
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedModules.license ? 'rotate-180' : ''}`} />
-                </SidebarGroupLabel>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {licenseItems.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton asChild>
-                          <NavLink to={item.url} className={getNavClass}>
-                            <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
-                          </NavLink>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
 
           {/* Settings Module */}
           <Collapsible 

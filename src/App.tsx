@@ -54,6 +54,7 @@ import InventoryAlertsPage from "./pages/inventory/InventoryAlerts";
 import OrderForm from "./components/orders/OrderForm";
 import QuoteForm from "./components/quotes/QuoteForm";
 import ProductionOrders from "./pages/production/ProductionOrders";
+import { Pessoas } from "./pages/Pessoas";
 
 const queryClient = new QueryClient();
 
@@ -277,6 +278,15 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <Customers />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/pessoas" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Pessoas />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

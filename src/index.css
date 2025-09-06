@@ -213,6 +213,12 @@ All colors MUST be HSL.
     @apply font-inter font-medium text-sm;
   }
   
+  /* Required field indicator */
+  label.required::after {
+    content: " *";
+    @apply text-destructive;
+  }
+  
   input, textarea, select {
     @apply font-inter;
   }

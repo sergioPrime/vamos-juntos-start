@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, ShoppingCart, TrendingUp, PieChart, Package, RefreshCw, ChevronDown } from "lucide-react"
+import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, ShoppingCart, TrendingUp, PieChart, Package, RefreshCw, ChevronDown, UserPlus } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import { useSidebarConfig } from "@/contexts/SidebarConfigContext"
 
@@ -58,6 +58,10 @@ const inventoryItems = [
   { title: "Relatórios", url: "/inventory/reports", icon: BarChart3 },
 ]
 
+const cadastrosItems = [
+  { title: "Pessoas", url: "/cadastros/pessoas", icon: Users },
+]
+
 
 
 const configItems = [
@@ -83,6 +87,7 @@ export function AppSidebar() {
     purchases: false,
     suppliers: false,
     inventory: false,
+    cadastros: false,
     settings: false,
   })
 
@@ -298,6 +303,40 @@ export function AppSidebar() {
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {inventoryItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink to={item.url} className={getNavClass}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+
+          {/* Cadastros Module */}
+          <Collapsible 
+            open={expandedModules.cadastros} 
+            onOpenChange={() => toggleModule('cadastros')}
+          >
+            <SidebarGroup className="py-0">
+              <CollapsibleTrigger asChild>
+                <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md p-2 flex items-center justify-between transition-colors">
+                  <span className="flex items-center gap-2">
+                    <UserPlus className="h-4 w-4" />
+                    Cadastros
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedModules.cadastros ? 'rotate-180' : ''}`} />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {cadastrosItems.map((item) => (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton asChild>
                           <NavLink to={item.url} className={getNavClass}>

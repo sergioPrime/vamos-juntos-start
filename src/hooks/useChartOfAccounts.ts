@@ -47,7 +47,7 @@ export function useChartOfAccounts() {
     try {
       setLoading(true)
       const { data, error } = await supabase
-        .from("chart_of_accounts" as any)
+        .from("chart_of_accounts")
         .select("*")
         .eq("org_id", organization.currentOrg.id)
         .eq("is_active", true)
@@ -93,7 +93,7 @@ export function useChartOfAccounts() {
 
     try {
       const { error } = await supabase
-        .from("chart_of_accounts" as any)
+        .from("chart_of_accounts")
         .insert([{
           ...data,
           org_id: organization.currentOrg.id,
@@ -121,7 +121,7 @@ export function useChartOfAccounts() {
   const updateAccount = async (id: string, data: Partial<CreateChartOfAccountData>): Promise<boolean> => {
     try {
       const { error } = await supabase
-        .from("chart_of_accounts" as any)
+        .from("chart_of_accounts")
         .update(data)
         .eq("id", id)
 
@@ -147,7 +147,7 @@ export function useChartOfAccounts() {
   const deleteAccount = async (id: string): Promise<boolean> => {
     try {
       const { error } = await supabase
-        .from("chart_of_accounts" as any)
+        .from("chart_of_accounts")
         .update({ is_active: false })
         .eq("id", id)
 

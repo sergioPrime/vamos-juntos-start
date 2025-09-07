@@ -314,6 +314,8 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean
+          is_expense: boolean | null
+          nature_code: string | null
           org_id: string
           parent_id: string | null
           updated_at: string
@@ -326,6 +328,8 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          is_expense?: boolean | null
+          nature_code?: string | null
           org_id: string
           parent_id?: string | null
           updated_at?: string
@@ -338,6 +342,8 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          is_expense?: boolean | null
+          nature_code?: string | null
           org_id?: string
           parent_id?: string | null
           updated_at?: string
@@ -395,6 +401,42 @@ export type Database = {
           state?: string | null
           updated_at?: string
           zip_code?: string | null
+        }
+        Relationships: []
+      }
+      cost_centers: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          org_id: string
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          org_id: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          org_id?: string
+          parent_id?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -458,6 +500,7 @@ export type Database = {
           chart_of_account_id: string | null
           company_id: string | null
           competence_date: string
+          cost_center_id: string | null
           created_at: string
           created_by: string
           description: string | null
@@ -481,6 +524,7 @@ export type Database = {
           chart_of_account_id?: string | null
           company_id?: string | null
           competence_date?: string
+          cost_center_id?: string | null
           created_at?: string
           created_by: string
           description?: string | null
@@ -504,6 +548,7 @@ export type Database = {
           chart_of_account_id?: string | null
           company_id?: string | null
           competence_date?: string
+          cost_center_id?: string | null
           created_at?: string
           created_by?: string
           description?: string | null

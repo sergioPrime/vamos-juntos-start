@@ -54,6 +54,8 @@ import OrderForm from "./components/orders/OrderForm";
 import QuoteForm from "./components/quotes/QuoteForm";
 import ProductionOrders from "./pages/production/ProductionOrders";
 import { Pessoas } from "./pages/Pessoas";
+import PlanoDeContas from "./pages/settings/PlanoDeContas";
+import CentrosDeCusto from "./pages/settings/CentrosDeCusto";
 
 const queryClient = new QueryClient();
 
@@ -343,6 +345,24 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <RenovarLicenca />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/plano-de-contas" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <PlanoDeContas />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/centros-de-custo" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <CentrosDeCusto />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

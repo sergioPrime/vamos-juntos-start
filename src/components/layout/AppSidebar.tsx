@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, ShoppingCart, TrendingUp, PieChart, Package, RefreshCw, ChevronDown, UserPlus } from "lucide-react"
+import { Wallet, DollarSign, FileText, Users, BarChart3, Settings, CreditCard, Receipt, Quote, LayoutDashboard, Zap, ShoppingCart, TrendingUp, PieChart, Package, RefreshCw, ChevronDown, UserPlus, Calculator, Target } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import { useSidebarConfig } from "@/contexts/SidebarConfigContext"
 
@@ -59,6 +59,8 @@ const inventoryItems = [
 const cadastrosItems = [
   { title: "Pessoas", url: "/cadastros/pessoas", icon: Users },
   { title: "Produtos", url: "/products", icon: Package },
+  { title: "Plano de Contas", url: "/cadastros/plano-de-contas", icon: Calculator },
+  { title: "Centros de Custo", url: "/cadastros/centros-de-custo", icon: Target },
 ]
 
 

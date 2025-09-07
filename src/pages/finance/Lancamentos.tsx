@@ -26,7 +26,8 @@ const formSchema = z.object({
   company_id: z.string().min(1, "Empresa é obrigatória"),
   person_id: z.string().min(1, "Cliente/Fornecedor é obrigatório"),
   entry_type: z.enum(["receivable", "payable"]),
-  chart_of_account_id: z.string().optional(),
+  chart_of_account_id: z.string().min(1, "Plano de conta é obrigatório"),
+  cost_center_id: z.string().min(1, "Centro de custo é obrigatório"),
   amount: z.string().min(1, "Valor é obrigatório"),
   payment_method_id: z.string().optional(),
   bank_account_id: z.string().optional(),
@@ -63,6 +64,7 @@ export default function Lancamentos() {
   const [customers, setCustomers] = useState<any[]>([])
   const [suppliers, setSuppliers] = useState<any[]>([])
   const [chartOfAccounts, setChartOfAccounts] = useState<any[]>([])
+  const [costCenters, setCostCenters] = useState<any[]>([])
   const [paymentMethods, setPaymentMethods] = useState<any[]>([])
   const [bankAccounts, setBankAccounts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -98,6 +100,7 @@ export default function Lancamentos() {
         customersResponse,
         suppliersResponse,
         chartResponse,
+        costCentersResponse,
         paymentMethodsResponse,
         bankAccountsResponse
       ] = await Promise.all([
@@ -138,6 +141,12 @@ export default function Lancamentos() {
           .eq("is_active", true),
         
         supabase
+          .from("cost_centers")
+          .select("*")
+          .eq("org_id", organization.currentOrg.id)
+          .eq("is_active", true),
+        
+        supabase
           .from("payment_methods")
           .select("*")
           .eq("org_id", organization.currentOrg.id)
@@ -155,6 +164,7 @@ export default function Lancamentos() {
       if (customersResponse.error) throw customersResponse.error
       if (suppliersResponse.error) throw suppliersResponse.error
       if (chartResponse.error) throw chartResponse.error
+      if (costCentersResponse.error) throw costCentersResponse.error
       if (paymentMethodsResponse.error) throw paymentMethodsResponse.error
       if (bankAccountsResponse.error) throw bankAccountsResponse.error
 
@@ -163,6 +173,7 @@ export default function Lancamentos() {
       setCustomers(customersResponse.data || [])
       setSuppliers(suppliersResponse.data || [])
       setChartOfAccounts(chartResponse.data || [])
+      setCostCenters(costCentersResponse.data || [])
       setPaymentMethods(paymentMethodsResponse.data || [])
       setBankAccounts(bankAccountsResponse.data || [])
     } catch (error) {
@@ -391,6 +402,31 @@ export default function Lancamentos() {
                               {chartOfAccounts.map((account) => (
                                 <SelectItem key={account.id} value={account.id}>
                                   {account.account_code} - {account.account_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="cost_center_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Centro de Custo</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o centro de custo" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {costCenters.map((center) => (
+                                <SelectItem key={center.id} value={center.id}>
+                                  {center.code} - {center.name}
                                 </SelectItem>
                               ))}
                             </SelectContent>

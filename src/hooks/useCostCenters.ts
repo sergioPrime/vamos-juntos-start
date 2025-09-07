@@ -41,7 +41,7 @@ export function useCostCenters() {
     try {
       setLoading(true)
       const { data, error } = await supabase
-        .from("cost_centers" as any)
+        .from("cost_centers")
         .select("*")
         .eq("org_id", organization.currentOrg.id)
         .eq("is_active", true)
@@ -87,7 +87,7 @@ export function useCostCenters() {
 
     try {
       const { error } = await supabase
-        .from("cost_centers" as any)
+        .from("cost_centers")
         .insert([{
           ...data,
           org_id: organization.currentOrg.id,
@@ -115,7 +115,7 @@ export function useCostCenters() {
   const updateCostCenter = async (id: string, data: Partial<CreateCostCenterData>): Promise<boolean> => {
     try {
       const { error } = await supabase
-        .from("cost_centers" as any)
+        .from("cost_centers")
         .update(data)
         .eq("id", id)
 
@@ -141,7 +141,7 @@ export function useCostCenters() {
   const deleteCostCenter = async (id: string): Promise<boolean> => {
     try {
       const { error } = await supabase
-        .from("cost_centers" as any)
+        .from("cost_centers")
         .update({ is_active: false })
         .eq("id", id)
 

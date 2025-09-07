@@ -447,13 +447,15 @@ export default function PlanoDeContas() {
                               <SelectValue placeholder="Selecione conta pai" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                           <SelectContent>
                             <SelectItem value="">Nenhuma</SelectItem>
-                            {getSyntheticAccounts(accounts).map(account => (
-                              <SelectItem key={account.id} value={account.id}>
-                                {account.account_code} - {account.account_name}
-                              </SelectItem>
-                            ))}
+                            {getSyntheticAccounts(accounts)
+                              .filter(account => account && account.id && account.account_code && account.account_name)
+                              .map(account => (
+                                <SelectItem key={account.id} value={account.id}>
+                                  {account.account_code} - {account.account_name}
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />

@@ -73,6 +73,7 @@ export default function Lancamentos() {
   const [showMoreFields, setShowMoreFields] = useState(false)
   const [filterType, setFilterType] = useState<string>("all")
   const [filterStatus, setFilterStatus] = useState<string>("all")
+  const [selectedAccountCostCenters, setSelectedAccountCostCenters] = useState<any[]>([])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -137,9 +138,17 @@ export default function Lancamentos() {
           .eq("org_id", organization.currentOrg.id),
         
         supabase
-          .from("analytical_accounts")
-          .select("*")
-          .eq("org_id", organization.currentOrg.id),
+          .from("chart_of_accounts")
+          .select(`
+            *,
+            chart_account_cost_centers(
+              cost_center_id,
+              cost_centers(id, code, name)
+            )
+          `)
+          .eq("org_id", organization.currentOrg.id)
+          .eq("is_active", true)
+          .eq("account_type", "analytic"),
         
         supabase
           .from("cost_centers")
@@ -194,18 +203,27 @@ export default function Lancamentos() {
 
     try {
       const entryData = {
-        ...values,
-        org_id: organization.currentOrg.id,
-        person_type: values.entry_type === "receivable" ? "customer" : "supplier",
+        entry_type: values.entry_type,
+        person_id: values.person_id,
+        chart_of_account_id: values.chart_of_account_id,
+        cost_center_id: values.cost_center_id,
         amount: parseFloat(values.amount),
-        competence_date: values.competence_date.toISOString().split('T')[0],
         due_date: values.due_date.toISOString().split('T')[0],
-        created_by: user?.id || organization.currentOrg.id,
+        competence_date: values.competence_date.toISOString().split('T')[0],
+        company_id: values.company_id,
+        payment_method_id: values.payment_method_id,
+        bank_account_id: values.bank_account_id,
+        description: values.description,
       }
 
       const { error } = await supabase
         .from("financial_entries")
-        .insert(entryData as any)
+        .insert([{
+          ...entryData,
+          org_id: organization.currentOrg.id,
+          person_type: entryData.entry_type === "receivable" ? "customer" : "supplier",
+          created_by: user?.id || organization.currentOrg.id,
+        }])
 
       if (error) throw error
 
@@ -224,6 +242,25 @@ export default function Lancamentos() {
         variant: "destructive",
       })
     }
+  }
+
+  // Function to get available cost centers based on selected account
+  const getAvailableCostCenters = () => {
+    const selectedAccountId = form.watch("chart_of_account_id")
+    
+    if (!selectedAccountId) {
+      return costCenters
+    }
+
+    const selectedAccount = chartOfAccounts.find(acc => acc.id === selectedAccountId)
+    
+    // If account has pre-associated cost centers, only show those
+    if (selectedAccount?.chart_account_cost_centers && selectedAccount.chart_account_cost_centers.length > 0) {
+      return selectedAccount.chart_account_cost_centers.map((cacc: any) => cacc.cost_centers)
+    }
+    
+    // Otherwise, show all active cost centers
+    return costCenters
   }
 
   const getStatusBadge = (entry: FinancialEntry) => {
@@ -392,8 +429,15 @@ export default function Lancamentos() {
                       name="chart_of_account_id"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Plano de Conta</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormLabel>Plano de Conta *</FormLabel>
+                          <Select 
+                            onValueChange={(value) => {
+                              field.onChange(value)
+                              // Reset cost center when account changes
+                              form.setValue("cost_center_id", "")
+                            }} 
+                            defaultValue={field.value}
+                          >
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Selecione o plano de conta" />
@@ -407,6 +451,9 @@ export default function Lancamentos() {
                               ))}
                             </SelectContent>
                           </Select>
+                          <p className="text-xs text-muted-foreground">
+                            Apenas contas analíticas podem ser selecionadas
+                          </p>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -415,26 +462,37 @@ export default function Lancamentos() {
                     <FormField
                       control={form.control}
                       name="cost_center_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Centro de Custo</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione o centro de custo" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {costCenters.map((center) => (
-                                <SelectItem key={center.id} value={center.id}>
-                                  {center.code} - {center.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      render={({ field }) => {
+                        const availableCostCenters = getAvailableCostCenters()
+                        const selectedAccount = chartOfAccounts.find(acc => acc.id === form.watch("chart_of_account_id"))
+                        const hasPreAssociated = selectedAccount?.chart_account_cost_centers?.length > 0
+                        
+                        return (
+                          <FormItem>
+                            <FormLabel>Centro de Custo *</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione o centro de custo" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {availableCostCenters.map((center) => (
+                                  <SelectItem key={center.id} value={center.id}>
+                                    {center.code} - {center.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            {hasPreAssociated && (
+                              <p className="text-xs text-muted-foreground">
+                                Centros de custo limitados aos associados à conta selecionada
+                              </p>
+                            )}
+                            <FormMessage />
+                          </FormItem>
+                        )
+                      }}
                     />
 
                     <FormField

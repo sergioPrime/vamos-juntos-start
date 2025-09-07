@@ -9,10 +9,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { Checkbox } from "@/components/ui/checkbox"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useChartOfAccounts, ChartOfAccount } from "@/hooks/useChartOfAccounts"
+import { useCostCenters } from "@/hooks/useCostCenters"
 
 const chartOfAccountSchema = z.object({
   account_code: z.string().min(1, "Código é obrigatório"),
@@ -25,12 +27,14 @@ const chartOfAccountSchema = z.object({
   is_active: z.boolean().default(true),
   parent_id: z.string().optional(),
   description: z.string().optional(),
+  cost_center_ids: z.array(z.string()).optional(),
 })
 
 type ChartOfAccountFormData = z.infer<typeof chartOfAccountSchema>
 
 export default function PlanoDeContas() {
   const { accounts, loading, createAccount, updateAccount, deleteAccount } = useChartOfAccounts()
+  const { costCenters, loading: loadingCostCenters, getFlatCostCenters } = useCostCenters()
   const [searchTerm, setSearchTerm] = useState("")
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set())
   const [selectedAccount, setSelectedAccount] = useState<ChartOfAccount | null>(null)
@@ -48,6 +52,7 @@ export default function PlanoDeContas() {
       is_active: true,
       parent_id: "",
       description: "",
+      cost_center_ids: [],
     },
   })
 
@@ -141,6 +146,7 @@ export default function PlanoDeContas() {
       is_active: account.is_active,
       parent_id: account.parent_id || "",
       description: account.description || "",
+      cost_center_ids: account.cost_centers?.map(cc => cc.id) || [],
     })
     setDialogOpen(true)
   }
@@ -156,6 +162,7 @@ export default function PlanoDeContas() {
       is_active: true,
       parent_id: "",
       description: "",
+      cost_center_ids: [],
     })
     setDialogOpen(true)
   }
@@ -241,6 +248,16 @@ export default function PlanoDeContas() {
               </div>
               {account.description && (
                 <p className="text-sm text-muted-foreground mt-1">{account.description}</p>
+              )}
+              {account.cost_centers && account.cost_centers.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  <span className="text-xs text-muted-foreground">Centros de Custo:</span>
+                  {account.cost_centers.map((cc) => (
+                    <Badge key={cc.id} variant="outline" className="text-xs">
+                      {cc.code}
+                    </Badge>
+                  ))}
+                </div>
               )}
             </div>
           </div>
@@ -523,6 +540,46 @@ export default function PlanoDeContas() {
                     </FormItem>
                   )}
                 />
+
+                {form.watch("account_type") === "analytic" && (
+                  <FormField
+                    control={form.control}
+                    name="cost_center_ids"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Centros de Custo (Opcional)</FormLabel>
+                        <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded-md p-3">
+                          {getFlatCostCenters().map((costCenter) => (
+                            <div key={costCenter.id} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={costCenter.id}
+                                checked={field.value?.includes(costCenter.id) || false}
+                                onCheckedChange={(checked) => {
+                                  const currentValue = field.value || []
+                                  if (checked) {
+                                    field.onChange([...currentValue, costCenter.id])
+                                  } else {
+                                    field.onChange(currentValue.filter(id => id !== costCenter.id))
+                                  }
+                                }}
+                              />
+                              <label
+                                htmlFor={costCenter.id}
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                              >
+                                {costCenter.code} - {costCenter.name}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Apenas contas analíticas podem ter centros de custo associados
+                        </p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 <div className="flex justify-end space-x-2">
                   <Button

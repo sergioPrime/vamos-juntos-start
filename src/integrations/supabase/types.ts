@@ -305,6 +305,49 @@ export type Database = {
         }
         Relationships: []
       }
+      chart_account_cost_centers: {
+        Row: {
+          chart_of_account_id: string
+          cost_center_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          chart_of_account_id: string
+          cost_center_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          chart_of_account_id?: string
+          cost_center_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_account_cost_centers_chart_of_account_id_fkey"
+            columns: ["chart_of_account_id"]
+            isOneToOne: false
+            referencedRelation: "analytical_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chart_account_cost_centers_chart_of_account_id_fkey"
+            columns: ["chart_of_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chart_account_cost_centers_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chart_of_accounts: {
         Row: {
           account_code: string

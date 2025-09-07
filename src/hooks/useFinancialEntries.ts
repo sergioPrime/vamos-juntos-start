@@ -11,6 +11,7 @@ export interface FinancialEntry {
   person_type: "customer" | "supplier"
   person_id: string
   chart_of_account_id?: string
+  cost_center_id?: string
   amount: number
   payment_method_id?: string
   bank_account_id?: string
@@ -25,11 +26,20 @@ export interface FinancialEntry {
   created_by: string
   created_at: string
   updated_at: string
+  companies?: { name: string }
+  customers?: { name: string }
+  suppliers?: { name: string }
+  chart_of_accounts?: { account_code: string; account_name: string }
+  cost_centers?: { code: string; name: string }
+  payment_methods?: { name: string }
+  bank_accounts?: { bank_name: string }
 }
 
 export interface CreateFinancialEntryData {
   entry_type: "receivable" | "payable"
   person_id: string
+  chart_of_account_id?: string
+  cost_center_id?: string
   amount: number
   due_date: string
   competence_date?: string
@@ -37,8 +47,22 @@ export interface CreateFinancialEntryData {
   origin_type?: "order" | "purchase" | "manual"
   origin_id?: string
   company_id?: string
-  chart_of_account_id?: string
-  cost_center_id?: string
+  payment_method_id?: string
+  bank_account_id?: string
+}
+
+export interface CreateFinancialEntryDataRequired {
+  entry_type: "receivable" | "payable"
+  person_id: string
+  chart_of_account_id: string
+  cost_center_id: string
+  amount: number
+  due_date: string
+  competence_date?: string
+  description?: string
+  origin_type?: "order" | "purchase" | "manual"
+  origin_id?: string
+  company_id?: string
   payment_method_id?: string
   bank_account_id?: string
 }
@@ -67,7 +91,8 @@ export function useFinancialEntries() {
           companies(name),
           customers(name),
           suppliers(name),
-          chart_of_accounts(account_name, account_code),
+          chart_of_accounts(account_code, account_name),
+          cost_centers(code, name),
           payment_methods(name),
           bank_accounts(bank_name, account_number)
         `)
@@ -75,7 +100,7 @@ export function useFinancialEntries() {
         .order("created_at", { ascending: false })
 
       if (error) throw error
-      setEntries((data || []) as FinancialEntry[])
+      setEntries((data || []) as any)
     } catch (error) {
       console.error("Error loading financial entries:", error)
       toast({
@@ -88,8 +113,27 @@ export function useFinancialEntries() {
     }
   }
 
-  const createEntry = async (data: CreateFinancialEntryData): Promise<boolean> => {
+  const createEntry = async (data: CreateFinancialEntryDataRequired): Promise<boolean> => {
     if (!organization?.currentOrg?.id) return false
+
+    // Validate required fields
+    if (!data.chart_of_account_id) {
+      toast({
+        title: "Erro",
+        description: "Plano de conta é obrigatório",
+        variant: "destructive",
+      })
+      return false
+    }
+
+    if (!data.cost_center_id) {
+      toast({
+        title: "Erro",
+        description: "Centro de custo é obrigatório",
+        variant: "destructive",
+      })
+      return false
+    }
 
     try {
       const entryData = {
@@ -107,6 +151,10 @@ export function useFinancialEntries() {
       if (error) throw error
 
       await loadEntries()
+      toast({
+        title: "Sucesso",
+        description: "Lançamento criado com sucesso",
+      })
       return true
     } catch (error) {
       console.error("Error creating financial entry:", error)
@@ -119,12 +167,23 @@ export function useFinancialEntries() {
     }
   }
 
-  const createFromOrder = async (orderId: string, customerId: string, amount: number, dueDate?: string): Promise<boolean> => {
+  const createFromOrder = async (orderId: string, customerId: string, amount: number, dueDate?: string, chartOfAccountId?: string, costCenterId?: string): Promise<boolean> => {
+    if (!chartOfAccountId || !costCenterId) {
+      toast({
+        title: "Erro",
+        description: "Plano de conta e centro de custo são obrigatórios",
+        variant: "destructive",
+      })
+      return false
+    }
+
     const calculatedDueDate = dueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     
     return createEntry({
       entry_type: "receivable",
       person_id: customerId,
+      chart_of_account_id: chartOfAccountId,
+      cost_center_id: costCenterId,
       amount,
       due_date: calculatedDueDate,
       description: `Conta a receber - Pedido`,
@@ -133,12 +192,23 @@ export function useFinancialEntries() {
     })
   }
 
-  const createFromPurchase = async (purchaseId: string, supplierId: string, amount: number, dueDate?: string): Promise<boolean> => {
+  const createFromPurchase = async (purchaseId: string, supplierId: string, amount: number, dueDate?: string, chartOfAccountId?: string, costCenterId?: string): Promise<boolean> => {
+    if (!chartOfAccountId || !costCenterId) {
+      toast({
+        title: "Erro",
+        description: "Plano de conta e centro de custo são obrigatórios",
+        variant: "destructive",
+      })
+      return false
+    }
+
     const calculatedDueDate = dueDate || new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     
     return createEntry({
       entry_type: "payable",
       person_id: supplierId,
+      chart_of_account_id: chartOfAccountId,
+      cost_center_id: costCenterId,
       amount,
       due_date: calculatedDueDate,
       description: `Conta a pagar - Compra`,

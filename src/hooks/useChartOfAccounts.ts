@@ -17,6 +17,7 @@ export interface ChartOfAccount {
   created_at: string
   updated_at: string
   children?: ChartOfAccount[]
+  cost_centers?: { id: string; code: string; name: string }[]
 }
 
 export interface CreateChartOfAccountData {
@@ -27,6 +28,7 @@ export interface CreateChartOfAccountData {
   is_expense: boolean
   parent_id?: string
   description?: string
+  cost_center_ids?: string[]
 }
 
 // Default Brazilian Chart of Accounts
@@ -147,7 +149,13 @@ export function useChartOfAccounts() {
       setLoading(true)
       const { data, error } = await supabase
         .from("chart_of_accounts")
-        .select("*")
+        .select(`
+          *,
+          chart_account_cost_centers(
+            cost_center_id,
+            cost_centers(id, code, name)
+          )
+        `)
         .eq("org_id", organization.currentOrg.id)
         .eq("is_active", true)
         .order("account_code", { ascending: true })
@@ -191,7 +199,8 @@ export function useChartOfAccounts() {
 
     // First pass: create map of all accounts
     data?.forEach((account: any) => {
-      accountsMap.set(account.id, { ...account, children: [] as ChartOfAccount[] })
+      const costCenters = account.chart_account_cost_centers?.map((cacc: any) => cacc.cost_centers) || []
+      accountsMap.set(account.id, { ...account, children: [] as ChartOfAccount[], cost_centers: costCenters })
     })
 
     // Second pass: build hierarchy
@@ -255,15 +264,43 @@ export function useChartOfAccounts() {
       return false
     }
 
+    // Validate cost centers are only associated with analytic accounts
+    if (data.cost_center_ids && data.cost_center_ids.length > 0 && data.account_type !== "analytic") {
+      toast({
+        title: "Erro",
+        description: "Apenas contas analíticas podem ter centros de custo associados",
+        variant: "destructive",
+      })
+      return false
+    }
+
     try {
-      const { error } = await supabase
+      const { cost_center_ids, ...accountData } = data
+      
+      const { data: insertedAccount, error } = await supabase
         .from("chart_of_accounts")
         .insert([{
-          ...data,
+          ...accountData,
           org_id: organization.currentOrg.id,
         }])
+        .select()
+        .single()
 
       if (error) throw error
+
+      // Associate cost centers if provided
+      if (cost_center_ids && cost_center_ids.length > 0 && insertedAccount) {
+        const associations = cost_center_ids.map(costCenterId => ({
+          chart_of_account_id: insertedAccount.id,
+          cost_center_id: costCenterId
+        }))
+
+        const { error: associationError } = await supabase
+          .from("chart_account_cost_centers")
+          .insert(associations)
+
+        if (associationError) throw associationError
+      }
 
       await loadAccounts()
       toast({
@@ -301,13 +338,48 @@ export function useChartOfAccounts() {
       }
     }
 
+    // Validate cost centers are only associated with analytic accounts
+    if (data.cost_center_ids && data.cost_center_ids.length > 0 && data.account_type === "synthetic") {
+      toast({
+        title: "Erro",
+        description: "Apenas contas analíticas podem ter centros de custo associados",
+        variant: "destructive",
+      })
+      return false
+    }
+
     try {
+      const { cost_center_ids, ...accountData } = data
+      
       const { error } = await supabase
         .from("chart_of_accounts")
-        .update(data)
+        .update(accountData)
         .eq("id", id)
 
       if (error) throw error
+
+      // Update cost center associations if provided
+      if (cost_center_ids !== undefined) {
+        // Remove existing associations
+        await supabase
+          .from("chart_account_cost_centers")
+          .delete()
+          .eq("chart_of_account_id", id)
+
+        // Add new associations
+        if (cost_center_ids.length > 0) {
+          const associations = cost_center_ids.map(costCenterId => ({
+            chart_of_account_id: id,
+            cost_center_id: costCenterId
+          }))
+
+          const { error: associationError } = await supabase
+            .from("chart_account_cost_centers")
+            .insert(associations)
+
+          if (associationError) throw associationError
+        }
+      }
 
       await loadAccounts()
       toast({

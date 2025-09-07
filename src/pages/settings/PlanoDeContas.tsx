@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Plus, Search, Edit, Trash2, ChevronRight, ChevronDown } from "lucide-react"
+import { Plus, Search, Edit, Trash2, ChevronRight, ChevronDown, ExpandIcon, ShrinkIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -67,6 +67,64 @@ export default function PlanoDeContas() {
       newExpanded.add(accountId)
     }
     setExpandedNodes(newExpanded)
+  }
+
+  const expandAllNodes = () => {
+    const allNodes = new Set<string>()
+    const collectNodes = (accs: ChartOfAccount[]) => {
+      accs.forEach(acc => {
+        if (acc.children && acc.children.length > 0) {
+          allNodes.add(acc.id)
+          collectNodes(acc.children)
+        }
+      })
+    }
+    collectNodes(accounts)
+    setExpandedNodes(allNodes)
+  }
+
+  const collapseAllNodes = () => {
+    setExpandedNodes(new Set())
+  }
+
+  const getAccountPath = (account: ChartOfAccount): string => {
+    if (!account.parent_id) return account.account_code
+    
+    const findParent = (accounts: ChartOfAccount[], targetId: string): ChartOfAccount | null => {
+      for (const acc of accounts) {
+        if (acc.id === targetId) return acc
+        if (acc.children) {
+          const found = findParent(acc.children, targetId)
+          if (found) return found
+        }
+      }
+      return null
+    }
+    
+    const parent = findParent(accounts, account.parent_id)
+    return parent ? `${getAccountPath(parent)} > ${account.account_code}` : account.account_code
+  }
+
+  const getCodeSuggestion = (parentId?: string): string => {
+    if (!parentId) return "Ex: 1, 2, 3..."
+    
+    const findParent = (accounts: ChartOfAccount[], targetId: string): ChartOfAccount | null => {
+      for (const acc of accounts) {
+        if (acc.id === targetId) return acc
+        if (acc.children) {
+          const found = findParent(acc.children, targetId)
+          if (found) return found
+        }
+      }
+      return null
+    }
+    
+    const parent = findParent(accounts, parentId)
+    return parent ? `Ex: ${parent.account_code}.1, ${parent.account_code}.2...` : "Ex: 1.1, 1.2..."
+  }
+
+  const hasActiveChildren = (account: ChartOfAccount): boolean => {
+    return account.children ? account.children.some(child => child.is_active) : false
   }
 
   const handleEdit = (account: ChartOfAccount) => {
@@ -186,7 +244,9 @@ export default function PlanoDeContas() {
               variant="ghost"
               size="sm"
               onClick={() => handleDelete(account)}
-              className="text-destructive hover:text-destructive"
+              disabled={hasActiveChildren(account)}
+              className="text-destructive hover:text-destructive disabled:opacity-50"
+              title={hasActiveChildren(account) ? "Não é possível excluir conta com filhos ativos" : undefined}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -256,10 +316,18 @@ export default function PlanoDeContas() {
                     name="account_code"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Código Hierárquico</FormLabel>
-                        <FormControl>
-                          <Input placeholder="1.1.1" {...field} />
-                        </FormControl>
+                         <FormLabel>Código Hierárquico</FormLabel>
+                         <FormControl>
+                           <Input 
+                             placeholder={getCodeSuggestion(form.watch("parent_id"))} 
+                             {...field} 
+                           />
+                         </FormControl>
+                         {selectedAccount && (
+                           <p className="text-sm text-muted-foreground">
+                             Caminho: {getAccountPath(selectedAccount)}
+                           </p>
+                         )}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -447,6 +515,22 @@ export default function PlanoDeContas() {
                 className="pl-10"
               />
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={expandAllNodes}
+            >
+              <ExpandIcon className="h-4 w-4 mr-2" />
+              Expandir Tudo
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={collapseAllNodes}
+            >
+              <ShrinkIcon className="h-4 w-4 mr-2" />
+              Recolher Tudo
+            </Button>
           </div>
         </CardHeader>
         <CardContent className="p-0">

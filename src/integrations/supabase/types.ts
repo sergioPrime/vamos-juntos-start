@@ -568,6 +568,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_financial_entries_chart_account"
+            columns: ["chart_of_account_id"]
+            isOneToOne: false
+            referencedRelation: "analytical_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_financial_entries_chart_account"
+            columns: ["chart_of_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "fk_financial_entries_chart_of_account"
             columns: ["chart_of_account_id"]
             isOneToOne: false
@@ -2128,11 +2142,9 @@ export type Database = {
         Row: {
           account_code: string | null
           account_name: string | null
-          account_type: string | null
           created_at: string | null
           description: string | null
           id: string | null
-          is_active: boolean | null
           is_expense: boolean | null
           nature_code: string | null
           org_id: string | null
@@ -2142,11 +2154,9 @@ export type Database = {
         Insert: {
           account_code?: string | null
           account_name?: string | null
-          account_type?: string | null
           created_at?: string | null
           description?: string | null
           id?: string | null
-          is_active?: boolean | null
           is_expense?: boolean | null
           nature_code?: string | null
           org_id?: string | null
@@ -2156,11 +2166,9 @@ export type Database = {
         Update: {
           account_code?: string | null
           account_name?: string | null
-          account_type?: string | null
           created_at?: string | null
           description?: string | null
           id?: string | null
-          is_active?: boolean | null
           is_expense?: boolean | null
           nature_code?: string | null
           org_id?: string | null
@@ -2188,7 +2196,9 @@ export type Database = {
           due_date: string | null
           entry_type: string | null
           id: string | null
+          is_expense: boolean | null
           is_settled: boolean | null
+          nature_code: string | null
           org_id: string | null
           origin_id: string | null
           origin_type: string | null
@@ -2201,6 +2211,20 @@ export type Database = {
           updated_at: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_financial_entries_chart_account"
+            columns: ["chart_of_account_id"]
+            isOneToOne: false
+            referencedRelation: "analytical_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_financial_entries_chart_account"
+            columns: ["chart_of_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fk_financial_entries_chart_of_account"
             columns: ["chart_of_account_id"]
@@ -2245,11 +2269,59 @@ export type Database = {
           projection_date: string
         }[]
       }
+      gtrgm_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_decompress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_options: {
+        Args: { "": unknown }
+        Returns: undefined
+      }
+      gtrgm_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      has_children: {
+        Args: { item_id: string; table_name: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_used_in_financial_entries: {
+        Args: { item_id: string; reference_type: string }
+        Returns: boolean
+      }
+      set_limit: {
+        Args: { "": number }
+        Returns: number
+      }
+      show_limit: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      show_trgm: {
+        Args: { "": string }
+        Returns: string[]
+      }
+      validate_account_code_hierarchy: {
+        Args: { new_account_code: string; parent_account_code: string }
+        Returns: boolean
+      }
+      validate_hierarchy_cycle: {
+        Args: { new_id: string; new_parent_id: string; table_name: string }
         Returns: boolean
       }
     }

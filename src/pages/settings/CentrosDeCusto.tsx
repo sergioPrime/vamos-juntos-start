@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Plus, Search, Edit, Trash2, ChevronRight, ChevronDown } from "lucide-react"
+import { Plus, Search, Edit, Trash2, ChevronRight, ChevronDown, ExpandIcon, ShrinkIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -50,6 +50,46 @@ export default function CentrosDeCusto() {
       newExpanded.add(centerId)
     }
     setExpandedNodes(newExpanded)
+  }
+
+  const expandAllNodes = () => {
+    const allNodes = new Set<string>()
+    const collectNodes = (centers: CostCenter[]) => {
+      centers.forEach(center => {
+        if (center.children && center.children.length > 0) {
+          allNodes.add(center.id)
+          collectNodes(center.children)
+        }
+      })
+    }
+    collectNodes(costCenters)
+    setExpandedNodes(allNodes)
+  }
+
+  const collapseAllNodes = () => {
+    setExpandedNodes(new Set())
+  }
+
+  const getCenterPath = (center: CostCenter): string => {
+    if (!center.parent_id) return center.code
+    
+    const findParent = (centers: CostCenter[], targetId: string): CostCenter | null => {
+      for (const c of centers) {
+        if (c.id === targetId) return c
+        if (c.children) {
+          const found = findParent(c.children, targetId)
+          if (found) return found
+        }
+      }
+      return null
+    }
+    
+    const parent = findParent(costCenters, center.parent_id)
+    return parent ? `${getCenterPath(parent)} > ${center.code}` : center.code
+  }
+
+  const hasActiveChildren = (center: CostCenter): boolean => {
+    return center.children ? center.children.some(child => child.is_active) : false
   }
 
   const handleEdit = (costCenter: CostCenter) => {
@@ -157,7 +197,9 @@ export default function CentrosDeCusto() {
               variant="ghost"
               size="sm"
               onClick={() => handleDelete(costCenter)}
-              className="text-destructive hover:text-destructive"
+              disabled={hasActiveChildren(costCenter)}
+              className="text-destructive hover:text-destructive disabled:opacity-50"
+              title={hasActiveChildren(costCenter) ? "Não é possível excluir centro com filhos ativos" : undefined}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -226,13 +268,18 @@ export default function CentrosDeCusto() {
                     control={form.control}
                     name="code"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Código</FormLabel>
-                        <FormControl>
-                          <Input placeholder="001" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                       <FormItem>
+                         <FormLabel>Código</FormLabel>
+                         <FormControl>
+                           <Input placeholder="001" {...field} />
+                         </FormControl>
+                         {selectedCostCenter && (
+                           <p className="text-sm text-muted-foreground">
+                             Caminho: {getCenterPath(selectedCostCenter)}
+                           </p>
+                         )}
+                         <FormMessage />
+                       </FormItem>
                     )}
                   />
                   <FormField
@@ -346,6 +393,22 @@ export default function CentrosDeCusto() {
                 className="pl-10"
               />
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={expandAllNodes}
+            >
+              <ExpandIcon className="h-4 w-4 mr-2" />
+              Expandir Tudo
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={collapseAllNodes}
+            >
+              <ShrinkIcon className="h-4 w-4 mr-2" />
+              Recolher Tudo
+            </Button>
           </div>
         </CardHeader>
         <CardContent className="p-0">

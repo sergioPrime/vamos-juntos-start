@@ -135,11 +135,9 @@ export default function Lancamentos() {
           .eq("org_id", organization.currentOrg.id),
         
         supabase
-          .from("chart_of_accounts")
+          .from("analytical_accounts")
           .select("*")
-          .eq("org_id", organization.currentOrg.id)
-          .eq("is_active", true)
-          .eq("account_type", "analytic"),
+          .eq("org_id", organization.currentOrg.id),
         
         supabase
           .from("cost_centers")
@@ -200,7 +198,7 @@ export default function Lancamentos() {
         amount: parseFloat(values.amount),
         competence_date: values.competence_date.toISOString().split('T')[0],
         due_date: values.due_date.toISOString().split('T')[0],
-        created_by: organization.currentOrg.id, // Temporary - should be user ID
+        created_by: organization.currentOrg.id,
       }
 
       const { error } = await supabase

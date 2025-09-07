@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useInventoryIntegration } from './useInventoryIntegration'
+import { useFinancialEntries } from './useFinancialEntries'
 import { useToast } from './use-toast'
 
 interface PurchaseReceiptHookProps {
@@ -10,6 +11,7 @@ interface PurchaseReceiptHookProps {
 
 export function usePurchaseIntegration() {
   const { processPurchaseReceipt } = useInventoryIntegration()
+  const { createFromPurchase } = useFinancialEntries()
   const { toast } = useToast()
 
   // Handle purchase receipt with inventory integration
@@ -33,9 +35,12 @@ export function usePurchaseIntegration() {
           items: mockPurchaseItems
         })
 
+        // Create financial entry (payable) - mock for now
+        await createFromPurchase(purchaseData.purchase_id, "mock-supplier-id", 255.00)
+
         toast({
           title: "Integração automática",
-          description: "Estoque atualizado automaticamente após recebimento da compra.",
+          description: "Estoque e financeiro atualizados automaticamente após recebimento da compra.",
         })
       }
     } catch (error) {

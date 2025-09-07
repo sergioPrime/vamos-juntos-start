@@ -305,6 +305,45 @@ export type Database = {
         }
         Relationships: []
       }
+      chart_of_accounts: {
+        Row: {
+          account_code: string
+          account_name: string
+          account_type: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          org_id: string
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_code: string
+          account_name: string
+          account_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          org_id: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_code?: string
+          account_name?: string
+          account_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          org_id?: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           address: string | null
@@ -411,6 +450,78 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      financial_entries: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          chart_of_account_id: string | null
+          company_id: string | null
+          competence_date: string
+          created_at: string
+          created_by: string
+          description: string | null
+          due_date: string
+          entry_type: string
+          id: string
+          is_settled: boolean
+          org_id: string
+          origin_id: string | null
+          origin_type: string | null
+          payment_method_id: string | null
+          person_id: string
+          person_type: string
+          settled_at: string | null
+          settled_payment_method_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          bank_account_id?: string | null
+          chart_of_account_id?: string | null
+          company_id?: string | null
+          competence_date?: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          due_date: string
+          entry_type: string
+          id?: string
+          is_settled?: boolean
+          org_id: string
+          origin_id?: string | null
+          origin_type?: string | null
+          payment_method_id?: string | null
+          person_id: string
+          person_type: string
+          settled_at?: string | null
+          settled_payment_method_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          chart_of_account_id?: string | null
+          company_id?: string | null
+          competence_date?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          due_date?: string
+          entry_type?: string
+          id?: string
+          is_settled?: boolean
+          org_id?: string
+          origin_id?: string | null
+          origin_type?: string | null
+          payment_method_id?: string | null
+          person_id?: string
+          person_type?: string
+          settled_at?: string | null
+          settled_payment_method_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       financial_transactions: {
         Row: {

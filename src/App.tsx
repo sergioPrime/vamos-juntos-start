@@ -14,8 +14,7 @@ import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { SuperAdminRoute } from "./components/auth/SuperAdminRoute";
 import { AuthRedirect } from "./components/auth/AuthRedirect";
 import Dashboard from "./pages/Dashboard";
-import Receivables from "./pages/finance/Receivables";
-import Payables from "./pages/finance/Payables";
+import Lancamentos from "./pages/finance/Lancamentos";
 import FinancialReports from "./pages/finance/FinancialReports";
 import FinancialDashboard from "./pages/FinancialDashboard";
 import Charges from "./pages/Charges";
@@ -96,24 +95,18 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/finance/receivables" element={
+          <Route path="/finance/lancamentos" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">
-                  <Receivables />
+                  <Lancamentos />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/finance/payables" element={
-            <ProtectedRoute>
-              <AppLayout>
-                <PageTransition direction="left">
-                  <Payables />
-                </PageTransition>
-              </AppLayout>
-            </ProtectedRoute>
-          } />
+          {/* Redirect old routes */}
+          <Route path="/finance/receivables" element={<Navigate to="/finance/lancamentos" replace />} />
+          <Route path="/finance/payables" element={<Navigate to="/finance/lancamentos" replace />} />
           <Route path="/finance/reports" element={
             <ProtectedRoute>
               <AppLayout>
@@ -145,7 +138,7 @@ const App = () => (
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">
-                  <Receivables />
+                  <Lancamentos />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

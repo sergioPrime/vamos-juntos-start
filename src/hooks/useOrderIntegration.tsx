@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useInventoryIntegration } from './useInventoryIntegration'
+import { useFinancialEntries } from './useFinancialEntries'
 import { useToast } from './use-toast'
 
 interface OrderCompletionHookProps {
@@ -11,6 +12,7 @@ interface OrderCompletionHookProps {
 
 export function useOrderIntegration() {
   const { processOrderCompletion } = useInventoryIntegration()
+  const { createFromOrder } = useFinancialEntries()
   const { toast } = useToast()
 
   // Handle order status change with inventory integration
@@ -37,9 +39,12 @@ export function useOrderIntegration() {
             }))
           })
 
+          // Create financial entry (receivable) - mock for now
+          await createFromOrder(orderData.order_id, "mock-customer-id", 100.00)
+
           toast({
             title: "Integração automática",
-            description: "Estoque atualizado automaticamente após conclusão do pedido.",
+            description: "Estoque e financeiro atualizados automaticamente após conclusão do pedido.",
           })
         }
       }

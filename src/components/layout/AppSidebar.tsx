@@ -28,8 +28,7 @@ const navigationItems = [
 
 const financeItems = [
   { title: "Dashboard", url: "/finance/dashboard", icon: PieChart },
-  { title: "Receber", url: "/finance/receivables", icon: Wallet },
-  { title: "Pagar", url: "/finance/payables", icon: CreditCard },
+  { title: "Lançamentos", url: "/finance/lancamentos", icon: FileText },
   { title: "Cobranças", url: "/charges", icon: Receipt },
   { title: "Relatórios", url: "/finance/reports", icon: BarChart3 },
 ]

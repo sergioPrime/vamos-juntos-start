@@ -97,6 +97,8 @@ export default function Lancamentos() {
     try {
       setLoading(true)
       
+      console.log("Loading data for organization:", organization?.currentOrg?.id)
+      
       const [
         entriesResponse,
         companiesResponse,
@@ -336,11 +338,21 @@ export default function Lancamentos() {
           <p className="text-muted-foreground">
             Gerencie contas a receber e contas a pagar
           </p>
+          {!loading && (
+            <div className="text-sm text-muted-foreground mt-1">
+              {companies.length} empresas • {customers.length} clientes • {suppliers.length} fornecedores
+            </div>
+          )}
         </div>
         <div className="flex items-center space-x-2">
           <Button variant="outline" size="sm" onClick={loadData}>
             <RefreshCcw className="h-4 w-4 mr-2" />
             Atualizar
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => {
+            console.log("Debug data:", { companies, customers, suppliers, chartOfAccounts, costCenters })
+          }}>
+            Debug
           </Button>
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
@@ -366,6 +378,12 @@ export default function Lancamentos() {
                 <CardDescription>
                   Preencha os dados para criar um novo lançamento financeiro
                 </CardDescription>
+                {loading && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="h-4 w-4 border-2 border-primary border-t-transparent animate-spin rounded-full"></div>
+                    Carregando dados...
+                  </div>
+                )}
               </CardHeader>
               <CardContent>
                 <Form {...form}>
@@ -397,7 +415,7 @@ export default function Lancamentos() {
                       name="company_id"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Sua Empresa</FormLabel>
+                          <FormLabel>Sua Empresa *</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
@@ -405,13 +423,24 @@ export default function Lancamentos() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {companies.map((company) => (
-                                <SelectItem key={company.id} value={company.id}>
-                                  {company.name}
+                              {companies.length > 0 ? (
+                                companies.map((company) => (
+                                  <SelectItem key={company.id} value={company.id}>
+                                    {company.name}
+                                  </SelectItem>
+                                ))
+                              ) : (
+                                <SelectItem value="" disabled>
+                                  Nenhuma empresa encontrada
                                 </SelectItem>
-                              ))}
+                              )}
                             </SelectContent>
                           </Select>
+                          {companies.length === 0 && (
+                            <p className="text-xs text-muted-foreground">
+                              Configure uma empresa em Configurações → Empresas
+                            </p>
+                          )}
                           <FormMessage />
                         </FormItem>
                       )}
@@ -420,28 +449,45 @@ export default function Lancamentos() {
                     <FormField
                       control={form.control}
                       name="person_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            {form.watch("entry_type") === "receivable" ? "Cliente" : "Fornecedor"}
-                          </FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={`Selecione o ${form.watch("entry_type") === "receivable" ? "cliente" : "fornecedor"}`} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {(form.watch("entry_type") === "receivable" ? customers : suppliers).map((person) => (
-                                <SelectItem key={person.id} value={person.id}>
-                                  {person.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      render={({ field }) => {
+                        const isReceivable = form.watch("entry_type") === "receivable"
+                        const people = isReceivable ? customers : suppliers
+                        const personType = isReceivable ? "cliente" : "fornecedor"
+                        
+                        return (
+                          <FormItem>
+                            <FormLabel>
+                              {isReceivable ? "Cliente *" : "Fornecedor *"}
+                            </FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder={`Selecione o ${personType}`} />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {people.length > 0 ? (
+                                  people.map((person) => (
+                                    <SelectItem key={person.id} value={person.id}>
+                                      {person.name}
+                                    </SelectItem>
+                                  ))
+                                ) : (
+                                  <SelectItem value="" disabled>
+                                    Nenhum {personType} encontrado
+                                  </SelectItem>
+                                )}
+                              </SelectContent>
+                            </Select>
+                            {people.length === 0 && (
+                              <p className="text-xs text-muted-foreground">
+                                Configure {isReceivable ? "clientes" : "fornecedores"} em {isReceivable ? "Clientes" : "Fornecedores"}
+                              </p>
+                            )}
+                            <FormMessage />
+                          </FormItem>
+                        )
+                      }}
                     />
 
                     <FormField

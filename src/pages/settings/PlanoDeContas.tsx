@@ -447,8 +447,7 @@ export default function PlanoDeContas() {
                               <SelectValue placeholder="Selecione conta pai" />
                             </SelectTrigger>
                           </FormControl>
-                           <SelectContent>
-                            <SelectItem value="">Nenhuma</SelectItem>
+                          <SelectContent>
                             {getSyntheticAccounts(accounts)
                               .filter(account => account && account.id && account.account_code && account.account_name)
                               .map(account => (

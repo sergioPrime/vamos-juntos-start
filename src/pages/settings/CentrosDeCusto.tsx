@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Plus, Search, Edit, Trash2, ChevronRight, ChevronDown, ExpandIcon, ShrinkIcon, Expand, Collapse } from "lucide-react"
+import { Plus, Search, Edit, Trash2, ChevronRight, ChevronDown, ExpandIcon, ShrinkIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -269,7 +269,7 @@ export default function CentrosDeCusto() {
             onClick={expandAllNodes}
             disabled={allExpanded}
           >
-            <Expand className="h-4 w-4 mr-2" />
+            <ExpandIcon className="h-4 w-4 mr-2" />
             Expandir Tudo
           </Button>
           <Button
@@ -278,7 +278,7 @@ export default function CentrosDeCusto() {
             onClick={collapseAllNodes}
             disabled={expandedNodes.size === 0}
           >
-            <Collapse className="h-4 w-4 mr-2" />
+            <ShrinkIcon className="h-4 w-4 mr-2" />
             Recolher Tudo
           </Button>
           
@@ -289,7 +289,7 @@ export default function CentrosDeCusto() {
                 Novo Centro de Custo
               </Button>
             </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>
                 {selectedCostCenter ? "Editar Centro de Custo" : "Novo Centro de Custo"}
@@ -412,6 +412,7 @@ export default function CentrosDeCusto() {
             </Form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <Card>

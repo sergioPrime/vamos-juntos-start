@@ -316,7 +316,7 @@ export default function PlanoDeContas() {
             onClick={expandAllNodes}
             disabled={allExpanded}
           >
-            <Expand className="h-4 w-4 mr-2" />
+            <ExpandIcon className="h-4 w-4 mr-2" />
             Expandir Tudo
           </Button>
           <Button
@@ -325,7 +325,7 @@ export default function PlanoDeContas() {
             onClick={collapseAllNodes}
             disabled={expandedNodes.size === 0}
           >
-            <Collapse className="h-4 w-4 mr-2" />
+            <ShrinkIcon className="h-4 w-4 mr-2" />
             Recolher Tudo
           </Button>
           
@@ -336,7 +336,7 @@ export default function PlanoDeContas() {
                 Nova Conta
               </Button>
             </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>
                 {selectedAccount ? "Editar Conta" : "Nova Conta"}
@@ -539,6 +539,7 @@ export default function PlanoDeContas() {
             </Form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <Card>

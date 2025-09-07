@@ -35,6 +35,7 @@ export default function PlanoDeContas() {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set())
   const [selectedAccount, setSelectedAccount] = useState<ChartOfAccount | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [allExpanded, setAllExpanded] = useState(false)
 
   const form = useForm<ChartOfAccountFormData>({
     resolver: zodResolver(chartOfAccountSchema),
@@ -81,10 +82,12 @@ export default function PlanoDeContas() {
     }
     collectNodes(accounts)
     setExpandedNodes(allNodes)
+    setAllExpanded(true)
   }
 
   const collapseAllNodes = () => {
     setExpandedNodes(new Set())
+    setAllExpanded(false)
   }
 
   const getAccountPath = (account: ChartOfAccount): string => {
@@ -169,7 +172,17 @@ export default function PlanoDeContas() {
   }
 
   const handleDelete = async (account: ChartOfAccount) => {
-    if (confirm("Tem certeza que deseja desativar esta conta?")) {
+    const hasChildren = hasActiveChildren(account)
+    const deleteMessage = hasChildren 
+      ? `Não é possível excluir a conta "${account.account_name}" pois possui contas filhas.`
+      : `Tem certeza que deseja excluir a conta "${account.account_name}"?`
+    
+    if (hasChildren) {
+      alert(deleteMessage)
+      return
+    }
+    
+    if (confirm(deleteMessage)) {
       await deleteAccount(account.id)
     }
   }
@@ -295,13 +308,34 @@ export default function PlanoDeContas() {
     <div className="w-full space-y-6">
       <div className="flex items-center justify-between sticky top-[4.5rem] sm:top-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-30 py-4 border-b">
         <h1 className="text-3xl font-bold">Plano de Contas</h1>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={handleNew}>
-              <Plus className="h-4 w-4 mr-2" />
-              Nova Conta
-            </Button>
-          </DialogTrigger>
+        
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={expandAllNodes}
+            disabled={allExpanded}
+          >
+            <Expand className="h-4 w-4 mr-2" />
+            Expandir Tudo
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={collapseAllNodes}
+            disabled={expandedNodes.size === 0}
+          >
+            <Collapse className="h-4 w-4 mr-2" />
+            Recolher Tudo
+          </Button>
+          
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={handleNew}>
+                <Plus className="h-4 w-4 mr-2" />
+                Nova Conta
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>
@@ -311,27 +345,32 @@ export default function PlanoDeContas() {
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="account_code"
-                    render={({ field }) => (
-                      <FormItem>
-                         <FormLabel>Código Hierárquico</FormLabel>
-                         <FormControl>
-                           <Input 
-                             placeholder={getCodeSuggestion(form.watch("parent_id"))} 
-                             {...field} 
-                           />
-                         </FormControl>
-                         {selectedAccount && (
-                           <p className="text-sm text-muted-foreground">
-                             Caminho: {getAccountPath(selectedAccount)}
-                           </p>
-                         )}
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                   <FormField
+                     control={form.control}
+                     name="account_code"
+                     render={({ field }) => (
+                       <FormItem>
+                          <FormLabel>Código Hierárquico</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder={getCodeSuggestion(form.watch("parent_id"))} 
+                              {...field} 
+                            />
+                          </FormControl>
+                          {getCodeSuggestion(form.watch("parent_id")) && form.watch("parent_id") && (
+                            <p className="text-xs text-muted-foreground">
+                              {getCodeSuggestion(form.watch("parent_id"))}
+                            </p>
+                          )}
+                          {selectedAccount && (
+                            <p className="text-sm text-muted-foreground">
+                              Caminho: {getAccountPath(selectedAccount)}
+                            </p>
+                          )}
+                         <FormMessage />
+                       </FormItem>
+                     )}
+                   />
                   <FormField
                     control={form.control}
                     name="account_name"

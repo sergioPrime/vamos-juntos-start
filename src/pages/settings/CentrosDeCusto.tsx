@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Plus, Search, Edit, Trash2, ChevronRight, ChevronDown, ExpandIcon, ShrinkIcon } from "lucide-react"
+import { Plus, Search, Edit, Trash2, ChevronRight, ChevronDown, ExpandIcon, ShrinkIcon, Expand, Collapse } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -30,6 +30,7 @@ export default function CentrosDeCusto() {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set())
   const [selectedCostCenter, setSelectedCostCenter] = useState<CostCenter | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [allExpanded, setAllExpanded] = useState(false)
 
   const form = useForm<CostCenterFormData>({
     resolver: zodResolver(costCenterSchema),
@@ -64,10 +65,12 @@ export default function CentrosDeCusto() {
     }
     collectNodes(costCenters)
     setExpandedNodes(allNodes)
+    setAllExpanded(true)
   }
 
   const collapseAllNodes = () => {
     setExpandedNodes(new Set())
+    setAllExpanded(false)
   }
 
   const getCenterPath = (center: CostCenter): string => {
@@ -128,7 +131,17 @@ export default function CentrosDeCusto() {
   }
 
   const handleDelete = async (costCenter: CostCenter) => {
-    if (confirm("Tem certeza que deseja desativar este centro de custo?")) {
+    const hasChildren = hasActiveChildren(costCenter)
+    const deleteMessage = hasChildren 
+      ? `Não é possível excluir o centro de custo "${costCenter.name}" pois possui centros filhos.`
+      : `Tem certeza que deseja excluir o centro de custo "${costCenter.name}"?`
+    
+    if (hasChildren) {
+      alert(deleteMessage)
+      return
+    }
+    
+    if (confirm(deleteMessage)) {
       await deleteCostCenter(costCenter.id)
     }
   }
@@ -248,13 +261,34 @@ export default function CentrosDeCusto() {
     <div className="w-full space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Centros de Custo</h1>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={handleNew}>
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Centro de Custo
-            </Button>
-          </DialogTrigger>
+        
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={expandAllNodes}
+            disabled={allExpanded}
+          >
+            <Expand className="h-4 w-4 mr-2" />
+            Expandir Tudo
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={collapseAllNodes}
+            disabled={expandedNodes.size === 0}
+          >
+            <Collapse className="h-4 w-4 mr-2" />
+            Recolher Tudo
+          </Button>
+          
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={handleNew}>
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Centro de Custo
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>
@@ -393,22 +427,6 @@ export default function CentrosDeCusto() {
                 className="pl-10"
               />
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={expandAllNodes}
-            >
-              <ExpandIcon className="h-4 w-4 mr-2" />
-              Expandir Tudo
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={collapseAllNodes}
-            >
-              <ShrinkIcon className="h-4 w-4 mr-2" />
-              Recolher Tudo
-            </Button>
           </div>
         </CardHeader>
         <CardContent className="p-0">

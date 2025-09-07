@@ -7,6 +7,7 @@ import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { supabase } from "@/integrations/supabase/client"
 import { useOrganization } from "@/hooks/useOrganization"
+import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/use-toast"
 
 import { Button } from "@/components/ui/button"
@@ -58,6 +59,7 @@ interface FinancialEntry {
 
 export default function Lancamentos() {
   const organization = useOrganization()
+  const { user } = useAuth()
   const { toast } = useToast()
   const [entries, setEntries] = useState<FinancialEntry[]>([])
   const [companies, setCompanies] = useState<any[]>([])
@@ -198,7 +200,7 @@ export default function Lancamentos() {
         amount: parseFloat(values.amount),
         competence_date: values.competence_date.toISOString().split('T')[0],
         due_date: values.due_date.toISOString().split('T')[0],
-        created_by: organization.currentOrg.id,
+        created_by: user?.id || organization.currentOrg.id,
       }
 
       const { error } = await supabase

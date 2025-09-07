@@ -566,7 +566,29 @@ export type Database = {
           settled_payment_method_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_financial_entries_chart_of_account"
+            columns: ["chart_of_account_id"]
+            isOneToOne: false
+            referencedRelation: "analytical_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_financial_entries_chart_of_account"
+            columns: ["chart_of_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_financial_entries_cost_center"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       financial_transactions: {
         Row: {
@@ -2102,7 +2124,106 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      analytical_accounts: {
+        Row: {
+          account_code: string | null
+          account_name: string | null
+          account_type: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          is_active: boolean | null
+          is_expense: boolean | null
+          nature_code: string | null
+          org_id: string | null
+          parent_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_code?: string | null
+          account_name?: string | null
+          account_type?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          is_expense?: boolean | null
+          nature_code?: string | null
+          org_id?: string | null
+          parent_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_code?: string | null
+          account_name?: string | null
+          account_type?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          is_expense?: boolean | null
+          nature_code?: string | null
+          org_id?: string | null
+          parent_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      financial_entries_report: {
+        Row: {
+          account_code: string | null
+          account_name: string | null
+          amount: number | null
+          bank_account_id: string | null
+          chart_of_account_id: string | null
+          company_id: string | null
+          company_name: string | null
+          competence_date: string | null
+          cost_center_code: string | null
+          cost_center_id: string | null
+          cost_center_name: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          due_date: string | null
+          entry_type: string | null
+          id: string | null
+          is_settled: boolean | null
+          org_id: string | null
+          origin_id: string | null
+          origin_type: string | null
+          payment_method_id: string | null
+          person_id: string | null
+          person_name: string | null
+          person_type: string | null
+          settled_at: string | null
+          settled_payment_method_id: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_financial_entries_chart_of_account"
+            columns: ["chart_of_account_id"]
+            isOneToOne: false
+            referencedRelation: "analytical_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_financial_entries_chart_of_account"
+            columns: ["chart_of_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_financial_entries_cost_center"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       create_organization_with_owner: {

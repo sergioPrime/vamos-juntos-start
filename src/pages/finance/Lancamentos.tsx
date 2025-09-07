@@ -170,13 +170,33 @@ export default function Lancamentos() {
       ])
 
       if (entriesResponse.error) throw entriesResponse.error
-      if (companiesResponse.error) throw companiesResponse.error
-      if (customersResponse.error) throw customersResponse.error
-      if (suppliersResponse.error) throw suppliersResponse.error
+      if (companiesResponse.error) {
+        console.error("Companies error:", companiesResponse.error)
+        throw companiesResponse.error
+      }
+      if (customersResponse.error) {
+        console.error("Customers error:", customersResponse.error)
+        throw customersResponse.error
+      }
+      if (suppliersResponse.error) {
+        console.error("Suppliers error:", suppliersResponse.error)
+        throw suppliersResponse.error
+      }
       if (chartResponse.error) throw chartResponse.error
       if (costCentersResponse.error) throw costCentersResponse.error
       if (paymentMethodsResponse.error) throw paymentMethodsResponse.error
       if (bankAccountsResponse.error) throw bankAccountsResponse.error
+
+      console.log("Data loaded:", {
+        entries: entriesResponse.data?.length || 0,
+        companies: companiesResponse.data?.length || 0,
+        customers: customersResponse.data?.length || 0,
+        suppliers: suppliersResponse.data?.length || 0,
+        chartOfAccounts: chartResponse.data?.length || 0,
+        costCenters: costCentersResponse.data?.length || 0,
+        paymentMethods: paymentMethodsResponse.data?.length || 0,
+        bankAccounts: bankAccountsResponse.data?.length || 0,
+      })
 
       setEntries((entriesResponse.data || []) as any)
       setCompanies(companiesResponse.data || [])

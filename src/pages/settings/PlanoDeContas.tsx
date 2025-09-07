@@ -336,7 +336,7 @@ export default function PlanoDeContas() {
                 Nova Conta
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {selectedAccount ? "Editar Conta" : "Nova Conta"}

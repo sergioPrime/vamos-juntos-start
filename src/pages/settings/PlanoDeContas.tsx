@@ -165,7 +165,7 @@ export default function PlanoDeContas() {
                   {account.is_expense ? "Despesa" : "Receita"}
                 </Badge>
                 {!account.is_active && (
-                  <Badge variant="outline">Inativo</Badge>
+                  <Badge variant="outline">Inativa</Badge>
                 )}
               </div>
               {account.description && (
@@ -327,7 +327,7 @@ export default function PlanoDeContas() {
                   />
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="parent_id"
@@ -353,6 +353,9 @@ export default function PlanoDeContas() {
                       </FormItem>
                     )}
                   />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="is_expense"
@@ -381,7 +384,7 @@ export default function PlanoDeContas() {
                         <div className="space-y-0.5">
                           <FormLabel className="text-base">Ativo</FormLabel>
                           <p className="text-sm text-muted-foreground">
-                            Conta disponível para uso
+                            Desmarque para desativar a conta
                           </p>
                         </div>
                         <FormControl>

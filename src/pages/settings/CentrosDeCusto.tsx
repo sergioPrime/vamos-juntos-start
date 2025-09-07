@@ -17,9 +17,9 @@ import { useCostCenters, CostCenter } from "@/hooks/useCostCenters"
 const costCenterSchema = z.object({
   code: z.string().min(1, "Código é obrigatório"),
   name: z.string().min(1, "Nome é obrigatório"),
+  is_active: z.boolean().default(true),
   description: z.string().optional(),
   parent_id: z.string().optional(),
-  is_active: z.boolean().default(true),
 })
 
 type CostCenterFormData = z.infer<typeof costCenterSchema>
@@ -36,9 +36,9 @@ export default function CentrosDeCusto() {
     defaultValues: {
       code: "",
       name: "",
+      is_active: true,
       description: "",
       parent_id: "",
-      is_active: true,
     },
   })
 
@@ -57,9 +57,9 @@ export default function CentrosDeCusto() {
     form.reset({
       code: costCenter.code,
       name: costCenter.name,
+      is_active: costCenter.is_active,
       description: costCenter.description || "",
       parent_id: costCenter.parent_id || "",
-      is_active: costCenter.is_active,
     })
     setDialogOpen(true)
   }
@@ -69,9 +69,9 @@ export default function CentrosDeCusto() {
     form.reset({
       code: "",
       name: "",
+      is_active: true,
       description: "",
       parent_id: "",
-      is_active: true,
     })
     setDialogOpen(true)
   }
@@ -278,6 +278,27 @@ export default function CentrosDeCusto() {
 
                 <FormField
                   control={form.control}
+                  name="is_active"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Ativo</FormLabel>
+                        <p className="text-sm text-muted-foreground">
+                          Desmarque para desativar o centro de custo
+                        </p>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="description"
                   render={({ field }) => (
                     <FormItem>
@@ -290,27 +311,6 @@ export default function CentrosDeCusto() {
                         />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="is_active"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">Ativo</FormLabel>
-                        <p className="text-sm text-muted-foreground">
-                          Centro de custo disponível para uso
-                        </p>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
                     </FormItem>
                   )}
                 />

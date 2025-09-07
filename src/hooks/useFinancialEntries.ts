@@ -38,6 +38,7 @@ export interface CreateFinancialEntryData {
   origin_id?: string
   company_id?: string
   chart_of_account_id?: string
+  cost_center_id?: string
   payment_method_id?: string
   bank_account_id?: string
 }

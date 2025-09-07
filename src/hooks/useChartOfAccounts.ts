@@ -31,50 +31,53 @@ export interface CreateChartOfAccountData {
 
 // Default Brazilian Chart of Accounts
 const defaultChartOfAccounts: Omit<CreateChartOfAccountData, 'org_id'>[] = [
-  // ATIVO
-  { account_code: "1", account_name: "ATIVO", account_type: "synthetic", nature_code: "01", is_expense: false },
-  { account_code: "1.1", account_name: "ATIVO CIRCULANTE", account_type: "synthetic", nature_code: "01", is_expense: false },
-  { account_code: "1.1.1", account_name: "Disponível", account_type: "synthetic", nature_code: "01", is_expense: false },
-  { account_code: "1.1.1.01", account_name: "Caixa", account_type: "analytic", nature_code: "01", is_expense: false },
-  { account_code: "1.1.1.02", account_name: "Bancos c/ Movimento", account_type: "analytic", nature_code: "01", is_expense: false },
-  { account_code: "1.1.2", account_name: "Direitos Realizáveis", account_type: "synthetic", nature_code: "01", is_expense: false },
-  { account_code: "1.1.2.01", account_name: "Duplicatas a Receber", account_type: "analytic", nature_code: "01", is_expense: false },
-  { account_code: "1.1.2.02", account_name: "Estoque", account_type: "analytic", nature_code: "01", is_expense: false },
-  
-  // PASSIVO
-  { account_code: "2", account_name: "PASSIVO", account_type: "synthetic", nature_code: "02", is_expense: false },
-  { account_code: "2.1", account_name: "PASSIVO CIRCULANTE", account_type: "synthetic", nature_code: "02", is_expense: false },
-  { account_code: "2.1.1", account_name: "Obrigações", account_type: "synthetic", nature_code: "02", is_expense: false },
-  { account_code: "2.1.1.01", account_name: "Fornecedores", account_type: "analytic", nature_code: "02", is_expense: false },
-  { account_code: "2.1.1.02", account_name: "Salários a Pagar", account_type: "analytic", nature_code: "02", is_expense: false },
-  { account_code: "2.1.1.03", account_name: "Impostos a Recolher", account_type: "analytic", nature_code: "02", is_expense: false },
-  
-  // PATRIMÔNIO LÍQUIDO
-  { account_code: "3", account_name: "PATRIMÔNIO LÍQUIDO", account_type: "synthetic", nature_code: "03", is_expense: false },
-  { account_code: "3.1", account_name: "Capital", account_type: "synthetic", nature_code: "03", is_expense: false },
-  { account_code: "3.1.1.01", account_name: "Capital Social", account_type: "analytic", nature_code: "03", is_expense: false },
-  { account_code: "3.2", account_name: "Reservas e Lucros", account_type: "synthetic", nature_code: "03", is_expense: false },
-  { account_code: "3.2.1.01", account_name: "Lucros Acumulados", account_type: "analytic", nature_code: "03", is_expense: false },
-  
-  // RECEITAS
-  { account_code: "4", account_name: "RECEITAS", account_type: "synthetic", nature_code: "04", is_expense: false },
-  { account_code: "4.1", account_name: "RECEITAS OPERACIONAIS", account_type: "synthetic", nature_code: "04", is_expense: false },
-  { account_code: "4.1.1", account_name: "Receita de Vendas", account_type: "synthetic", nature_code: "04", is_expense: false },
-  { account_code: "4.1.1.01", account_name: "Vendas de Produtos", account_type: "analytic", nature_code: "04", is_expense: false },
-  { account_code: "4.1.1.02", account_name: "Prestação de Serviços", account_type: "analytic", nature_code: "04", is_expense: false },
-  
-  // DESPESAS
-  { account_code: "5", account_name: "DESPESAS", account_type: "synthetic", nature_code: "04", is_expense: true },
-  { account_code: "5.1", account_name: "DESPESAS OPERACIONAIS", account_type: "synthetic", nature_code: "04", is_expense: true },
-  { account_code: "5.1.1", account_name: "Despesas Administrativas", account_type: "synthetic", nature_code: "04", is_expense: true },
-  { account_code: "5.1.1.01", account_name: "Salários", account_type: "analytic", nature_code: "04", is_expense: true },
-  { account_code: "5.1.1.02", account_name: "Encargos Sociais", account_type: "analytic", nature_code: "04", is_expense: true },
-  { account_code: "5.1.1.03", account_name: "Aluguel", account_type: "analytic", nature_code: "04", is_expense: true },
-  { account_code: "5.1.1.04", account_name: "Energia Elétrica", account_type: "analytic", nature_code: "04", is_expense: true },
-  { account_code: "5.1.1.05", account_name: "Telefone", account_type: "analytic", nature_code: "04", is_expense: true },
-  { account_code: "5.1.2", account_name: "Despesas Comerciais", account_type: "synthetic", nature_code: "04", is_expense: true },
-  { account_code: "5.1.2.01", account_name: "Comissões", account_type: "analytic", nature_code: "04", is_expense: true },
-  { account_code: "5.1.2.02", account_name: "Propaganda e Marketing", account_type: "analytic", nature_code: "04", is_expense: true },
+  // 1 • RECEITAS
+  { account_code: "1", account_name: "RECEITAS", account_type: "synthetic", nature_code: "04", is_expense: false },
+  { account_code: "1.1", account_name: "Receitas Operacionais", account_type: "synthetic", nature_code: "04", is_expense: false },
+  { account_code: "1.1.1", account_name: "Vendas de Produtos", account_type: "analytic", nature_code: "04", is_expense: false },
+  { account_code: "1.1.2", account_name: "Prestação de Serviços", account_type: "analytic", nature_code: "04", is_expense: false },
+  { account_code: "1.2", account_name: "Receitas Não Operacionais", account_type: "synthetic", nature_code: "04", is_expense: false },
+  { account_code: "1.2.1", account_name: "Receitas Financeiras", account_type: "analytic", nature_code: "04", is_expense: false },
+  { account_code: "1.2.2", account_name: "Ganhos na Venda de Ativos", account_type: "analytic", nature_code: "04", is_expense: false },
+
+  // 2 • DESPESAS
+  { account_code: "2", account_name: "DESPESAS", account_type: "synthetic", nature_code: "04", is_expense: true },
+  { account_code: "2.1", account_name: "Despesas Operacionais", account_type: "synthetic", nature_code: "04", is_expense: true },
+  { account_code: "2.1.1", account_name: "Custo dos Produtos Vendidos", account_type: "analytic", nature_code: "04", is_expense: true },
+  { account_code: "2.1.2", account_name: "Despesas com Pessoal", account_type: "analytic", nature_code: "04", is_expense: true },
+  { account_code: "2.1.3", account_name: "Despesas Administrativas", account_type: "analytic", nature_code: "04", is_expense: true },
+  { account_code: "2.2", account_name: "Despesas Não Operacionais", account_type: "synthetic", nature_code: "04", is_expense: true },
+  { account_code: "2.2.1", account_name: "Perdas Financeiras", account_type: "analytic", nature_code: "04", is_expense: true },
+  { account_code: "2.2.2", account_name: "Despesas Extraordinárias", account_type: "analytic", nature_code: "04", is_expense: true },
+
+  // 3 • ATIVOS
+  { account_code: "3", account_name: "ATIVOS", account_type: "synthetic", nature_code: "01", is_expense: false },
+  { account_code: "3.1", account_name: "Ativo Circulante", account_type: "synthetic", nature_code: "01", is_expense: false },
+  { account_code: "3.1.1", account_name: "Caixa", account_type: "analytic", nature_code: "01", is_expense: false },
+  { account_code: "3.1.2", account_name: "Bancos com Movimento", account_type: "analytic", nature_code: "01", is_expense: false },
+  { account_code: "3.1.3", account_name: "Clientes", account_type: "analytic", nature_code: "01", is_expense: false },
+  { account_code: "3.1.4", account_name: "Estoques", account_type: "analytic", nature_code: "01", is_expense: false },
+  { account_code: "3.2", account_name: "Ativo Não Circulante", account_type: "synthetic", nature_code: "01", is_expense: false },
+  { account_code: "3.2.1", account_name: "Investimentos", account_type: "analytic", nature_code: "01", is_expense: false },
+  { account_code: "3.2.2", account_name: "Imobilizado", account_type: "synthetic", nature_code: "01", is_expense: false },
+  { account_code: "3.2.2.1", account_name: "Máquinas", account_type: "analytic", nature_code: "01", is_expense: false },
+  { account_code: "3.2.2.2", account_name: "Edifícios", account_type: "analytic", nature_code: "01", is_expense: false },
+  { account_code: "3.2.3", account_name: "Intangível", account_type: "analytic", nature_code: "01", is_expense: false },
+
+  // 4 • PASSIVOS
+  { account_code: "4", account_name: "PASSIVOS", account_type: "synthetic", nature_code: "02", is_expense: false },
+  { account_code: "4.1", account_name: "Passivo Circulante", account_type: "synthetic", nature_code: "02", is_expense: false },
+  { account_code: "4.1.1", account_name: "Fornecedores", account_type: "analytic", nature_code: "02", is_expense: false },
+  { account_code: "4.1.2", account_name: "Empréstimos de Curto Prazo", account_type: "analytic", nature_code: "02", is_expense: false },
+  { account_code: "4.1.3", account_name: "Obrigações Fiscais", account_type: "analytic", nature_code: "02", is_expense: false },
+  { account_code: "4.2", account_name: "Passivo Não Circulante", account_type: "synthetic", nature_code: "02", is_expense: false },
+  { account_code: "4.2.1", account_name: "Empréstimos de Longo Prazo", account_type: "analytic", nature_code: "02", is_expense: false },
+  { account_code: "4.2.2", account_name: "Provisões", account_type: "analytic", nature_code: "02", is_expense: false },
+
+  // 5 • PATRIMÔNIO LÍQUIDO
+  { account_code: "5", account_name: "PATRIMÔNIO LÍQUIDO", account_type: "synthetic", nature_code: "03", is_expense: false },
+  { account_code: "5.1", account_name: "Capital Social", account_type: "analytic", nature_code: "03", is_expense: false },
+  { account_code: "5.2", account_name: "Reservas", account_type: "analytic", nature_code: "03", is_expense: false },
 ]
 
 export function useChartOfAccounts() {

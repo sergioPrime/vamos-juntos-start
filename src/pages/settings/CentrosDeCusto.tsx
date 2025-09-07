@@ -3,9 +3,11 @@ import { Plus, Search, Edit, Trash2, ChevronRight, ChevronDown } from "lucide-re
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -17,6 +19,7 @@ const costCenterSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   description: z.string().optional(),
   parent_id: z.string().optional(),
+  is_active: z.boolean().default(true),
 })
 
 type CostCenterFormData = z.infer<typeof costCenterSchema>
@@ -35,6 +38,7 @@ export default function CentrosDeCusto() {
       name: "",
       description: "",
       parent_id: "",
+      is_active: true,
     },
   })
 
@@ -55,6 +59,7 @@ export default function CentrosDeCusto() {
       name: costCenter.name,
       description: costCenter.description || "",
       parent_id: costCenter.parent_id || "",
+      is_active: costCenter.is_active,
     })
     setDialogOpen(true)
   }
@@ -66,6 +71,7 @@ export default function CentrosDeCusto() {
       name: "",
       description: "",
       parent_id: "",
+      is_active: true,
     })
     setDialogOpen(true)
   }
@@ -129,6 +135,9 @@ export default function CentrosDeCusto() {
                   {costCenter.code}
                 </span>
                 <span className="font-medium">{costCenter.name}</span>
+                {!costCenter.is_active && (
+                  <Badge variant="outline">Inativo</Badge>
+                )}
               </div>
               {costCenter.description && (
                 <p className="text-sm text-muted-foreground mt-1">{costCenter.description}</p>
@@ -281,6 +290,27 @@ export default function CentrosDeCusto() {
                         />
                       </FormControl>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="is_active"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Ativo</FormLabel>
+                        <p className="text-sm text-muted-foreground">
+                          Centro de custo disponível para uso
+                        </p>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
                     </FormItem>
                   )}
                 />

@@ -22,6 +22,7 @@ const chartOfAccountSchema = z.object({
   }),
   nature_code: z.string().min(1, "Código natureza é obrigatório"),
   is_expense: z.boolean().default(false),
+  is_active: z.boolean().default(true),
   parent_id: z.string().optional(),
   description: z.string().optional(),
 })
@@ -43,6 +44,7 @@ export default function PlanoDeContas() {
       account_type: "analytic",
       nature_code: "01",
       is_expense: false,
+      is_active: true,
       parent_id: "",
       description: "",
     },
@@ -75,6 +77,7 @@ export default function PlanoDeContas() {
       account_type: account.account_type,
       nature_code: account.nature_code,
       is_expense: account.is_expense,
+      is_active: account.is_active,
       parent_id: account.parent_id || "",
       description: account.description || "",
     })
@@ -89,6 +92,7 @@ export default function PlanoDeContas() {
       account_type: "analytic",
       nature_code: "01",
       is_expense: false,
+      is_active: true,
       parent_id: "",
       description: "",
     })
@@ -160,6 +164,9 @@ export default function PlanoDeContas() {
                 <Badge variant={account.is_expense ? "destructive" : "default"}>
                   {account.is_expense ? "Despesa" : "Receita"}
                 </Badge>
+                {!account.is_active && (
+                  <Badge variant="outline">Inativo</Badge>
+                )}
               </div>
               {account.description && (
                 <p className="text-sm text-muted-foreground mt-1">{account.description}</p>
@@ -320,7 +327,7 @@ export default function PlanoDeContas() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="parent_id"
@@ -355,6 +362,26 @@ export default function PlanoDeContas() {
                           <FormLabel className="text-base">Despesa</FormLabel>
                           <p className="text-sm text-muted-foreground">
                             Marque se for conta de despesa
+                          </p>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="is_active"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">Ativo</FormLabel>
+                          <p className="text-sm text-muted-foreground">
+                            Conta disponível para uso
                           </p>
                         </div>
                         <FormControl>

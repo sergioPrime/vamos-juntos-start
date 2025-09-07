@@ -138,7 +138,8 @@ export default function Lancamentos() {
           .from("chart_of_accounts")
           .select("*")
           .eq("org_id", organization.currentOrg.id)
-          .eq("is_active", true),
+          .eq("is_active", true)
+          .eq("account_type", "analytic"),
         
         supabase
           .from("cost_centers")

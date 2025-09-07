@@ -331,7 +331,7 @@ export default function Lancamentos() {
   }
 
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full h-full min-h-screen space-y-6 -m-3 sm:-m-4 lg:-m-6 p-3 sm:p-4 lg:p-6">{/* Negative margin to counteract AppLayout padding, then add our own */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Lançamentos Financeiros</h1>
@@ -370,7 +370,7 @@ export default function Lancamentos() {
         </TabsList>
 
         <TabsContent value="dados" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">{/* Changed to 3 columns on xl screens */}
             {/* Form Section */}
             <Card>
               <CardHeader>
@@ -766,8 +766,8 @@ export default function Lancamentos() {
               </CardContent>
             </Card>
 
-            {/* List Section */}
-            <Card>
+            {/* List Section - Takes 2 columns on xl screens */}
+            <Card className="xl:col-span-2">{/* Span 2 columns on xl screens */}
               <CardHeader>
                 <CardTitle>Lançamentos Recentes</CardTitle>
                 <CardDescription>

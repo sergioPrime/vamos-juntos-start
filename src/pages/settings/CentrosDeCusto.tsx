@@ -72,8 +72,8 @@ export default function CentrosDeCusto() {
 
   const onSubmit = async (data: CostCenterFormData) => {
     const success = selectedCostCenter
-      ? await updateCostCenter(selectedCostCenter.id, data)
-      : await createCostCenter(data)
+      ? await updateCostCenter(selectedCostCenter.id, data as any)
+      : await createCostCenter(data as any)
 
     if (success) {
       setDialogOpen(false)
@@ -194,7 +194,7 @@ export default function CentrosDeCusto() {
   const filteredCostCenters = filterCostCenters(costCenters)
 
   return (
-    <div className="space-y-6">
+    <div className="w-full space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Centros de Custo</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

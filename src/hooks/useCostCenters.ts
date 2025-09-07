@@ -41,7 +41,7 @@ export function useCostCenters() {
     try {
       setLoading(true)
       const { data, error } = await supabase
-        .from("cost_centers")
+        .from("cost_centers" as any)
         .select("*")
         .eq("org_id", organization.currentOrg.id)
         .eq("is_active", true)
@@ -51,15 +51,15 @@ export function useCostCenters() {
       
       // Build hierarchical structure
       const centersMap = new Map<string, CostCenter>()
-      const rootCenters: CostCenter[] = []
+      const rootCenters = [] as CostCenter[]
 
       // First pass: create map of all centers
-      data?.forEach(center => {
-        centersMap.set(center.id, { ...center, children: [] })
+      (data as any)?.forEach((center: any) => {
+        centersMap.set(center.id, { ...center, children: [] as CostCenter[] })
       })
 
       // Second pass: build hierarchy
-      data?.forEach(center => {
+      (data as any)?.forEach((center: any) => {
         const centerWithChildren = centersMap.get(center.id)!
         if (center.parent_id && centersMap.has(center.parent_id)) {
           const parent = centersMap.get(center.parent_id)!
@@ -87,7 +87,7 @@ export function useCostCenters() {
 
     try {
       const { error } = await supabase
-        .from("cost_centers")
+        .from("cost_centers" as any)
         .insert([{
           ...data,
           org_id: organization.currentOrg.id,
@@ -115,7 +115,7 @@ export function useCostCenters() {
   const updateCostCenter = async (id: string, data: Partial<CreateCostCenterData>): Promise<boolean> => {
     try {
       const { error } = await supabase
-        .from("cost_centers")
+        .from("cost_centers" as any)
         .update(data)
         .eq("id", id)
 
@@ -141,7 +141,7 @@ export function useCostCenters() {
   const deleteCostCenter = async (id: string): Promise<boolean> => {
     try {
       const { error } = await supabase
-        .from("cost_centers")
+        .from("cost_centers" as any)
         .update({ is_active: false })
         .eq("id", id)
 

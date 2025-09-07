@@ -97,8 +97,8 @@ export default function PlanoDeContas() {
 
   const onSubmit = async (data: ChartOfAccountFormData) => {
     const success = selectedAccount
-      ? await updateAccount(selectedAccount.id, data)
-      : await createAccount(data)
+      ? await updateAccount(selectedAccount.id, data as any)
+      : await createAccount(data as any)
 
     if (success) {
       setDialogOpen(false)
@@ -225,7 +225,7 @@ export default function PlanoDeContas() {
   const filteredAccounts = filterAccounts(accounts)
 
   return (
-    <div className="space-y-6">
+    <div className="w-full space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Plano de Contas</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

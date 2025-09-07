@@ -248,7 +248,7 @@ export default function Lancamentos() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="w-full">
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
@@ -260,7 +260,7 @@ export default function Lancamentos() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="w-full space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Lançamentos Financeiros</h1>

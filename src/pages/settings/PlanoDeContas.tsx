@@ -226,7 +226,7 @@ export default function PlanoDeContas() {
 
   return (
     <div className="w-full space-y-6">
-      <div className="flex items-center justify-between sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 py-4 border-b">
+      <div className="flex items-center justify-between sticky top-[4.5rem] sm:top-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-30 py-4 border-b">
         <h1 className="text-3xl font-bold">Plano de Contas</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>

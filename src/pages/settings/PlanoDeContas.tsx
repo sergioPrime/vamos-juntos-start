@@ -458,21 +458,22 @@ export default function PlanoDeContas() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Conta Pai (Opcional)</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                         <Select onValueChange={field.onChange} value={field.value || ""}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Selecione conta pai" />
+                             <SelectValue placeholder="Selecione conta pai" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
-                            {getSyntheticAccounts(accounts)
-                              .filter(account => account && account.id && account.account_code && account.account_name)
-                              .map(account => (
-                                <SelectItem key={account.id} value={account.id}>
-                                  {account.account_code} - {account.account_name}
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
+                           <SelectContent>
+                             <SelectItem value="">Nenhuma (Raiz)</SelectItem>
+                             {getSyntheticAccounts(accounts)
+                               .filter(account => account && account.id && account.account_code && account.account_name)
+                               .map(account => (
+                                 <SelectItem key={account.id} value={account.id}>
+                                   {account.account_code} - {account.account_name}
+                                 </SelectItem>
+                               ))}
+                           </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>

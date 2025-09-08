@@ -277,18 +277,21 @@ export function useChartOfAccounts() {
     try {
       const { cost_center_ids, ...accountData } = data
       
+      // Transform empty string parent_id to null
+      const insertData = {
+        account_code: accountData.account_code,
+        account_name: accountData.account_name,
+        account_type: accountData.account_type,
+        nature_code: accountData.nature_code,
+        description: accountData.description,
+        is_expense: accountData.is_expense,
+        parent_id: accountData.parent_id === "" ? null : accountData.parent_id,
+        org_id: organization.currentOrg.id,
+      }
+
       const { data: insertedAccount, error } = await supabase
         .from("chart_of_accounts")
-        .insert([{
-          account_code: accountData.account_code,
-          account_name: accountData.account_name,
-          account_type: accountData.account_type,
-          nature_code: accountData.nature_code,
-          description: accountData.description,
-          is_expense: accountData.is_expense,
-          parent_id: accountData.parent_id || null,
-          org_id: organization.currentOrg.id,
-        }])
+        .insert([insertData])
         .select()
         .single()
 
@@ -357,9 +360,15 @@ export function useChartOfAccounts() {
     try {
       const { cost_center_ids, ...accountData } = data
       
+      // Transform empty string parent_id to null
+      const updateData = {
+        ...accountData,
+        parent_id: accountData.parent_id === "" ? null : accountData.parent_id
+      }
+      
       const { error } = await supabase
         .from("chart_of_accounts")
-        .update(accountData)
+        .update(updateData)
         .eq("id", id)
 
       if (error) throw error
@@ -367,10 +376,12 @@ export function useChartOfAccounts() {
       // Update cost center associations if provided
       if (cost_center_ids !== undefined) {
         // Remove existing associations
-        await supabase
+        const { error: deleteError } = await supabase
           .from("chart_account_cost_centers")
           .delete()
           .eq("chart_of_account_id", id)
+
+        if (deleteError) throw deleteError
 
         // Add new associations
         if (cost_center_ids.length > 0) {

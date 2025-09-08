@@ -151,7 +151,7 @@ export function useChartOfAccounts() {
         .from("chart_of_accounts")
         .select(`
           *,
-          chart_account_cost_centers(
+          chart_account_cost_centers!chart_account_cost_centers_chart_of_account_id_fkey(
             cost_center_id,
             cost_centers(id, code, name)
           )
@@ -169,7 +169,13 @@ export function useChartOfAccounts() {
           // Reload accounts after creating defaults
           const { data: newData, error: newError } = await supabase
             .from("chart_of_accounts")
-            .select("*")
+            .select(`
+              *,
+              chart_account_cost_centers!chart_account_cost_centers_chart_of_account_id_fkey(
+                cost_center_id,
+                cost_centers(id, code, name)
+              )
+            `)
             .eq("org_id", organization.currentOrg.id)
             .eq("is_active", true)
             .order("account_code", { ascending: true })

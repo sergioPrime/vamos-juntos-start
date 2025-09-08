@@ -162,26 +162,36 @@ export function useChartOfAccounts() {
 
       if (error) throw error
       
-      // If no accounts exist, create default ones
+      // If no accounts exist (active OR inactive), create default ones
       if (!data || data.length === 0) {
-        const defaultCreated = await createDefaultAccounts()
-        if (defaultCreated) {
-          // Reload accounts after creating defaults
-          const { data: newData, error: newError } = await supabase
-            .from("chart_of_accounts")
-            .select(`
-              *,
-              chart_account_cost_centers!chart_account_cost_centers_chart_of_account_id_fkey(
-                cost_center_id,
-                cost_centers!chart_account_cost_centers_cost_center_id_fkey(id, code, name)
-              )
-            `)
-            .eq("org_id", organization.currentOrg.id)
-            .eq("is_active", true)
-            .order("account_code", { ascending: true })
-          
-          if (newError) throw newError
-          buildAccountHierarchy(newData as any)
+        // Check if ANY accounts exist (including inactive)
+        const { count: totalCount } = await supabase
+          .from("chart_of_accounts")
+          .select("id", { count: "exact", head: true })
+          .eq("org_id", organization.currentOrg.id)
+        
+        if ((totalCount || 0) === 0) {
+          const defaultCreated = await createDefaultAccounts()
+          if (defaultCreated) {
+            // Reload accounts after creating defaults
+            const { data: newData, error: newError } = await supabase
+              .from("chart_of_accounts")
+              .select(`
+                *,
+                chart_account_cost_centers!chart_account_cost_centers_chart_of_account_id_fkey(
+                  cost_center_id,
+                  cost_centers!chart_account_cost_centers_cost_center_id_fkey(id, code, name)
+                )
+              `)
+              .eq("org_id", organization.currentOrg.id)
+              .eq("is_active", true)
+              .order("account_code", { ascending: true })
+            
+            if (newError) throw newError
+            buildAccountHierarchy(newData as any)
+          }
+        } else {
+          buildAccountHierarchy(data as any)
         }
       } else {
         buildAccountHierarchy(data as any)

@@ -17,6 +17,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useChartOfAccounts, ChartOfAccount } from "@/hooks/useChartOfAccounts"
 import { useCostCenters } from "@/hooks/useCostCenters"
+import { useOrganization } from "@/hooks/useOrganization"
+import { supabase } from "@/integrations/supabase/client"
 import { cn } from "@/lib/utils"
 
 const chartOfAccountSchema = z.object({
@@ -38,11 +40,13 @@ type ChartOfAccountFormData = z.infer<typeof chartOfAccountSchema>
 export default function PlanoDeContas() {
   const { accounts, loading, createAccount, updateAccount, deleteAccount } = useChartOfAccounts()
   const { costCenters, loading: loadingCostCenters, getFlatCostCenters } = useCostCenters()
+  const organization = useOrganization()
   const [searchTerm, setSearchTerm] = useState("")
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set())
   const [selectedAccount, setSelectedAccount] = useState<ChartOfAccount | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [allExpanded, setAllExpanded] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<ChartOfAccountFormData>({
     resolver: zodResolver(chartOfAccountSchema),
@@ -171,13 +175,21 @@ export default function PlanoDeContas() {
   }
 
   const onSubmit = async (data: ChartOfAccountFormData) => {
-    const success = selectedAccount
-      ? await updateAccount(selectedAccount.id, data as any)
-      : await createAccount(data as any)
+    if (isSubmitting) return
+    
+    setIsSubmitting(true)
+    try {
+      const success = selectedAccount
+        ? await updateAccount(selectedAccount.id, data as any)
+        : await createAccount(data as any)
 
-    if (success) {
-      setDialogOpen(false)
-      form.reset()
+      if (success) {
+        setDialogOpen(false)
+        form.reset()
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
     }
   }
 
@@ -311,7 +323,7 @@ export default function PlanoDeContas() {
     return result
   }
 
-  if (loading) {
+  if (loading || loadingCostCenters || !organization.currentOrg) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -366,17 +378,35 @@ export default function PlanoDeContas() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                    <FormField
-                     control={form.control}
-                     name="account_code"
-                     render={({ field }) => (
-                       <FormItem>
-                          <FormLabel>Código Hierárquico</FormLabel>
-                          <FormControl>
-                            <Input 
-                              placeholder={getCodeSuggestion(form.watch("parent_id"))} 
-                              {...field} 
-                            />
-                          </FormControl>
+                      control={form.control}
+                      name="account_code"
+                      render={({ field }) => (
+                        <FormItem>
+                           <FormLabel>Código Hierárquico</FormLabel>
+                           <FormControl>
+                             <Input 
+                               placeholder={getCodeSuggestion(form.watch("parent_id"))} 
+                               {...field}
+                               onBlur={async (e) => {
+                                 field.onBlur(e)
+                                 const code = e.target.value.trim()
+                                 if (code && !selectedAccount) {
+                                   // Check for duplicates when creating new account
+                                   const { count } = await supabase
+                                     .from('chart_of_accounts')
+                                     .select('id', { count: 'exact', head: true })
+                                     .eq('org_id', organization.currentOrg.id)
+                                     .eq('account_code', code)
+                                   if ((count || 0) > 0) {
+                                     form.setError('account_code', {
+                                       type: 'manual',
+                                       message: 'Código já existe nesta organização'
+                                     })
+                                   }
+                                 }
+                               }}
+                             />
+                           </FormControl>
                           {getCodeSuggestion(form.watch("parent_id")) && form.watch("parent_id") && (
                             <p className="text-xs text-muted-foreground">
                               {getCodeSuggestion(form.watch("parent_id"))}
@@ -690,8 +720,8 @@ export default function PlanoDeContas() {
                   >
                     Cancelar
                   </Button>
-                  <Button type="submit">
-                    {selectedAccount ? "Atualizar" : "Criar"}
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Processando..." : (selectedAccount ? "Atualizar" : "Criar")}
                   </Button>
                 </div>
               </form>

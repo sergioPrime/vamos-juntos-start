@@ -297,16 +297,17 @@ export function useChartOfAccounts() {
 
       if (error) throw error
 
-      // Associate cost centers if provided
-      if (cost_center_ids && cost_center_ids.length > 0 && insertedAccount) {
-        const associations = cost_center_ids.map(costCenterId => ({
-          chart_of_account_id: insertedAccount.id,
-          cost_center_id: costCenterId
-        }))
-
+      // Associate cost centers if provided (only for analytic accounts)
+      if (cost_center_ids && cost_center_ids.length > 0 && insertedAccount && accountData.account_type === "analytic") {
+        // Process associations in a single transaction for better integrity
         const { error: associationError } = await supabase
           .from("chart_account_cost_centers")
-          .insert(associations)
+          .insert(
+            cost_center_ids.map(costCenterId => ({
+              chart_of_account_id: insertedAccount.id,
+              cost_center_id: costCenterId
+            }))
+          )
 
         if (associationError) throw associationError
       }
@@ -375,26 +376,34 @@ export function useChartOfAccounts() {
 
       // Update cost center associations if provided
       if (cost_center_ids !== undefined) {
-        // Remove existing associations
-        const { error: deleteError } = await supabase
-          .from("chart_account_cost_centers")
-          .delete()
-          .eq("chart_of_account_id", id)
+        // Check if the account is analytic to allow associations
+        const currentAccount = findAccountById(id, accounts)
+        const finalAccountType = updateData.account_type || currentAccount?.account_type
+        
+        if (finalAccountType === "analytic" && cost_center_ids.length > 0) {
+          // Remove existing associations first
+          await supabase
+            .from("chart_account_cost_centers")
+            .delete()
+            .eq("chart_of_account_id", id)
 
-        if (deleteError) throw deleteError
-
-        // Add new associations
-        if (cost_center_ids.length > 0) {
-          const associations = cost_center_ids.map(costCenterId => ({
-            chart_of_account_id: id,
-            cost_center_id: costCenterId
-          }))
-
+          // Add new associations
           const { error: associationError } = await supabase
             .from("chart_account_cost_centers")
-            .insert(associations)
+            .insert(
+              cost_center_ids.map(costCenterId => ({
+                chart_of_account_id: id,
+                cost_center_id: costCenterId
+              }))
+            )
 
           if (associationError) throw associationError
+        } else if (finalAccountType === "synthetic") {
+          // If account is becoming synthetic, remove all associations
+          await supabase
+            .from("chart_account_cost_centers")
+            .delete()
+            .eq("chart_of_account_id", id)
         }
       }
 

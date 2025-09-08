@@ -459,13 +459,13 @@ export default function PlanoDeContas() {
                       <FormItem>
                         <FormLabel>Conta Pai (Opcional)</FormLabel>
                          <Select onValueChange={field.onChange} value={field.value || ""}>
-                          <FormControl>
-                            <SelectTrigger>
-                             <SelectValue placeholder="Selecione conta pai" />
-                            </SelectTrigger>
-                          </FormControl>
+                           <FormControl>
+                             <SelectTrigger>
+                               <SelectValue placeholder="Selecione conta pai" />
+                             </SelectTrigger>
+                           </FormControl>
                            <SelectContent>
-                             <SelectItem value="">Nenhuma (Raiz)</SelectItem>
+                             <SelectItem value="">Sem conta pai</SelectItem>
                              {getSyntheticAccounts(accounts)
                                .filter(account => account && account.id && account.account_code && account.account_name)
                                .map(account => (
@@ -474,7 +474,7 @@ export default function PlanoDeContas() {
                                  </SelectItem>
                                ))}
                            </SelectContent>
-                        </Select>
+                         </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -549,30 +549,36 @@ export default function PlanoDeContas() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Centros de Custo (Opcional)</FormLabel>
-                        <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded-md p-3">
-                          {getFlatCostCenters().map((costCenter) => (
-                            <div key={costCenter.id} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={costCenter.id}
-                                checked={field.value?.includes(costCenter.id) || false}
-                                onCheckedChange={(checked) => {
-                                  const currentValue = field.value || []
-                                  if (checked) {
-                                    field.onChange([...currentValue, costCenter.id])
-                                  } else {
-                                    field.onChange(currentValue.filter(id => id !== costCenter.id))
-                                  }
-                                }}
-                              />
-                              <label
-                                htmlFor={costCenter.id}
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                              >
-                                {costCenter.code} - {costCenter.name}
-                              </label>
-                            </div>
-                          ))}
-                        </div>
+                         <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded-md p-3">
+                           {getFlatCostCenters().length === 0 ? (
+                             <div className="col-span-2 text-center text-sm text-muted-foreground py-4">
+                               Nenhum centro de custo cadastrado
+                             </div>
+                           ) : (
+                             getFlatCostCenters().map((costCenter) => (
+                               <div key={costCenter.id} className="flex items-center space-x-2">
+                                 <Checkbox
+                                   id={costCenter.id}
+                                   checked={field.value?.includes(costCenter.id) || false}
+                                   onCheckedChange={(checked) => {
+                                     const currentValue = field.value || []
+                                     if (checked) {
+                                       field.onChange([...currentValue, costCenter.id])
+                                     } else {
+                                       field.onChange(currentValue.filter(id => id !== costCenter.id))
+                                     }
+                                   }}
+                                 />
+                                 <label
+                                   htmlFor={costCenter.id}
+                                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                 >
+                                   {costCenter.code} - {costCenter.name}
+                                 </label>
+                               </div>
+                             ))
+                           )}
+                         </div>
                         <p className="text-xs text-muted-foreground">
                           Apenas contas analíticas podem ter centros de custo associados
                         </p>

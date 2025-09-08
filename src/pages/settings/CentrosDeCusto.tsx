@@ -102,7 +102,7 @@ export default function CentrosDeCusto() {
       name: costCenter.name,
       is_active: costCenter.is_active,
       description: costCenter.description || "",
-      parent_id: costCenter.parent_id || "",
+      parent_id: costCenter.parent_id || "none",
     })
     setDialogOpen(true)
   }
@@ -114,15 +114,17 @@ export default function CentrosDeCusto() {
       name: "",
       is_active: true,
       description: "",
-      parent_id: "",
+      parent_id: "none",
     })
     setDialogOpen(true)
   }
 
   const onSubmit = async (data: CostCenterFormData) => {
+    // Convert "none" back to empty string for parent_id
+    const submitData = { ...data, parent_id: data.parent_id === "none" ? "" : data.parent_id }
     const success = selectedCostCenter
-      ? await updateCostCenter(selectedCostCenter.id, data as any)
-      : await createCostCenter(data as any)
+      ? await updateCostCenter(selectedCostCenter.id, submitData as any)
+      : await createCostCenter(submitData as any)
 
     if (success) {
       setDialogOpen(false)
@@ -344,7 +346,7 @@ export default function CentrosDeCusto() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">Nenhum</SelectItem>
+                          <SelectItem value="none">Nenhum</SelectItem>
                           {getParentCandidates(costCenters).map(center => (
                             <SelectItem key={center.id} value={center.id}>
                               {center.code} - {center.name}

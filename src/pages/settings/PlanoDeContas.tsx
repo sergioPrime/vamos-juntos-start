@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Plus, Search, Edit, Trash2, ChevronRight, ChevronDown, ExpandIcon, ShrinkIcon } from "lucide-react"
+import { Plus, Search, Edit, Trash2, ChevronRight, ChevronDown, ExpandIcon, ShrinkIcon, Check, ChevronsUpDown, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,11 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useChartOfAccounts, ChartOfAccount } from "@/hooks/useChartOfAccounts"
 import { useCostCenters } from "@/hooks/useCostCenters"
+import { cn } from "@/lib/utils"
 
 const chartOfAccountSchema = z.object({
   account_code: z.string().min(1, "Código é obrigatório"),
@@ -456,25 +459,73 @@ export default function PlanoDeContas() {
                     control={form.control}
                     name="parent_id"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel>Conta Pai (Opcional)</FormLabel>
-                         <Select onValueChange={(value) => field.onChange(value === "NONE" ? undefined : value)} value={field.value || "NONE"}>
-                           <FormControl>
-                             <SelectTrigger>
-                               <SelectValue placeholder="Selecione conta pai" />
-                             </SelectTrigger>
-                           </FormControl>
-                           <SelectContent>
-                             <SelectItem value="NONE">Sem conta pai</SelectItem>
-                             {getSyntheticAccounts(accounts)
-                               .filter(account => account && account.id && account.account_code && account.account_name)
-                               .map(account => (
-                                 <SelectItem key={account.id} value={account.id}>
-                                   {account.account_code} - {account.account_name}
-                                 </SelectItem>
-                               ))}
-                           </SelectContent>
-                         </Select>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "w-full justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value
+                                  ? (() => {
+                                      const selectedAccount = getSyntheticAccounts(accounts).find(account => account.id === field.value)
+                                      return selectedAccount ? `${selectedAccount.account_code} - ${selectedAccount.account_name}` : "Sem conta pai"
+                                    })()
+                                  : "Selecione conta pai"}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[400px] p-0" align="start">
+                            <Command>
+                              <CommandInput placeholder="Buscar conta pai..." className="h-9" />
+                              <CommandList>
+                                <CommandEmpty>Nenhuma conta encontrada.</CommandEmpty>
+                                <CommandGroup>
+                                  <CommandItem
+                                    value="NONE"
+                                    onSelect={() => {
+                                      field.onChange(undefined)
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        !field.value ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    Sem conta pai
+                                  </CommandItem>
+                                  {getSyntheticAccounts(accounts)
+                                    .filter(account => account && account.id && account.account_code && account.account_name)
+                                    .map(account => (
+                                      <CommandItem
+                                        key={account.id}
+                                        value={`${account.account_code} - ${account.account_name}`}
+                                        onSelect={() => {
+                                          field.onChange(account.id)
+                                        }}
+                                      >
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-4 w-4",
+                                            field.value === account.id ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                        {account.account_code} - {account.account_name}
+                                      </CommandItem>
+                                    ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -547,38 +598,81 @@ export default function PlanoDeContas() {
                     control={form.control}
                     name="cost_center_ids"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel>Centros de Custo (Opcional)</FormLabel>
-                         <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded-md p-3">
-                           {getFlatCostCenters().length === 0 ? (
-                             <div className="col-span-2 text-center text-sm text-muted-foreground py-4">
-                               Nenhum centro de custo cadastrado
-                             </div>
-                           ) : (
-                             getFlatCostCenters().map((costCenter) => (
-                               <div key={costCenter.id} className="flex items-center space-x-2">
-                                 <Checkbox
-                                   id={costCenter.id}
-                                   checked={field.value?.includes(costCenter.id) || false}
-                                   onCheckedChange={(checked) => {
-                                     const currentValue = field.value || []
-                                     if (checked) {
-                                       field.onChange([...currentValue, costCenter.id])
-                                     } else {
-                                       field.onChange(currentValue.filter(id => id !== costCenter.id))
-                                     }
-                                   }}
-                                 />
-                                 <label
-                                   htmlFor={costCenter.id}
-                                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                                 >
-                                   {costCenter.code} - {costCenter.name}
-                                 </label>
-                               </div>
-                             ))
-                           )}
-                         </div>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className="w-full justify-between text-left font-normal"
+                              >
+                                {field.value && field.value.length > 0 ? (
+                                  <span className="flex flex-wrap gap-1">
+                                    {field.value.map(id => {
+                                      const costCenter = getFlatCostCenters().find(cc => cc.id === id)
+                                      return costCenter ? (
+                                        <Badge key={id} variant="secondary" className="text-xs">
+                                          {costCenter.code}
+                                          <X 
+                                            className="ml-1 h-3 w-3 cursor-pointer" 
+                                            onClick={(e) => {
+                                              e.stopPropagation()
+                                              field.onChange(field.value?.filter(ccId => ccId !== id) || [])
+                                            }}
+                                          />
+                                        </Badge>
+                                      ) : null
+                                    })}
+                                  </span>
+                                ) : (
+                                  <span className="text-muted-foreground">Selecione centros de custo...</span>
+                                )}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[400px] p-0" align="start">
+                            <Command>
+                              <CommandInput placeholder="Buscar centro de custo..." className="h-9" />
+                              <CommandList>
+                                <CommandEmpty>Nenhum centro de custo encontrado.</CommandEmpty>
+                                <CommandGroup>
+                                  {getFlatCostCenters().length === 0 ? (
+                                    <CommandItem disabled>
+                                      Nenhum centro de custo cadastrado
+                                    </CommandItem>
+                                  ) : (
+                                    getFlatCostCenters().map((costCenter) => (
+                                      <CommandItem
+                                        key={costCenter.id}
+                                        value={`${costCenter.code} - ${costCenter.name}`}
+                                        onSelect={() => {
+                                          const currentValue = field.value || []
+                                          const isSelected = currentValue.includes(costCenter.id)
+                                          if (isSelected) {
+                                            field.onChange(currentValue.filter(id => id !== costCenter.id))
+                                          } else {
+                                            field.onChange([...currentValue, costCenter.id])
+                                          }
+                                        }}
+                                      >
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-4 w-4",
+                                            field.value?.includes(costCenter.id) ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                        {costCenter.code} - {costCenter.name}
+                                      </CommandItem>
+                                    ))
+                                  )}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                         <p className="text-xs text-muted-foreground">
                           Apenas contas analíticas podem ter centros de custo associados
                         </p>

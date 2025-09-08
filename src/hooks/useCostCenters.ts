@@ -91,6 +91,7 @@ export function useCostCenters() {
         .from("cost_centers")
         .insert([{
           ...data,
+          parent_id: data.parent_id || null,
           org_id: organization.currentOrg.id,
         }])
 

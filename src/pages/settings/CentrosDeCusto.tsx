@@ -39,7 +39,7 @@ export default function CentrosDeCusto() {
       name: "",
       is_active: true,
       description: "",
-      parent_id: "",
+      parent_id: "none",
     },
   })
 
@@ -291,7 +291,7 @@ export default function CentrosDeCusto() {
                 Novo Centro de Custo
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-4xl w-full mx-4">
             <DialogHeader>
               <DialogTitle>
                 {selectedCostCenter ? "Editar Centro de Custo" : "Novo Centro de Custo"}
@@ -339,7 +339,7 @@ export default function CentrosDeCusto() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Centro de Custo Pai (Opcional)</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione centro pai" />

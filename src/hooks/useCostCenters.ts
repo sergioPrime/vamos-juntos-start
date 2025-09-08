@@ -54,12 +54,13 @@ export function useCostCenters() {
       const rootCenters = [] as CostCenter[]
 
       // First pass: create map of all centers
-      (data as any)?.forEach((center: any) => {
+      const rows = Array.isArray(data) ? (data as any[]) : []
+      rows.forEach((center: any) => {
         centersMap.set(center.id, { ...center, children: [] as CostCenter[] })
       })
 
       // Second pass: build hierarchy
-      (data as any)?.forEach((center: any) => {
+      rows.forEach((center: any) => {
         const centerWithChildren = centersMap.get(center.id)!
         if (center.parent_id && centersMap.has(center.parent_id)) {
           const parent = centersMap.get(center.parent_id)!

@@ -20,7 +20,7 @@ import { useCostCenters } from "@/hooks/useCostCenters"
 import { cn } from "@/lib/utils"
 
 const chartOfAccountSchema = z.object({
-  account_code: z.string().min(1, "Código é obrigatório"),
+  account_code: z.string().min(1, "Código é obrigatório").transform((s) => s.trim()),
   account_name: z.string().min(1, "Nome é obrigatório"),
   account_type: z.enum(["analytic", "synthetic"], {
     required_error: "Tipo de conta é obrigatório",

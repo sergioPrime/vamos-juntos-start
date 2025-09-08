@@ -288,21 +288,41 @@ export function useChartOfAccounts() {
 
     try {
       const { cost_center_ids, ...accountData } = data
+
+      // Normalize inputs
+      const normalizedCode = (accountData.account_code || '').trim()
+
+      // Prevent duplicate account_code within the same organization (friendlier error)
+      const { count: existingCount, error: existsError } = await supabase
+        .from('chart_of_accounts')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', organization.currentOrg.id)
+        .eq('account_code', normalizedCode)
+
+      if (existsError) throw existsError
+      if ((existingCount || 0) > 0) {
+        toast({
+          title: 'Código já existente',
+          description: 'Já existe uma conta com esse código nesta organização. Escolha outro código.',
+          variant: 'destructive',
+        })
+        return false
+      }
       
       // Transform empty string parent_id to null
       const insertData = {
-        account_code: accountData.account_code,
+        account_code: normalizedCode,
         account_name: accountData.account_name,
         account_type: accountData.account_type,
         nature_code: accountData.nature_code,
         description: accountData.description,
         is_expense: accountData.is_expense,
-        parent_id: accountData.parent_id === "" ? null : accountData.parent_id,
+        parent_id: accountData.parent_id === '' ? null : accountData.parent_id,
         org_id: organization.currentOrg.id,
       }
 
       const { data: insertedAccount, error } = await supabase
-        .from("chart_of_accounts")
+        .from('chart_of_accounts')
         .insert([insertData])
         .select()
         .single()
@@ -310,14 +330,14 @@ export function useChartOfAccounts() {
       if (error) throw error
 
       // Associate cost centers if provided (only for analytic accounts)
-      if (cost_center_ids && cost_center_ids.length > 0 && insertedAccount && accountData.account_type === "analytic") {
+      if (cost_center_ids && cost_center_ids.length > 0 && insertedAccount && accountData.account_type === 'analytic') {
         // Process associations in a single transaction for better integrity
         const { error: associationError } = await supabase
-          .from("chart_account_cost_centers")
+          .from('chart_account_cost_centers')
           .insert(
             cost_center_ids.map(costCenterId => ({
               chart_of_account_id: insertedAccount.id,
-              cost_center_id: costCenterId
+              cost_center_id: costCenterId,
             }))
           )
 
@@ -326,17 +346,25 @@ export function useChartOfAccounts() {
 
       await loadAccounts()
       toast({
-        title: "Sucesso",
-        description: "Conta criada com sucesso",
+        title: 'Sucesso',
+        description: 'Conta criada com sucesso',
       })
       return true
-    } catch (error) {
-      console.error("Error creating account:", error)
-      toast({
-        title: "Erro",
-        description: "Erro ao criar conta",
-        variant: "destructive",
-      })
+    } catch (error: any) {
+      console.error('Error creating account:', error)
+      if (error?.code === '23505') {
+        toast({
+          title: 'Código já existente',
+          description: 'Já existe uma conta com esse código nesta organização. Escolha outro código.',
+          variant: 'destructive',
+        })
+      } else {
+        toast({
+          title: 'Erro',
+          description: error?.message || 'Erro ao criar conta',
+          variant: 'destructive',
+        })
+      }
       return false
     }
   }

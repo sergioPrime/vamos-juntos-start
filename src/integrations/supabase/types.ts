@@ -311,18 +311,21 @@ export type Database = {
           cost_center_id: string
           created_at: string
           id: string
+          updated_at: string
         }
         Insert: {
           chart_of_account_id: string
           cost_center_id: string
           created_at?: string
           id?: string
+          updated_at?: string
         }
         Update: {
           chart_of_account_id?: string
           cost_center_id?: string
           created_at?: string
           id?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -341,27 +344,6 @@ export type Database = {
           },
           {
             foreignKeyName: "chart_account_cost_centers_cost_center_id_fkey"
-            columns: ["cost_center_id"]
-            isOneToOne: false
-            referencedRelation: "cost_centers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_cacc_account"
-            columns: ["chart_of_account_id"]
-            isOneToOne: false
-            referencedRelation: "analytical_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_cacc_account"
-            columns: ["chart_of_account_id"]
-            isOneToOne: false
-            referencedRelation: "chart_of_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_cacc_center"
             columns: ["cost_center_id"]
             isOneToOne: false
             referencedRelation: "cost_centers"

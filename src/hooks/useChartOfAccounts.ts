@@ -186,8 +186,14 @@ export function useChartOfAccounts() {
       } else {
         buildAccountHierarchy(data as any)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error loading chart of accounts:", error)
+      console.error("Error details:", {
+        code: error?.code,
+        message: error?.message,
+        details: error?.details,
+        hint: error?.hint
+      })
       toast({
         title: "Erro",
         description: "Erro ao carregar plano de contas",

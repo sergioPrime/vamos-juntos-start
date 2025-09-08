@@ -258,7 +258,7 @@ export default function CentrosDeCusto() {
   const filteredCostCenters = filterCostCenters(costCenters)
 
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full h-full min-h-screen space-y-6 -m-3 sm:-m-4 lg:-m-6 p-3 sm:p-4 lg:p-6 pt-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Centros de Custo</h1>
         

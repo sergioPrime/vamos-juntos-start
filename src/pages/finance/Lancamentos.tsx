@@ -430,7 +430,7 @@ export default function Lancamentos() {
                                   </SelectItem>
                                 ))
                               ) : (
-                                <SelectItem value="" disabled>
+                                <SelectItem value="NO_COMPANIES" disabled>
                                   Nenhuma empresa encontrada
                                 </SelectItem>
                               )}
@@ -473,7 +473,7 @@ export default function Lancamentos() {
                                     </SelectItem>
                                   ))
                                 ) : (
-                                  <SelectItem value="" disabled>
+                                  <SelectItem value="NO_PEOPLE" disabled>
                                     Nenhum {personType} encontrado
                                   </SelectItem>
                                 )}

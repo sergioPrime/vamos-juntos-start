@@ -458,14 +458,14 @@ export default function PlanoDeContas() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Conta Pai (Opcional)</FormLabel>
-                         <Select onValueChange={field.onChange} value={field.value || ""}>
+                         <Select onValueChange={(value) => field.onChange(value === "NONE" ? undefined : value)} value={field.value || "NONE"}>
                            <FormControl>
                              <SelectTrigger>
                                <SelectValue placeholder="Selecione conta pai" />
                              </SelectTrigger>
                            </FormControl>
                            <SelectContent>
-                             <SelectItem value="">Sem conta pai</SelectItem>
+                             <SelectItem value="NONE">Sem conta pai</SelectItem>
                              {getSyntheticAccounts(accounts)
                                .filter(account => account && account.id && account.account_code && account.account_name)
                                .map(account => (

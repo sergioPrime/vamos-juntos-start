@@ -153,7 +153,7 @@ export function useChartOfAccounts() {
           *,
           chart_account_cost_centers!chart_account_cost_centers_chart_of_account_id_fkey(
             cost_center_id,
-            cost_centers(id, code, name)
+            cost_centers!chart_account_cost_centers_cost_center_id_fkey(id, code, name)
           )
         `)
         .eq("org_id", organization.currentOrg.id)
@@ -173,7 +173,7 @@ export function useChartOfAccounts() {
               *,
               chart_account_cost_centers!chart_account_cost_centers_chart_of_account_id_fkey(
                 cost_center_id,
-                cost_centers(id, code, name)
+                cost_centers!chart_account_cost_centers_cost_center_id_fkey(id, code, name)
               )
             `)
             .eq("org_id", organization.currentOrg.id)

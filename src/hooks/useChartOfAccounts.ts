@@ -280,7 +280,13 @@ export function useChartOfAccounts() {
       const { data: insertedAccount, error } = await supabase
         .from("chart_of_accounts")
         .insert([{
-          ...accountData,
+          account_code: accountData.account_code,
+          account_name: accountData.account_name,
+          account_type: accountData.account_type,
+          nature_code: accountData.nature_code,
+          description: accountData.description,
+          is_expense: accountData.is_expense,
+          parent_id: accountData.parent_id || null,
           org_id: organization.currentOrg.id,
         }])
         .select()

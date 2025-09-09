@@ -31,7 +31,10 @@ const formSchema = z.object({
   entry_type: z.enum(["receivable", "payable"]),
   chart_of_account_id: z.string().min(1, "Plano de conta é obrigatório"),
   cost_center_id: z.string().min(1, "Centro de custo é obrigatório"),
-  amount: z.string().min(1, "Valor é obrigatório"),
+  amount: z.string().min(1, "Valor é obrigatório").refine((val) => {
+    const numericValue = parseFloat(val)
+    return numericValue > 0
+  }, "Valor deve ser maior que zero"),
   payment_method_id: z.string().optional(),
   bank_account_id: z.string().optional(),
   competence_date: z.date(),
@@ -86,6 +89,7 @@ export default function Lancamentos() {
   const [chartAccountSearchValue, setChartAccountSearchValue] = useState("")
   const [costCenterSearchOpen, setCostCenterSearchOpen] = useState(false)
   const [costCenterSearchValue, setCostCenterSearchValue] = useState("")
+  const [amountDisplayValue, setAmountDisplayValue] = useState("")
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -240,6 +244,7 @@ export default function Lancamentos() {
       })
 
       form.reset()
+      setAmountDisplayValue("")
       loadData()
       loadEntries()
     } catch (error) {
@@ -297,6 +302,39 @@ export default function Lancamentos() {
       style: 'currency',
       currency: 'BRL'
     }).format(value)
+  }
+
+  // Currency formatting functions
+  const formatCurrencyInput = (value: string) => {
+    // Remove all non-numeric characters
+    const numericValue = value.replace(/\D/g, "")
+    
+    if (!numericValue) return ""
+    
+    // Convert to number and format as currency
+    const numberValue = parseInt(numericValue, 10) / 100
+    
+    return numberValue.toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+  }
+
+  const parseCurrencyValue = (formattedValue: string) => {
+    if (!formattedValue) return 0
+    
+    // Remove currency formatting and convert to number
+    const numericString = formattedValue.replace(/\./g, "").replace(",", ".")
+    return parseFloat(numericString) || 0
+  }
+
+  const handleAmountChange = (value: string) => {
+    const formatted = formatCurrencyInput(value)
+    setAmountDisplayValue(formatted)
+    
+    // Update form with numeric value
+    const numericValue = parseCurrencyValue(formatted)
+    form.setValue("amount", numericValue.toString())
   }
 
   const formatDate = (dateString: string) => {
@@ -721,15 +759,23 @@ export default function Lancamentos() {
                       name="amount"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Valor (R$)</FormLabel>
+                          <FormLabel>Valor (R$) *</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="0,00"
-                              type="number"
-                              step="0.01"
-                              {...field}
+                              value={amountDisplayValue}
+                              onChange={(e) => handleAmountChange(e.target.value)}
+                              onPaste={(e) => {
+                                e.preventDefault()
+                                const pastedText = e.clipboardData.getData("text")
+                                handleAmountChange(pastedText)
+                              }}
+                              className="text-right"
                             />
                           </FormControl>
+                          <p className="text-xs text-muted-foreground">
+                            Digite apenas números. Ex: 250000 = R$ 2.500,00
+                          </p>
                           <FormMessage />
                         </FormItem>
                       )}

@@ -78,6 +78,14 @@ export default function Lancamentos() {
   const [selectedAccountCostCenters, setSelectedAccountCostCenters] = useState<any[]>([])
   const [companySearchOpen, setCompanySearchOpen] = useState(false)
   const [companySearchValue, setCompanySearchValue] = useState("")
+  const [customerSearchOpen, setCustomerSearchOpen] = useState(false)
+  const [customerSearchValue, setCustomerSearchValue] = useState("")
+  const [supplierSearchOpen, setSupplierSearchOpen] = useState(false)
+  const [supplierSearchValue, setSupplierSearchValue] = useState("")
+  const [chartAccountSearchOpen, setChartAccountSearchOpen] = useState(false)
+  const [chartAccountSearchValue, setChartAccountSearchValue] = useState("")
+  const [costCenterSearchOpen, setCostCenterSearchOpen] = useState(false)
+  const [costCenterSearchValue, setCostCenterSearchValue] = useState("")
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -469,32 +477,74 @@ export default function Lancamentos() {
                         const isReceivable = form.watch("entry_type") === "receivable"
                         const people = isReceivable ? customers : suppliers
                         const personType = isReceivable ? "cliente" : "fornecedor"
+                        const searchOpen = isReceivable ? customerSearchOpen : supplierSearchOpen
+                        const setSearchOpen = isReceivable ? setCustomerSearchOpen : setSupplierSearchOpen
+                        const searchValue = isReceivable ? customerSearchValue : supplierSearchValue
+                        const setSearchValue = isReceivable ? setCustomerSearchValue : setSupplierSearchValue
                         
                         return (
                           <FormItem>
                             <FormLabel>
                               {isReceivable ? "Cliente *" : "Fornecedor *"}
                             </FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder={`Selecione o ${personType}`} />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {people.length > 0 ? (
-                                  people.map((person) => (
-                                    <SelectItem key={person.id} value={person.id}>
-                                      {person.name}
-                                    </SelectItem>
-                                  ))
-                                ) : (
-                                  <SelectItem value="NO_PEOPLE" disabled>
-                                    Nenhum {personType} encontrado
-                                  </SelectItem>
-                                )}
-                              </SelectContent>
-                            </Select>
+                            <Popover open={searchOpen} onOpenChange={setSearchOpen}>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={searchOpen}
+                                    className={cn(
+                                      "w-full justify-between",
+                                      !field.value && "text-muted-foreground"
+                                    )}
+                                  >
+                                    {field.value
+                                      ? people.find((person) => person.id === field.value)?.name
+                                      : `Selecione o ${personType}`}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-full p-0">
+                                <Command>
+                                  <CommandInput 
+                                    placeholder={`Buscar ${personType}...`}
+                                    value={searchValue}
+                                    onValueChange={setSearchValue}
+                                  />
+                                  <CommandList>
+                                    <CommandEmpty>
+                                      {people.length === 0 
+                                        ? `Nenhum ${personType} cadastrado.`
+                                        : `Nenhum ${personType} encontrado.`
+                                      }
+                                    </CommandEmpty>
+                                    <CommandGroup>
+                                      {people.map((person) => (
+                                        <CommandItem
+                                          key={person.id}
+                                          value={person.name}
+                                          onSelect={() => {
+                                            field.onChange(person.id)
+                                            setSearchValue("")
+                                            setSearchOpen(false)
+                                          }}
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              field.value === person.id ? "opacity-100" : "opacity-0"
+                                            )}
+                                          />
+                                          {person.name}
+                                        </CommandItem>
+                                      ))}
+                                    </CommandGroup>
+                                  </CommandList>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
                             {people.length === 0 && (
                               <p className="text-xs text-muted-foreground">
                                 Configure {isReceivable ? "clientes" : "fornecedores"} em {isReceivable ? "Clientes" : "Fornecedores"}
@@ -512,27 +562,69 @@ export default function Lancamentos() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Plano de Conta *</FormLabel>
-                          <Select 
-                            onValueChange={(value) => {
-                              field.onChange(value)
-                              // Reset cost center when account changes
-                              form.setValue("cost_center_id", "")
-                            }} 
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione o plano de conta" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {chartOfAccounts.map((account) => (
-                                <SelectItem key={account.id} value={account.id}>
-                                  {account.account_code} - {account.account_name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <Popover open={chartAccountSearchOpen} onOpenChange={setChartAccountSearchOpen}>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  aria-expanded={chartAccountSearchOpen}
+                                  className={cn(
+                                    "w-full justify-between",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value
+                                    ? (() => {
+                                        const account = chartOfAccounts.find((acc) => acc.id === field.value)
+                                        return account ? `${account.account_code} - ${account.account_name}` : "Selecione o plano de conta"
+                                      })()
+                                    : "Selecione o plano de conta"}
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-full p-0">
+                              <Command>
+                                <CommandInput 
+                                  placeholder="Buscar plano de conta..."
+                                  value={chartAccountSearchValue}
+                                  onValueChange={setChartAccountSearchValue}
+                                />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    {chartOfAccounts.length === 0 
+                                      ? "Nenhum plano de conta cadastrado."
+                                      : "Nenhum plano de conta encontrado."
+                                    }
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {chartOfAccounts.map((account) => (
+                                      <CommandItem
+                                        key={account.id}
+                                        value={`${account.account_code} ${account.account_name}`}
+                                        onSelect={() => {
+                                          field.onChange(account.id)
+                                          // Reset cost center when account changes
+                                          form.setValue("cost_center_id", "")
+                                          setChartAccountSearchValue("")
+                                          setChartAccountSearchOpen(false)
+                                        }}
+                                      >
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-4 w-4",
+                                            field.value === account.id ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                        {account.account_code} - {account.account_name}
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
                           <p className="text-xs text-muted-foreground">
                             Apenas contas analíticas podem ser selecionadas
                           </p>
@@ -552,20 +644,67 @@ export default function Lancamentos() {
                         return (
                           <FormItem>
                             <FormLabel>Centro de Custo *</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione o centro de custo" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {availableCostCenters.map((center) => (
-                                  <SelectItem key={center.id} value={center.id}>
-                                    {center.code} - {center.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <Popover open={costCenterSearchOpen} onOpenChange={setCostCenterSearchOpen}>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={costCenterSearchOpen}
+                                    className={cn(
+                                      "w-full justify-between",
+                                      !field.value && "text-muted-foreground"
+                                    )}
+                                  >
+                                    {field.value
+                                      ? (() => {
+                                          const costCenter = availableCostCenters.find((cc) => cc.id === field.value)
+                                          return costCenter ? `${costCenter.code} - ${costCenter.name}` : "Selecione o centro de custo"
+                                        })()
+                                      : "Selecione o centro de custo"}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-full p-0">
+                                <Command>
+                                  <CommandInput 
+                                    placeholder="Buscar centro de custo..."
+                                    value={costCenterSearchValue}
+                                    onValueChange={setCostCenterSearchValue}
+                                  />
+                                  <CommandList>
+                                    <CommandEmpty>
+                                      {availableCostCenters.length === 0 
+                                        ? "Nenhum centro de custo disponível."
+                                        : "Nenhum centro de custo encontrado."
+                                      }
+                                    </CommandEmpty>
+                                    <CommandGroup>
+                                      {availableCostCenters.map((center) => (
+                                        <CommandItem
+                                          key={center.id}
+                                          value={`${center.code} ${center.name}`}
+                                          onSelect={() => {
+                                            field.onChange(center.id)
+                                            setCostCenterSearchValue("")
+                                            setCostCenterSearchOpen(false)
+                                          }}
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              field.value === center.id ? "opacity-100" : "opacity-0"
+                                            )}
+                                          />
+                                          {center.code} - {center.name}
+                                        </CommandItem>
+                                      ))}
+                                    </CommandGroup>
+                                  </CommandList>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
                             {hasPreAssociated && (
                               <p className="text-xs text-muted-foreground">
                                 Centros de custo limitados aos associados à conta selecionada

@@ -2,13 +2,14 @@ import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { CalendarIcon, Plus, MoreHorizontal, Filter, Download, RefreshCcw, ChevronDown, ChevronUp } from "lucide-react"
+import { CalendarIcon, Plus, MoreHorizontal, Filter, Download, RefreshCcw, ChevronDown, ChevronUp, Check, ChevronsUpDown } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { supabase } from "@/integrations/supabase/client"
 import { useOrganization } from "@/hooks/useOrganization"
 import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/use-toast"
+import { useFinancialEntries } from "@/hooks/useFinancialEntries"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -22,6 +23,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 
 const formSchema = z.object({
   company_id: z.string().min(1, "Empresa é obrigatória"),
@@ -61,7 +63,7 @@ export default function Lancamentos() {
   const organization = useOrganization()
   const { user } = useAuth()
   const { toast } = useToast()
-  const [entries, setEntries] = useState<FinancialEntry[]>([])
+  const { entries, loading: entriesLoading, loadEntries, createEntry } = useFinancialEntries()
   const [companies, setCompanies] = useState<any[]>([])
   const [customers, setCustomers] = useState<any[]>([])
   const [suppliers, setSuppliers] = useState<any[]>([])
@@ -74,6 +76,8 @@ export default function Lancamentos() {
   const [filterType, setFilterType] = useState<string>("all")
   const [filterStatus, setFilterStatus] = useState<string>("all")
   const [selectedAccountCostCenters, setSelectedAccountCostCenters] = useState<any[]>([])
+  const [companySearchOpen, setCompanySearchOpen] = useState(false)
+  const [companySearchValue, setCompanySearchValue] = useState("")
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -99,8 +103,7 @@ export default function Lancamentos() {
       
       console.log("Loading data for organization:", organization?.currentOrg?.id)
       
-      const [
-        entriesResponse,
+        const [
         companiesResponse,
         customersResponse,
         suppliersResponse,
@@ -109,20 +112,6 @@ export default function Lancamentos() {
         paymentMethodsResponse,
         bankAccountsResponse
       ] = await Promise.all([
-        supabase
-          .from("financial_entries")
-          .select(`
-            *,
-            companies(name),
-            customers(name),
-            suppliers(name),
-            chart_of_accounts(account_name),
-            payment_methods(name),
-            bank_accounts(bank_name)
-          `)
-          .eq("org_id", organization.currentOrg.id)
-          .order("created_at", { ascending: false }),
-        
         supabase
           .from("companies")
           .select("*")
@@ -171,7 +160,6 @@ export default function Lancamentos() {
           .eq("is_active", true)
       ])
 
-      if (entriesResponse.error) throw entriesResponse.error
       if (companiesResponse.error) {
         console.error("Companies error:", companiesResponse.error)
         throw companiesResponse.error
@@ -190,7 +178,6 @@ export default function Lancamentos() {
       if (bankAccountsResponse.error) throw bankAccountsResponse.error
 
       console.log("Data loaded:", {
-        entries: entriesResponse.data?.length || 0,
         companies: companiesResponse.data?.length || 0,
         customers: customersResponse.data?.length || 0,
         suppliers: suppliersResponse.data?.length || 0,
@@ -199,8 +186,6 @@ export default function Lancamentos() {
         paymentMethods: paymentMethodsResponse.data?.length || 0,
         bankAccounts: bankAccountsResponse.data?.length || 0,
       })
-
-      setEntries((entriesResponse.data || []) as any)
       setCompanies(companiesResponse.data || [])
       setCustomers(customersResponse.data || [])
       setSuppliers(suppliersResponse.data || [])
@@ -236,18 +221,10 @@ export default function Lancamentos() {
         payment_method_id: values.payment_method_id,
         bank_account_id: values.bank_account_id,
         description: values.description,
+        person_type: values.entry_type === "receivable" ? "customer" : "supplier",
       }
 
-      const { error } = await supabase
-        .from("financial_entries")
-        .insert([{
-          ...entryData,
-          org_id: organization.currentOrg.id,
-          person_type: entryData.entry_type === "receivable" ? "customer" : "supplier",
-          created_by: user?.id || organization.currentOrg.id,
-        }])
-
-      if (error) throw error
+      await createEntry(entryData)
 
       toast({
         title: "Sucesso",
@@ -256,6 +233,7 @@ export default function Lancamentos() {
 
       form.reset()
       loadData()
+      loadEntries()
     } catch (error) {
       console.error("Error creating entry:", error)
       toast({
@@ -317,7 +295,7 @@ export default function Lancamentos() {
     return format(new Date(dateString), 'dd/MM/yyyy')
   }
 
-  if (loading) {
+  if (loading || entriesLoading) {
     return (
       <div className="w-full">
         <div className="flex items-center justify-center h-96">
@@ -416,29 +394,67 @@ export default function Lancamentos() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Sua Empresa *</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione a empresa" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {companies.length > 0 ? (
-                                companies.map((company) => (
-                                  <SelectItem key={company.id} value={company.id}>
-                                    {company.name}
-                                  </SelectItem>
-                                ))
-                              ) : (
-                                <SelectItem value="NO_COMPANIES" disabled>
-                                  Nenhuma empresa encontrada
-                                </SelectItem>
-                              )}
-                            </SelectContent>
-                          </Select>
+                          <Popover open={companySearchOpen} onOpenChange={setCompanySearchOpen}>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  aria-expanded={companySearchOpen}
+                                  className={cn(
+                                    "w-full justify-between",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value
+                                    ? companies.find((company) => company.id === field.value)?.name
+                                    : "Selecione a empresa"}
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-full p-0">
+                              <Command>
+                                <CommandInput 
+                                  placeholder="Buscar empresa..." 
+                                  value={companySearchValue}
+                                  onValueChange={setCompanySearchValue}
+                                />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    {companies.length === 0 
+                                      ? "Nenhuma empresa cadastrada. Cadastre em Configurações → Empresas."
+                                      : "Nenhuma empresa encontrada."
+                                    }
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {companies.map((company) => (
+                                      <CommandItem
+                                        key={company.id}
+                                        value={company.name}
+                                        onSelect={() => {
+                                          field.onChange(company.id)
+                                          setCompanySearchValue("")
+                                          setCompanySearchOpen(false)
+                                        }}
+                                      >
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-4 w-4",
+                                            field.value === company.id ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                        {company.name}
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
                           {companies.length === 0 && (
                             <p className="text-xs text-muted-foreground">
-                              Configure uma empresa em Configurações → Empresas
+                              Nenhuma empresa cadastrada. Cadastre em Configurações → Empresas.
                             </p>
                           )}
                           <FormMessage />

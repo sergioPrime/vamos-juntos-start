@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { CalendarIcon, Plus, MoreHorizontal, Filter, Download, RefreshCcw, ChevronDown, ChevronUp, Check, ChevronsUpDown } from "lucide-react"
+import { CalendarIcon, Plus, RefreshCcw, ChevronDown, ChevronUp, Check, ChevronsUpDown, Download } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { supabase } from "@/integrations/supabase/client"
@@ -21,9 +21,9 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 const formSchema = z.object({
   company_id: z.string().min(1, "Empresa é obrigatória"),
@@ -43,6 +43,16 @@ const formSchema = z.object({
   settled_at: z.date().optional(),
   settled_payment_method_id: z.string().optional(),
   description: z.string().optional(),
+  // New fields
+  group_name: z.string().optional(),
+  document_number: z.string().optional(),
+  discount_percent: z.number().optional(),
+  original_due_date: z.date().optional(),
+  is_conciliated: z.boolean().default(false),
+  // Installment/Recurrence fields
+  installment_type: z.enum(["none", "manual", "automatic", "recurring"]).default("none"),
+  installment_count: z.number().optional(),
+  installment_interval: z.enum(["monthly", "quarterly", "semiannual", "annual"]).optional(),
 })
 
 interface FinancialEntry {
@@ -76,9 +86,9 @@ export default function Lancamentos() {
   const [bankAccounts, setBankAccounts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showMoreFields, setShowMoreFields] = useState(false)
+  const [showInstallments, setShowInstallments] = useState(false)
   const [filterType, setFilterType] = useState<string>("all")
   const [filterStatus, setFilterStatus] = useState<string>("all")
-  const [selectedAccountCostCenters, setSelectedAccountCostCenters] = useState<any[]>([])
   const [companySearchOpen, setCompanySearchOpen] = useState(false)
   const [companySearchValue, setCompanySearchValue] = useState("")
   const [customerSearchOpen, setCustomerSearchOpen] = useState(false)
@@ -98,6 +108,7 @@ export default function Lancamentos() {
       competence_date: new Date(),
       due_date: new Date(),
       is_settled: false,
+      installment_type: "none",
     },
   })
 
@@ -355,7 +366,7 @@ export default function Lancamentos() {
   }
 
   return (
-    <div className="w-full h-full min-h-screen space-y-6 -m-3 sm:-m-4 lg:-m-6 p-3 sm:p-4 lg:p-6">{/* Negative margin to counteract AppLayout padding, then add our own */}
+    <div className="w-full h-full min-h-screen space-y-6 -m-3 sm:-m-4 lg:-m-6 p-3 sm:p-4 lg:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Lançamentos Financeiros</h1>
@@ -394,188 +405,106 @@ export default function Lancamentos() {
         </TabsList>
 
         <TabsContent value="dados" className="space-y-6">
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">{/* Changed to 3 columns on xl screens */}
-            {/* Form Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Novo Lançamento</CardTitle>
-                <CardDescription>
-                  Preencha os dados para criar um novo lançamento financeiro
-                </CardDescription>
-                {loading && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div className="h-4 w-4 border-2 border-primary border-t-transparent animate-spin rounded-full"></div>
-                    Carregando dados...
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="entry_type"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tipo de Lançamento</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione o tipo" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="receivable">Conta a Receber</SelectItem>
-                              <SelectItem value="payable">Conta a Pagar</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="company_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Sua Empresa *</FormLabel>
-                          <Popover open={companySearchOpen} onOpenChange={setCompanySearchOpen}>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant="outline"
-                                  role="combobox"
-                                  aria-expanded={companySearchOpen}
-                                  className={cn(
-                                    "w-full justify-between",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value
-                                    ? companies.find((company) => company.id === field.value)?.name
-                                    : "Selecione a empresa"}
-                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-full p-0">
-                              <Command>
-                                <CommandInput 
-                                  placeholder="Buscar empresa..." 
-                                  value={companySearchValue}
-                                  onValueChange={setCompanySearchValue}
-                                />
-                                <CommandList>
-                                  <CommandEmpty>
-                                    {companies.length === 0 
-                                      ? "Nenhuma empresa cadastrada. Cadastre em Configurações → Empresas."
-                                      : "Nenhuma empresa encontrada."
-                                    }
-                                  </CommandEmpty>
-                                  <CommandGroup>
-                                    {companies.map((company) => (
-                                      <CommandItem
-                                        key={company.id}
-                                        value={company.name}
-                                        onSelect={() => {
-                                          field.onChange(company.id)
-                                          setCompanySearchValue("")
-                                          setCompanySearchOpen(false)
-                                        }}
-                                      >
-                                        <Check
-                                          className={cn(
-                                            "mr-2 h-4 w-4",
-                                            field.value === company.id ? "opacity-100" : "opacity-0"
-                                          )}
-                                        />
-                                        {company.name}
-                                      </CommandItem>
-                                    ))}
-                                  </CommandGroup>
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
-                          {companies.length === 0 && (
-                            <p className="text-xs text-muted-foreground">
-                              Nenhuma empresa cadastrada. Cadastre em Configurações → Empresas.
-                            </p>
-                          )}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="person_id"
-                      render={({ field }) => {
-                        const isReceivable = form.watch("entry_type") === "receivable"
-                        const people = isReceivable ? customers : suppliers
-                        const personType = isReceivable ? "cliente" : "fornecedor"
-                        const searchOpen = isReceivable ? customerSearchOpen : supplierSearchOpen
-                        const setSearchOpen = isReceivable ? setCustomerSearchOpen : setSupplierSearchOpen
-                        const searchValue = isReceivable ? customerSearchValue : supplierSearchValue
-                        const setSearchValue = isReceivable ? setCustomerSearchValue : setSupplierSearchValue
-                        
-                        return (
+          {/* Full Width Form Section */}
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle>Novo Lançamento</CardTitle>
+              <CardDescription>
+                Preencha os dados para criar um novo lançamento financeiro
+              </CardDescription>
+              {loading && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="h-4 w-4 border-2 border-primary border-t-transparent animate-spin rounded-full"></div>
+                  Carregando dados...
+                </div>
+              )}
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  {/* Company and Entry Type Section */}
+                  <div className="border-b pb-6">
+                    <h3 className="text-lg font-semibold mb-4">Dados da Empresa</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="entry_type"
+                        render={({ field }) => (
                           <FormItem>
-                            <FormLabel>
-                              {isReceivable ? "Cliente *" : "Fornecedor *"}
-                            </FormLabel>
-                            <Popover open={searchOpen} onOpenChange={setSearchOpen}>
+                            <FormLabel>Tipo de Lançamento *</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione o tipo" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="receivable">Conta a Receber</SelectItem>
+                                <SelectItem value="payable">Conta a Pagar</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="company_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Sua Empresa *</FormLabel>
+                            <Popover open={companySearchOpen} onOpenChange={setCompanySearchOpen}>
                               <PopoverTrigger asChild>
                                 <FormControl>
                                   <Button
                                     variant="outline"
                                     role="combobox"
-                                    aria-expanded={searchOpen}
+                                    aria-expanded={companySearchOpen}
                                     className={cn(
                                       "w-full justify-between",
                                       !field.value && "text-muted-foreground"
                                     )}
                                   >
                                     {field.value
-                                      ? people.find((person) => person.id === field.value)?.name
-                                      : `Selecione o ${personType}`}
+                                      ? companies.find((company) => company.id === field.value)?.name
+                                      : "Selecione a empresa"}
                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                   </Button>
                                 </FormControl>
                               </PopoverTrigger>
-                              <PopoverContent className="w-full p-0">
+                              <PopoverContent className="w-full p-0 z-50 bg-background">
                                 <Command>
                                   <CommandInput 
-                                    placeholder={`Buscar ${personType}...`}
-                                    value={searchValue}
-                                    onValueChange={setSearchValue}
+                                    placeholder="Buscar empresa..." 
+                                    value={companySearchValue}
+                                    onValueChange={setCompanySearchValue}
                                   />
                                   <CommandList>
                                     <CommandEmpty>
-                                      {people.length === 0 
-                                        ? `Nenhum ${personType} cadastrado.`
-                                        : `Nenhum ${personType} encontrado.`
+                                      {companies.length === 0 
+                                        ? "Nenhuma empresa cadastrada. Cadastre em Configurações → Empresas."
+                                        : "Nenhuma empresa encontrada."
                                       }
                                     </CommandEmpty>
                                     <CommandGroup>
-                                      {people.map((person) => (
+                                      {companies.map((company) => (
                                         <CommandItem
-                                          key={person.id}
-                                          value={person.name}
+                                          key={company.id}
+                                          value={company.name}
                                           onSelect={() => {
-                                            field.onChange(person.id)
-                                            setSearchValue("")
-                                            setSearchOpen(false)
+                                            field.onChange(company.id)
+                                            setCompanySearchValue("")
+                                            setCompanySearchOpen(false)
                                           }}
                                         >
                                           <Check
                                             className={cn(
                                               "mr-2 h-4 w-4",
-                                              field.value === person.id ? "opacity-100" : "opacity-0"
+                                              field.value === company.id ? "opacity-100" : "opacity-0"
                                             )}
                                           />
-                                          {person.name}
+                                          {company.name}
                                         </CommandItem>
                                       ))}
                                     </CommandGroup>
@@ -583,112 +512,121 @@ export default function Lancamentos() {
                                 </Command>
                               </PopoverContent>
                             </Popover>
-                            {people.length === 0 && (
+                            {companies.length === 0 && (
                               <p className="text-xs text-muted-foreground">
-                                Configure {isReceivable ? "clientes" : "fornecedores"} em {isReceivable ? "Clientes" : "Fornecedores"}
+                                Nenhuma empresa cadastrada. Cadastre em Configurações → Empresas.
                               </p>
                             )}
                             <FormMessage />
                           </FormItem>
-                        )
-                      }}
-                    />
+                        )}
+                      />
 
-                    <FormField
-                      control={form.control}
-                      name="chart_of_account_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Plano de Conta *</FormLabel>
-                          <Popover open={chartAccountSearchOpen} onOpenChange={setChartAccountSearchOpen}>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant="outline"
-                                  role="combobox"
-                                  aria-expanded={chartAccountSearchOpen}
-                                  className={cn(
-                                    "w-full justify-between",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value
-                                    ? (() => {
-                                        const account = chartOfAccounts.find((acc) => acc.id === field.value)
-                                        return account ? `${account.account_code} - ${account.account_name}` : "Selecione o plano de conta"
-                                      })()
-                                    : "Selecione o plano de conta"}
-                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-full p-0">
-                              <Command>
-                                <CommandInput 
-                                  placeholder="Buscar plano de conta..."
-                                  value={chartAccountSearchValue}
-                                  onValueChange={setChartAccountSearchValue}
-                                />
-                                <CommandList>
-                                  <CommandEmpty>
-                                    {chartOfAccounts.length === 0 
-                                      ? "Nenhum plano de conta cadastrado."
-                                      : "Nenhum plano de conta encontrado."
-                                    }
-                                  </CommandEmpty>
-                                  <CommandGroup>
-                                    {chartOfAccounts.map((account) => (
-                                      <CommandItem
-                                        key={account.id}
-                                        value={`${account.account_code} ${account.account_name}`}
-                                        onSelect={() => {
-                                          field.onChange(account.id)
-                                          // Reset cost center when account changes
-                                          form.setValue("cost_center_id", "")
-                                          setChartAccountSearchValue("")
-                                          setChartAccountSearchOpen(false)
-                                        }}
-                                      >
-                                        <Check
-                                          className={cn(
-                                            "mr-2 h-4 w-4",
-                                            field.value === account.id ? "opacity-100" : "opacity-0"
-                                          )}
-                                        />
-                                        {account.account_code} - {account.account_name}
-                                      </CommandItem>
-                                    ))}
-                                  </CommandGroup>
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
-                          <p className="text-xs text-muted-foreground">
-                            Apenas contas analíticas podem ser selecionadas
-                          </p>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                      <FormField
+                        control={form.control}
+                        name="person_id"
+                        render={({ field }) => {
+                          const isReceivable = form.watch("entry_type") === "receivable"
+                          const people = isReceivable ? customers : suppliers
+                          const personType = isReceivable ? "cliente" : "fornecedor"
+                          const searchOpen = isReceivable ? customerSearchOpen : supplierSearchOpen
+                          const setSearchOpen = isReceivable ? setCustomerSearchOpen : setSupplierSearchOpen
+                          const searchValue = isReceivable ? customerSearchValue : supplierSearchValue
+                          const setSearchValue = isReceivable ? setCustomerSearchValue : setSupplierSearchValue
+                          
+                          return (
+                            <FormItem>
+                              <FormLabel>
+                                {isReceivable ? "Cliente *" : "Fornecedor *"}
+                              </FormLabel>
+                              <Popover open={searchOpen} onOpenChange={setSearchOpen}>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button
+                                      variant="outline"
+                                      role="combobox"
+                                      aria-expanded={searchOpen}
+                                      className={cn(
+                                        "w-full justify-between",
+                                        !field.value && "text-muted-foreground"
+                                      )}
+                                    >
+                                      {field.value
+                                        ? people.find((person) => person.id === field.value)?.name
+                                        : `Selecione o ${personType}`}
+                                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-full p-0 z-50 bg-background">
+                                  <Command>
+                                    <CommandInput 
+                                      placeholder={`Buscar ${personType}...`}
+                                      value={searchValue}
+                                      onValueChange={setSearchValue}
+                                    />
+                                    <CommandList>
+                                      <CommandEmpty>
+                                        {people.length === 0 
+                                          ? `Nenhum ${personType} cadastrado.`
+                                          : `Nenhum ${personType} encontrado.`
+                                        }
+                                      </CommandEmpty>
+                                      <CommandGroup>
+                                        {people.map((person) => (
+                                          <CommandItem
+                                            key={person.id}
+                                            value={person.name}
+                                            onSelect={() => {
+                                              field.onChange(person.id)
+                                              setSearchValue("")
+                                              setSearchOpen(false)
+                                            }}
+                                          >
+                                            <Check
+                                              className={cn(
+                                                "mr-2 h-4 w-4",
+                                                field.value === person.id ? "opacity-100" : "opacity-0"
+                                              )}
+                                            />
+                                            {person.name}
+                                          </CommandItem>
+                                        ))}
+                                      </CommandGroup>
+                                    </CommandList>
+                                  </Command>
+                                </PopoverContent>
+                              </Popover>
+                              {people.length === 0 && (
+                                <p className="text-xs text-muted-foreground">
+                                  Configure {isReceivable ? "clientes" : "fornecedores"} em {isReceivable ? "Clientes" : "Fornecedores"}
+                                </p>
+                              )}
+                              <FormMessage />
+                            </FormItem>
+                          )
+                        }}
+                      />
+                    </div>
+                  </div>
 
-                    <FormField
-                      control={form.control}
-                      name="cost_center_id"
-                      render={({ field }) => {
-                        const availableCostCenters = getAvailableCostCenters()
-                        const selectedAccount = chartOfAccounts.find(acc => acc.id === form.watch("chart_of_account_id"))
-                        const hasPreAssociated = selectedAccount?.chart_account_cost_centers?.length > 0
-                        
-                        return (
+                  {/* Financial Data Section */}
+                  <div className="border-b pb-6">
+                    <h3 className="text-lg font-semibold mb-4">Dados Financeiros</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="chart_of_account_id"
+                        render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Centro de Custo *</FormLabel>
-                            <Popover open={costCenterSearchOpen} onOpenChange={setCostCenterSearchOpen}>
+                            <FormLabel>Plano de Conta *</FormLabel>
+                            <Popover open={chartAccountSearchOpen} onOpenChange={setChartAccountSearchOpen}>
                               <PopoverTrigger asChild>
                                 <FormControl>
                                   <Button
                                     variant="outline"
                                     role="combobox"
-                                    aria-expanded={costCenterSearchOpen}
+                                    aria-expanded={chartAccountSearchOpen}
                                     className={cn(
                                       "w-full justify-between",
                                       !field.value && "text-muted-foreground"
@@ -696,46 +634,49 @@ export default function Lancamentos() {
                                   >
                                     {field.value
                                       ? (() => {
-                                          const costCenter = availableCostCenters.find((cc) => cc.id === field.value)
-                                          return costCenter ? `${costCenter.code} - ${costCenter.name}` : "Selecione o centro de custo"
+                                          const account = chartOfAccounts.find((acc) => acc.id === field.value)
+                                          return account ? `${account.account_code} - ${account.account_name}` : "Selecione o plano de conta"
                                         })()
-                                      : "Selecione o centro de custo"}
+                                      : "Selecione o plano de conta"}
                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                   </Button>
                                 </FormControl>
                               </PopoverTrigger>
-                              <PopoverContent className="w-full p-0">
+                              <PopoverContent className="w-full p-0 z-50 bg-background">
                                 <Command>
                                   <CommandInput 
-                                    placeholder="Buscar centro de custo..."
-                                    value={costCenterSearchValue}
-                                    onValueChange={setCostCenterSearchValue}
+                                    placeholder="Buscar plano de conta..." 
+                                    value={chartAccountSearchValue}
+                                    onValueChange={setChartAccountSearchValue}
                                   />
                                   <CommandList>
                                     <CommandEmpty>
-                                      {availableCostCenters.length === 0 
-                                        ? "Nenhum centro de custo disponível."
-                                        : "Nenhum centro de custo encontrado."
+                                      {chartOfAccounts.length === 0 
+                                        ? "Nenhum plano de conta cadastrado."
+                                        : "Nenhum plano de conta encontrado."
                                       }
                                     </CommandEmpty>
                                     <CommandGroup>
-                                      {availableCostCenters.map((center) => (
+                                      {chartOfAccounts.map((account) => (
                                         <CommandItem
-                                          key={center.id}
-                                          value={`${center.code} ${center.name}`}
+                                          key={account.id}
+                                          value={`${account.account_code} ${account.account_name}`}
                                           onSelect={() => {
-                                            field.onChange(center.id)
-                                            setCostCenterSearchValue("")
-                                            setCostCenterSearchOpen(false)
+                                            field.onChange(account.id)
+                                            setChartAccountSearchValue("")
+                                            setChartAccountSearchOpen(false)
                                           }}
                                         >
                                           <Check
                                             className={cn(
                                               "mr-2 h-4 w-4",
-                                              field.value === center.id ? "opacity-100" : "opacity-0"
+                                              field.value === account.id ? "opacity-100" : "opacity-0"
                                             )}
                                           />
-                                          {center.code} - {center.name}
+                                          <div className="flex flex-col">
+                                            <span className="font-medium">{account.account_code}</span>
+                                            <span className="text-sm text-muted-foreground">{account.account_name}</span>
+                                          </div>
                                         </CommandItem>
                                       ))}
                                     </CommandGroup>
@@ -743,51 +684,50 @@ export default function Lancamentos() {
                                 </Command>
                               </PopoverContent>
                             </Popover>
-                            {hasPreAssociated && (
-                              <p className="text-xs text-muted-foreground">
-                                Centros de custo limitados aos associados à conta selecionada
-                              </p>
-                            )}
                             <FormMessage />
                           </FormItem>
-                        )
-                      }}
-                    />
+                        )}
+                      />
 
-                    <FormField
-                      control={form.control}
-                      name="amount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Valor (R$) *</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="0,00"
-                              value={amountDisplayValue}
-                              onChange={(e) => handleAmountChange(e.target.value)}
-                              onPaste={(e) => {
-                                e.preventDefault()
-                                const pastedText = e.clipboardData.getData("text")
-                                handleAmountChange(pastedText)
-                              }}
-                              className="text-right"
-                            />
-                          </FormControl>
-                          <p className="text-xs text-muted-foreground">
-                            Digite apenas números. Ex: 250000 = R$ 2.500,00
-                          </p>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                      <FormField
+                        control={form.control}
+                        name="amount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Valor (R$) *</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="0,00"
+                                value={amountDisplayValue}
+                                onChange={(e) => handleAmountChange(e.target.value)}
+                                onPaste={(e) => {
+                                  e.preventDefault()
+                                  const pastedText = e.clipboardData.getData("text")
+                                  handleAmountChange(pastedText)
+                                }}
+                                className="text-right"
+                              />
+                            </FormControl>
+                            <p className="text-xs text-muted-foreground">
+                              Digite apenas números. Ex: 250000 = R$ 2.500,00
+                            </p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                  {/* Dates and Status Section */}
+                  <div className="border-b pb-6">
+                    <h3 className="text-lg font-semibold mb-4">Vencimentos e Status</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       <FormField
                         control={form.control}
                         name="competence_date"
                         render={({ field }) => (
                           <FormItem className="flex flex-col">
-                            <FormLabel>Data da Competência</FormLabel>
+                            <FormLabel>Data da Competência *</FormLabel>
                             <Popover>
                               <PopoverTrigger asChild>
                                 <FormControl>
@@ -827,7 +767,7 @@ export default function Lancamentos() {
                         name="due_date"
                         render={({ field }) => (
                           <FormItem className="flex flex-col">
-                            <FormLabel>Data do Vencimento</FormLabel>
+                            <FormLabel>Data do Vencimento *</FormLabel>
                             <Popover>
                               <PopoverTrigger asChild>
                                 <FormControl>
@@ -861,34 +801,146 @@ export default function Lancamentos() {
                           </FormItem>
                         )}
                       />
+
+                      <FormField
+                        control={form.control}
+                        name="is_settled"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel>Foi Quitado?</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
                     </div>
+                  </div>
 
-                    <FormField
-                      control={form.control}
-                      name="is_settled"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Foi Quitado?</FormLabel>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
+                  {/* Mostrar Mais Campos Section */}
+                  <Collapsible open={showMoreFields} onOpenChange={setShowMoreFields}>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" className="w-full justify-between">
+                        Mostrar Mais Campos
+                        {showMoreFields ? <ChevronUp /> : <ChevronDown />}
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-6 pt-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="cost_center_id"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Centro de Custo * <span className="text-xs text-muted-foreground">(obrigatório)</span></FormLabel>
+                              <Popover open={costCenterSearchOpen} onOpenChange={setCostCenterSearchOpen}>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button
+                                      variant="outline"
+                                      role="combobox"
+                                      aria-expanded={costCenterSearchOpen}
+                                      className={cn(
+                                        "w-full justify-between",
+                                        !field.value && "text-muted-foreground"
+                                      )}
+                                    >
+                                      {field.value
+                                        ? (() => {
+                                            const center = getAvailableCostCenters().find((center) => center.id === field.value)
+                                            return center ? `${center.code} - ${center.name}` : "Selecione o centro de custo"
+                                          })()
+                                        : "Selecione o centro de custo"}
+                                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-full p-0 z-50 bg-background">
+                                  <Command>
+                                    <CommandInput 
+                                      placeholder="Buscar centro de custo..." 
+                                      value={costCenterSearchValue}
+                                      onValueChange={setCostCenterSearchValue}
+                                    />
+                                    <CommandList>
+                                      <CommandEmpty>
+                                        {getAvailableCostCenters().length === 0 
+                                          ? "Nenhum centro de custo disponível."
+                                          : "Nenhum centro de custo encontrado."
+                                        }
+                                      </CommandEmpty>
+                                      <CommandGroup>
+                                        {getAvailableCostCenters().map((center) => (
+                                          <CommandItem
+                                            key={center.id}
+                                            value={`${center.code} ${center.name}`}
+                                            onSelect={() => {
+                                              field.onChange(center.id)
+                                              setCostCenterSearchValue("")
+                                              setCostCenterSearchOpen(false)
+                                            }}
+                                          >
+                                            <Check
+                                              className={cn(
+                                                "mr-2 h-4 w-4",
+                                                field.value === center.id ? "opacity-100" : "opacity-0"
+                                              )}
+                                            />
+                                            <div className="flex flex-col">
+                                              <span className="font-medium">{center.code}</span>
+                                              <span className="text-sm text-muted-foreground">{center.name}</span>
+                                            </div>
+                                          </CommandItem>
+                                        ))}
+                                      </CommandGroup>
+                                    </CommandList>
+                                  </Command>
+                                </PopoverContent>
+                              </Popover>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                    <Collapsible open={showMoreFields} onOpenChange={setShowMoreFields}>
-                      <CollapsibleTrigger asChild>
-                        <Button variant="ghost" className="w-full justify-between">
-                          Mostrar Mais Campos
-                          {showMoreFields ? <ChevronUp /> : <ChevronDown />}
-                        </Button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="group_name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Grupo</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Ex: Vendas, Marketing, Operacional"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="document_number"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Documento</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Número do documento"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
                         <FormField
                           control={form.control}
                           name="payment_method_id"
@@ -955,95 +1007,209 @@ export default function Lancamentos() {
                             </FormItem>
                           )}
                         />
-                      </CollapsibleContent>
-                    </Collapsible>
-
-                    <Button type="submit" className="w-full">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Criar Lançamento
-                    </Button>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-
-            {/* List Section - Takes 2 columns on xl screens */}
-            <Card className="xl:col-span-2">{/* Span 2 columns on xl screens */}
-              <CardHeader>
-                <CardTitle>Lançamentos Recentes</CardTitle>
-                <CardDescription>
-                  Visualize e gerencie seus lançamentos financeiros
-                </CardDescription>
-                
-                <div className="flex items-center space-x-2">
-                  <Select value={filterType} onValueChange={setFilterType}>
-                    <SelectTrigger className="w-40">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="receivable">A Receber</SelectItem>
-                      <SelectItem value="payable">A Pagar</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="w-40">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos Status</SelectItem>
-                      <SelectItem value="pending">Pendente</SelectItem>
-                      <SelectItem value="settled">Quitado</SelectItem>
-                      <SelectItem value="overdue">Em Atraso</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {filteredEntries.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">Nenhum lançamento encontrado</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {filteredEntries.map((entry) => (
-                      <div key={entry.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="space-y-1">
-                          <div className="flex items-center space-x-2">
-                            <Badge variant={entry.entry_type === "receivable" ? "default" : "secondary"}>
-                              {entry.entry_type === "receivable" ? "A Receber" : "A Pagar"}
-                            </Badge>
-                            {getStatusBadge(entry)}
-                          </div>
-                          <p className="font-medium">
-                            {entry.person_type === "customer" && entry.customers?.name}
-                            {entry.person_type === "supplier" && entry.suppliers?.name}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            Venc: {formatDate(entry.due_date)}
-                          </p>
-                          {entry.description && (
-                            <p className="text-sm text-muted-foreground">{entry.description}</p>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-lg">
-                            {formatCurrency(entry.amount)}
-                          </p>
-                          {entry.is_settled && entry.settled_at && (
-                            <p className="text-sm text-muted-foreground">
-                              Quitado em {formatDate(entry.settled_at)}
-                            </p>
-                          )}
-                        </div>
                       </div>
-                    ))}
+                    </CollapsibleContent>
+                  </Collapsible>
+
+                  {/* Parcelamento e Recorrência Section */}
+                  <Collapsible open={showInstallments} onOpenChange={setShowInstallments}>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" className="w-full justify-between">
+                        Parcelamento e Recorrência
+                        {showInstallments ? <ChevronUp /> : <ChevronDown />}
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-6 pt-4">
+                      <FormField
+                        control={form.control}
+                        name="installment_type"
+                        render={({ field }) => (
+                          <FormItem className="space-y-3">
+                            <FormLabel>Tipo de Parcelamento</FormLabel>
+                            <FormControl>
+                              <RadioGroup
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                className="flex flex-col space-y-2"
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="none" id="none" />
+                                  <FormLabel htmlFor="none" className="font-normal">
+                                    Não parcelar
+                                  </FormLabel>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="manual" id="manual" />
+                                  <FormLabel htmlFor="manual" className="font-normal">
+                                    Configurar manualmente
+                                  </FormLabel>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="automatic" id="automatic" />
+                                  <FormLabel htmlFor="automatic" className="font-normal">
+                                    Parcelamento automático
+                                  </FormLabel>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="recurring" id="recurring" />
+                                  <FormLabel htmlFor="recurring" className="font-normal">
+                                    Recorrência automática
+                                  </FormLabel>
+                                </div>
+                              </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {form.watch("installment_type") !== "none" && form.watch("installment_type") && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="installment_count"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Número de Parcelas</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    min="2"
+                                    max="100"
+                                    placeholder="Ex: 12"
+                                    {...field}
+                                    onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="installment_interval"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Intervalo</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Selecione o intervalo" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="monthly">Mensal</SelectItem>
+                                    <SelectItem value="quarterly">Trimestral</SelectItem>
+                                    <SelectItem value="semiannual">Semestral</SelectItem>
+                                    <SelectItem value="annual">Anual</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
+
+                  {/* Sticky Action Bar */}
+                  <div className="sticky bottom-0 bg-background border-t pt-4 mt-6">
+                    <div className="flex gap-3 justify-end">
+                      <Button type="button" variant="outline">
+                        Cancelar
+                      </Button>
+                      <Button type="button" variant="outline">
+                        Voltar
+                      </Button>
+                      <Button type="submit">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Criar Lançamento
+                      </Button>
+                    </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+
+          {/* Recent Entries List */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Lançamentos Recentes</CardTitle>
+              <CardDescription>
+                Visualize e gerencie seus lançamentos financeiros
+              </CardDescription>
+              
+              <div className="flex items-center space-x-2">
+                <Select value={filterType} onValueChange={setFilterType}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="receivable">A Receber</SelectItem>
+                    <SelectItem value="payable">A Pagar</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos Status</SelectItem>
+                    <SelectItem value="pending">Pendente</SelectItem>
+                    <SelectItem value="settled">Quitado</SelectItem>
+                    <SelectItem value="overdue">Em Atraso</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {filteredEntries.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Nenhum lançamento encontrado</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredEntries.map((entry) => (
+                    <div key={entry.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <Badge variant={entry.entry_type === "receivable" ? "default" : "secondary"}>
+                            {entry.entry_type === "receivable" ? "A Receber" : "A Pagar"}
+                          </Badge>
+                          {getStatusBadge(entry)}
+                        </div>
+                        <p className="font-medium">
+                          {entry.person_type === "customer" && entry.customers?.name}
+                          {entry.person_type === "supplier" && entry.suppliers?.name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Venc: {formatDate(entry.due_date)}
+                        </p>
+                        {entry.description && (
+                          <p className="text-sm text-muted-foreground">{entry.description}</p>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-lg">
+                          {formatCurrency(entry.amount)}
+                        </p>
+                        {entry.is_settled && entry.settled_at && (
+                          <p className="text-sm text-muted-foreground">
+                            Quitado em {formatDate(entry.settled_at)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

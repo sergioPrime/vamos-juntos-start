@@ -56,7 +56,7 @@ import ProductionOrders from "./pages/production/ProductionOrders";
 import { Pessoas } from "./pages/Pessoas";
 import PlanoDeContas from "./pages/settings/PlanoDeContas";
 import CentrosDeCusto from "./pages/settings/CentrosDeCusto";
-import PaymentMethods from "./pages/settings/PaymentMethods";
+import PaymentMethods from "./pages/cadastros/PaymentMethods";
 
 const queryClient = new QueryClient();
 
@@ -364,6 +364,15 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <CentrosDeCusto />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/formas-de-pagamento" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <PaymentMethods />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

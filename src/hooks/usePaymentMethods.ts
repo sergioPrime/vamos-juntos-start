@@ -150,6 +150,33 @@ export function usePaymentMethods() {
     return updatePaymentMethod(id, { active })
   }
 
+  const deleteMultiple = async (ids: string[]): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('payment_methods')
+        .delete()
+        .in('id', ids)
+
+      if (error) throw error
+
+      toast({
+        title: "Sucesso",
+        description: `${ids.length} forma(s) de pagamento excluída(s) com sucesso.`,
+      })
+
+      await loadPaymentMethods()
+      return true
+    } catch (error) {
+      console.error('Error deleting payment methods:', error)
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir as formas de pagamento selecionadas.",
+        variant: "destructive",
+      })
+      return false
+    }
+  }
+
   useEffect(() => {
     loadPaymentMethods()
   }, [currentOrg?.id])
@@ -161,6 +188,7 @@ export function usePaymentMethods() {
     createPaymentMethod,
     updatePaymentMethod,
     deletePaymentMethod,
-    toggleActive
+    toggleActive,
+    deleteMultiple
   }
 }

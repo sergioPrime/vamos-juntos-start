@@ -1037,24 +1037,30 @@ export type Database = {
       payment_methods: {
         Row: {
           active: boolean
+          code: string | null
           created_at: string
           id: string
+          is_default: boolean
           name: string
           org_id: string
           type: string
         }
         Insert: {
           active?: boolean
+          code?: string | null
           created_at?: string
           id?: string
+          is_default?: boolean
           name: string
           org_id: string
           type: string
         }
         Update: {
           active?: boolean
+          code?: string | null
           created_at?: string
           id?: string
+          is_default?: boolean
           name?: string
           org_id?: string
           type?: string
@@ -2314,6 +2320,10 @@ export type Database = {
           projected_outflow: number
           projection_date: string
         }[]
+      }
+      generate_next_payment_method_code: {
+        Args: { p_org_id: string }
+        Returns: string
       }
       gtrgm_compress: {
         Args: { "": unknown }

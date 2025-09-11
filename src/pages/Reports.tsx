@@ -129,7 +129,7 @@ export default function Reports() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
+    <div className="page-container space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* Back Navigation */}
       <div className="flex items-center gap-2 sm:gap-4">
         <Button 

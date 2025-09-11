@@ -341,7 +341,7 @@ export default function PlanoDeContas() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="page-container space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Plano de Contas</h1>

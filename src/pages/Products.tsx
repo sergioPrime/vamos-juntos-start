@@ -669,7 +669,7 @@ const Products = () => {
   }
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="page-container w-full h-full flex flex-col">
       {/* Fixed header with buttons */}
       <div className="flex justify-between items-center p-6 border-b bg-background">
         <h1 className="text-3xl font-bold">Produtos</h1>

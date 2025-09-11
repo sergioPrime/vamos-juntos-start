@@ -366,7 +366,7 @@ export default function Lancamentos() {
   }
 
   return (
-    <div className="w-full h-full min-h-screen space-y-6 -m-3 sm:-m-4 lg:-m-6 p-3 sm:p-4 lg:p-6">
+    <div className="page-container w-full h-full min-h-screen space-y-6 -m-3 sm:-m-4 lg:-m-6 p-3 sm:p-4 lg:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Lançamentos Financeiros</h1>

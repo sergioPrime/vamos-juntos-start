@@ -67,7 +67,7 @@ export default function Quotes() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="page-container space-y-6">
       {/* Back Navigation */}
       <div className="flex items-center gap-4">
         <Button 

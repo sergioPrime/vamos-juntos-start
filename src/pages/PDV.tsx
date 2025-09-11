@@ -301,7 +301,7 @@ const PDV = () => {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="page-container container mx-auto p-6">
       <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-8rem)]">
         {/* Products Section */}
         <div className="flex-1 flex flex-col">

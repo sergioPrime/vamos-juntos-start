@@ -144,8 +144,8 @@ export default function PaymentMethods() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="page-container space-y-6">
+      <div className="page-header flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Formas de Pagamento</h1>
           <p className="text-muted-foreground">
@@ -162,7 +162,7 @@ export default function PaymentMethods() {
         <CardHeader>
           <CardTitle>Formas de Pagamento</CardTitle>
           <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-sm">
+            <div className="relative w-full">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar por nome ou código..."

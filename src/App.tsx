@@ -377,15 +377,6 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/cadastros/formas-de-pagamento" element={
-            <ProtectedRoute>
-              <AppLayout>
-                <PageTransition direction="left">
-                  <PaymentMethods />
-                </PageTransition>
-              </AppLayout>
-            </ProtectedRoute>
-          } />
           <Route path="/admin" element={
             <ProtectedRoute>
               <SuperAdminRoute>

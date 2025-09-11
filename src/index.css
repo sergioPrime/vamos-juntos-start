@@ -8,6 +8,10 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* === LAYOUT VARIABLES === */
+    --header-height: 56px;
+    --page-top-offset: calc(var(--header-height) + 12px);
+    
     /* === MODO CLARO - CORES AZUIS E VERDES === */
     /* Nível 1: Fundo Principal (muito claro) */
     --background: 210 40% 98%;
@@ -87,6 +91,13 @@ All colors MUST be HSL.
     /* Nível 1: Fundo Principal (mais escuro - base) */
     --background: 220 28% 10%;
     --foreground: 210 20% 98%;
+  }
+  
+  @media (min-width: 640px) {
+    :root {
+      --header-height: 64px;
+      --page-top-offset: calc(var(--header-height) + 16px);
+    }
 
     /* Nível 2: Cards e Containers (intermediário) */
     --card: 220 24% 16%;

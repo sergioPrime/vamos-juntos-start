@@ -332,7 +332,7 @@ export function FinancialTable({
       <Table className="table-fixed w-full">
         <TableHeader>
           <TableRow className="border-b h-12">
-            <TableHead className="w-12 px-3 text-xs font-semibold">
+            <TableHead className="w-12 px-4 text-xs font-semibold text-left">
               <Checkbox
                 checked={selectedEntries.length === entries.length}
                 onCheckedChange={handleSelectAll}
@@ -341,12 +341,12 @@ export function FinancialTable({
             </TableHead>
             
             {visibleColumns.map((column) => (
-              <TableHead key={column.key} className="font-semibold text-left px-3 text-xs min-w-[100px]">
+              <TableHead key={column.key} className="font-semibold text-left px-4 text-xs min-w-[120px]">
                 {column.sortable ? (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-auto p-0 font-semibold hover:bg-transparent text-left justify-start -ml-3 pl-3 text-xs"
+                    className="h-auto p-0 font-semibold hover:bg-transparent text-left justify-start -ml-4 pl-4 text-xs"
                     onClick={() => handleSort(column.key as keyof FinancialEntry)}
                   >
                     <span className="mr-1">{column.label}</span>
@@ -358,7 +358,7 @@ export function FinancialTable({
               </TableHead>
             ))}
             
-            <TableHead className="w-20 text-center px-3 text-xs font-semibold min-w-[80px]">Ações</TableHead>
+            <TableHead className="w-20 text-center px-4 text-xs font-semibold min-w-[80px]">Ações</TableHead>
           </TableRow>
         </TableHeader>
         
@@ -373,7 +373,7 @@ export function FinancialTable({
                   animationsEnabled && "hover:scale-[1.01] transition-transform duration-150"
                 )}
               >
-                <TableCell className="px-3 py-3 text-xs">
+                <TableCell className="px-4 py-3 text-xs text-left">
                   <Checkbox
                     checked={selectedEntries.includes(entry.id)}
                     onCheckedChange={(checked) => handleSelectEntry(entry.id, checked as boolean)}
@@ -382,12 +382,12 @@ export function FinancialTable({
                 </TableCell>
                 
                 {visibleColumns.map((column) => (
-                  <TableCell key={`${entry.id}-${column.key}`} className="align-middle text-left px-3 py-3 text-xs">
+                  <TableCell key={`${entry.id}-${column.key}`} className="align-middle text-left px-4 py-3 text-xs">
                     {getCellValue(entry, column.key)}
                   </TableCell>
                 ))}
                 
-                <TableCell className="text-center px-3 py-3 text-xs">
+                <TableCell className="text-center px-4 py-3 text-xs">
                   <div className="flex items-center justify-center gap-1">
                     <TooltipProvider>
                       <Tooltip>

@@ -749,20 +749,6 @@ export type Database = {
             referencedRelation: "cost_centers"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "fk_financial_entries_customer_id"
-            columns: ["person_id"]
-            isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_financial_entries_supplier_id"
-            columns: ["person_id"]
-            isOneToOne: false
-            referencedRelation: "suppliers"
-            referencedColumns: ["id"]
-          },
         ]
       }
       financial_transactions: {
@@ -2418,20 +2404,6 @@ export type Database = {
             columns: ["cost_center_id"]
             isOneToOne: false
             referencedRelation: "cost_centers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_financial_entries_customer_id"
-            columns: ["person_id"]
-            isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_financial_entries_supplier_id"
-            columns: ["person_id"]
-            isOneToOne: false
-            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
         ]

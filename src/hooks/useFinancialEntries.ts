@@ -89,8 +89,6 @@ export function useFinancialEntries() {
         .select(`
           *,
           companies(name),
-          customers(name),
-          suppliers(name),
           chart_of_accounts(account_code, account_name),
           cost_centers(code, name),
           payment_methods(name),
@@ -100,7 +98,28 @@ export function useFinancialEntries() {
         .order("created_at", { ascending: false })
 
       if (error) throw error
-      setEntries((data || []) as any)
+      
+      // Manually fetch customer and supplier names
+      const enrichedEntries = await Promise.all((data || []).map(async (entry: any) => {
+        if (entry.person_type === 'customer') {
+          const { data: customer } = await supabase
+            .from('customers')
+            .select('name')
+            .eq('id', entry.person_id)
+            .single();
+          return { ...entry, customers: customer };
+        } else if (entry.person_type === 'supplier') {
+          const { data: supplier } = await supabase
+            .from('suppliers')
+            .select('name')
+            .eq('id', entry.person_id)
+            .single();
+          return { ...entry, suppliers: supplier };
+        }
+        return entry;
+      }));
+
+      setEntries(enrichedEntries as any)
     } catch (error) {
       console.error("Error loading financial entries:", error)
       toast({

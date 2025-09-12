@@ -10,6 +10,7 @@ import { AuthProvider } from "./hooks/useAuth";
 import { OrganizationProvider } from "./hooks/useOrganization";
 import { SubscriptionProvider } from "./hooks/useSubscription";
 import { SidebarConfigProvider } from "./contexts/SidebarConfigContext";
+import { AnimationProvider } from "./contexts/AnimationContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { SuperAdminRoute } from "./components/auth/SuperAdminRoute";
 import { AuthRedirect } from "./components/auth/AuthRedirect";
@@ -67,8 +68,9 @@ const App = () => (
       <OrganizationProvider>
         <SubscriptionProvider>
           <SidebarConfigProvider>
-            <TooltipProvider>
-            <NotificationProvider>
+            <AnimationProvider>
+              <TooltipProvider>
+                <NotificationProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -404,12 +406,13 @@ const App = () => (
         </Routes>
           </BrowserRouter>
           </NotificationProvider>
-            </TooltipProvider>
-          </SidebarConfigProvider>
-        </SubscriptionProvider>
-      </OrganizationProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+                </TooltipProvider>
+              </AnimationProvider>
+            </SidebarConfigProvider>
+          </SubscriptionProvider>
+        </OrganizationProvider>
+      </AuthProvider>
+    </QueryClientProvider>
 );
 
 export default App;

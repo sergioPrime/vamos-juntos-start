@@ -347,52 +347,70 @@ export function FinancialTable({
 
   return (
     <ResponsiveTable>
-      <Table className="w-full">
-        <TableHeader>
-          <TableRow className="border-b h-12">
-            <TableHead className="w-12 px-3 text-xs font-semibold text-center">
-              <Checkbox
-                checked={selectedEntries.length === entries.length}
-                onCheckedChange={handleSelectAll}
-                aria-label="Selecionar todos"
-              />
-            </TableHead>
-            
-            {visibleColumns.map((column) => {
-              const alignment = getColumnAlignment(column.key)
+      <div className="overflow-x-auto">
+        <Table className="w-full table-fixed">
+          <colgroup>
+            <col className="w-12" />
+            {visibleColumns.map((column) => (
+              <col key={column.key} className={cn(
+                column.key === 'status' && "w-32",
+                column.key === 'entry_code' && "w-28",
+                column.key === 'person_name' && "w-48",
+                (column.key === 'amount' || column.key === 'balance') && "w-36",
+                (column.key === 'due_date' || column.key === 'created_at' || column.key === 'settled_at') && "w-32",
+                column.key === 'description' && "w-64",
+                !['status', 'entry_code', 'person_name', 'amount', 'balance', 'due_date', 'created_at', 'settled_at', 'description'].includes(column.key) && "w-36"
+              )} />
+            ))}
+            <col className="w-24" />
+          </colgroup>
+          <TableHeader>
+            <TableRow className="border-b h-12">
+              <TableHead className="px-3 text-xs font-semibold text-center">
+                <Checkbox
+                  checked={selectedEntries.length === entries.length}
+                  onCheckedChange={handleSelectAll}
+                  aria-label="Selecionar todos"
+                />
+              </TableHead>
               
-              return (
-                <TableHead 
-                  key={column.key} 
-                  className={cn(
-                    "font-semibold px-3 text-xs",
-                    alignment
-                  )}
-                >
-                  {column.sortable ? (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={cn(
-                        "h-auto p-0 font-semibold hover:bg-transparent -ml-3 pl-3 text-xs w-full",
-                        alignment === 'text-right' ? 'justify-end' : 
-                        alignment === 'text-center' ? 'justify-center' : 'justify-start'
-                      )}
-                      onClick={() => handleSort(column.key as keyof FinancialEntry)}
-                    >
-                      <span className="mr-1">{column.label}</span>
-                      {getSortIcon(column.key)}
-                    </Button>
-                  ) : (
-                    <span className={alignment}>{column.label}</span>
-                  )}
-                </TableHead>
-              )
-            })}
-            
-            <TableHead className="w-24 text-center px-3 text-xs font-semibold">Ações</TableHead>
-          </TableRow>
-        </TableHeader>
+              {visibleColumns.map((column) => {
+                const alignment = getColumnAlignment(column.key)
+                
+                return (
+                  <TableHead 
+                    key={column.key} 
+                    className={cn(
+                      "font-semibold px-3 text-xs",
+                      alignment
+                    )}
+                  >
+                    {column.sortable ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={cn(
+                          "h-auto p-0 font-semibold hover:bg-transparent -ml-3 pl-3 text-xs w-full",
+                          alignment === 'text-right' ? 'justify-end' : 
+                          alignment === 'text-center' ? 'justify-center' : 'justify-start'
+                        )}
+                        onClick={() => handleSort(column.key as keyof FinancialEntry)}
+                      >
+                        <span className="mr-1">{column.label}</span>
+                        {getSortIcon(column.key)}
+                      </Button>
+                    ) : (
+                      <div className={cn("w-full", alignment)}>
+                        <span>{column.label}</span>
+                      </div>
+                    )}
+                  </TableHead>
+                )
+              })}
+              
+              <TableHead className="text-center px-3 text-xs font-semibold">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
         
         <TableBody>
           <StaggeredList delay={50}>
@@ -491,6 +509,7 @@ export function FinancialTable({
           </StaggeredList>
         </TableBody>
       </Table>
+      </div>
     </ResponsiveTable>
   )
 }

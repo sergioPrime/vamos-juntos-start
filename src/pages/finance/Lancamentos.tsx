@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/use-toast"
 import { useFinancialEntries } from "@/hooks/useFinancialEntries"
 import { useBankAccounts } from "@/hooks/useBankAccounts"
+import { FinancialListingTab } from "@/components/finance/FinancialListingTab"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -406,8 +407,9 @@ export default function Lancamentos() {
       </div>
 
       <Tabs defaultValue="dados" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="dados">Dados</TabsTrigger>
+          <TabsTrigger value="listagem">Listagem</TabsTrigger>
           <TabsTrigger value="pagamentos" disabled>Pagamentos</TabsTrigger>
           <TabsTrigger value="arquivos" disabled>Arquivos</TabsTrigger>
           <TabsTrigger value="historico" disabled>Histórico</TabsTrigger>
@@ -1219,6 +1221,10 @@ export default function Lancamentos() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="listagem" className="space-y-6">
+          <FinancialListingTab />
         </TabsContent>
       </Tabs>
     </div>

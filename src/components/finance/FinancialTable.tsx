@@ -206,28 +206,6 @@ export function FinancialTable({
     }
   }
 
-  const getColumnWidth = (columnKey: string): string => {
-    switch (columnKey) {
-      case 'status':
-        return 'w-32'
-      case 'entry_code':
-        return 'w-28'
-      case 'person_name':
-        return 'w-48'
-      case 'amount':
-      case 'balance':
-        return 'w-32'
-      case 'due_date':
-      case 'created_at':
-      case 'settled_at':
-        return 'w-28'
-      case 'description':
-        return 'w-64'
-      default:
-        return 'w-36'
-    }
-  }
-
   const getCellValue = (entry: FinancialEntry, columnKey: string) => {
     const alignment = getColumnAlignment(columnKey)
     
@@ -254,7 +232,7 @@ export function FinancialTable({
       case 'person_name':
         return (
           <div className="flex flex-col">
-            <span className="font-medium text-xs">{entry.person_name || '-'}</span>
+            <span className="font-medium text-xs">{entry.person_name || entry.company_name || '-'}</span>
             <span className="text-[10px] text-muted-foreground">
               {entry.person_type === 'customer' ? 'Cliente' : 'Fornecedor'}
             </span>
@@ -369,10 +347,10 @@ export function FinancialTable({
 
   return (
     <ResponsiveTable>
-      <Table className="table-fixed w-full">
+      <Table className="w-full">
         <TableHeader>
           <TableRow className="border-b h-12">
-            <TableHead className="w-12 px-4 text-xs font-semibold text-center">
+            <TableHead className="w-12 px-3 text-xs font-semibold text-center">
               <Checkbox
                 checked={selectedEntries.length === entries.length}
                 onCheckedChange={handleSelectAll}
@@ -382,14 +360,12 @@ export function FinancialTable({
             
             {visibleColumns.map((column) => {
               const alignment = getColumnAlignment(column.key)
-              const width = getColumnWidth(column.key)
               
               return (
                 <TableHead 
                   key={column.key} 
                   className={cn(
-                    "font-semibold px-4 text-xs",
-                    width,
+                    "font-semibold px-3 text-xs",
                     alignment
                   )}
                 >
@@ -398,7 +374,7 @@ export function FinancialTable({
                       variant="ghost"
                       size="sm"
                       className={cn(
-                        "h-auto p-0 font-semibold hover:bg-transparent -ml-4 pl-4 text-xs w-full",
+                        "h-auto p-0 font-semibold hover:bg-transparent -ml-3 pl-3 text-xs w-full",
                         alignment === 'text-right' ? 'justify-end' : 
                         alignment === 'text-center' ? 'justify-center' : 'justify-start'
                       )}
@@ -414,7 +390,7 @@ export function FinancialTable({
               )
             })}
             
-            <TableHead className="w-20 text-center px-4 text-xs font-semibold">Ações</TableHead>
+            <TableHead className="w-24 text-center px-3 text-xs font-semibold">Ações</TableHead>
           </TableRow>
         </TableHeader>
         
@@ -429,7 +405,7 @@ export function FinancialTable({
                   animationsEnabled && "hover:scale-[1.01] transition-transform duration-150"
                 )}
               >
-                <TableCell className="px-4 py-3 text-xs text-center">
+                <TableCell className="px-3 py-3 text-xs text-center">
                   <Checkbox
                     checked={selectedEntries.includes(entry.id)}
                     onCheckedChange={(checked) => handleSelectEntry(entry.id, checked as boolean)}
@@ -439,14 +415,12 @@ export function FinancialTable({
                 
                 {visibleColumns.map((column) => {
                   const alignment = getColumnAlignment(column.key)
-                  const width = getColumnWidth(column.key)
                   
                   return (
                     <TableCell 
                       key={`${entry.id}-${column.key}`} 
                       className={cn(
-                        "align-middle px-4 py-3 text-xs",
-                        width,
+                        "align-middle px-3 py-3 text-xs",
                         alignment
                       )}
                     >
@@ -455,7 +429,7 @@ export function FinancialTable({
                   )
                 })}
                 
-                <TableCell className="text-center px-4 py-3 text-xs">
+                <TableCell className="text-center px-3 py-3 text-xs">
                   <div className="flex items-center justify-center gap-1">
                     <TooltipProvider>
                       <Tooltip>

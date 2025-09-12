@@ -194,13 +194,49 @@ export function FinancialTable({
     }
   }
 
+  const getColumnAlignment = (columnKey: string): string => {
+    switch (columnKey) {
+      case 'amount':
+      case 'balance':
+        return 'text-right'
+      case 'status':
+        return 'text-center'
+      default:
+        return 'text-left'
+    }
+  }
+
+  const getColumnWidth = (columnKey: string): string => {
+    switch (columnKey) {
+      case 'status':
+        return 'w-32'
+      case 'entry_code':
+        return 'w-28'
+      case 'person_name':
+        return 'w-48'
+      case 'amount':
+      case 'balance':
+        return 'w-32'
+      case 'due_date':
+      case 'created_at':
+      case 'settled_at':
+        return 'w-28'
+      case 'description':
+        return 'w-64'
+      default:
+        return 'w-36'
+    }
+  }
+
   const getCellValue = (entry: FinancialEntry, columnKey: string) => {
+    const alignment = getColumnAlignment(columnKey)
+    
     switch (columnKey) {
       case 'status':
         const statusInfo = getStatusInfo(entry)
         const StatusIcon = statusInfo.icon
         return (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center justify-center gap-1.5">
             <StatusIcon className={`h-3.5 w-3.5 ${statusInfo.color}`} />
             <Badge variant={statusInfo.variant} className="text-[10px] px-1.5 py-0.5">
               {statusInfo.label}
@@ -247,23 +283,27 @@ export function FinancialTable({
       
       case 'amount':
         return (
-          <span className={cn(
-            "font-semibold",
-            entry.entry_type === 'receivable' ? "text-green-600" : "text-red-600"
-          )}>
-            {formatCurrency(entry.amount)}
-          </span>
+          <div className="text-right">
+            <span className={cn(
+              "font-semibold",
+              entry.entry_type === 'receivable' ? "text-green-600" : "text-red-600"
+            )}>
+              {formatCurrency(entry.amount)}
+            </span>
+          </div>
         )
       
       case 'balance':
         const balance = entry.is_settled ? 0 : entry.amount
         return (
-          <span className={cn(
-            "font-medium",
-            balance > 0 && "text-orange-600"
-          )}>
-            {formatCurrency(balance)}
-          </span>
+          <div className="text-right">
+            <span className={cn(
+              "font-medium",
+              balance > 0 && "text-orange-600"
+            )}>
+              {formatCurrency(balance)}
+            </span>
+          </div>
         )
       
       case 'chart_of_account':
@@ -332,7 +372,7 @@ export function FinancialTable({
       <Table className="table-fixed w-full">
         <TableHeader>
           <TableRow className="border-b h-12">
-            <TableHead className="w-12 px-4 text-xs font-semibold text-left">
+            <TableHead className="w-12 px-4 text-xs font-semibold text-center">
               <Checkbox
                 checked={selectedEntries.length === entries.length}
                 onCheckedChange={handleSelectAll}
@@ -340,25 +380,41 @@ export function FinancialTable({
               />
             </TableHead>
             
-            {visibleColumns.map((column) => (
-              <TableHead key={column.key} className="font-semibold text-left px-4 text-xs min-w-[120px]">
-                {column.sortable ? (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-auto p-0 font-semibold hover:bg-transparent text-left justify-start -ml-4 pl-4 text-xs"
-                    onClick={() => handleSort(column.key as keyof FinancialEntry)}
-                  >
-                    <span className="mr-1">{column.label}</span>
-                    {getSortIcon(column.key)}
-                  </Button>
-                ) : (
-                  <span className="text-left">{column.label}</span>
-                )}
-              </TableHead>
-            ))}
+            {visibleColumns.map((column) => {
+              const alignment = getColumnAlignment(column.key)
+              const width = getColumnWidth(column.key)
+              
+              return (
+                <TableHead 
+                  key={column.key} 
+                  className={cn(
+                    "font-semibold px-4 text-xs",
+                    width,
+                    alignment
+                  )}
+                >
+                  {column.sortable ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={cn(
+                        "h-auto p-0 font-semibold hover:bg-transparent -ml-4 pl-4 text-xs w-full",
+                        alignment === 'text-right' ? 'justify-end' : 
+                        alignment === 'text-center' ? 'justify-center' : 'justify-start'
+                      )}
+                      onClick={() => handleSort(column.key as keyof FinancialEntry)}
+                    >
+                      <span className="mr-1">{column.label}</span>
+                      {getSortIcon(column.key)}
+                    </Button>
+                  ) : (
+                    <span className={alignment}>{column.label}</span>
+                  )}
+                </TableHead>
+              )
+            })}
             
-            <TableHead className="w-20 text-center px-4 text-xs font-semibold min-w-[80px]">Ações</TableHead>
+            <TableHead className="w-20 text-center px-4 text-xs font-semibold">Ações</TableHead>
           </TableRow>
         </TableHeader>
         
@@ -373,7 +429,7 @@ export function FinancialTable({
                   animationsEnabled && "hover:scale-[1.01] transition-transform duration-150"
                 )}
               >
-                <TableCell className="px-4 py-3 text-xs text-left">
+                <TableCell className="px-4 py-3 text-xs text-center">
                   <Checkbox
                     checked={selectedEntries.includes(entry.id)}
                     onCheckedChange={(checked) => handleSelectEntry(entry.id, checked as boolean)}
@@ -381,11 +437,23 @@ export function FinancialTable({
                   />
                 </TableCell>
                 
-                {visibleColumns.map((column) => (
-                  <TableCell key={`${entry.id}-${column.key}`} className="align-middle text-left px-4 py-3 text-xs">
-                    {getCellValue(entry, column.key)}
-                  </TableCell>
-                ))}
+                {visibleColumns.map((column) => {
+                  const alignment = getColumnAlignment(column.key)
+                  const width = getColumnWidth(column.key)
+                  
+                  return (
+                    <TableCell 
+                      key={`${entry.id}-${column.key}`} 
+                      className={cn(
+                        "align-middle px-4 py-3 text-xs",
+                        width,
+                        alignment
+                      )}
+                    >
+                      {getCellValue(entry, column.key)}
+                    </TableCell>
+                  )
+                })}
                 
                 <TableCell className="text-center px-4 py-3 text-xs">
                   <div className="flex items-center justify-center gap-1">

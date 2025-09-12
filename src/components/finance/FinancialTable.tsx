@@ -332,7 +332,7 @@ export function FinancialTable({
       <Table>
         <TableHeader>
           <TableRow className="border-b">
-            <TableHead className="w-10">
+            <TableHead className="w-12">
               <Checkbox
                 checked={selectedEntries.length === entries.length}
                 onCheckedChange={handleSelectAll}
@@ -341,24 +341,24 @@ export function FinancialTable({
             </TableHead>
             
             {visibleColumns.map((column) => (
-              <TableHead key={column.key} className="font-semibold">
+              <TableHead key={column.key} className="font-semibold text-left">
                 {column.sortable ? (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-auto p-0 font-semibold hover:bg-transparent"
+                    className="h-auto p-0 font-semibold hover:bg-transparent text-left justify-start"
                     onClick={() => handleSort(column.key as keyof FinancialEntry)}
                   >
                     <span className="mr-1">{column.label}</span>
                     {getSortIcon(column.key)}
                   </Button>
                 ) : (
-                  column.label
+                  <span className="text-left">{column.label}</span>
                 )}
               </TableHead>
             ))}
             
-            <TableHead className="w-20 text-center">Ações</TableHead>
+            <TableHead className="w-24 text-center">Ações</TableHead>
           </TableRow>
         </TableHeader>
         
@@ -382,7 +382,7 @@ export function FinancialTable({
                 </TableCell>
                 
                 {visibleColumns.map((column) => (
-                  <TableCell key={`${entry.id}-${column.key}`} className="align-middle">
+                  <TableCell key={`${entry.id}-${column.key}`} className="align-middle text-left">
                     {getCellValue(entry, column.key)}
                   </TableCell>
                 ))}

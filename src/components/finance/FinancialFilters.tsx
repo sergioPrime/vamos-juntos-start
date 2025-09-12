@@ -77,7 +77,7 @@ export function FinancialFilters({
   ]
 
   const filteredPersons = allPersons.filter(person =>
-    person.name.toLowerCase().includes(personSearchValue.toLowerCase())
+    person.name?.toLowerCase().includes(personSearchValue.toLowerCase())
   )
 
   const getActiveFiltersCount = () => {
@@ -85,10 +85,10 @@ export function FinancialFilters({
     if (filters.startDate || filters.endDate) count++
     if (filters.status !== "all") count++
     if (filters.personId) count++
-    if (filters.chartOfAccountId) count++
-    if (filters.costCenterId) count++
-    if (filters.paymentMethodId) count++
-    if (filters.bankAccountId) count++
+    if (filters.chartOfAccountId !== "all") count++
+    if (filters.costCenterId !== "all") count++
+    if (filters.paymentMethodId !== "all") count++
+    if (filters.bankAccountId !== "all") count++
     if (filters.entryType !== "all") count++
     if (filters.minAmount || filters.maxAmount) count++
     return count
@@ -286,7 +286,7 @@ export function FinancialFilters({
                     <SelectValue placeholder="Todas as contas" />
                   </SelectTrigger>
                   <SelectContent className="bg-background border z-50">
-                    <SelectItem value="">Todas as contas</SelectItem>
+                    <SelectItem value="all">Todas as contas</SelectItem>
                     {chartOfAccounts.map((account) => (
                       <SelectItem key={account.id} value={account.id}>
                         {account.account_code} - {account.account_name}
@@ -304,7 +304,7 @@ export function FinancialFilters({
                     <SelectValue placeholder="Todos os centros" />
                   </SelectTrigger>
                   <SelectContent className="bg-background border z-50">
-                    <SelectItem value="">Todos os centros</SelectItem>
+                    <SelectItem value="all">Todos os centros</SelectItem>
                     {costCenters.map((center) => (
                       <SelectItem key={center.id} value={center.id}>
                         {center.code} - {center.name}
@@ -324,7 +324,7 @@ export function FinancialFilters({
                     <SelectValue placeholder="Todas as formas" />
                   </SelectTrigger>
                   <SelectContent className="bg-background border z-50">
-                    <SelectItem value="">Todas as formas</SelectItem>
+                    <SelectItem value="all">Todas as formas</SelectItem>
                     {paymentMethods.map((method) => (
                       <SelectItem key={method.id} value={method.id}>
                         {method.name}
@@ -342,7 +342,7 @@ export function FinancialFilters({
                     <SelectValue placeholder="Todas as contas" />
                   </SelectTrigger>
                   <SelectContent className="bg-background border z-50">
-                    <SelectItem value="">Todas as contas</SelectItem>
+                    <SelectItem value="all">Todas as contas</SelectItem>
                     {bankAccounts.map((account) => (
                       <SelectItem key={account.id} value={account.id}>
                         {account.bank_name} - {account.account_number}

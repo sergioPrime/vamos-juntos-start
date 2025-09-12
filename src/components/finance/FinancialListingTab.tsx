@@ -34,10 +34,10 @@ const DEFAULT_FILTERS: FilterValues = {
   dateType: "due",
   status: "all",
   personId: "",
-  chartOfAccountId: "",
-  costCenterId: "",
-  paymentMethodId: "",
-  bankAccountId: "",
+  chartOfAccountId: "all",
+  costCenterId: "all",
+  paymentMethodId: "all",
+  bankAccountId: "all",
   entryType: "all",
   minAmount: "",
   maxAmount: ""
@@ -197,16 +197,16 @@ export function FinancialListingTab() {
       if (filters.personId && entry.person_id !== filters.personId) return false
 
       // Filter by chart of account
-      if (filters.chartOfAccountId && entry.chart_of_account_id !== filters.chartOfAccountId) return false
+      if (filters.chartOfAccountId && filters.chartOfAccountId !== "all" && entry.chart_of_account_id !== filters.chartOfAccountId) return false
 
       // Filter by cost center
-      if (filters.costCenterId && entry.cost_center_id !== filters.costCenterId) return false
+      if (filters.costCenterId && filters.costCenterId !== "all" && entry.cost_center_id !== filters.costCenterId) return false
 
       // Filter by payment method
-      if (filters.paymentMethodId && entry.payment_method_id !== filters.paymentMethodId) return false
+      if (filters.paymentMethodId && filters.paymentMethodId !== "all" && entry.payment_method_id !== filters.paymentMethodId) return false
 
       // Filter by bank account
-      if (filters.bankAccountId && entry.bank_account_id !== filters.bankAccountId) return false
+      if (filters.bankAccountId && filters.bankAccountId !== "all" && entry.bank_account_id !== filters.bankAccountId) return false
 
       // Filter by entry type
       if (filters.entryType !== "all" && entry.entry_type !== filters.entryType) return false

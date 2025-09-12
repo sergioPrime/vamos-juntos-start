@@ -138,48 +138,134 @@ export type Database = {
       }
       bank_accounts: {
         Row: {
+          account_digit: string | null
           account_number: string
           account_type: string
           agency: string | null
+          agency_digit: string | null
           balance: number
+          bank_can_protest: boolean | null
+          bank_can_return: boolean | null
           bank_code: string | null
           bank_name: string
           company_id: string | null
           created_at: string
+          discount_until_due: number | null
+          emit_boletos_erp: boolean | null
+          emit_with_receipt: boolean | null
+          enable_pix_sales: boolean | null
+          fine_percentage: number | null
           id: string
+          initial_number: number | null
           is_active: boolean
+          monthly_interest: number | null
           org_id: string
+          payment_instruction_after_due: string | null
           updated_at: string
         }
         Insert: {
+          account_digit?: string | null
           account_number: string
           account_type?: string
           agency?: string | null
+          agency_digit?: string | null
           balance?: number
+          bank_can_protest?: boolean | null
+          bank_can_return?: boolean | null
           bank_code?: string | null
           bank_name: string
           company_id?: string | null
           created_at?: string
+          discount_until_due?: number | null
+          emit_boletos_erp?: boolean | null
+          emit_with_receipt?: boolean | null
+          enable_pix_sales?: boolean | null
+          fine_percentage?: number | null
           id?: string
+          initial_number?: number | null
           is_active?: boolean
+          monthly_interest?: number | null
           org_id: string
+          payment_instruction_after_due?: string | null
           updated_at?: string
         }
         Update: {
+          account_digit?: string | null
           account_number?: string
           account_type?: string
           agency?: string | null
+          agency_digit?: string | null
           balance?: number
+          bank_can_protest?: boolean | null
+          bank_can_return?: boolean | null
           bank_code?: string | null
           bank_name?: string
           company_id?: string | null
           created_at?: string
+          discount_until_due?: number | null
+          emit_boletos_erp?: boolean | null
+          emit_with_receipt?: boolean | null
+          enable_pix_sales?: boolean | null
+          fine_percentage?: number | null
           id?: string
+          initial_number?: number | null
           is_active?: boolean
+          monthly_interest?: number | null
           org_id?: string
+          payment_instruction_after_due?: string | null
           updated_at?: string
         }
         Relationships: []
+      }
+      bank_wallets: {
+        Row: {
+          add_fee_to_amount: boolean | null
+          agreement_number: string | null
+          bank_account_id: string
+          created_at: string
+          fee: number | null
+          id: string
+          is_default: boolean | null
+          name: string
+          org_id: string
+          updated_at: string
+          with_registration: boolean | null
+        }
+        Insert: {
+          add_fee_to_amount?: boolean | null
+          agreement_number?: string | null
+          bank_account_id: string
+          created_at?: string
+          fee?: number | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          org_id: string
+          updated_at?: string
+          with_registration?: boolean | null
+        }
+        Update: {
+          add_fee_to_amount?: boolean | null
+          agreement_number?: string | null
+          bank_account_id?: string
+          created_at?: string
+          fee?: number | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          org_id?: string
+          updated_at?: string
+          with_registration?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_wallets_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       budget_alerts: {
         Row: {

@@ -62,6 +62,7 @@ const cadastrosItems = [
   { title: "Plano de Contas", url: "/cadastros/plano-de-contas", icon: Calculator },
   { title: "Centros de Custo", url: "/cadastros/centros-de-custo", icon: Target },
   { title: "Formas de Pagamento", url: "/cadastros/formas-de-pagamento", icon: CreditCard },
+  { title: "Contas Bancárias", url: "/cadastros/contas-bancarias", icon: Wallet },
 ]
 
 

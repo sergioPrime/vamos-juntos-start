@@ -57,6 +57,7 @@ import { Pessoas } from "./pages/Pessoas";
 import PlanoDeContas from "./pages/settings/PlanoDeContas";
 import CentrosDeCusto from "./pages/settings/CentrosDeCusto";
 import PaymentMethods from "./pages/cadastros/PaymentMethods";
+import BankAccounts from "./pages/cadastros/BankAccounts";
 
 const queryClient = new QueryClient();
 
@@ -373,6 +374,15 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <PaymentMethods />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/contas-bancarias" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <BankAccounts />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

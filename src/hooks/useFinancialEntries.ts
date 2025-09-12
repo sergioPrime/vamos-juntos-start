@@ -89,7 +89,7 @@ export function useFinancialEntries() {
         .select(`
           *,
           companies(name),
-          chart_of_accounts(account_code, account_name),
+          chart_of_accounts!fk_financial_entries_chart_account(account_code, account_name),
           cost_centers(code, name),
           payment_methods(name),
           bank_accounts(bank_name, account_number, bank_code, agency, agency_digit, account_digit)

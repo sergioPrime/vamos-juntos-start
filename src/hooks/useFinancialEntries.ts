@@ -106,14 +106,14 @@ export function useFinancialEntries() {
             .from('customers')
             .select('name')
             .eq('id', entry.person_id)
-            .single();
+            .maybeSingle();
           return { ...entry, customers: customer };
         } else if (entry.person_type === 'supplier') {
           const { data: supplier } = await supabase
             .from('suppliers')
             .select('name')
             .eq('id', entry.person_id)
-            .single();
+            .maybeSingle();
           return { ...entry, suppliers: supplier };
         }
         return entry;

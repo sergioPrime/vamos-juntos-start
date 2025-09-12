@@ -10,6 +10,7 @@ import { useOrganization } from "@/hooks/useOrganization"
 import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/use-toast"
 import { useFinancialEntries } from "@/hooks/useFinancialEntries"
+import { useBankAccounts } from "@/hooks/useBankAccounts"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -77,6 +78,7 @@ export default function Lancamentos() {
   const { user } = useAuth()
   const { toast } = useToast()
   const { entries, loading: entriesLoading, loadEntries, createEntry } = useFinancialEntries()
+  const { getFormattedAccountName } = useBankAccounts()
   const [companies, setCompanies] = useState<any[]>([])
   const [customers, setCustomers] = useState<any[]>([])
   const [suppliers, setSuppliers] = useState<any[]>([])
@@ -178,7 +180,13 @@ export default function Lancamentos() {
         
         supabase
           .from("bank_accounts")
-          .select("*")
+          .select(`
+            *,
+            companies (
+              id,
+              name
+            )
+          `)
           .eq("org_id", organization.currentOrg.id)
           .eq("is_active", true)
       ])
@@ -347,6 +355,7 @@ export default function Lancamentos() {
     const numericValue = parseCurrencyValue(formatted)
     form.setValue("amount", numericValue.toString())
   }
+
 
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), 'dd/MM/yyyy')
@@ -981,7 +990,7 @@ export default function Lancamentos() {
                                 <SelectContent>
                                   {bankAccounts.map((account) => (
                                     <SelectItem key={account.id} value={account.id}>
-                                      {account.bank_name} - {account.account_number}
+                                      {getFormattedAccountName(account)}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>

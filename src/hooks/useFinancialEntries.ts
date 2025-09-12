@@ -32,7 +32,7 @@ export interface FinancialEntry {
   chart_of_accounts?: { account_code: string; account_name: string }
   cost_centers?: { code: string; name: string }
   payment_methods?: { name: string }
-  bank_accounts?: { bank_name: string }
+  bank_accounts?: { bank_name: string; account_number: string; bank_code?: string; agency?: string; agency_digit?: string; account_digit?: string }
 }
 
 export interface CreateFinancialEntryData {
@@ -94,7 +94,7 @@ export function useFinancialEntries() {
           chart_of_accounts(account_code, account_name),
           cost_centers(code, name),
           payment_methods(name),
-          bank_accounts(bank_name, account_number)
+          bank_accounts(bank_name, account_number, bank_code, agency, agency_digit, account_digit)
         `)
         .eq("org_id", organization.currentOrg.id)
         .order("created_at", { ascending: false })

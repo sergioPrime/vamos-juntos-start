@@ -708,28 +708,28 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_financial_entries_chart_account"
+            foreignKeyName: "fk_financial_entries_chart_of_account"
             columns: ["chart_of_account_id"]
             isOneToOne: false
             referencedRelation: "analytical_accounts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_financial_entries_chart_account"
+            foreignKeyName: "fk_financial_entries_chart_of_account"
             columns: ["chart_of_account_id"]
             isOneToOne: false
             referencedRelation: "chart_of_accounts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_financial_entries_chart_of_account"
+            foreignKeyName: "fk_financial_entries_chart_of_account_id"
             columns: ["chart_of_account_id"]
             isOneToOne: false
             referencedRelation: "analytical_accounts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_financial_entries_chart_of_account"
+            foreignKeyName: "fk_financial_entries_chart_of_account_id"
             columns: ["chart_of_account_id"]
             isOneToOne: false
             referencedRelation: "chart_of_accounts"
@@ -2365,28 +2365,28 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_financial_entries_chart_account"
+            foreignKeyName: "fk_financial_entries_chart_of_account"
             columns: ["chart_of_account_id"]
             isOneToOne: false
             referencedRelation: "analytical_accounts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_financial_entries_chart_account"
+            foreignKeyName: "fk_financial_entries_chart_of_account"
             columns: ["chart_of_account_id"]
             isOneToOne: false
             referencedRelation: "chart_of_accounts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_financial_entries_chart_of_account"
+            foreignKeyName: "fk_financial_entries_chart_of_account_id"
             columns: ["chart_of_account_id"]
             isOneToOne: false
             referencedRelation: "analytical_accounts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_financial_entries_chart_of_account"
+            foreignKeyName: "fk_financial_entries_chart_of_account_id"
             columns: ["chart_of_account_id"]
             isOneToOne: false
             referencedRelation: "chart_of_accounts"

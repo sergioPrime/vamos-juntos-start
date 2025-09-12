@@ -200,9 +200,9 @@ export function FinancialTable({
         const statusInfo = getStatusInfo(entry)
         const StatusIcon = statusInfo.icon
         return (
-          <div className="flex items-center gap-2">
-            <StatusIcon className={`h-4 w-4 ${statusInfo.color}`} />
-            <Badge variant={statusInfo.variant} className="text-xs">
+          <div className="flex items-center gap-1.5">
+            <StatusIcon className={`h-3.5 w-3.5 ${statusInfo.color}`} />
+            <Badge variant={statusInfo.variant} className="text-[10px] px-1.5 py-0.5">
               {statusInfo.label}
             </Badge>
           </div>
@@ -210,7 +210,7 @@ export function FinancialTable({
       
       case 'entry_code':
         return (
-          <div className="font-mono text-sm">
+          <div className="font-mono text-xs">
             #{entry.id.slice(-8).toUpperCase()}
           </div>
         )
@@ -218,8 +218,8 @@ export function FinancialTable({
       case 'person_name':
         return (
           <div className="flex flex-col">
-            <span className="font-medium">{entry.person_name || '-'}</span>
-            <span className="text-xs text-muted-foreground">
+            <span className="font-medium text-xs">{entry.person_name || '-'}</span>
+            <span className="text-[10px] text-muted-foreground">
               {entry.person_type === 'customer' ? 'Cliente' : 'Fornecedor'}
             </span>
           </div>
@@ -329,10 +329,10 @@ export function FinancialTable({
 
   return (
     <ResponsiveTable>
-      <Table className="table-fixed">
+      <Table className="table-fixed w-full">
         <TableHeader>
-          <TableRow className="border-b">
-            <TableHead className="w-12 px-4">
+          <TableRow className="border-b h-12">
+            <TableHead className="w-12 px-3 text-xs font-semibold">
               <Checkbox
                 checked={selectedEntries.length === entries.length}
                 onCheckedChange={handleSelectAll}
@@ -341,12 +341,12 @@ export function FinancialTable({
             </TableHead>
             
             {visibleColumns.map((column) => (
-              <TableHead key={column.key} className="font-semibold text-left px-4">
+              <TableHead key={column.key} className="font-semibold text-left px-3 text-xs min-w-[100px]">
                 {column.sortable ? (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-auto p-0 font-semibold hover:bg-transparent text-left justify-start -ml-4 pl-4"
+                    className="h-auto p-0 font-semibold hover:bg-transparent text-left justify-start -ml-3 pl-3 text-xs"
                     onClick={() => handleSort(column.key as keyof FinancialEntry)}
                   >
                     <span className="mr-1">{column.label}</span>
@@ -358,7 +358,7 @@ export function FinancialTable({
               </TableHead>
             ))}
             
-            <TableHead className="w-24 text-center px-4">Ações</TableHead>
+            <TableHead className="w-20 text-center px-3 text-xs font-semibold min-w-[80px]">Ações</TableHead>
           </TableRow>
         </TableHeader>
         
@@ -368,12 +368,12 @@ export function FinancialTable({
               <TableRow
                 key={entry.id}
                 className={cn(
-                  "border-b transition-colors hover:bg-muted/50",
+                  "border-b transition-colors hover:bg-muted/50 h-10",
                   selectedEntries.includes(entry.id) && "bg-muted/30",
                   animationsEnabled && "hover:scale-[1.01] transition-transform duration-150"
                 )}
               >
-                <TableCell className="px-4">
+                <TableCell className="px-3 py-3 text-xs">
                   <Checkbox
                     checked={selectedEntries.includes(entry.id)}
                     onCheckedChange={(checked) => handleSelectEntry(entry.id, checked as boolean)}
@@ -382,12 +382,12 @@ export function FinancialTable({
                 </TableCell>
                 
                 {visibleColumns.map((column) => (
-                  <TableCell key={`${entry.id}-${column.key}`} className="align-middle text-left px-4">
+                  <TableCell key={`${entry.id}-${column.key}`} className="align-middle text-left px-3 py-3 text-xs">
                     {getCellValue(entry, column.key)}
                   </TableCell>
                 ))}
                 
-                <TableCell className="text-center px-4">
+                <TableCell className="text-center px-3 py-3 text-xs">
                   <div className="flex items-center justify-center gap-1">
                     <TooltipProvider>
                       <Tooltip>
@@ -396,9 +396,9 @@ export function FinancialTable({
                             variant="ghost"
                             size="sm"
                             onClick={() => onEdit(entry)}
-                            className="h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600"
+                            className="h-7 w-7 p-0 hover:bg-blue-100 hover:text-blue-600"
                           >
-                            <Edit className="h-3.5 w-3.5" />
+                            <Edit className="h-3 w-3" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>Editar lançamento</TooltipContent>
@@ -413,9 +413,9 @@ export function FinancialTable({
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
+                                className="h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600"
                               >
-                                <Trash2 className="h-3.5 w-3.5" />
+                                <Trash2 className="h-3 w-3" />
                               </Button>
                             </AlertDialogTrigger>
                           </TooltipTrigger>

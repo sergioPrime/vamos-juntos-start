@@ -1,0 +1,44 @@
+-- Add entry_code column to financial_entries table
+ALTER TABLE public.financial_entries 
+ADD COLUMN entry_code INTEGER DEFAULT 1;
+
+-- Create function to generate next entry code
+CREATE OR REPLACE FUNCTION public.generate_next_entry_code(p_org_id uuid)
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  next_code INTEGER;
+BEGIN
+  -- Find the highest entry code for the organization
+  SELECT COALESCE(MAX(entry_code), 0) + 1
+  INTO next_code
+  FROM public.financial_entries
+  WHERE org_id = p_org_id;
+  
+  RETURN next_code;
+END;
+$$;
+
+-- Create trigger function to auto-assign entry code on insert
+CREATE OR REPLACE FUNCTION public.set_entry_code()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  IF NEW.entry_code IS NULL OR NEW.entry_code = 1 THEN
+    NEW.entry_code := public.generate_next_entry_code(NEW.org_id);
+  END IF;
+  
+  RETURN NEW;
+END;
+$$;
+
+-- Create the trigger
+DROP TRIGGER IF EXISTS set_entry_code_trigger ON public.financial_entries;
+CREATE TRIGGER set_entry_code_trigger
+  BEFORE INSERT ON public.financial_entries
+  FOR EACH ROW
+  EXECUTE FUNCTION public.set_entry_code();

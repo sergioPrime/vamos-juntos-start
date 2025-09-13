@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast"
 
 export interface FinancialEntry {
   id: string
+  entry_code?: number
   org_id: string
   company_id?: string
   entry_type: "receivable" | "payable"

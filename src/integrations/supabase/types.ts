@@ -645,6 +645,7 @@ export type Database = {
           created_by: string
           description: string | null
           due_date: string
+          entry_code: number | null
           entry_type: string
           id: string
           is_settled: boolean
@@ -669,6 +670,7 @@ export type Database = {
           created_by: string
           description?: string | null
           due_date: string
+          entry_code?: number | null
           entry_type: string
           id?: string
           is_settled?: boolean
@@ -693,6 +695,7 @@ export type Database = {
           created_by?: string
           description?: string | null
           due_date?: string
+          entry_code?: number | null
           entry_type?: string
           id?: string
           is_settled?: boolean
@@ -2509,6 +2512,10 @@ export type Database = {
           projected_outflow: number
           projection_date: string
         }[]
+      }
+      generate_next_entry_code: {
+        Args: { p_org_id: string }
+        Returns: number
       }
       generate_next_payment_method_code: {
         Args: { p_org_id: string }

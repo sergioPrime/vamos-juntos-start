@@ -59,6 +59,7 @@ const formSchema = z.object({
 
 interface FinancialEntry {
   id: string
+  entry_code?: number
   entry_type: "receivable" | "payable"
   person_type: "customer" | "supplier"
   amount: number
@@ -510,7 +511,20 @@ export default function Lancamentos() {
                   {/* Company and Entry Type Section */}
                   <div className="border-b pb-6">
                     <h3 className="text-lg font-semibold mb-4">Dados da Empresa</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {/* Campo Código - não editável */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Código</label>
+                        <Input
+                          value={editingEntry?.entry_code || "Automático"}
+                          disabled
+                          className="bg-muted"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Gerado automaticamente
+                        </p>
+                      </div>
+
                       <FormField
                         control={form.control}
                         name="entry_type"

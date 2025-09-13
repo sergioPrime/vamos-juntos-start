@@ -257,22 +257,29 @@ export function FinancialListingTab() {
   }
 
   const handleEdit = (entry: any) => {
-    // TODO: Open edit modal/form
-    toast({
-      title: "Editar Lançamento",
-      description: `Editando lançamento ${entry.id}`,
-    })
+    // Set the active tab to "dados" to edit the entry
+    const event = new CustomEvent('switch-to-dados-tab', { 
+      detail: { entry } 
+    });
+    window.dispatchEvent(event);
   }
 
   const handleDelete = async (entryId: string) => {
     try {
-      // TODO: Implement delete logic
+      const { error } = await supabase
+        .from('financial_entries')
+        .delete()
+        .eq('id', entryId);
+
+      if (error) throw error;
+
       toast({
         title: "Lançamento Excluído",
         description: "O lançamento foi excluído com sucesso",
       })
       loadEntries()
     } catch (error) {
+      console.error('Error deleting entry:', error);
       toast({
         title: "Erro",
         description: "Erro ao excluir lançamento",

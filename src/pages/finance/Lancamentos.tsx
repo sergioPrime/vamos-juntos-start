@@ -103,6 +103,8 @@ export default function Lancamentos() {
   const [costCenterSearchOpen, setCostCenterSearchOpen] = useState(false)
   const [costCenterSearchValue, setCostCenterSearchValue] = useState("")
   const [amountDisplayValue, setAmountDisplayValue] = useState("")
+  const [activeTab, setActiveTab] = useState("dados")
+  const [editingEntry, setEditingEntry] = useState<any>(null)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -120,6 +122,39 @@ export default function Lancamentos() {
       loadData()
     }
   }, [organization])
+
+  // Listen for edit entry events from listing tab
+  useEffect(() => {
+    const handleSwitchToEditTab = (event: any) => {
+      const entry = event.detail.entry;
+      setEditingEntry(entry);
+      
+      // Pre-fill form with entry data
+      form.reset({
+        company_id: entry.company_id || '',
+        person_id: entry.person_id || '',
+        entry_type: entry.entry_type || 'receivable',
+        chart_of_account_id: entry.chart_of_account_id || '',
+        cost_center_id: entry.cost_center_id || '',
+        amount: entry.amount?.toString() || '',
+        payment_method_id: entry.payment_method_id || '',
+        bank_account_id: entry.bank_account_id || '',
+        competence_date: new Date(entry.competence_date),
+        due_date: new Date(entry.due_date),
+        is_settled: entry.is_settled || false,
+        settled_at: entry.settled_at ? new Date(entry.settled_at) : undefined,
+        settled_payment_method_id: entry.settled_payment_method_id || '',
+        description: entry.description || '',
+        installment_type: "none",
+      });
+      
+      setAmountDisplayValue(entry.amount ? formatCurrencyInput((entry.amount * 100).toString()) : '');
+      setActiveTab("dados");
+    };
+
+    window.addEventListener('switch-to-dados-tab', handleSwitchToEditTab);
+    return () => window.removeEventListener('switch-to-dados-tab', handleSwitchToEditTab);
+  }, [form])
 
   const loadData = async () => {
     if (!organization?.currentOrg?.id) return
@@ -254,24 +289,45 @@ export default function Lancamentos() {
         bank_account_id: values.bank_account_id,
         description: values.description,
         person_type: values.entry_type === "receivable" ? "customer" : "supplier",
+        is_settled: values.is_settled,
+        settled_at: values.settled_at ? values.settled_at.toISOString().split('T')[0] : null,
+        settled_payment_method_id: values.settled_payment_method_id,
       }
 
-      await createEntry(entryData)
+      if (editingEntry) {
+        // Update existing entry
+        const { error } = await supabase
+          .from('financial_entries')
+          .update(entryData)
+          .eq('id', editingEntry.id);
 
-      toast({
-        title: "Sucesso",
-        description: "Lançamento criado com sucesso",
-      })
+        if (error) throw error;
+
+        toast({
+          title: "Sucesso",
+          description: "Lançamento atualizado com sucesso",
+        })
+      } else {
+        // Create new entry
+        await createEntry(entryData)
+
+        toast({
+          title: "Sucesso",
+          description: "Lançamento criado com sucesso",
+        })
+      }
 
       form.reset()
       setAmountDisplayValue("")
+      setEditingEntry(null)
       loadData()
       loadEntries()
+      setActiveTab("listagem")
     } catch (error) {
-      console.error("Error creating entry:", error)
+      console.error("Error saving entry:", error)
       toast({
         title: "Erro",
-        description: "Erro ao criar lançamento",
+        description: editingEntry ? "Erro ao atualizar lançamento" : "Erro ao criar lançamento",
         variant: "destructive",
       })
     }
@@ -399,6 +455,19 @@ export default function Lancamentos() {
           }}>
             Debug
           </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              setEditingEntry(null);
+              form.reset();
+              setAmountDisplayValue("");
+              setActiveTab("dados");
+            }}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Novo
+          </Button>
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Exportar
@@ -406,7 +475,7 @@ export default function Lancamentos() {
         </div>
       </div>
 
-      <Tabs defaultValue="dados" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="dados">Dados</TabsTrigger>
           <TabsTrigger value="listagem">Listagem</TabsTrigger>
@@ -419,9 +488,14 @@ export default function Lancamentos() {
           {/* Full Width Form Section */}
           <Card className="w-full">
             <CardHeader>
-              <CardTitle>Novo Lançamento</CardTitle>
+              <CardTitle>
+                {editingEntry ? "Editar Lançamento" : "Novo Lançamento"}
+              </CardTitle>
               <CardDescription>
-                Preencha os dados para criar um novo lançamento financeiro
+                {editingEntry 
+                  ? "Edite os dados do lançamento financeiro"
+                  : "Preencha os dados para criar um novo lançamento financeiro"
+                }
               </CardDescription>
               {loading && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">

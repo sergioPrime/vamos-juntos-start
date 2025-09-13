@@ -348,7 +348,7 @@ export function FinancialTable({
   return (
     <ResponsiveTable>
       <div className="overflow-x-auto">
-        <Table className="w-full table-fixed">
+        <Table className="w-full table-fixed text-xs">
           <colgroup>
             <col className="w-12" />
             {visibleColumns.map((column) => (

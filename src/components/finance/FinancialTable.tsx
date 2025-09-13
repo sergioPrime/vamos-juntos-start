@@ -232,7 +232,7 @@ export function FinancialTable({
       case 'person_name':
         return (
           <div className="flex flex-col">
-            <span className="font-medium text-xs">{entry.person_name || entry.company_name || '-'}</span>
+            <span className="font-medium text-xs">{entry.person_name || '-'}</span>
             <span className="text-[10px] text-muted-foreground">
               {entry.person_type === 'customer' ? 'Cliente' : 'Fornecedor'}
             </span>
@@ -346,24 +346,25 @@ export function FinancialTable({
   }
 
   return (
-    <ResponsiveTable>
-      <div className="overflow-x-auto">
-        <Table className="w-full table-fixed text-xs">
-          <colgroup>
-            <col className="w-12" />
-            {visibleColumns.map((column) => (
-              <col key={column.key} className={cn(
-                column.key === 'status' && "w-32",
-                column.key === 'entry_code' && "w-28",
-                column.key === 'person_name' && "w-48",
-                (column.key === 'amount' || column.key === 'balance') && "w-36",
-                (column.key === 'due_date' || column.key === 'created_at' || column.key === 'settled_at') && "w-32",
-                column.key === 'description' && "w-64",
-                !['status', 'entry_code', 'person_name', 'amount', 'balance', 'due_date', 'created_at', 'settled_at', 'description'].includes(column.key) && "w-36"
-              )} />
-            ))}
-            <col className="w-24" />
-          </colgroup>
+    <div className="relative">
+      <ResponsiveTable>
+        <div className="overflow-x-auto">
+          <Table className="w-full table-fixed text-xs">
+            <colgroup>
+              <col className="w-12" />
+              {visibleColumns.map((column) => (
+                <col key={column.key} className={cn(
+                  column.key === 'status' && "w-32",
+                  column.key === 'entry_code' && "w-28", 
+                  column.key === 'person_name' && "w-48",
+                  (column.key === 'amount' || column.key === 'balance') && "w-36",
+                  (column.key === 'due_date' || column.key === 'created_at' || column.key === 'settled_at') && "w-32",
+                  column.key === 'description' && "w-64",
+                  !['status', 'entry_code', 'person_name', 'amount', 'balance', 'due_date', 'created_at', 'settled_at', 'description'].includes(column.key) && "w-36"
+                )} />
+              ))}
+              <col className="w-24" />
+            </colgroup>
           <TableHeader>
             <TableRow className="border-b h-12">
               <TableHead className="px-3 text-xs font-semibold text-center">
@@ -408,7 +409,7 @@ export function FinancialTable({
                 )
               })}
               
-              <TableHead className="text-center px-3 text-xs font-semibold">Ações</TableHead>
+              <TableHead className="text-center px-3 text-xs font-semibold sticky right-0 bg-background z-10">Ações</TableHead>
             </TableRow>
           </TableHeader>
         
@@ -447,7 +448,7 @@ export function FinancialTable({
                   )
                 })}
                 
-                <TableCell className="text-center px-3 py-3 text-xs">
+                <TableCell className="text-center px-3 py-3 text-xs sticky right-0 bg-background z-10">
                   <div className="flex items-center justify-center gap-1">
                     <TooltipProvider>
                       <Tooltip>
@@ -509,7 +510,8 @@ export function FinancialTable({
           </StaggeredList>
         </TableBody>
       </Table>
-      </div>
-    </ResponsiveTable>
+    </div>
+  </ResponsiveTable>
+    </div>
   )
 }

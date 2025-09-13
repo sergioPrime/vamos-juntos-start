@@ -164,6 +164,7 @@ export default function Lancamentos() {
       setLoading(true)
       
       console.log("Loading data for organization:", organization?.currentOrg?.id)
+      console.log("About to execute queries for pessoas table...")
       
         const [
         companiesResponse,

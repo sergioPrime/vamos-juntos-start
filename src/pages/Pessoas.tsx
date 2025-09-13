@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { X, Plus } from "lucide-react"
 import { toast } from "sonner"
+import { PessoasListagem } from "@/components/pessoas/PessoasListagem"
 
 interface PessoaFormData {
   nomeFantasia: string
@@ -42,7 +43,7 @@ const rotulosDisponiveis = [
 
 export function Pessoas() {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState("dados")
+  const [activeTab, setActiveTab] = useState("listagem")
   const [formData, setFormData] = useState<PessoaFormData>({
     nomeFantasia: "",
     tipoPessoa: "",
@@ -196,9 +197,14 @@ export function Pessoas() {
       <div className="flex-1 overflow-auto">
         <div className="p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-1">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="listagem">Listagem</TabsTrigger>
               <TabsTrigger value="dados">Dados</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="listagem" className="mt-6">
+              <PessoasListagem />
+            </TabsContent>
 
             <TabsContent value="dados" className="mt-6">
               <Card>

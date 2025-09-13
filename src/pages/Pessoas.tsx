@@ -12,6 +12,9 @@ import { Badge } from "@/components/ui/badge"
 import { X, Plus } from "lucide-react"
 import { toast } from "sonner"
 import { PessoasListagem } from "@/components/pessoas/PessoasListagem"
+import { usePessoas, type Pessoa } from "@/hooks/usePessoas"
+// import { useOrganization } from "@/hooks/useOrganization"
+import { useAuth } from "@/hooks/useAuth"
 
 interface PessoaFormData {
   nomeFantasia: string
@@ -44,6 +47,11 @@ const rotulosDisponiveis = [
 export function Pessoas() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("listagem")
+  const [editingPessoa, setEditingPessoa] = useState<Pessoa | null>(null)
+  const { createPessoa, updatePessoa } = usePessoas()
+  // const { currentOrganization } = useOrganization()
+  const currentOrganization = { id: 'mock-org-id' }
+  const { user } = useAuth()
   const [formData, setFormData] = useState<PessoaFormData>({
     nomeFantasia: "",
     tipoPessoa: "",
@@ -138,17 +146,74 @@ export function Pessoas() {
     return errors
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const errors = validateForm()
     
     if (errors.length > 0) {
       errors.forEach(error => toast.error(error))
       return
     }
+
+    if (!user || !currentOrganization) {
+      toast.error("Usuário não autenticado")
+      return
+    }
     
-    // Aqui seria implementada a lógica de salvamento
-    toast.success("Pessoa cadastrada com sucesso!")
-    console.log("Dados salvos:", formData)
+    try {
+      const pessoaData = {
+        nome_fantasia: formData.nomeFantasia,
+        razao_social: formData.razaoSocial || undefined,
+        tipo_pessoa: formData.tipoPessoa as 'fisica' | 'juridica',
+        documento: formData.documento,
+        codigo: undefined,
+        endereco: undefined,
+        cidade: undefined,
+        uf: undefined,
+        cep: undefined,
+        email_geral: formData.emailGeral || undefined,
+        emails_secundarios: formData.emailsSecundarios.length > 0 ? formData.emailsSecundarios : undefined,
+        telefone: formData.telefone || undefined,
+        telefone_celular: formData.telefonecelular || undefined,
+        whatsapps: formData.whatsapps.length > 0 ? formData.whatsapps : undefined,
+        bloquear_notificacoes_whatsapp: formData.bloquearNotificacoesWhatsapp,
+        vendedor_padrao: formData.vendedorPadrao || undefined,
+        transportadora_padrao: formData.transportadoraPadrao || undefined,
+        rotulos: formData.rotulos.length > 0 ? formData.rotulos : undefined,
+        ativo: true,
+        org_id: currentOrganization.id,
+        created_by: user.id
+      }
+
+      if (editingPessoa && editingPessoa.id) {
+        await updatePessoa(editingPessoa.id, pessoaData)
+        toast.success("Pessoa atualizada com sucesso!")
+      } else {
+        await createPessoa(pessoaData)
+        toast.success("Pessoa cadastrada com sucesso!")
+      }
+
+      // Reset form and go back to listing
+      setFormData({
+        nomeFantasia: "",
+        tipoPessoa: "",
+        documento: "",
+        razaoSocial: "",
+        emailGeral: "",
+        emailsSecundarios: [],
+        telefone: "",
+        telefonecelular: "",
+        whatsapps: [],
+        bloquearNotificacoesWhatsapp: false,
+        vendedorPadrao: "",
+        transportadoraPadrao: "",
+        rotulos: []
+      })
+      setEditingPessoa(null)
+      setActiveTab("listagem")
+    } catch (error) {
+      toast.error("Erro ao salvar pessoa")
+      console.error(error)
+    }
   }
 
   const handleBack = () => {
@@ -167,6 +232,47 @@ export function Pessoas() {
     return "Documento"
   }
 
+  const handleEditPessoa = (pessoa: Pessoa) => {
+    if (pessoa.id) {
+      // Editing existing pessoa
+      setEditingPessoa(pessoa)
+      setFormData({
+        nomeFantasia: pessoa.nome_fantasia,
+        tipoPessoa: pessoa.tipo_pessoa,
+        documento: pessoa.documento,
+        razaoSocial: pessoa.razao_social || "",
+        emailGeral: pessoa.email_geral || "",
+        emailsSecundarios: pessoa.emails_secundarios || [],
+        telefone: pessoa.telefone || "",
+        telefonecelular: pessoa.telefone_celular || "",
+        whatsapps: pessoa.whatsapps || [],
+        bloquearNotificacoesWhatsapp: pessoa.bloquear_notificacoes_whatsapp || false,
+        vendedorPadrao: pessoa.vendedor_padrao || "",
+        transportadoraPadrao: pessoa.transportadora_padrao || "",
+        rotulos: pessoa.rotulos || []
+      })
+    } else {
+      // Creating new pessoa
+      setEditingPessoa(null)
+      setFormData({
+        nomeFantasia: "",
+        tipoPessoa: "",
+        documento: "",
+        razaoSocial: "",
+        emailGeral: "",
+        emailsSecundarios: [],
+        telefone: "",
+        telefonecelular: "",
+        whatsapps: [],
+        bloquearNotificacoesWhatsapp: false,
+        vendedorPadrao: "",
+        transportadoraPadrao: "",
+        rotulos: []
+      })
+    }
+    setActiveTab("dados")
+  }
+
   return (
     <div className="flex-1 flex flex-col h-screen bg-background">
       {/* Header fixo */}
@@ -177,7 +283,7 @@ export function Pessoas() {
               <span className="text-sm font-medium text-primary">P</span>
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-foreground">Pessoas - {formData.nomeFantasia || "NOVA PESSOA"}</h1>
+              <h1 className="text-xl font-semibold text-foreground">Pessoas - {formData.nomeFantasia || (editingPessoa ? "EDITAR PESSOA" : "NOVA PESSOA")}</h1>
               <p className="text-sm text-muted-foreground">Cadastro</p>
             </div>
           </div>
@@ -203,7 +309,7 @@ export function Pessoas() {
             </TabsList>
 
             <TabsContent value="listagem" className="mt-6">
-              <PessoasListagem />
+              <PessoasListagem onEditPessoa={handleEditPessoa} />
             </TabsContent>
 
             <TabsContent value="dados" className="mt-6">

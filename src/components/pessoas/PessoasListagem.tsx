@@ -10,84 +10,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar, Search, Filter, Plus, Edit, Trash2, Settings2, X } from "lucide-react"
 import { toast } from "sonner"
-
-interface Pessoa {
-  id: string
-  nomeFantasia: string
-  razaoSocial: string
-  documento: string
-  codigo: string
-  endereco: string
-  dataCadastro: string
-  rotulos: string[]
-  ativo: boolean
-}
-
-const mockPessoas: Pessoa[] = [
-  {
-    id: "1",
-    nomeFantasia: "PRIMEGESTOR - SISTEMAS & GESTÃO",
-    razaoSocial: "M. S. MENDES",
-    documento: "055667950001113",
-    codigo: "RUA DAS HELICÔNIAS, 33, SETOR COMERCIAL, 78550120, Sinop, MT",
-    endereco: "RUA DAS HELICÔNIAS, 33, SETOR COMERCIAL, 78550120, Sinop, MT",
-    dataCadastro: "30/05/2025",
-    rotulos: ["Cliente", "Fornecedor"],
-    ativo: true
-  },
-  {
-    id: "2",
-    nomeFantasia: "CEZAR",
-    razaoSocial: "CEZAR",
-    documento: "",
-    codigo: "",
-    endereco: "",
-    dataCadastro: "25/05/2025",
-    rotulos: ["Cliente"],
-    ativo: true
-  },
-  {
-    id: "3",
-    nomeFantasia: "LUIZ",
-    razaoSocial: "LUIZ",
-    documento: "",
-    codigo: "",
-    endereco: "",
-    dataCadastro: "26/05/2025",
-    rotulos: ["Técnico"],
-    ativo: true
-  },
-  {
-    id: "4",
-    nomeFantasia: "vinicius lemes",
-    razaoSocial: "",
-    documento: "07131404101",
-    codigo: "Avenida dos Ipês, 2711, Jardim Imperial, 78550140, Sinop, MT",
-    endereco: "Avenida dos Ipês, 2711, Jardim Imperial, 78550140, Sinop, MT",
-    dataCadastro: "05/02/2025",
-    rotulos: ["Colaborador"],
-    ativo: true
-  },
-  {
-    id: "5",
-    nomeFantasia: "SUPERMERCADO IDEAL",
-    razaoSocial: "HEEMANN SUPERMERCADO LTDA",
-    documento: "10209340000180",
-    codigo: "AVENIDA BRASIL, 2400, CENTRO, 78550000, Vera, MT",
-    endereco: "AVENIDA BRASIL, 2400, CENTRO, 78550000, Vera, MT",
-    dataCadastro: "05/02/2025",
-    rotulos: ["Cliente", "Fornecedor"],
-    ativo: true
-  }
-]
+import { usePessoas, type Pessoa } from "@/hooks/usePessoas"
+import { format } from "date-fns"
 
 const availableColumns = [
-  { key: "nomeFantasia", label: "Nome Fantasia" },
-  { key: "razaoSocial", label: "Razão Social" },
+  { key: "nome_fantasia", label: "Nome Fantasia" },
+  { key: "razao_social", label: "Razão Social" },
   { key: "documento", label: "CNPJ/CPF" },
   { key: "codigo", label: "Código" },
   { key: "endereco", label: "Endereço" },
-  { key: "dataCadastro", label: "Data de Cadastro" },
+  { key: "created_at", label: "Data de Cadastro" },
   { key: "rotulos", label: "Rótulos" },
   { key: "ativo", label: "Ativo" }
 ]
@@ -104,23 +36,27 @@ const availableRotulos = [
   "Fabricante"
 ]
 
-export function PessoasListagem() {
-  const [pessoas] = useState<Pessoa[]>(mockPessoas)
-  const [filteredPessoas, setFilteredPessoas] = useState<Pessoa[]>(mockPessoas)
+interface PessoasListagemProps {
+  onEditPessoa?: (pessoa: Pessoa) => void
+}
+
+export function PessoasListagem({ onEditPessoa }: PessoasListagemProps) {
+  const { pessoas, loading, deletePessoa } = usePessoas()
+  const [filteredPessoas, setFilteredPessoas] = useState<Pessoa[]>([])
   const [selectedPessoas, setSelectedPessoas] = useState<string[]>([])
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false)
   const [showColumnManager, setShowColumnManager] = useState(false)
   
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>([
-    "nomeFantasia", "razaoSocial", "documento", "codigo", "endereco", "dataCadastro"
+    "nome_fantasia", "razao_social", "documento", "codigo", "endereco", "created_at"
   ])
   
   // Filters
   const [searchTerm, setSearchTerm] = useState("")
   const [filters, setFilters] = useState({
-    nomeFantasia: "",
-    razaoSocial: "",
+    nome_fantasia: "",
+    razao_social: "",
     documento: "",
     email: "",
     categoriaRazaoSocial: "",
@@ -146,21 +82,21 @@ export function PessoasListagem() {
     
     if (searchTerm) {
       filtered = filtered.filter(pessoa => 
-        pessoa.nomeFantasia.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pessoa.razaoSocial.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pessoa.nome_fantasia.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (pessoa.razao_social || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         pessoa.documento.includes(searchTerm)
       )
     }
     
-    if (newFilters.nomeFantasia) {
+    if (newFilters.nome_fantasia) {
       filtered = filtered.filter(pessoa => 
-        pessoa.nomeFantasia.toLowerCase().includes(newFilters.nomeFantasia.toLowerCase())
+        pessoa.nome_fantasia.toLowerCase().includes(newFilters.nome_fantasia.toLowerCase())
       )
     }
     
-    if (newFilters.razaoSocial) {
+    if (newFilters.razao_social) {
       filtered = filtered.filter(pessoa => 
-        pessoa.razaoSocial.toLowerCase().includes(newFilters.razaoSocial.toLowerCase())
+        (pessoa.razao_social || '').toLowerCase().includes(newFilters.razao_social.toLowerCase())
       )
     }
     
@@ -172,7 +108,7 @@ export function PessoasListagem() {
     
     if (newFilters.rotulosSelected.length > 0) {
       filtered = filtered.filter(pessoa => 
-        pessoa.rotulos.some(rotulo => newFilters.rotulosSelected.includes(rotulo))
+        (pessoa.rotulos || []).some(rotulo => newFilters.rotulosSelected.includes(rotulo))
       )
     }
     
@@ -191,8 +127,8 @@ export function PessoasListagem() {
 
   const clearFilters = () => {
     const emptyFilters = {
-      nomeFantasia: "",
-      razaoSocial: "",
+      nome_fantasia: "",
+      razao_social: "",
       documento: "",
       email: "",
       categoriaRazaoSocial: "",
@@ -237,16 +173,58 @@ export function PessoasListagem() {
   }
 
   const handleEdit = (pessoa: Pessoa) => {
-    toast.info(`Editar pessoa: ${pessoa.nomeFantasia}`)
+    if (onEditPessoa) {
+      onEditPessoa(pessoa)
+    }
   }
 
-  const handleDelete = (pessoa: Pessoa) => {
-    toast.error(`Excluir pessoa: ${pessoa.nomeFantasia}`)
+  const handleDelete = async (pessoa: Pessoa) => {
+    try {
+      await deletePessoa(pessoa.id)
+      toast.success(`Pessoa ${pessoa.nome_fantasia} excluída com sucesso`)
+    } catch (error) {
+      toast.error('Erro ao excluir pessoa')
+    }
   }
 
   const handleNewPessoa = () => {
-    toast.info("Adicionar nova pessoa")
+    if (onEditPessoa) {
+      onEditPessoa({
+        id: '',
+        nome_fantasia: '',
+        razao_social: '',
+        tipo_pessoa: 'fisica',
+        documento: '',
+        codigo: '',
+        endereco: '',
+        cidade: '',
+        uf: '',
+        cep: '',
+        email_geral: '',
+        emails_secundarios: [],
+        telefone: '',
+        telefone_celular: '',
+        whatsapps: [],
+        bloquear_notificacoes_whatsapp: false,
+        vendedor_padrao: '',
+        transportadora_padrao: '',
+        rotulos: [],
+        ativo: true,
+        created_at: '',
+        updated_at: ''
+      })
+    }
   }
+
+  // Update filtered pessoas when pessoas change
+  React.useEffect(() => {
+    setFilteredPessoas(pessoas)
+  }, [pessoas])
+
+  // Apply filters when they change
+  React.useEffect(() => {
+    applyFilters(filters, searchTerm)
+  }, [pessoas, filters, searchTerm])
 
   return (
     <div className="w-full space-y-4">
@@ -272,8 +250,8 @@ export function PessoasListagem() {
                 <Label htmlFor="filtro-nome">Nome / Nome Fantasia</Label>
                 <Input
                   id="filtro-nome"
-                  value={filters.nomeFantasia}
-                  onChange={(e) => handleFilterChange("nomeFantasia", e.target.value)}
+                  value={filters.nome_fantasia}
+                  onChange={(e) => handleFilterChange("nome_fantasia", e.target.value)}
                   placeholder="Nome fantasia"
                 />
               </div>
@@ -282,8 +260,8 @@ export function PessoasListagem() {
                 <Label htmlFor="filtro-razao">Razão Social</Label>
                 <Input
                   id="filtro-razao"
-                  value={filters.razaoSocial}
-                  onChange={(e) => handleFilterChange("razaoSocial", e.target.value)}
+                  value={filters.razao_social}
+                  onChange={(e) => handleFilterChange("razao_social", e.target.value)}
                   placeholder="Razão social"
                 />
               </div>
@@ -490,123 +468,112 @@ export function PessoasListagem() {
                         checked={visibleColumns.includes(column.key)}
                         onCheckedChange={() => toggleColumnVisibility(column.key)}
                       />
-                      <Label htmlFor={`column-${column.key}`} className="text-sm">
+                      <Label 
+                        htmlFor={`column-${column.key}`} 
+                        className="text-sm cursor-pointer text-xs"
+                      >
                         {column.label}
                       </Label>
                     </div>
                   ))}
                 </div>
-                <Button onClick={() => setShowColumnManager(false)} className="w-full">
-                  Aplicar
-                </Button>
               </div>
             </PopoverContent>
           </Popover>
         </div>
-        
+
         <Button onClick={handleNewPessoa} className="gap-2">
           <Plus className="h-4 w-4" />
-          NOVO
+          Novo
         </Button>
       </div>
 
-      {/* Table */}
-      <div className="border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">
-                <Checkbox
-                  checked={selectedPessoas.length === filteredPessoas.length && filteredPessoas.length > 0}
-                  onCheckedChange={selectAllPessoas}
-                />
-              </TableHead>
-              {availableColumns
-                .filter(col => visibleColumns.includes(col.key))
-                .map((column) => (
-                  <TableHead key={column.key}>{column.label}</TableHead>
+      {/* Data Table */}
+      <Card>
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="p-8 text-center">Carregando...</div>
+          ) : (
+            <Table className="text-xs">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">
+                    <Checkbox
+                      checked={selectedPessoas.length === filteredPessoas.length && filteredPessoas.length > 0}
+                      onCheckedChange={selectAllPessoas}
+                      aria-label="Select all"
+                    />
+                  </TableHead>
+                  {visibleColumns.map((columnKey) => {
+                    const column = availableColumns.find(c => c.key === columnKey)
+                    return column ? (
+                      <TableHead key={columnKey} className="text-xs">{column.label}</TableHead>
+                    ) : null
+                  })}
+                  <TableHead className="w-[100px] text-xs">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredPessoas.map((pessoa) => (
+                  <TableRow key={pessoa.id}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedPessoas.includes(pessoa.id)}
+                        onCheckedChange={() => togglePessoaSelection(pessoa.id)}
+                        aria-label={`Select ${pessoa.nome_fantasia}`}
+                      />
+                    </TableCell>
+                    {visibleColumns.map((columnKey) => (
+                      <TableCell key={columnKey} className="max-w-[200px] truncate text-xs">
+                        {columnKey === "nome_fantasia" && pessoa.nome_fantasia}
+                        {columnKey === "razao_social" && (pessoa.razao_social || '-')}
+                        {columnKey === "documento" && pessoa.documento}
+                        {columnKey === "codigo" && (pessoa.codigo || '-')}
+                        {columnKey === "endereco" && (pessoa.endereco || '-')}
+                        {columnKey === "created_at" && format(new Date(pessoa.created_at), 'dd/MM/yyyy')}
+                        {columnKey === "rotulos" && (
+                          <div className="flex gap-1 flex-wrap">
+                            {(pessoa.rotulos || []).map((rotulo, index) => (
+                              <Badge key={index} variant="secondary" className="text-xs">
+                                {rotulo}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        {columnKey === "ativo" && (
+                          <Badge variant={pessoa.ativo ? "default" : "secondary"} className="text-xs">
+                            {pessoa.ativo ? "Ativo" : "Inativo"}
+                          </Badge>
+                        )}
+                      </TableCell>
+                    ))}
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(pessoa)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(pessoa)}
+                          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              <TableHead className="w-24 text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredPessoas.map((pessoa) => (
-              <TableRow key={pessoa.id}>
-                <TableCell>
-                  <Checkbox
-                    checked={selectedPessoas.includes(pessoa.id)}
-                    onCheckedChange={() => togglePessoaSelection(pessoa.id)}
-                  />
-                </TableCell>
-                {visibleColumns.includes("nomeFantasia") && (
-                  <TableCell className="font-medium">{pessoa.nomeFantasia}</TableCell>
-                )}
-                {visibleColumns.includes("razaoSocial") && (
-                  <TableCell>{pessoa.razaoSocial}</TableCell>
-                )}
-                {visibleColumns.includes("documento") && (
-                  <TableCell>{pessoa.documento}</TableCell>
-                )}
-                {visibleColumns.includes("codigo") && (
-                  <TableCell>{pessoa.codigo}</TableCell>
-                )}
-                {visibleColumns.includes("endereco") && (
-                  <TableCell className="max-w-xs truncate" title={pessoa.endereco}>
-                    {pessoa.endereco}
-                  </TableCell>
-                )}
-                {visibleColumns.includes("dataCadastro") && (
-                  <TableCell>{pessoa.dataCadastro}</TableCell>
-                )}
-                {visibleColumns.includes("rotulos") && (
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {pessoa.rotulos.map((rotulo, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {rotulo}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                )}
-                {visibleColumns.includes("ativo") && (
-                  <TableCell>
-                    <Badge variant={pessoa.ativo ? "default" : "destructive"}>
-                      {pessoa.ativo ? "Ativo" : "Inativo"}
-                    </Badge>
-                  </TableCell>
-                )}
-                <TableCell>
-                  <div className="flex gap-1 justify-end">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(pessoa)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(pessoa)}
-                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-      
-      {filteredPessoas.length === 0 && (
-        <div className="text-center py-8 text-muted-foreground">
-          Nenhuma pessoa encontrada com os filtros aplicados.
-        </div>
-      )}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

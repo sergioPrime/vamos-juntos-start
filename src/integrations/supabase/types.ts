@@ -1168,6 +1168,87 @@ export type Database = {
         }
         Relationships: []
       }
+      pessoas: {
+        Row: {
+          ativo: boolean
+          bloquear_notificacoes_whatsapp: boolean | null
+          cep: string | null
+          cidade: string | null
+          codigo: string | null
+          created_at: string
+          created_by: string
+          documento: string
+          email_geral: string | null
+          emails_secundarios: string[] | null
+          endereco: string | null
+          id: string
+          nome_fantasia: string
+          org_id: string
+          razao_social: string | null
+          rotulos: string[] | null
+          telefone: string | null
+          telefone_celular: string | null
+          tipo_pessoa: string
+          transportadora_padrao: string | null
+          uf: string | null
+          updated_at: string
+          vendedor_padrao: string | null
+          whatsapps: string[] | null
+        }
+        Insert: {
+          ativo?: boolean
+          bloquear_notificacoes_whatsapp?: boolean | null
+          cep?: string | null
+          cidade?: string | null
+          codigo?: string | null
+          created_at?: string
+          created_by: string
+          documento: string
+          email_geral?: string | null
+          emails_secundarios?: string[] | null
+          endereco?: string | null
+          id?: string
+          nome_fantasia: string
+          org_id: string
+          razao_social?: string | null
+          rotulos?: string[] | null
+          telefone?: string | null
+          telefone_celular?: string | null
+          tipo_pessoa: string
+          transportadora_padrao?: string | null
+          uf?: string | null
+          updated_at?: string
+          vendedor_padrao?: string | null
+          whatsapps?: string[] | null
+        }
+        Update: {
+          ativo?: boolean
+          bloquear_notificacoes_whatsapp?: boolean | null
+          cep?: string | null
+          cidade?: string | null
+          codigo?: string | null
+          created_at?: string
+          created_by?: string
+          documento?: string
+          email_geral?: string | null
+          emails_secundarios?: string[] | null
+          endereco?: string | null
+          id?: string
+          nome_fantasia?: string
+          org_id?: string
+          razao_social?: string | null
+          rotulos?: string[] | null
+          telefone?: string | null
+          telefone_celular?: string | null
+          tipo_pessoa?: string
+          transportadora_padrao?: string | null
+          uf?: string | null
+          updated_at?: string
+          vendedor_padrao?: string | null
+          whatsapps?: string[] | null
+        }
+        Relationships: []
+      }
       product_categories: {
         Row: {
           created_at: string

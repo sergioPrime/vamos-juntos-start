@@ -47,9 +47,6 @@ const purchaseItems = [
   { title: "Relatórios", url: "/purchases/reports", icon: TrendingUp },
 ]
 
-const supplierItems = [
-  { title: "Fornecedores", url: "/suppliers", icon: Users },
-]
 
 const inventoryItems = [
   { title: "Gestão de Estoque", url: "/inventory", icon: Package },
@@ -88,7 +85,6 @@ export function AppSidebar() {
     finance: false,
     sales: false,
     purchases: false,
-    suppliers: false,
     inventory: false,
     cadastros: false,
     settings: false,
@@ -253,39 +249,6 @@ export function AppSidebar() {
             </SidebarGroup>
           </Collapsible>
 
-          {/* Suppliers Module */}
-          <Collapsible 
-            open={expandedModules.suppliers} 
-            onOpenChange={() => toggleModule('suppliers')}
-          >
-            <SidebarGroup className="py-0">
-              <CollapsibleTrigger asChild>
-                <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md p-2 flex items-center justify-between transition-colors">
-                  <span className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    Fornecedores
-                  </span>
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedModules.suppliers ? 'rotate-180' : ''}`} />
-                </SidebarGroupLabel>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {supplierItems.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton asChild>
-                          <NavLink to={item.url} className={getNavClass}>
-                            <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
-                          </NavLink>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
 
           {/* Inventory Module */}
           <Collapsible 

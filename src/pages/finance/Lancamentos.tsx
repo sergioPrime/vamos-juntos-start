@@ -508,7 +508,29 @@ export default function Lancamentos() {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  {/* Company and Entry Type Section */}
+                   {/* Entry Code Section */}
+                   {editingEntry && (
+                     <div className="border-b pb-6">
+                       <h3 className="text-lg font-semibold mb-4">Identificação</h3>
+                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                         <div>
+                           <label className="text-sm font-medium">Código</label>
+                           <div className="mt-1">
+                             <Input
+                               value={editingEntry.entry_code ? `#${editingEntry.entry_code}` : 'Será gerado automaticamente'}
+                               readOnly
+                               className="bg-muted text-muted-foreground cursor-not-allowed"
+                             />
+                           </div>
+                           <p className="text-xs text-muted-foreground mt-1">
+                             Código sequencial gerado automaticamente
+                           </p>
+                         </div>
+                       </div>
+                     </div>
+                   )}
+
+                   {/* Company and Entry Type Section */}
                   <div className="border-b pb-6">
                     <h3 className="text-lg font-semibold mb-4">Dados da Empresa</h3>
                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

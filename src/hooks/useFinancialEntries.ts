@@ -91,9 +91,9 @@ export function useFinancialEntries() {
       
       const { data, error } = await supabase
         .from("financial_entries")
-        .select("*")
+        .select("*, entry_code")
         .eq("org_id", organization.currentOrg.id)
-        .order("created_at", { ascending: false })
+        .order("entry_code", { ascending: false })
 
       if (error) {
         console.error("Financial entries query error:", error)

@@ -50,6 +50,7 @@ import { ColumnConfig } from "./ColumnManager"
 
 interface FinancialEntry {
   id: string
+  entry_code?: number
   entry_type: "receivable" | "payable"
   person_type: "customer" | "supplier"
   amount: number
@@ -225,7 +226,7 @@ export function FinancialTable({
       case 'entry_code':
         return (
           <div className="font-mono text-xs">
-            #{entry.id.slice(-8).toUpperCase()}
+            {entry.entry_code ? `#${entry.entry_code}` : '-'}
           </div>
         )
       

@@ -181,14 +181,18 @@ export default function Lancamentos() {
           .eq("is_active", true),
         
         supabase
-          .from("customers")
-          .select("*")
-          .eq("org_id", organization.currentOrg.id),
+          .from("pessoas")
+          .select("id, nome_fantasia as name, documento, tipo_pessoa, ativo")
+          .eq("org_id", organization.currentOrg.id)
+          .eq("ativo", true)
+          .in("tipo_pessoa", ["juridica", "fisica"]),
         
         supabase
-          .from("suppliers")
-          .select("*")
-          .eq("org_id", organization.currentOrg.id),
+          .from("pessoas")
+          .select("id, nome_fantasia as name, documento, tipo_pessoa, ativo")
+          .eq("org_id", organization.currentOrg.id)
+          .eq("ativo", true)
+          .in("tipo_pessoa", ["juridica", "fisica"]),
         
         supabase
           .from("chart_of_accounts")
@@ -255,6 +259,7 @@ export default function Lancamentos() {
         bankAccounts: bankAccountsResponse.data?.length || 0,
       })
       setCompanies(companiesResponse.data || [])
+      // Both customers and suppliers come from 'pessoas' table now
       setCustomers(customersResponse.data || [])
       setSuppliers(suppliersResponse.data || [])
       setChartOfAccounts(chartResponse.data || [])

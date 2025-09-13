@@ -196,16 +196,8 @@ export function Pessoas() {
       <div className="flex-1 overflow-auto">
         <div className="p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-9">
+            <TabsList className="grid w-full grid-cols-1">
               <TabsTrigger value="dados">Dados</TabsTrigger>
-              <TabsTrigger value="contatos" disabled className="opacity-50">Contatos</TabsTrigger>
-              <TabsTrigger value="negociacoes" disabled className="opacity-50">Negociações Efetuadas</TabsTrigger>
-              <TabsTrigger value="registros" disabled className="opacity-50">Registros Financeiros</TabsTrigger>
-              <TabsTrigger value="pendencias" disabled className="opacity-50">Pendências</TabsTrigger>
-              <TabsTrigger value="referencias" disabled className="opacity-50">Referências</TabsTrigger>
-              <TabsTrigger value="arquivos" disabled className="opacity-50">Arquivos</TabsTrigger>
-              <TabsTrigger value="imagem" disabled className="opacity-50">Imagem</TabsTrigger>
-              <TabsTrigger value="agendamentos" disabled className="opacity-50">Agendamentos</TabsTrigger>
             </TabsList>
 
             <TabsContent value="dados" className="mt-6">

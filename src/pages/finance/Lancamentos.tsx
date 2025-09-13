@@ -182,14 +182,14 @@ export default function Lancamentos() {
         
         supabase
           .from("pessoas")
-          .select("id, nome_fantasia as name, documento, tipo_pessoa, ativo")
+          .select("id, nome_fantasia, documento, tipo_pessoa, ativo")
           .eq("org_id", organization.currentOrg.id)
           .eq("ativo", true)
           .in("tipo_pessoa", ["juridica", "fisica"]),
         
         supabase
           .from("pessoas")
-          .select("id, nome_fantasia as name, documento, tipo_pessoa, ativo")
+          .select("id, nome_fantasia, documento, tipo_pessoa, ativo")
           .eq("org_id", organization.currentOrg.id)
           .eq("ativo", true)
           .in("tipo_pessoa", ["juridica", "fisica"]),
@@ -259,9 +259,9 @@ export default function Lancamentos() {
         bankAccounts: bankAccountsResponse.data?.length || 0,
       })
       setCompanies(companiesResponse.data || [])
-      // Both customers and suppliers come from 'pessoas' table now
-      setCustomers(customersResponse.data || [])
-      setSuppliers(suppliersResponse.data || [])
+      // Both customers and suppliers come from 'pessoas' table now - map nome_fantasia to name
+      setCustomers((customersResponse.data || []).map(p => ({ ...p, name: p.nome_fantasia })))
+      setSuppliers((suppliersResponse.data || []).map(p => ({ ...p, name: p.nome_fantasia })))
       setChartOfAccounts(chartResponse.data || [])
       setCostCenters(costCentersResponse.data || [])
       setPaymentMethods(paymentMethodsResponse.data || [])

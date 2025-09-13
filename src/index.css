@@ -213,10 +213,73 @@ All colors MUST be HSL.
   }
 
   .dark {
-    /* === HIERARQUIA VISUAL DE 3 NÍVEIS === */
+    /* === MODO ESCURO - CORES COM ALTO CONTRASTE === */
     /* Nível 1: Fundo Principal (mais escuro - base) */
-    --background: 220 28% 10%;
+    --background: 220 30% 8%;
     --foreground: 210 20% 98%;
+
+    /* Nível 2: Cards e Containers (intermediário) */
+    --card: 220 25% 14%;
+    --card-foreground: 210 20% 98%;
+    
+    /* Nível 3: Elementos Flutuantes/Destaques (mais claro) */
+    --elevated: 220 20% 20%;
+    --elevated-foreground: 210 20% 98%;
+
+    --popover: 220 20% 20%;
+    --popover-foreground: 210 20% 98%;
+
+    --primary: 217 91% 75%;
+    --primary-foreground: 220 30% 8%;
+    --primary-hover: 217 91% 80%;
+    --primary-active: 217 91% 70%;
+
+    /* Cores de ação com mais presença no modo escuro */
+    --action-primary: 217 91% 75%;
+    --action-primary-hover: 217 91% 80%;
+    --action-primary-active: 217 91% 70%;
+    --action-secondary: 158 84% 65%;
+    --action-secondary-hover: 158 84% 70%;
+    --action-destructive: 0 84% 70%;
+    --action-destructive-hover: 0 84% 75%;
+
+    --secondary: 220 25% 16%;
+    --secondary-foreground: 210 20% 95%;
+
+    --muted: 220 25% 12%;
+    --muted-foreground: 210 20% 75%;
+
+    --accent: 217 91% 75%;
+    --accent-foreground: 220 30% 8%;
+
+    --destructive: 0 84% 70%;
+    --destructive-foreground: 210 20% 98%;
+
+    --success: 158 84% 65%;
+    --success-foreground: 220 30% 8%;
+
+    --border: 220 25% 22%;
+    --input: 220 25% 16%;
+    --ring: 217 91% 70%;
+
+    /* Gradientes para hierarquia visual no modo escuro */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 70%), hsl(217 91% 60%));
+    --gradient-card: linear-gradient(135deg, hsl(220 25% 14%), hsl(220 20% 16%));
+    --gradient-elevated: linear-gradient(135deg, hsl(220 20% 20%), hsl(220 16% 22%));
+
+    /* Sombras mais intensas para modo escuro */
+    --shadow-card: 0 4px 16px -4px hsl(220 100% 3% / 0.5);
+    --shadow-elevated: 0 8px 28px -8px hsl(220 100% 3% / 0.6);
+    --shadow-floating: 0 16px 40px -12px hsl(220 100% 3% / 0.7);
+
+    --sidebar-background: 220 30% 8%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 217 91% 70%;
+    --sidebar-primary-foreground: 210 20% 98%;
+    --sidebar-accent: 220 25% 14%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 220 25% 22%;
+    --sidebar-ring: 217 91% 70%;
   }
   
   @media (min-width: 640px) {
@@ -224,69 +287,6 @@ All colors MUST be HSL.
       --header-height: 64px;
       --page-top-offset: calc(var(--header-height) + 16px);
     }
-
-    /* Nível 2: Cards e Containers (intermediário) */
-    --card: 220 24% 16%;
-    --card-foreground: 210 20% 98%;
-    
-    /* Nível 3: Elementos Flutuantes/Destaques (mais claro) */
-    --elevated: 220 20% 22%;
-    --elevated-foreground: 210 20% 98%;
-
-    --popover: 220 20% 22%;
-    --popover-foreground: 210 20% 98%;
-
-    --primary: 217 91% 68%;
-    --primary-foreground: 210 20% 98%;
-    --primary-hover: 217 91% 72%;
-    --primary-active: 217 91% 60%;
-
-    /* Cores de ação com mais presença no modo escuro */
-    --action-primary: 217 91% 68%;
-    --action-primary-hover: 217 91% 72%;
-    --action-primary-active: 217 91% 60%;
-    --action-secondary: 158 84% 60%;
-    --action-secondary-hover: 158 84% 65%;
-    --action-destructive: 0 84% 65%;
-    --action-destructive-hover: 0 84% 70%;
-
-    --secondary: 220 24% 18%;
-    --secondary-foreground: 210 20% 98%;
-
-    --muted: 220 24% 14%;
-    --muted-foreground: 210 20% 70%;
-
-    --accent: 217 91% 68%;
-    --accent-foreground: 220 28% 10%;
-
-    --destructive: 0 84% 65%;
-    --destructive-foreground: 210 20% 98%;
-
-    --success: 158 84% 60%;
-    --success-foreground: 220 28% 10%;
-
-    --border: 220 24% 20%;
-    --input: 220 24% 18%;
-    --ring: 217 91% 65%;
-
-    /* Gradientes para hierarquia visual no modo escuro */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 65%), hsl(217 91% 55%));
-    --gradient-card: linear-gradient(135deg, hsl(220 24% 16%), hsl(220 20% 18%));
-    --gradient-elevated: linear-gradient(135deg, hsl(220 20% 22%), hsl(220 16% 24%));
-
-    /* Sombras mais intensas para modo escuro */
-    --shadow-card: 0 4px 16px -4px hsl(220 100% 5% / 0.4);
-    --shadow-elevated: 0 8px 28px -8px hsl(220 100% 5% / 0.5);
-    --shadow-floating: 0 16px 40px -12px hsl(220 100% 5% / 0.6);
-
-    --sidebar-background: 220 28% 10%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 217 91% 65%;
-    --sidebar-primary-foreground: 210 20% 98%;
-    --sidebar-accent: 220 24% 16%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 220 24% 20%;
-    --sidebar-ring: 217 91% 65%;
   }
 }
 
@@ -329,15 +329,13 @@ All colors MUST be HSL.
     font-feature-settings: 'tnum' 1; /* Tabular numbers */
   }
 
-  /* Textos secundários - cinza claro, 14px */
+  /* Textos secundários - usando design system */
   .text-secondary {
     @apply text-muted-foreground text-sm; /* 14px */
-    color: #9CA3AF;
   }
   
   .text-tertiary {
-    @apply text-muted-foreground text-xs; /* 12px */
-    color: #6B7280;
+    @apply text-muted-foreground text-xs opacity-75; /* 12px */
   }
 
   /* Botões com tipografia consistente */
@@ -479,15 +477,13 @@ All colors MUST be HSL.
     font-feature-settings: 'tnum' 1;
   }
   
-  /* Textos secundários */
+  /* Textos secundários usando design system */
   .text-secondary {
-    @apply text-sm;
-    color: #9CA3AF;
+    @apply text-muted-foreground text-sm;
   }
   
   .text-tertiary {
-    @apply text-xs;
-    color: #6B7280;
+    @apply text-muted-foreground text-xs opacity-75;
   }
   
   /* === ESPAÇAMENTOS CONFORTÁVEIS === */

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from './useAuth'
-// import { useOrganization } from './useOrganization'
+import { useOrganization } from './useOrganization'
 
 export interface Pessoa {
   id: string
@@ -33,18 +33,17 @@ export function usePessoas() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { user } = useAuth()
-  // const { currentOrganization } = useOrganization()
-  const [currentOrganization, setCurrentOrganization] = useState<{ id: string } | null>(null)
+  const { currentOrg } = useOrganization()
 
   const fetchPessoas = async () => {
-    if (!user || !currentOrganization) return
+    if (!user || !currentOrg) return
 
     try {
       setLoading(true)
       const { data, error } = await supabase
         .from('pessoas')
         .select('*')
-        .eq('org_id', currentOrganization?.id || '')
+        .eq('org_id', currentOrg.id)
         .order('nome_fantasia')
 
       if (error) throw error
@@ -61,14 +60,14 @@ export function usePessoas() {
   }
 
   const createPessoa = async (pessoaData: Omit<Pessoa, 'id' | 'created_at' | 'updated_at'>) => {
-    if (!user || !currentOrganization) throw new Error('User not authenticated')
+    if (!user || !currentOrg) throw new Error('User not authenticated')
 
     try {
       const { data, error } = await supabase
         .from('pessoas')
         .insert([{
           ...pessoaData,
-          org_id: currentOrganization.id,
+          org_id: currentOrg.id,
           created_by: user.id
         }])
         .select()
@@ -120,15 +119,10 @@ export function usePessoas() {
   }
 
   useEffect(() => {
-    // Mock organization for now
-    setCurrentOrganization({ id: 'mock-org-id' })
-  }, [])
-
-  useEffect(() => {
-    if (currentOrganization) {
+    if (currentOrg) {
       fetchPessoas()
     }
-  }, [user, currentOrganization])
+  }, [user, currentOrg])
 
   return {
     pessoas,

@@ -103,7 +103,7 @@ export default function Lancamentos() {
   const [costCenterSearchOpen, setCostCenterSearchOpen] = useState(false)
   const [costCenterSearchValue, setCostCenterSearchValue] = useState("")
   const [amountDisplayValue, setAmountDisplayValue] = useState("")
-  const [activeTab, setActiveTab] = useState("dados")
+  const [activeTab, setActiveTab] = useState("listagem")
   const [editingEntry, setEditingEntry] = useState<any>(null)
 
   const form = useForm<z.infer<typeof formSchema>>({

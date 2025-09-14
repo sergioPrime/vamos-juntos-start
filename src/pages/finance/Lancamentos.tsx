@@ -172,14 +172,14 @@ export default function Lancamentos() {
           .eq("is_active", true)
 
         // Load customers and suppliers from pessoas table based on rotulo
-        const pessoasClientesData = await supabase
+        const pessoasClientesData = await (supabase as any)
           .from("pessoas")
           .select("id, nome_fantasia")
           .eq("org_id", organization.currentOrg.id)
           .eq("ativo", true)
           .eq("rotulo", "cliente")
 
-        const pessoasFornecedoresData = await supabase
+        const pessoasFornecedoresData = await (supabase as any)
           .from("pessoas")
           .select("id, nome_fantasia")
           .eq("org_id", organization.currentOrg.id)
@@ -190,7 +190,7 @@ export default function Lancamentos() {
         const suppliersResponse = pessoasFornecedoresData
 
         // Load other data
-        const chartResponse = await supabase
+        const chartResponse: any = await supabase
           .from("chart_of_accounts")
           .select(`
             *,
@@ -205,14 +205,14 @@ export default function Lancamentos() {
           .eq("is_active", true)
           .order("account_code")
 
-        const costCentersResponse = await supabase
+        const costCentersResponse: any = await supabase
           .from("cost_centers")
           .select("*")
           .eq("org_id", organization.currentOrg.id)
           .eq("is_active", true)
           .order("name")
 
-        const paymentMethodsResponse = await supabase
+        const paymentMethodsResponse: any = await (supabase as any)
           .from("payment_methods")
           .select("*")
           .eq("org_id", organization.currentOrg.id)

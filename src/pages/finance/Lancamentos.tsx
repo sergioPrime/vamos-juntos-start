@@ -164,63 +164,62 @@ export default function Lancamentos() {
       setLoading(true)
       
       console.log("Loading data for organization:", organization?.currentOrg?.id)
-      console.log("About to execute queries for pessoas table...")
-      
-        const [
-        companiesResponse,
-        customersResponse,
-        suppliersResponse,
-        chartResponse,
-        costCentersResponse,
-        paymentMethodsResponse,
-        bankAccountsResponse
-      ] = await Promise.all([
-        supabase
+        // Load companies
+        const companiesResponse = await supabase
           .from("companies")
           .select("*")
           .eq("org_id", organization.currentOrg.id)
-          .eq("is_active", true),
-        
-        supabase
+          .eq("is_active", true)
+
+        // Load customers and suppliers from pessoas table based on rotulo
+        const pessoasClientes = await supabase
           .from("pessoas")
-          .select("id, nome_fantasia, documento, tipo_pessoa, ativo")
+          .select("id, nome_fantasia")
           .eq("org_id", organization.currentOrg.id)
           .eq("ativo", true)
-          .in("tipo_pessoa", ["juridica", "fisica"]),
-        
-        supabase
+          .eq("rotulo", "cliente")
+
+        const pessoasFornecedores = await supabase
           .from("pessoas")
-          .select("id, nome_fantasia, documento, tipo_pessoa, ativo")
+          .select("id, nome_fantasia")
           .eq("org_id", organization.currentOrg.id)
           .eq("ativo", true)
-          .in("tipo_pessoa", ["juridica", "fisica"]),
-        
-        supabase
+          .eq("rotulo", "fornecedor")
+
+        const customersResponse = pessoasClientes
+        const suppliersResponse = pessoasFornecedores
+
+        // Load other data
+        const chartResponse = await supabase
           .from("chart_of_accounts")
           .select(`
             *,
-            chart_account_cost_centers!chart_account_cost_centers_chart_of_account_id_fkey(
-              cost_center_id,
-              cost_centers!chart_account_cost_centers_cost_center_id_fkey(id, code, name)
+            chart_account_cost_centers (
+              cost_centers (
+                id,
+                name
+              )
             )
           `)
           .eq("org_id", organization.currentOrg.id)
           .eq("is_active", true)
-          .eq("account_type", "analytic"),
-        
-        supabase
+          .order("account_code")
+
+        const costCentersResponse = await supabase
           .from("cost_centers")
           .select("*")
           .eq("org_id", organization.currentOrg.id)
-          .eq("is_active", true),
-        
-        supabase
+          .eq("is_active", true)
+          .order("name")
+
+        const paymentMethodsResponse = await supabase
           .from("payment_methods")
           .select("*")
           .eq("org_id", organization.currentOrg.id)
-          .eq("active", true),
-        
-        supabase
+          .eq("is_active", true)
+          .order("name")
+
+        const bankAccountsResponse = await supabase
           .from("bank_accounts")
           .select(`
             *,
@@ -231,15 +230,15 @@ export default function Lancamentos() {
           `)
           .eq("org_id", organization.currentOrg.id)
           .eq("is_active", true)
-      ])
 
-      if (companiesResponse.error) {
-        console.error("Companies error:", companiesResponse.error)
-        throw companiesResponse.error
-      }
-      if (customersResponse.error) {
-        console.error("Customers error:", customersResponse.error)
-        throw customersResponse.error
+        // Check for errors
+        if (companiesResponse.error) {
+          console.error("Companies error:", companiesResponse.error)
+          throw companiesResponse.error
+        }
+        if (customersResponse.error) {
+          console.error("Customers error:", customersResponse.error)
+          throw customersResponse.error
       }
       if (suppliersResponse.error) {
         console.error("Suppliers error:", suppliersResponse.error)
@@ -266,17 +265,17 @@ export default function Lancamentos() {
       setChartOfAccounts(chartResponse.data || [])
       setCostCenters(costCentersResponse.data || [])
       setPaymentMethods(paymentMethodsResponse.data || [])
-      setBankAccounts(bankAccountsResponse.data || [])
-    } catch (error) {
-      console.error("Error loading data:", error)
-      toast({
-        title: "Erro",
-        description: "Erro ao carregar dados",
-        variant: "destructive",
-      })
-    } finally {
-      setLoading(false)
-    }
+        setBankAccounts(bankAccountsResponse.data || [])
+      } catch (error) {
+        console.error("Error loading data:", error)
+        toast({
+          title: "Erro",
+          description: "Erro ao carregar dados",
+          variant: "destructive",
+        })
+      } finally {
+        setLoading(false)
+      }
   }
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {

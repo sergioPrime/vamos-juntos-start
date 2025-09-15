@@ -32,7 +32,7 @@ const formSchema = z.object({
   person_id: z.string().min(1, "Cliente/Fornecedor é obrigatório"),
   entry_type: z.enum(["receivable", "payable"]),
   chart_of_account_id: z.string().min(1, "Plano de conta é obrigatório"),
-  cost_center_id: z.string().min(1, "Centro de custo é obrigatório"),
+  cost_center_id: z.string().optional(),
   amount: z.string().min(1, "Valor é obrigatório").refine((val) => {
     const numericValue = parseFloat(val)
     return numericValue > 0
@@ -817,6 +817,81 @@ export default function Lancamentos() {
 
                       <FormField
                         control={form.control}
+                        name="cost_center_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Centro de Custo</FormLabel>
+                            <Popover open={costCenterSearchOpen} onOpenChange={setCostCenterSearchOpen}>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={costCenterSearchOpen}
+                                    className={cn(
+                                      "w-full justify-between",
+                                      !field.value && "text-muted-foreground"
+                                    )}
+                                  >
+                                    {field.value
+                                      ? (() => {
+                                          const center = getAvailableCostCenters().find((center) => center.id === field.value)
+                                          return center ? `${center.code} - ${center.name}` : "Selecione o centro de custo"
+                                        })()
+                                      : "Selecione o centro de custo"}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-full p-0 z-50 bg-background">
+                                <Command>
+                                  <CommandInput 
+                                    placeholder="Buscar centro de custo..." 
+                                    value={costCenterSearchValue}
+                                    onValueChange={setCostCenterSearchValue}
+                                  />
+                                  <CommandList>
+                                    <CommandEmpty>
+                                      {getAvailableCostCenters().length === 0 
+                                        ? "Nenhum centro de custo disponível."
+                                        : "Nenhum centro de custo encontrado."
+                                      }
+                                    </CommandEmpty>
+                                    <CommandGroup>
+                                      {getAvailableCostCenters().map((center) => (
+                                        <CommandItem
+                                          key={center.id}
+                                          value={`${center.code} ${center.name}`}
+                                          onSelect={() => {
+                                            field.onChange(center.id)
+                                            setCostCenterSearchValue("")
+                                            setCostCenterSearchOpen(false)
+                                          }}
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              field.value === center.id ? "opacity-100" : "opacity-0"
+                                            )}
+                                          />
+                                          <div className="flex flex-col">
+                                            <span className="font-medium">{center.code}</span>
+                                            <span className="text-sm text-muted-foreground">{center.name}</span>
+                                          </div>
+                                        </CommandItem>
+                                      ))}
+                                    </CommandGroup>
+                                  </CommandList>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
                         name="amount"
                         render={({ field }) => (
                           <FormItem>
@@ -960,74 +1035,16 @@ export default function Lancamentos() {
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <FormField
                           control={form.control}
-                          name="cost_center_id"
+                          name="description"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Centro de Custo * <span className="text-xs text-muted-foreground">(obrigatório)</span></FormLabel>
-                              <Popover open={costCenterSearchOpen} onOpenChange={setCostCenterSearchOpen}>
-                                <PopoverTrigger asChild>
-                                  <FormControl>
-                                    <Button
-                                      variant="outline"
-                                      role="combobox"
-                                      aria-expanded={costCenterSearchOpen}
-                                      className={cn(
-                                        "w-full justify-between",
-                                        !field.value && "text-muted-foreground"
-                                      )}
-                                    >
-                                      {field.value
-                                        ? (() => {
-                                            const center = getAvailableCostCenters().find((center) => center.id === field.value)
-                                            return center ? `${center.code} - ${center.name}` : "Selecione o centro de custo"
-                                          })()
-                                        : "Selecione o centro de custo"}
-                                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                    </Button>
-                                  </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-full p-0 z-50 bg-background">
-                                  <Command>
-                                    <CommandInput 
-                                      placeholder="Buscar centro de custo..." 
-                                      value={costCenterSearchValue}
-                                      onValueChange={setCostCenterSearchValue}
-                                    />
-                                    <CommandList>
-                                      <CommandEmpty>
-                                        {getAvailableCostCenters().length === 0 
-                                          ? "Nenhum centro de custo disponível."
-                                          : "Nenhum centro de custo encontrado."
-                                        }
-                                      </CommandEmpty>
-                                      <CommandGroup>
-                                        {getAvailableCostCenters().map((center) => (
-                                          <CommandItem
-                                            key={center.id}
-                                            value={`${center.code} ${center.name}`}
-                                            onSelect={() => {
-                                              field.onChange(center.id)
-                                              setCostCenterSearchValue("")
-                                              setCostCenterSearchOpen(false)
-                                            }}
-                                          >
-                                            <Check
-                                              className={cn(
-                                                "mr-2 h-4 w-4",
-                                                field.value === center.id ? "opacity-100" : "opacity-0"
-                                              )}
-                                            />
-                                            <div className="flex flex-col">
-                                              <span className="font-medium">{center.code}</span>
-                                              <span className="text-sm text-muted-foreground">{center.name}</span>
-                                            </div>
-                                          </CommandItem>
-                                        ))}
-                                      </CommandGroup>
-                                    </CommandList>
-                                  </Command>
-                                </PopoverContent>
-                              </Popover>
+                              <FormLabel>Histórico/Descrição</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Descrição do lançamento"
+                                  {...field}
+                                />
+                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}

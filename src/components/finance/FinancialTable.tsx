@@ -289,7 +289,9 @@ export function FinancialTable({
         return entry.chart_of_account_name || '-'
       
       case 'cost_center':
-        return entry.cost_center_name || '-'
+        return entry.cost_center_name || (
+          <span className="text-muted-foreground text-xs">Centro de Custo removido</span>
+        )
       
       case 'payment_method':
         return entry.payment_method_name || '-'

@@ -54,7 +54,7 @@ const DEFAULT_COLUMNS: ColumnConfig[] = [
   { key: 'amount', label: 'Valor Previsto', visible: true, sortable: true, required: true },
   { key: 'balance', label: 'Saldo', visible: true, sortable: true },
   { key: 'chart_of_account', label: 'Plano de Contas', visible: false, sortable: true },
-  { key: 'cost_center', label: 'Centro de Custos', visible: false, sortable: true },
+  { key: 'cost_center', label: 'Centro de Custo', visible: true, sortable: true },
   { key: 'payment_method', label: 'Forma Pagamento', visible: false, sortable: true },
   { key: 'description', label: 'Descrição', visible: true, sortable: false, required: true }
 ]

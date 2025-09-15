@@ -95,10 +95,31 @@ export function AppSidebar() {
     isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "hover:bg-sidebar-accent/50"
 
   const toggleModule = (moduleKey: string) => {
-    setExpandedModules(prev => ({
-      ...prev,
-      [moduleKey]: !prev[moduleKey]
-    }))
+    setExpandedModules(prev => {
+      const isCurrentlyExpanded = prev[moduleKey]
+      
+      // If clicking on already expanded module, just close it
+      if (isCurrentlyExpanded) {
+        return {
+          ...prev,
+          [moduleKey]: false
+        }
+      }
+      
+      // If opening a new module, close all others and open this one
+      const newState: Record<string, boolean> = {
+        dashboard: true, // Dashboard always stays open
+        finance: false,
+        sales: false,
+        purchases: false,
+        inventory: false,
+        cadastros: false,
+        settings: false,
+      }
+      
+      newState[moduleKey] = true
+      return newState
+    })
   }
 
   const handleMouseEnter = () => {

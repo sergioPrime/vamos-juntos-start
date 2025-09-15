@@ -28,13 +28,9 @@ const navigationItems = [
 
 const financeItems = [
   { title: "Dashboard", url: "/finance/dashboard", icon: PieChart },
+  { title: "Lançamentos", url: "/finance/lancamentos?tab=listagem", icon: FileText },
   { title: "Cobranças", url: "/charges", icon: Receipt },
   { title: "Relatórios", url: "/finance/reports", icon: BarChart3 },
-]
-
-const lancamentosItems = [
-  { title: "Listagem", url: "/finance/lancamentos?tab=listagem", icon: FileText },
-  { title: "Dados", url: "/finance/lancamentos?tab=dados", icon: FileText },
 ]
 
 const businessItems = [
@@ -199,31 +195,6 @@ export function AppSidebar() {
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     ))}
-                    <SidebarMenuItem>
-                      <Collapsible>
-                        <CollapsibleTrigger asChild>
-                          <SidebarMenuButton className="cursor-pointer">
-                            <FileText className="h-4 w-4" />
-                            <span>Lançamentos</span>
-                            <ChevronDown className="h-4 w-4 ml-auto transition-transform duration-200" />
-                          </SidebarMenuButton>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-                          <div className="ml-4 mt-1">
-                            {lancamentosItems.map((item) => (
-                              <SidebarMenuItem key={item.title}>
-                                <SidebarMenuButton asChild>
-                                  <NavLink to={item.url} className={getNavClass}>
-                                    <item.icon className="h-3 w-3" />
-                                    <span>{item.title}</span>
-                                  </NavLink>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
-                            ))}
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    </SidebarMenuItem>
                   </SidebarMenu>
                 </SidebarGroupContent>
               </CollapsibleContent>

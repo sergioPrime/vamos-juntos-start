@@ -38,7 +38,6 @@ const businessItems = [
   { title: "PDV", url: "/pdv", icon: Zap },
   { title: "Pedidos", url: "/orders", icon: Receipt },
   { title: "Orçamentos", url: "/quotes", icon: Quote },
-  { title: "Clientes", url: "/customers", icon: Users },
   { title: "Relatórios", url: "/reports", icon: BarChart3 },
 ]
 

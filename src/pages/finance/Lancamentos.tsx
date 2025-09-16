@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/use-toast"
 import { useFinancialEntries } from "@/hooks/useFinancialEntries"
 import { useBankAccounts } from "@/hooks/useBankAccounts"
+import { useCostCenters } from "@/hooks/useCostCenters"
 import { FinancialListingTab } from "@/components/finance/FinancialListingTab"
 
 import { Button } from "@/components/ui/button"
@@ -81,11 +82,11 @@ export default function Lancamentos() {
   const { toast } = useToast()
   const { entries, loading: entriesLoading, loadEntries, createEntry } = useFinancialEntries()
   const { getFormattedAccountName } = useBankAccounts()
+  const { costCenters: allCostCenters, getFlatCostCenters } = useCostCenters()
   const [companies, setCompanies] = useState<any[]>([])
   const [customers, setCustomers] = useState<any[]>([])
   const [suppliers, setSuppliers] = useState<any[]>([])
   const [chartOfAccounts, setChartOfAccounts] = useState<any[]>([])
-  const [costCenters, setCostCenters] = useState<any[]>([])
   const [paymentMethods, setPaymentMethods] = useState<any[]>([])
   const [bankAccounts, setBankAccounts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -205,13 +206,6 @@ export default function Lancamentos() {
           .eq("is_active", true)
           .order("account_code")
 
-        const costCentersResponse: any = await supabase
-          .from("cost_centers")
-          .select("*")
-          .eq("org_id", organization.currentOrg.id)
-          .eq("is_active", true)
-          .order("name")
-
         const paymentMethodsResponse: any = await (supabase as any)
           .from("payment_methods")
           .select("*")
@@ -245,7 +239,6 @@ export default function Lancamentos() {
         throw suppliersResponse.error
       }
       if (chartResponse.error) throw chartResponse.error
-      if (costCentersResponse.error) throw costCentersResponse.error
       if (paymentMethodsResponse.error) throw paymentMethodsResponse.error
       if (bankAccountsResponse.error) throw bankAccountsResponse.error
 
@@ -254,7 +247,6 @@ export default function Lancamentos() {
         customers: customersResponse.data?.length || 0,
         suppliers: suppliersResponse.data?.length || 0,
         chartOfAccounts: chartResponse.data?.length || 0,
-        costCenters: costCentersResponse.data?.length || 0,
         paymentMethods: paymentMethodsResponse.data?.length || 0,
         bankAccounts: bankAccountsResponse.data?.length || 0,
       })
@@ -263,7 +255,6 @@ export default function Lancamentos() {
       setCustomers((customersResponse.data || []).map(p => ({ ...p, name: p.nome_fantasia })))
       setSuppliers((suppliersResponse.data || []).map(p => ({ ...p, name: p.nome_fantasia })))
       setChartOfAccounts(chartResponse.data || [])
-      setCostCenters(costCentersResponse.data || [])
       setPaymentMethods(paymentMethodsResponse.data || [])
         setBankAccounts(bankAccountsResponse.data || [])
       } catch (error) {
@@ -343,19 +334,23 @@ export default function Lancamentos() {
   const getAvailableCostCenters = () => {
     const selectedAccountId = form.watch("chart_of_account_id")
     
+    // Get flat list of all cost centers from hook
+    const flatCostCenters = getFlatCostCenters()
+    
     if (!selectedAccountId) {
-      return costCenters
+      return flatCostCenters
     }
 
     const selectedAccount = chartOfAccounts.find(acc => acc.id === selectedAccountId)
     
     // If account has pre-associated cost centers, only show those
     if (selectedAccount?.chart_account_cost_centers && selectedAccount.chart_account_cost_centers.length > 0) {
-      return selectedAccount.chart_account_cost_centers.map((cacc: any) => cacc.cost_centers)
+      const associatedIds = selectedAccount.chart_account_cost_centers.map((cacc: any) => cacc.cost_centers.id)
+      return flatCostCenters.filter(center => associatedIds.includes(center.id))
     }
     
     // Otherwise, show all active cost centers
-    return costCenters
+    return flatCostCenters
   }
 
   const getStatusBadge = (entry: FinancialEntry) => {
@@ -447,7 +442,7 @@ export default function Lancamentos() {
           </p>
           {!loading && (
             <div className="text-sm text-muted-foreground mt-1">
-              {companies.length} empresas • {customers.length} clientes • {suppliers.length} fornecedores
+              {companies.length} empresas • {customers.length} clientes • {suppliers.length} fornecedores • {getFlatCostCenters().length} centros de custo
             </div>
           )}
         </div>
@@ -457,7 +452,7 @@ export default function Lancamentos() {
             Atualizar
           </Button>
           <Button variant="outline" size="sm" onClick={() => {
-            console.log("Debug data:", { companies, customers, suppliers, chartOfAccounts, costCenters })
+            console.log("Debug data:", { companies, customers, suppliers, chartOfAccounts, costCenters: getFlatCostCenters() })
           }}>
             Debug
           </Button>

@@ -171,20 +171,20 @@ export default function Lancamentos() {
           .eq("org_id", organization.currentOrg.id)
           .eq("is_active", true)
 
-        // Load customers and suppliers from pessoas table based on rotulo
+        // Load customers and suppliers from pessoas table based on rotulos
         const pessoasClientesData = await (supabase as any)
           .from("pessoas")
           .select("id, nome_fantasia")
           .eq("org_id", organization.currentOrg.id)
           .eq("ativo", true)
-          .eq("rotulo", "cliente")
+          .contains("rotulos", ["cliente"])
 
         const pessoasFornecedoresData = await (supabase as any)
           .from("pessoas")
           .select("id, nome_fantasia")
           .eq("org_id", organization.currentOrg.id)
           .eq("ativo", true)
-          .eq("rotulo", "fornecedor")
+          .contains("rotulos", ["fornecedor"])
 
         const customersResponse = pessoasClientesData
         const suppliersResponse = pessoasFornecedoresData

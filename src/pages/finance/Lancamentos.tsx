@@ -256,7 +256,13 @@ export default function Lancamentos() {
       setSuppliers((suppliersResponse.data || []).map(p => ({ ...p, name: p.nome_fantasia })))
       setChartOfAccounts(chartResponse.data || [])
       setPaymentMethods(paymentMethodsResponse.data || [])
-        setBankAccounts(bankAccountsResponse.data || [])
+      setBankAccounts(bankAccountsResponse.data || [])
+      
+      // Auto-select default company
+      const defaultCompany = companiesResponse.data?.find(company => company.is_default)
+      if (defaultCompany && !form.getValues('company_id')) {
+        form.setValue('company_id', defaultCompany.id)
+      }
       } catch (error) {
         console.error("Error loading data:", error)
         toast({
@@ -314,7 +320,16 @@ export default function Lancamentos() {
         })
       }
 
-      form.reset()
+      // Reset form but keep default company selected
+      const defaultCompany = companies.find(company => company.is_default)
+      form.reset({
+        entry_type: "receivable",
+        competence_date: new Date(),
+        due_date: new Date(),
+        is_settled: false,
+        installment_type: "none",
+        company_id: defaultCompany?.id || '',
+      })
       setAmountDisplayValue("")
       setEditingEntry(null)
       loadData()

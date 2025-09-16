@@ -125,6 +125,16 @@ export default function Lancamentos() {
     }
   }, [organization])
 
+  // Auto-select default company when companies are loaded
+  useEffect(() => {
+    if (companies.length > 0 && !form.getValues('company_id')) {
+      const defaultCompany = companies.find(company => company.is_default)
+      if (defaultCompany) {
+        form.setValue('company_id', defaultCompany.id)
+      }
+    }
+  }, [companies, form])
+
   // Listen for edit entry events from listing tab
   useEffect(() => {
     const handleSwitchToEditTab = (event: any) => {
@@ -258,11 +268,6 @@ export default function Lancamentos() {
       setPaymentMethods(paymentMethodsResponse.data || [])
       setBankAccounts(bankAccountsResponse.data || [])
       
-      // Auto-select default company
-      const defaultCompany = companiesResponse.data?.find(company => company.is_default)
-      if (defaultCompany && !form.getValues('company_id')) {
-        form.setValue('company_id', defaultCompany.id)
-      }
       } catch (error) {
         console.error("Error loading data:", error)
         toast({

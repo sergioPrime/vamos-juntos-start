@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useFinancialEntries } from "@/hooks/useFinancialEntries"
 import { useBankAccounts } from "@/hooks/useBankAccounts"
 import { useCostCenters } from "@/hooks/useCostCenters"
+import { useAsyncSearch } from "@/hooks/useAsyncSearch"
 import { FinancialListingTab } from "@/components/finance/FinancialListingTab"
 
 import { Button } from "@/components/ui/button"
@@ -27,6 +28,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { ComboboxAsync } from "@/components/ui/combobox-async"
 
 const formSchema = z.object({
   company_id: z.string().min(1, "Empresa é obrigatória"),
@@ -83,27 +85,20 @@ export default function Lancamentos() {
   const { entries, loading: entriesLoading, loadEntries, createEntry } = useFinancialEntries()
   const { getFormattedAccountName } = useBankAccounts()
   const { costCenters: allCostCenters, getFlatCostCenters } = useCostCenters()
+  const { 
+    searchCompanies, 
+    searchBankAccounts, 
+    searchChartOfAccounts, 
+    searchPessoas, 
+    searchPaymentMethods, 
+    searchCostCenters 
+  } = useAsyncSearch()
   const [companies, setCompanies] = useState<any[]>([])
-  const [customers, setCustomers] = useState<any[]>([])
-  const [suppliers, setSuppliers] = useState<any[]>([])
-  const [chartOfAccounts, setChartOfAccounts] = useState<any[]>([])
-  const [paymentMethods, setPaymentMethods] = useState<any[]>([])
-  const [bankAccounts, setBankAccounts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showMoreFields, setShowMoreFields] = useState(false)
   const [showInstallments, setShowInstallments] = useState(false)
   const [filterType, setFilterType] = useState<string>("all")
   const [filterStatus, setFilterStatus] = useState<string>("all")
-  const [companySearchOpen, setCompanySearchOpen] = useState(false)
-  const [companySearchValue, setCompanySearchValue] = useState("")
-  const [customerSearchOpen, setCustomerSearchOpen] = useState(false)
-  const [customerSearchValue, setCustomerSearchValue] = useState("")
-  const [supplierSearchOpen, setSupplierSearchOpen] = useState(false)
-  const [supplierSearchValue, setSupplierSearchValue] = useState("")
-  const [chartAccountSearchOpen, setChartAccountSearchOpen] = useState(false)
-  const [chartAccountSearchValue, setChartAccountSearchValue] = useState("")
-  const [costCenterSearchOpen, setCostCenterSearchOpen] = useState(false)
-  const [costCenterSearchValue, setCostCenterSearchValue] = useState("")
   const [amountDisplayValue, setAmountDisplayValue] = useState("")
   const [activeTab, setActiveTab] = useState("listagem")
   const [editingEntry, setEditingEntry] = useState<any>(null)
@@ -174,110 +169,30 @@ export default function Lancamentos() {
     try {
       setLoading(true)
       
-      console.log("Loading data for organization:", organization?.currentOrg?.id)
-        // Load companies
-        const companiesResponse = await supabase
-          .from("companies")
-          .select("*")
-          .eq("org_id", organization.currentOrg.id)
-          .eq("is_active", true)
+      // Load only companies for default selection
+      const companiesResponse = await supabase
+        .from("companies")
+        .select("*")
+        .eq("org_id", organization.currentOrg.id)
+        .eq("is_active", true)
 
-        // Load customers and suppliers from pessoas table based on rotulos
-        const pessoasClientesData = await (supabase as any)
-          .from("pessoas")
-          .select("id, nome_fantasia")
-          .eq("org_id", organization.currentOrg.id)
-          .eq("ativo", true)
-          .contains("rotulos", ["cliente"])
-
-        const pessoasFornecedoresData = await (supabase as any)
-          .from("pessoas")
-          .select("id, nome_fantasia")
-          .eq("org_id", organization.currentOrg.id)
-          .eq("ativo", true)
-          .contains("rotulos", ["fornecedor"])
-
-        const customersResponse = pessoasClientesData
-        const suppliersResponse = pessoasFornecedoresData
-
-        // Load other data
-        const chartResponse: any = await supabase
-          .from("chart_of_accounts")
-          .select(`
-            *,
-            chart_account_cost_centers (
-              cost_centers (
-                id,
-                name
-              )
-            )
-          `)
-          .eq("org_id", organization.currentOrg.id)
-          .eq("is_active", true)
-          .order("account_code")
-
-        const paymentMethodsResponse: any = await (supabase as any)
-          .from("payment_methods")
-          .select("*")
-          .eq("org_id", organization.currentOrg.id)
-          .eq("is_active", true)
-          .order("name")
-
-        const bankAccountsResponse = await supabase
-          .from("bank_accounts")
-          .select(`
-            *,
-            companies (
-              id,
-              name
-            )
-          `)
-          .eq("org_id", organization.currentOrg.id)
-          .eq("is_active", true)
-
-        // Check for errors
-        if (companiesResponse.error) {
-          console.error("Companies error:", companiesResponse.error)
-          throw companiesResponse.error
-        }
-        if (customersResponse.error) {
-          console.error("Customers error:", customersResponse.error)
-          throw customersResponse.error
+      if (companiesResponse.error) {
+        console.error("Companies error:", companiesResponse.error)
+        throw companiesResponse.error
       }
-      if (suppliersResponse.error) {
-        console.error("Suppliers error:", suppliersResponse.error)
-        throw suppliersResponse.error
-      }
-      if (chartResponse.error) throw chartResponse.error
-      if (paymentMethodsResponse.error) throw paymentMethodsResponse.error
-      if (bankAccountsResponse.error) throw bankAccountsResponse.error
 
-      console.log("Data loaded:", {
-        companies: companiesResponse.data?.length || 0,
-        customers: customersResponse.data?.length || 0,
-        suppliers: suppliersResponse.data?.length || 0,
-        chartOfAccounts: chartResponse.data?.length || 0,
-        paymentMethods: paymentMethodsResponse.data?.length || 0,
-        bankAccounts: bankAccountsResponse.data?.length || 0,
-      })
       setCompanies(companiesResponse.data || [])
-      // Both customers and suppliers come from 'pessoas' table now - map nome_fantasia to name
-      setCustomers((customersResponse.data || []).map(p => ({ ...p, name: p.nome_fantasia })))
-      setSuppliers((suppliersResponse.data || []).map(p => ({ ...p, name: p.nome_fantasia })))
-      setChartOfAccounts(chartResponse.data || [])
-      setPaymentMethods(paymentMethodsResponse.data || [])
-      setBankAccounts(bankAccountsResponse.data || [])
       
-      } catch (error) {
-        console.error("Error loading data:", error)
-        toast({
-          title: "Erro",
-          description: "Erro ao carregar dados",
-          variant: "destructive",
-        })
-      } finally {
-        setLoading(false)
-      }
+    } catch (error) {
+      console.error("Error loading data:", error)
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar dados",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -350,28 +265,9 @@ export default function Lancamentos() {
     }
   }
 
-  // Function to get available cost centers based on selected account
-  const getAvailableCostCenters = () => {
-    const selectedAccountId = form.watch("chart_of_account_id")
-    
-    // Get flat list of all cost centers from hook
-    const flatCostCenters = getFlatCostCenters()
-    
-    if (!selectedAccountId) {
-      return flatCostCenters
-    }
-
-    const selectedAccount = chartOfAccounts.find(acc => acc.id === selectedAccountId)
-    
-    // If account has pre-associated cost centers, only show those
-    if (selectedAccount?.chart_account_cost_centers && selectedAccount.chart_account_cost_centers.length > 0) {
-      const associatedIds = selectedAccount.chart_account_cost_centers.map((cacc: any) => cacc.cost_centers.id)
-      return flatCostCenters.filter(center => associatedIds.includes(center.id))
-    }
-    
-    // Otherwise, show all active cost centers
-    return flatCostCenters
-  }
+  // Search functions for different person types
+  const searchCustomers = (query: string) => searchPessoas(query, 'cliente')
+  const searchSuppliers = (query: string) => searchPessoas(query, 'fornecedor')
 
   const getStatusBadge = (entry: FinancialEntry) => {
     if (entry.is_settled) {
@@ -462,7 +358,7 @@ export default function Lancamentos() {
           </p>
           {!loading && (
             <div className="text-sm text-muted-foreground mt-1">
-              {companies.length} empresas • {customers.length} clientes • {suppliers.length} fornecedores • {getFlatCostCenters().length} centros de custo
+              {companies.length} empresas • {getFlatCostCenters().length} centros de custo
             </div>
           )}
         </div>
@@ -472,7 +368,7 @@ export default function Lancamentos() {
             Atualizar
           </Button>
           <Button variant="outline" size="sm" onClick={() => {
-            console.log("Debug data:", { companies, customers, suppliers, chartOfAccounts, costCenters: getFlatCostCenters() })
+            console.log("Debug data:", { companies, costCenters: getFlatCostCenters() })
           }}>
             Debug
           </Button>
@@ -595,69 +491,15 @@ export default function Lancamentos() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Sua Empresa *</FormLabel>
-                            <Popover open={companySearchOpen} onOpenChange={setCompanySearchOpen}>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    aria-expanded={companySearchOpen}
-                                    className={cn(
-                                      "w-full justify-between",
-                                      !field.value && "text-muted-foreground"
-                                    )}
-                                  >
-                                    {field.value
-                                      ? companies.find((company) => company.id === field.value)?.name
-                                      : "Selecione a empresa"}
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                  </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-full p-0 z-50 bg-background">
-                                <Command>
-                                  <CommandInput 
-                                    placeholder="Buscar empresa..." 
-                                    value={companySearchValue}
-                                    onValueChange={setCompanySearchValue}
-                                  />
-                                  <CommandList>
-                                    <CommandEmpty>
-                                      {companies.length === 0 
-                                        ? "Nenhuma empresa cadastrada. Cadastre em Configurações → Empresas."
-                                        : "Nenhuma empresa encontrada."
-                                      }
-                                    </CommandEmpty>
-                                    <CommandGroup>
-                                      {companies.map((company) => (
-                                        <CommandItem
-                                          key={company.id}
-                                          value={company.name}
-                                          onSelect={() => {
-                                            field.onChange(company.id)
-                                            setCompanySearchValue("")
-                                            setCompanySearchOpen(false)
-                                          }}
-                                        >
-                                          <Check
-                                            className={cn(
-                                              "mr-2 h-4 w-4",
-                                              field.value === company.id ? "opacity-100" : "opacity-0"
-                                            )}
-                                          />
-                                          {company.name}
-                                        </CommandItem>
-                                      ))}
-                                    </CommandGroup>
-                                  </CommandList>
-                                </Command>
-                              </PopoverContent>
-                            </Popover>
-                            {companies.length === 0 && (
-                              <p className="text-xs text-muted-foreground">
-                                Nenhuma empresa cadastrada. Cadastre em Configurações → Empresas.
-                              </p>
-                            )}
+                            <FormControl>
+                              <ComboboxAsync
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                searchFunction={searchCompanies}
+                                placeholder="Buscar empresa..."
+                                emptyText="Nenhuma empresa encontrada"
+                              />
+                            </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -668,81 +510,23 @@ export default function Lancamentos() {
                         name="person_id"
                         render={({ field }) => {
                           const isReceivable = form.watch("entry_type") === "receivable"
-                          const people = isReceivable ? customers : suppliers
                           const personType = isReceivable ? "cliente" : "fornecedor"
-                          const searchOpen = isReceivable ? customerSearchOpen : supplierSearchOpen
-                          const setSearchOpen = isReceivable ? setCustomerSearchOpen : setSupplierSearchOpen
-                          const searchValue = isReceivable ? customerSearchValue : supplierSearchValue
-                          const setSearchValue = isReceivable ? setCustomerSearchValue : setSupplierSearchValue
+                          const searchFunction = isReceivable ? searchCustomers : searchSuppliers
                           
                           return (
                             <FormItem>
                               <FormLabel>
                                 {isReceivable ? "Cliente *" : "Fornecedor *"}
                               </FormLabel>
-                              <Popover open={searchOpen} onOpenChange={setSearchOpen}>
-                                <PopoverTrigger asChild>
-                                  <FormControl>
-                                    <Button
-                                      variant="outline"
-                                      role="combobox"
-                                      aria-expanded={searchOpen}
-                                      className={cn(
-                                        "w-full justify-between",
-                                        !field.value && "text-muted-foreground"
-                                      )}
-                                    >
-                                      {field.value
-                                        ? people.find((person) => person.id === field.value)?.name
-                                        : `Selecione o ${personType}`}
-                                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                    </Button>
-                                  </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-full p-0 z-50 bg-background">
-                                  <Command>
-                                    <CommandInput 
-                                      placeholder={`Buscar ${personType}...`}
-                                      value={searchValue}
-                                      onValueChange={setSearchValue}
-                                    />
-                                    <CommandList>
-                                      <CommandEmpty>
-                                        {people.length === 0 
-                                          ? `Nenhum ${personType} cadastrado.`
-                                          : `Nenhum ${personType} encontrado.`
-                                        }
-                                      </CommandEmpty>
-                                      <CommandGroup>
-                                        {people.map((person) => (
-                                          <CommandItem
-                                            key={person.id}
-                                            value={person.name}
-                                            onSelect={() => {
-                                              field.onChange(person.id)
-                                              setSearchValue("")
-                                              setSearchOpen(false)
-                                            }}
-                                          >
-                                            <Check
-                                              className={cn(
-                                                "mr-2 h-4 w-4",
-                                                field.value === person.id ? "opacity-100" : "opacity-0"
-                                              )}
-                                            />
-                                            {person.name}
-                                          </CommandItem>
-                                        ))}
-                                      </CommandGroup>
-                                    </CommandList>
-                                  </Command>
-                                </PopoverContent>
-                              </Popover>
-                              {people.length === 0 && (
-                                <p className="text-xs text-muted-foreground">
-                                  Configure {isReceivable ? "clientes" : "fornecedores"} em {isReceivable ? "Clientes" : "Fornecedores"}
-                                </p>
-                              )}
+                              <FormControl>
+                                <ComboboxAsync
+                                  value={field.value}
+                                  onValueChange={field.onChange}
+                                  searchFunction={searchFunction}
+                                  placeholder={`Buscar ${personType}...`}
+                                  emptyText={`Nenhum ${personType} encontrado`}
+                                />
+                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )
@@ -761,70 +545,15 @@ export default function Lancamentos() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Plano de Conta *</FormLabel>
-                            <Popover open={chartAccountSearchOpen} onOpenChange={setChartAccountSearchOpen}>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    aria-expanded={chartAccountSearchOpen}
-                                    className={cn(
-                                      "w-full justify-between",
-                                      !field.value && "text-muted-foreground"
-                                    )}
-                                  >
-                                    {field.value
-                                      ? (() => {
-                                          const account = chartOfAccounts.find((acc) => acc.id === field.value)
-                                          return account ? `${account.account_code} - ${account.account_name}` : "Selecione o plano de conta"
-                                        })()
-                                      : "Selecione o plano de conta"}
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                  </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-full p-0 z-50 bg-background">
-                                <Command>
-                                  <CommandInput 
-                                    placeholder="Buscar plano de conta..." 
-                                    value={chartAccountSearchValue}
-                                    onValueChange={setChartAccountSearchValue}
-                                  />
-                                  <CommandList>
-                                    <CommandEmpty>
-                                      {chartOfAccounts.length === 0 
-                                        ? "Nenhum plano de conta cadastrado."
-                                        : "Nenhum plano de conta encontrado."
-                                      }
-                                    </CommandEmpty>
-                                    <CommandGroup>
-                                      {chartOfAccounts.map((account) => (
-                                        <CommandItem
-                                          key={account.id}
-                                          value={`${account.account_code} ${account.account_name}`}
-                                          onSelect={() => {
-                                            field.onChange(account.id)
-                                            setChartAccountSearchValue("")
-                                            setChartAccountSearchOpen(false)
-                                          }}
-                                        >
-                                          <Check
-                                            className={cn(
-                                              "mr-2 h-4 w-4",
-                                              field.value === account.id ? "opacity-100" : "opacity-0"
-                                            )}
-                                          />
-                                          <div className="flex flex-col">
-                                            <span className="font-medium">{account.account_code}</span>
-                                            <span className="text-sm text-muted-foreground">{account.account_name}</span>
-                                          </div>
-                                        </CommandItem>
-                                      ))}
-                                    </CommandGroup>
-                                  </CommandList>
-                                </Command>
-                              </PopoverContent>
-                            </Popover>
+                            <FormControl>
+                              <ComboboxAsync
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                searchFunction={searchChartOfAccounts}
+                                placeholder="Buscar plano de conta..."
+                                emptyText="Nenhum plano de conta encontrado"
+                              />
+                            </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -836,70 +565,15 @@ export default function Lancamentos() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Centro de Custo</FormLabel>
-                            <Popover open={costCenterSearchOpen} onOpenChange={setCostCenterSearchOpen}>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    aria-expanded={costCenterSearchOpen}
-                                    className={cn(
-                                      "w-full justify-between",
-                                      !field.value && "text-muted-foreground"
-                                    )}
-                                  >
-                                    {field.value
-                                      ? (() => {
-                                          const center = getAvailableCostCenters().find((center) => center.id === field.value)
-                                          return center ? `${center.code} - ${center.name}` : "Selecione o centro de custo"
-                                        })()
-                                      : "Selecione o centro de custo"}
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                  </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-full p-0 z-50 bg-background">
-                                <Command>
-                                  <CommandInput 
-                                    placeholder="Buscar centro de custo..." 
-                                    value={costCenterSearchValue}
-                                    onValueChange={setCostCenterSearchValue}
-                                  />
-                                  <CommandList>
-                                    <CommandEmpty>
-                                      {getAvailableCostCenters().length === 0 
-                                        ? "Nenhum centro de custo disponível."
-                                        : "Nenhum centro de custo encontrado."
-                                      }
-                                    </CommandEmpty>
-                                    <CommandGroup>
-                                      {getAvailableCostCenters().map((center) => (
-                                        <CommandItem
-                                          key={center.id}
-                                          value={`${center.code} ${center.name}`}
-                                          onSelect={() => {
-                                            field.onChange(center.id)
-                                            setCostCenterSearchValue("")
-                                            setCostCenterSearchOpen(false)
-                                          }}
-                                        >
-                                          <Check
-                                            className={cn(
-                                              "mr-2 h-4 w-4",
-                                              field.value === center.id ? "opacity-100" : "opacity-0"
-                                            )}
-                                          />
-                                          <div className="flex flex-col">
-                                            <span className="font-medium">{center.code}</span>
-                                            <span className="text-sm text-muted-foreground">{center.name}</span>
-                                          </div>
-                                        </CommandItem>
-                                      ))}
-                                    </CommandGroup>
-                                  </CommandList>
-                                </Command>
-                              </PopoverContent>
-                            </Popover>
+                            <FormControl>
+                              <ComboboxAsync
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                searchFunction={searchCostCenters}
+                                placeholder="Buscar centro de custo..."
+                                emptyText="Nenhum centro de custo encontrado"
+                              />
+                            </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -1105,20 +779,15 @@ export default function Lancamentos() {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Forma de Pagamento</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecione a forma de pagamento" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {paymentMethods.map((method) => (
-                                    <SelectItem key={method.id} value={method.id}>
-                                      {method.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                              <FormControl>
+                                <ComboboxAsync
+                                  value={field.value}
+                                  onValueChange={field.onChange}
+                                  searchFunction={searchPaymentMethods}
+                                  placeholder="Buscar forma de pagamento..."
+                                  emptyText="Nenhuma forma de pagamento encontrada"
+                                />
+                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -1130,20 +799,15 @@ export default function Lancamentos() {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Conta Bancária</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecione a conta bancária" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {bankAccounts.map((account) => (
-                                    <SelectItem key={account.id} value={account.id}>
-                                      {getFormattedAccountName(account)}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                              <FormControl>
+                                <ComboboxAsync
+                                  value={field.value}
+                                  onValueChange={field.onChange}
+                                  searchFunction={searchBankAccounts}
+                                  placeholder="Buscar conta bancária..."
+                                  emptyText="Nenhuma conta bancária encontrada"
+                                />
+                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}

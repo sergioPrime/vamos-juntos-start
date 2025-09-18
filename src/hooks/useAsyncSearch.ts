@@ -64,12 +64,15 @@ export const useAsyncSearch = () => {
   const searchPessoas = useCallback(async (query: string, type: 'cliente' | 'fornecedor'): Promise<SearchResult[]> => {
     if (!organization?.currentOrg?.id || query.length < 2) return []
     
+    // Capitalize first letter to match database values
+    const typeCapitalized = type.charAt(0).toUpperCase() + type.slice(1)
+    
     const { data } = await supabase
       .from('pessoas')
       .select('id, nome_fantasia, codigo')
       .eq('org_id', organization.currentOrg.id)
       .eq('ativo', true)
-      .contains('rotulos', [type])
+      .contains('rotulos', [typeCapitalized])
       .or(`nome_fantasia.ilike.%${query}%,codigo.ilike.%${query}%`)
       .limit(10)
     

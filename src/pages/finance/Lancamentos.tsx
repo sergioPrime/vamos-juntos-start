@@ -469,7 +469,7 @@ export default function Lancamentos() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Tipo de Lançamento *</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Selecione o tipo" />

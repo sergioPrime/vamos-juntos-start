@@ -13,7 +13,7 @@ import { X, Plus } from "lucide-react"
 import { toast } from "sonner"
 import { PessoasListagem } from "@/components/pessoas/PessoasListagem"
 import { usePessoas, type Pessoa } from "@/hooks/usePessoas"
-// import { useOrganization } from "@/hooks/useOrganization"
+import { useOrganization } from "@/hooks/useOrganization"
 import { useAuth } from "@/hooks/useAuth"
 
 interface PessoaFormData {
@@ -49,8 +49,7 @@ export function Pessoas() {
   const [activeTab, setActiveTab] = useState("listagem")
   const [editingPessoa, setEditingPessoa] = useState<Pessoa | null>(null)
   const { createPessoa, updatePessoa } = usePessoas()
-  // const { currentOrganization } = useOrganization()
-  const currentOrganization = { id: 'mock-org-id' }
+  const { currentOrg: currentOrganization } = useOrganization()
   const { user } = useAuth()
   const [formData, setFormData] = useState<PessoaFormData>({
     nomeFantasia: "",

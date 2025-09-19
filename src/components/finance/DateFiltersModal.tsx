@@ -144,7 +144,7 @@ export function DateFiltersModal({
               <SelectTrigger className="bg-background">
                 <SelectValue placeholder="Selecione o tipo de data" />
               </SelectTrigger>
-              <SelectContent className="bg-background border z-50">
+              <SelectContent className="bg-background border z-[60]">
                 {DATE_FILTER_OPTIONS.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
@@ -165,7 +165,7 @@ export function DateFiltersModal({
                 <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Selecione o período" />
                 </SelectTrigger>
-                <SelectContent className="bg-background border z-50">
+                <SelectContent className="bg-background border z-[60]">
                   {PERIOD_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
@@ -197,7 +197,7 @@ export function DateFiltersModal({
                       {localFilters.startDate ? format(localFilters.startDate, "dd/MM/yyyy") : "Selecionar"}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-background border z-50" align="start">
+                  <PopoverContent className="w-auto p-0 bg-background border z-[60]" align="start">
                     <Calendar
                       mode="single"
                       selected={localFilters.startDate}
@@ -227,7 +227,7 @@ export function DateFiltersModal({
                       {localFilters.endDate ? format(localFilters.endDate, "dd/MM/yyyy") : "Selecionar"}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-background border z-50" align="start">
+                  <PopoverContent className="w-auto p-0 bg-background border z-[60]" align="start">
                     <Calendar
                       mode="single"
                       selected={localFilters.endDate}

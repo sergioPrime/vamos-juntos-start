@@ -14,9 +14,12 @@ import { FinancialTable } from "./FinancialTable"
 import { ColumnManager, ColumnConfig } from "./ColumnManager"
 import { LoadingWrapper } from "@/components/animations/LoadingWrapper"
 import { PageTransition } from "@/components/layout/PageTransition"
+import { usePersistentFilters } from "@/hooks/usePersistentFilters"
 
 interface FilterValues {
   dateType: string
+  periodType?: string
+  dateFilterType: string
   startDate?: Date
   endDate?: Date
   status: string
@@ -32,6 +35,8 @@ interface FilterValues {
 
 const DEFAULT_FILTERS: FilterValues = {
   dateType: "due",
+  periodType: "custom",
+  dateFilterType: "none",
   status: "all",
   personId: "",
   chartOfAccountId: "all",
@@ -64,7 +69,13 @@ export function FinancialListingTab() {
   const { toast } = useToast()
   const { entries, loading: entriesLoading, loadEntries } = useFinancialEntries()
   
-  const [filters, setFilters] = useState<FilterValues>(DEFAULT_FILTERS)
+  // Use persistent filters
+  const { filters, updateFilters, clearFilters } = usePersistentFilters<FilterValues>({
+    key: 'financial-listing-filters',
+    defaultFilters: DEFAULT_FILTERS,
+    useSessionStorage: false
+  })
+  
   const [columns, setColumns] = useState<ColumnConfig[]>(DEFAULT_COLUMNS)
   const [selectedEntries, setSelectedEntries] = useState<string[]>([])
   const [filtersLoading, setFiltersLoading] = useState(false)
@@ -150,10 +161,12 @@ export function FinancialListingTab() {
   // Filter entries based on current filters
   const filteredEntries = useMemo(() => {
     return entries.filter(entry => {
-      // Filter by date type and range
-      if (filters.startDate || filters.endDate) {
+      // Filter by date type and range - Skip if "Não filtrar por data" is selected
+      if (filters.dateFilterType !== "none" && (filters.startDate || filters.endDate)) {
         let entryDate: Date
-        switch (filters.dateType) {
+        const dateType = filters.dateFilterType || filters.dateType
+        
+        switch (dateType) {
           case "competence":
             entryDate = new Date(entry.competence_date)
             break
@@ -252,7 +265,7 @@ export function FinancialListingTab() {
   }
 
   const handleClearFilters = () => {
-    setFilters(DEFAULT_FILTERS)
+    clearFilters()
     setSelectedEntries([])
   }
 
@@ -312,7 +325,7 @@ export function FinancialListingTab() {
         {/* Filters Section */}
         <FinancialFilters
           filters={filters}
-          onFiltersChange={setFilters}
+          onFiltersChange={updateFilters}
           onApplyFilters={handleApplyFilters}
           onClearFilters={handleClearFilters}
           customers={customers}

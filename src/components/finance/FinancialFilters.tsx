@@ -14,9 +14,12 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { ChevronsUpDown, Check } from "lucide-react"
 import { AnimatedCard } from "@/components/animations/AnimatedCard"
 import { useAnimation } from "@/contexts/AnimationContext"
+import { DateFiltersModal } from "./DateFiltersModal"
 
 interface FilterValues {
   dateType: string
+  periodType?: string
+  dateFilterType: string
   startDate?: Date
   endDate?: Date
   status: string
@@ -82,6 +85,7 @@ export function FinancialFilters({
 
   const getActiveFiltersCount = () => {
     let count = 0
+    if (filters.dateFilterType && filters.dateFilterType !== "none") count++
     if (filters.startDate || filters.endDate) count++
     if (filters.status !== "all") count++
     if (filters.personId) count++
@@ -122,77 +126,36 @@ export function FinancialFilters({
 
       <CardContent className="space-y-4">
         {/* Primeira linha - Filtros principais */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {/* Filtro por Período */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Modal de Filtros de Data */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Período</Label>
-            <Select value={filters.dateType} onValueChange={(value) => updateFilter("dateType", value)}>
-              <SelectTrigger className="bg-background">
-                <SelectValue placeholder="Tipo de data" />
-              </SelectTrigger>
-              <SelectContent className="bg-background border z-50">
-                <SelectItem value="competence">Data de Competência</SelectItem>
-                <SelectItem value="due">Data de Vencimento</SelectItem>
-                <SelectItem value="settlement">Data de Quitação</SelectItem>
-                <SelectItem value="entry">Data de Lançamento</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Data Inicial */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Data Inicial</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal bg-background",
-                    !filters.startDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {filters.startDate ? format(filters.startDate, "dd/MM/yyyy") : "Selecionar"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-background border z-50" align="start">
-                <Calendar
-                  mode="single"
-                  selected={filters.startDate}
-                  onSelect={(date) => updateFilter("startDate", date)}
-                  initialFocus
-                  className="pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          {/* Data Final */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Data Final</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal bg-background",
-                    !filters.endDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {filters.endDate ? format(filters.endDate, "dd/MM/yyyy") : "Selecionar"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-background border z-50" align="start">
-                <Calendar
-                  mode="single"
-                  selected={filters.endDate}
-                  onSelect={(date) => updateFilter("endDate", date)}
-                  initialFocus
-                  className="pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
+            <Label className="text-sm font-medium">Filtros de Data</Label>
+            <DateFiltersModal
+              filters={{
+                periodType: filters.periodType,
+                dateFilterType: filters.dateFilterType || "none",
+                startDate: filters.startDate,
+                endDate: filters.endDate
+              }}
+              onFiltersChange={(dateFilters) => {
+                updateFilter("periodType", dateFilters.periodType)
+                updateFilter("dateFilterType", dateFilters.dateFilterType)
+                updateFilter("startDate", dateFilters.startDate)
+                updateFilter("endDate", dateFilters.endDate)
+                // Update legacy dateType for backward compatibility
+                if (dateFilters.dateFilterType !== "none") {
+                  updateFilter("dateType", dateFilters.dateFilterType)
+                }
+              }}
+              onApply={onApplyFilters}
+              onClear={() => {
+                updateFilter("periodType", "custom")
+                updateFilter("dateFilterType", "none")
+                updateFilter("startDate", undefined)
+                updateFilter("endDate", undefined)
+                updateFilter("dateType", "due")
+              }}
+            />
           </div>
 
           {/* Status */}
@@ -209,6 +172,21 @@ export function FinancialFilters({
                 <SelectItem value="overdue">Vencido</SelectItem>
                 <SelectItem value="conciliated">Conciliado</SelectItem>
                 <SelectItem value="not_conciliated">Não Conciliado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Tipo de Lançamento */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Tipo de Lançamento</Label>
+            <Select value={filters.entryType} onValueChange={(value) => updateFilter("entryType", value)}>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="Todos os tipos" />
+              </SelectTrigger>
+              <SelectContent className="bg-background border z-50">
+                <SelectItem value="all">Todos os tipos</SelectItem>
+                <SelectItem value="receivable">Receita</SelectItem>
+                <SelectItem value="payable">Despesa</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -352,20 +330,6 @@ export function FinancialFilters({
                 </Select>
               </div>
 
-              {/* Tipo de Lançamento */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Tipo de Lançamento</Label>
-                <Select value={filters.entryType} onValueChange={(value) => updateFilter("entryType", value)}>
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Todos os tipos" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border z-50">
-                    <SelectItem value="all">Todos os tipos</SelectItem>
-                    <SelectItem value="receivable">Receita</SelectItem>
-                    <SelectItem value="payable">Despesa</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
 
             {/* Filtro por Valor */}

@@ -181,8 +181,18 @@ export function FinancialListingTab() {
             entryDate = new Date(entry.due_date)
         }
         
-        if (filters.startDate && entryDate < filters.startDate) return false
-        if (filters.endDate && entryDate > filters.endDate) return false
+        // Normalize entry date to compare only the date part (remove time)
+        const entryDateOnly = new Date(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate())
+        
+        if (filters.startDate) {
+          const startDateOnly = new Date(filters.startDate.getFullYear(), filters.startDate.getMonth(), filters.startDate.getDate())
+          if (entryDateOnly < startDateOnly) return false
+        }
+        
+        if (filters.endDate) {
+          const endDateOnly = new Date(filters.endDate.getFullYear(), filters.endDate.getMonth(), filters.endDate.getDate())
+          if (entryDateOnly > endDateOnly) return false
+        }
       }
 
       // Filter by status

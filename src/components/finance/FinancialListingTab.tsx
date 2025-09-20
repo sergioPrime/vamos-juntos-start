@@ -15,6 +15,7 @@ import { ColumnManager, ColumnConfig } from "./ColumnManager"
 import { LoadingWrapper } from "@/components/animations/LoadingWrapper"
 import { PageTransition } from "@/components/layout/PageTransition"
 import { usePersistentFilters } from "@/hooks/usePersistentFilters"
+import { validateDateFilter, logDateFilterSummary } from "@/utils/dateFilterValidation"
 
 interface FilterValues {
   dateType: string
@@ -160,100 +161,44 @@ export function FinancialListingTab() {
 
   // Filter entries based on current filters
   const filteredEntries = useMemo(() => {
-    console.log("🔍 Filtering entries:", { 
+    console.log("🔍 [FILTER DEBUG] Starting filter process:", { 
       totalEntries: entries.length, 
       filters: {
         dateFilterType: filters.dateFilterType,
-        startDate: filters.startDate,
-        endDate: filters.endDate,
+        startDate: filters.startDate?.toISOString().split('T')[0],
+        endDate: filters.endDate?.toISOString().split('T')[0],
         periodType: filters.periodType
       }
     })
     
-    return entries.filter(entry => {
-      // Skip date filtering completely if "Não filtrar por data" is selected
+    const result = entries.filter(entry => {
+      // === DATE FILTERING LOGIC ===
       if (filters.dateFilterType === "none" || !filters.dateFilterType) {
-        console.log("📅 Skipping date filter - none selected or undefined")
+        console.log("📅 [FILTER DEBUG] Skipping date filter - none selected or undefined")
       } else if (filters.dateFilterType && filters.dateFilterType !== "none") {
-        let entryDate: Date | null = null
-        let dateField: string | null = null
+        // Use the new validation utility
+        const dateValidation = validateDateFilter(
+          entry, 
+          filters.dateFilterType, 
+          filters.startDate, 
+          filters.endDate
+        )
         
-        // Get the appropriate date based on filter type
-        switch (filters.dateFilterType) {
-          case "competence":
-            if (entry.competence_date) {
-              entryDate = new Date(entry.competence_date)
-              dateField = "competence_date"
-            }
-            break
-          case "settlement":
-            if (entry.settled_at) {
-              entryDate = new Date(entry.settled_at)
-              dateField = "settled_at"
-            } else {
-              console.log("❌ Entry excluded - no settlement date:", entry.id)
-              return false // Exclude entries without settlement date when filtering by settlement
-            }
-            break
-          case "entry":
-            if (entry.created_at) {
-              entryDate = new Date(entry.created_at)
-              dateField = "created_at"
-            }
-            break
-          default: // due
-            if (entry.due_date) {
-              entryDate = new Date(entry.due_date)
-              dateField = "due_date"
-            }
-        }
+        console.log(`${dateValidation.included ? '✅' : '❌'} [FILTER DEBUG] Entry ${dateValidation.included ? 'included' : 'excluded'}:`, {
+          entryId: entry.id,
+          filterType: filters.dateFilterType,
+          fieldName: dateValidation.debugInfo.fieldName,
+          rawValue: dateValidation.debugInfo.rawValue,
+          dateOnly: dateValidation.debugInfo.dateOnly,
+          reason: dateValidation.reason,
+          filterDates: {
+            start: filters.startDate?.toISOString().split('T')[0],
+            end: filters.endDate?.toISOString().split('T')[0]
+          }
+        })
         
-        // Skip entry if date field is null or invalid
-        if (!entryDate || isNaN(entryDate.getTime())) {
-          console.log("❌ Entry excluded - invalid date:", { entryId: entry.id, dateField, dateValue: entryDate })
+        if (!dateValidation.included) {
           return false
-        }
-        
-        // Only apply date range filter if we have actual filter dates
-        const hasDateFilter = filters.startDate || filters.endDate
-        
-        if (hasDateFilter) {
-          // Normalize dates to compare only date part (ignore time)
-          const entryDateOnly = new Date(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate())
-          
-          // Check start date
-          if (filters.startDate) {
-            const startDateOnly = new Date(filters.startDate.getFullYear(), filters.startDate.getMonth(), filters.startDate.getDate())
-            if (entryDateOnly < startDateOnly) {
-              console.log("❌ Entry excluded - before start date:", { 
-                entryId: entry.id, 
-                entryDate: entryDateOnly.toDateString(), 
-                startDate: startDateOnly.toDateString() 
-              })
-              return false
-            }
-          }
-          
-          // Check end date
-          if (filters.endDate) {
-            const endDateOnly = new Date(filters.endDate.getFullYear(), filters.endDate.getMonth(), filters.endDate.getDate())
-            if (entryDateOnly > endDateOnly) {
-              console.log("❌ Entry excluded - after end date:", { 
-                entryId: entry.id, 
-                entryDate: entryDateOnly.toDateString(), 
-                endDate: endDateOnly.toDateString() 
-              })
-              return false
-            }
-          }
-          
-          console.log("✅ Entry included:", { 
-            entryId: entry.id, 
-            entryDate: entryDateOnly.toDateString(),
-            dateField 
-          })
-        } else {
-          console.log("📅 No date range filter applied - including entry:", entry.id)
         }
       }
 
@@ -302,6 +247,19 @@ export function FinancialListingTab() {
 
       return true
     })
+    
+    // Log summary of date filtering
+    if (filters.dateFilterType && filters.dateFilterType !== "none") {
+      logDateFilterSummary(
+        entries.length,
+        result.length,
+        filters.dateFilterType,
+        filters.startDate,
+        filters.endDate
+      )
+    }
+    
+    return result
   }, [entries, filters])
 
   // Calculate summary data

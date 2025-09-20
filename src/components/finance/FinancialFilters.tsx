@@ -138,7 +138,20 @@ export function FinancialFilters({
                 endDate: filters.endDate
               }}
               onFiltersChange={(dateFilters) => {
-                console.log("🔄 FinancialFilters updating date filters:", dateFilters)
+                console.log("🔄 [FILTERS DEBUG] FinancialFilters updating date filters:", {
+                  before: {
+                    periodType: filters.periodType,
+                    dateFilterType: filters.dateFilterType,
+                    startDate: filters.startDate?.toISOString(),
+                    endDate: filters.endDate?.toISOString()
+                  },
+                  after: {
+                    periodType: dateFilters.periodType,
+                    dateFilterType: dateFilters.dateFilterType,
+                    startDate: dateFilters.startDate?.toISOString(),
+                    endDate: dateFilters.endDate?.toISOString()
+                  }
+                })
                 updateFilter("periodType", dateFilters.periodType)
                 updateFilter("dateFilterType", dateFilters.dateFilterType)
                 updateFilter("startDate", dateFilters.startDate)

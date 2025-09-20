@@ -28,10 +28,10 @@ interface DateFiltersModalProps {
 
 const DATE_FILTER_OPTIONS = [
   { value: "none", label: "Não filtrar por data" },
+  { value: "entry", label: "Data de Lançamento" },
   { value: "due", label: "Data de Vencimento" },
   { value: "settlement", label: "Data de Quitação" },
-  { value: "competence", label: "Data de Competência" },
-  { value: "entry", label: "Data de Lançamento" }
+  { value: "competence", label: "Data de Competência" }
 ]
 
 export function DateFiltersModal({ 
@@ -86,7 +86,13 @@ export function DateFiltersModal({
   }
 
   const handleApply = () => {
-    console.log("🎯 DateFiltersModal applying filters:", localFilters)
+    console.log("🎯 [MODAL DEBUG] DateFiltersModal applying filters:", {
+      filters: localFilters,
+      dateFilterType: localFilters.dateFilterType,
+      periodType: localFilters.periodType,
+      startDate: localFilters.startDate?.toISOString(),
+      endDate: localFilters.endDate?.toISOString()
+    })
     
     // Validate dates if date filtering is enabled
     if (localFilters.dateFilterType !== "none") {
@@ -100,8 +106,20 @@ export function DateFiltersModal({
         })
         return
       }
+      
+      // Ensure we have dates when a date filter type is selected
+      if (!localFilters.startDate && !localFilters.endDate) {
+        setValidationError("Selecione pelo menos uma data inicial ou final")
+        toast({
+          title: "Erro de Validação",
+          description: "Selecione pelo menos uma data inicial ou final",
+          variant: "destructive"
+        })
+        return
+      }
     }
     
+    console.log("✅ [MODAL DEBUG] Validation passed, applying filters")
     onFiltersChange(localFilters)
     onApply()
     setOpen(false)

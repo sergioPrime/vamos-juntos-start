@@ -48,12 +48,25 @@ export const PERIOD_OPTIONS: PeriodOption[] = [
 export function calculateDateRange(periodType: string): DateRange | null {
   const today = new Date()
   
+  console.log("📅 [DATE CALC DEBUG] Calculating date range for period:", {
+    periodType,
+    today: today.toISOString(),
+    todayDateOnly: today.toISOString().split('T')[0]
+  })
+  
   switch (periodType) {
     case "today":
-      return {
+      const todayRange = {
         startDate: startOfDay(today),
         endDate: endOfDay(today)
       }
+      console.log("📅 [DATE CALC DEBUG] Today range calculated:", {
+        startDate: todayRange.startDate.toISOString(),
+        endDate: todayRange.endDate.toISOString(),
+        startDateOnly: todayRange.startDate.toISOString().split('T')[0],
+        endDateOnly: todayRange.endDate.toISOString().split('T')[0]
+      })
+      return todayRange
       
     case "yesterday":
       const yesterday = subDays(today, 1)

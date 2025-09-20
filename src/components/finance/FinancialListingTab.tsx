@@ -34,8 +34,8 @@ interface FilterValues {
 }
 
 const DEFAULT_FILTERS: FilterValues = {
-  dateType: "due",
-  periodType: "custom",
+  dateType: "due", // Legacy field for compatibility
+  periodType: undefined,
   dateFilterType: "none",
   status: "all",
   personId: "",
@@ -172,9 +172,9 @@ export function FinancialListingTab() {
     
     return entries.filter(entry => {
       // Skip date filtering completely if "Não filtrar por data" is selected
-      if (filters.dateFilterType === "none") {
-        console.log("📅 Skipping date filter - none selected")
-      } else if (filters.dateFilterType && (filters.startDate || filters.endDate)) {
+      if (filters.dateFilterType === "none" || !filters.dateFilterType) {
+        console.log("📅 Skipping date filter - none selected or undefined")
+      } else if (filters.dateFilterType && filters.dateFilterType !== "none") {
         let entryDate: Date | null = null
         let dateField: string | null = null
         
@@ -214,40 +214,47 @@ export function FinancialListingTab() {
           return false
         }
         
-        // Normalize dates to compare only date part (ignore time)
-        const entryDateOnly = new Date(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate())
+        // Only apply date range filter if we have actual filter dates
+        const hasDateFilter = filters.startDate || filters.endDate
         
-        // Check start date
-        if (filters.startDate) {
-          const startDateOnly = new Date(filters.startDate.getFullYear(), filters.startDate.getMonth(), filters.startDate.getDate())
-          if (entryDateOnly < startDateOnly) {
-            console.log("❌ Entry excluded - before start date:", { 
-              entryId: entry.id, 
-              entryDate: entryDateOnly.toDateString(), 
-              startDate: startDateOnly.toDateString() 
-            })
-            return false
+        if (hasDateFilter) {
+          // Normalize dates to compare only date part (ignore time)
+          const entryDateOnly = new Date(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate())
+          
+          // Check start date
+          if (filters.startDate) {
+            const startDateOnly = new Date(filters.startDate.getFullYear(), filters.startDate.getMonth(), filters.startDate.getDate())
+            if (entryDateOnly < startDateOnly) {
+              console.log("❌ Entry excluded - before start date:", { 
+                entryId: entry.id, 
+                entryDate: entryDateOnly.toDateString(), 
+                startDate: startDateOnly.toDateString() 
+              })
+              return false
+            }
           }
-        }
-        
-        // Check end date
-        if (filters.endDate) {
-          const endDateOnly = new Date(filters.endDate.getFullYear(), filters.endDate.getMonth(), filters.endDate.getDate())
-          if (entryDateOnly > endDateOnly) {
-            console.log("❌ Entry excluded - after end date:", { 
-              entryId: entry.id, 
-              entryDate: entryDateOnly.toDateString(), 
-              endDate: endDateOnly.toDateString() 
-            })
-            return false
+          
+          // Check end date
+          if (filters.endDate) {
+            const endDateOnly = new Date(filters.endDate.getFullYear(), filters.endDate.getMonth(), filters.endDate.getDate())
+            if (entryDateOnly > endDateOnly) {
+              console.log("❌ Entry excluded - after end date:", { 
+                entryId: entry.id, 
+                entryDate: entryDateOnly.toDateString(), 
+                endDate: endDateOnly.toDateString() 
+              })
+              return false
+            }
           }
+          
+          console.log("✅ Entry included:", { 
+            entryId: entry.id, 
+            entryDate: entryDateOnly.toDateString(),
+            dateField 
+          })
+        } else {
+          console.log("📅 No date range filter applied - including entry:", entry.id)
         }
-        
-        console.log("✅ Entry included:", { 
-          entryId: entry.id, 
-          entryDate: entryDateOnly.toDateString(),
-          dateField 
-        })
       }
 
       // Filter by status

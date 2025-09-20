@@ -138,22 +138,19 @@ export function FinancialFilters({
                 endDate: filters.endDate
               }}
               onFiltersChange={(dateFilters) => {
+                console.log("🔄 FinancialFilters updating date filters:", dateFilters)
                 updateFilter("periodType", dateFilters.periodType)
                 updateFilter("dateFilterType", dateFilters.dateFilterType)
                 updateFilter("startDate", dateFilters.startDate)
                 updateFilter("endDate", dateFilters.endDate)
-                // Update legacy dateType for backward compatibility
-                if (dateFilters.dateFilterType !== "none") {
-                  updateFilter("dateType", dateFilters.dateFilterType)
-                }
               }}
               onApply={onApplyFilters}
               onClear={() => {
-                updateFilter("periodType", "custom")
+                console.log("🧹 FinancialFilters clearing date filters")
+                updateFilter("periodType", undefined)
                 updateFilter("dateFilterType", "none")
                 updateFilter("startDate", undefined)
                 updateFilter("endDate", undefined)
-                updateFilter("dateType", "due")
               }}
             />
           </div>

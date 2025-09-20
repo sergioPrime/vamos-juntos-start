@@ -50,6 +50,7 @@ export function DateFiltersModal({
   }, [filters])
 
   const updateLocalFilter = (key: string, value: any) => {
+    console.log("🔄 DateFiltersModal updating filter:", { key, value })
     const newFilters = { ...localFilters, [key]: value }
     
     // Clear date fields when "none" is selected
@@ -58,6 +59,11 @@ export function DateFiltersModal({
       delete newFilters.endDate
       delete newFilters.periodType
       console.log("🧹 Cleared date filters - dateFilterType set to none")
+    }
+    
+    // Set default periodType when enabling date filtering
+    if (key === "dateFilterType" && value !== "none" && !newFilters.periodType) {
+      newFilters.periodType = "custom"
     }
     
     setLocalFilters(newFilters)
@@ -80,6 +86,8 @@ export function DateFiltersModal({
   }
 
   const handleApply = () => {
+    console.log("🎯 DateFiltersModal applying filters:", localFilters)
+    
     // Validate dates if date filtering is enabled
     if (localFilters.dateFilterType !== "none") {
       const error = validateDateRange(localFilters.startDate, localFilters.endDate)

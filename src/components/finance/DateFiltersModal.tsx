@@ -51,15 +51,25 @@ export function DateFiltersModal({
 
   const updateLocalFilter = (key: string, value: any) => {
     const newFilters = { ...localFilters, [key]: value }
+    
+    // Clear date fields when "none" is selected
+    if (key === "dateFilterType" && value === "none") {
+      delete newFilters.startDate
+      delete newFilters.endDate
+      delete newFilters.periodType
+      console.log("🧹 Cleared date filters - dateFilterType set to none")
+    }
+    
     setLocalFilters(newFilters)
     
     // Auto-calculate dates for predefined periods
-    if (key === "periodType" && value !== "custom") {
+    if (key === "periodType" && value !== "custom" && newFilters.dateFilterType !== "none") {
       const dateRange = calculateDateRange(value)
       if (dateRange) {
         newFilters.startDate = dateRange.startDate
         newFilters.endDate = dateRange.endDate
         setLocalFilters(newFilters)
+        console.log("📅 Auto-calculated date range:", { period: value, dateRange })
       }
     }
     
@@ -97,18 +107,21 @@ export function DateFiltersModal({
   const handleClear = () => {
     const clearedFilters = {
       ...localFilters,
-      periodType: "custom",
       dateFilterType: "none",
       startDate: undefined,
-      endDate: undefined
+      endDate: undefined,
+      periodType: undefined
     }
+    
     setLocalFilters(clearedFilters)
     setValidationError(null)
     onFiltersChange(clearedFilters)
     onClear()
     
+    console.log("🧹 Date filters cleared completely")
+    
     toast({
-      title: "Filtros Limpos",
+      title: "Filtros de Data Limpos",
       description: "Todos os filtros de data foram removidos."
     })
   }

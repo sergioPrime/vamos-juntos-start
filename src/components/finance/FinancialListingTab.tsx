@@ -285,6 +285,13 @@ export function FinancialListingTab() {
   }, [filteredEntries])
 
   const handleApplyFilters = () => {
+    console.log("🎯 [LISTING DEBUG] handleApplyFilters called with filters:", {
+      dateFilterType: filters.dateFilterType,
+      periodType: filters.periodType,
+      startDate: filters.startDate?.toISOString(),
+      endDate: filters.endDate?.toISOString()
+    })
+    
     setFiltersLoading(true)
     // Simulate filter loading
     setTimeout(() => {

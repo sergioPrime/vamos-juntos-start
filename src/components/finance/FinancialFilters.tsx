@@ -137,7 +137,7 @@ export function FinancialFilters({
                 endDate: filters.endDate
               }}
               onFiltersChange={(dateFilters) => {
-                console.log("🔄 [FILTERS DEBUG] FinancialFilters updating date filters:", {
+                console.log("🔄 [FILTERS DEBUG] FinancialFilters received date filters:", {
                   before: {
                     periodType: filters.periodType,
                     dateFilterType: filters.dateFilterType,
@@ -151,10 +151,18 @@ export function FinancialFilters({
                     endDate: dateFilters.endDate?.toISOString()
                   }
                 })
-                updateFilter("periodType", dateFilters.periodType)
-                updateFilter("dateFilterType", dateFilters.dateFilterType)
-                updateFilter("startDate", dateFilters.startDate)
-                updateFilter("endDate", dateFilters.endDate)
+                
+                // Update all date-related filters at once
+                const updatedFilters = {
+                  ...filters,
+                  periodType: dateFilters.periodType,
+                  dateFilterType: dateFilters.dateFilterType,
+                  startDate: dateFilters.startDate,
+                  endDate: dateFilters.endDate
+                }
+                
+                console.log("🔄 [FILTERS DEBUG] Calling onFiltersChange with complete filters:", updatedFilters)
+                onFiltersChange(updatedFilters)
               }}
               onApply={onApplyFilters}
               onClear={() => {

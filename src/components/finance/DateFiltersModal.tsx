@@ -109,31 +109,46 @@ export function DateFiltersModal({
             description: error,
             variant: "destructive"
           })
+          setLoading(false)
           return
         }
         
         // Ensure we have dates when a date filter type is selected
-        if (!localFilters.startDate && !localFilters.endDate) {
-          setValidationError("Selecione pelo menos uma data inicial ou final")
+        if (!localFilters.startDate || !localFilters.endDate) {
+          setValidationError("Por favor, selecione tanto a data inicial quanto a data final.")
           toast({
             title: "Erro de Validação",
-            description: "Selecione pelo menos uma data inicial ou final",
+            description: "Por favor, selecione tanto a data inicial quanto a data final.",
             variant: "destructive"
           })
+          setLoading(false)
           return
         }
       }
       
-      console.log("✅ [MODAL DEBUG] Validation passed, applying filters")
-      onFiltersChange(localFilters)
-      onApply()
-      setOpen(false)
+      console.log("✅ [MODAL DEBUG] Validation passed, calling onFiltersChange with:", localFilters)
       
-      toast({
-        title: "Filtros Aplicados",
-        description: "Os filtros de data foram aplicados com sucesso.",
-        variant: "default"
+      // CRITICAL: Make sure we call onFiltersChange with the complete filter object
+      onFiltersChange({
+        dateFilterType: localFilters.dateFilterType,
+        periodType: localFilters.periodType,
+        startDate: localFilters.startDate,
+        endDate: localFilters.endDate
       })
+      
+      // Small delay to ensure state updates
+      setTimeout(() => {
+        console.log("🚀 [MODAL DEBUG] Calling onApply")
+        onApply()
+        setOpen(false)
+        
+        toast({
+          title: "Filtros Aplicados",
+          description: "Os filtros de data foram aplicados com sucesso.",
+          variant: "default"
+        })
+      }, 100)
+      
     } catch (error) {
       console.error("❌ Error applying filters:", error)
       toast({

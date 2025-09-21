@@ -76,6 +76,9 @@ export function usePersistentFilters<T>({
     console.log("💾 [PERSISTENT FILTERS] Saving filters to storage:", {
       key,
       filters: cleanedFilters,
+      dateFilterType: cleanedFilters.dateFilterType,
+      startDate: cleanedFilters.startDate?.toISOString?.(),
+      endDate: cleanedFilters.endDate?.toISOString?.(),
       storage: useSessionStorage ? 'session' : 'local'
     })
     

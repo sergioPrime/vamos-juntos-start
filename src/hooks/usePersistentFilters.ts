@@ -45,6 +45,11 @@ export function usePersistentFilters<T>({
           delete parsedFilters.periodType
         }
         
+        // Remove legacy dateType field if it exists
+        if (parsedFilters.dateType) {
+          delete parsedFilters.dateType
+        }
+        
         setFilters({ ...defaultFilters, ...parsedFilters })
       }
     } catch (error) {
@@ -62,6 +67,17 @@ export function usePersistentFilters<T>({
       delete cleanedFilters.endDate
       delete cleanedFilters.periodType
     }
+    
+    // Remove legacy dateType field if it exists
+    if (cleanedFilters.dateType) {
+      delete cleanedFilters.dateType
+    }
+    
+    console.log("💾 [PERSISTENT FILTERS] Saving filters to storage:", {
+      key,
+      filters: cleanedFilters,
+      storage: useSessionStorage ? 'session' : 'local'
+    })
     
     setFilters(cleanedFilters as T)
     try {

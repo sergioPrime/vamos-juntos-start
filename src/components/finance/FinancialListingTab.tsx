@@ -18,7 +18,6 @@ import { usePersistentFilters } from "@/hooks/usePersistentFilters"
 import { validateDateFilter, logDateFilterSummary } from "@/utils/dateFilterValidation"
 
 interface FilterValues {
-  dateType: string
   periodType?: string
   dateFilterType: string
   startDate?: Date
@@ -35,7 +34,6 @@ interface FilterValues {
 }
 
 const DEFAULT_FILTERS: FilterValues = {
-  dateType: "due", // Legacy field for compatibility
   periodType: undefined,
   dateFilterType: "none",
   status: "all",

@@ -17,7 +17,6 @@ import { useAnimation } from "@/contexts/AnimationContext"
 import { DateFiltersModal } from "./DateFiltersModal"
 
 interface FilterValues {
-  dateType: string
   periodType?: string
   dateFilterType: string
   startDate?: Date

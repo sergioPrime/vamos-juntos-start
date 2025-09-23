@@ -340,9 +340,7 @@ const PDV = () => {
                 <CardContent className="p-4">
                   <div className="space-y-2">
                     <h3 className="font-medium text-sm">{product.name}</h3>
-                    {product.sku && (
-                      <p className="text-xs text-muted-foreground">SKU: {product.sku}</p>
-                    )}
+                    <p className="text-xs font-medium text-primary">SKU: {product.sku}</p>
                     {product.category && (
                       <Badge variant="secondary" className="text-xs">
                         {product.category}
@@ -406,10 +404,10 @@ const PDV = () => {
                   <div className="flex-1 space-y-3 overflow-auto">
                     {cart.map(item => (
                       <div key={item.id} className="flex items-center justify-between p-3 border rounded">
-                        <div className="flex-1 min-w-0">
+                         <div className="flex-1 min-w-0">
                           <h4 className="font-medium text-sm truncate">{item.name}</h4>
                           <p className="text-xs text-muted-foreground">
-                            R$ {item.unit_price.toFixed(2)} / {item.unit}
+                            SKU: {item.sku} | R$ {item.unit_price.toFixed(2)} / {item.unit}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">

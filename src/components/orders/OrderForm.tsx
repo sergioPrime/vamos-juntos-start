@@ -365,11 +365,16 @@ const OrderForm = () => {
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                     <div className="md:col-span-4">
                       <Label>Produto</Label>
-                      <Input
-                        value={item.product_name}
-                        onChange={(e) => updateItem(index, 'product_name', e.target.value)}
-                        placeholder="Nome do produto"
-                      />
+                      <div className="space-y-2">
+                        <Input
+                          value={`${item.product_name}${item.product_sku ? ` (${item.product_sku})` : ''}`}
+                          onChange={(e) => updateItem(index, 'product_name', e.target.value)}
+                          placeholder="Nome do produto (SKU)"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Digite o nome e SKU do produto
+                        </p>
+                      </div>
                     </div>
                     
                     <div className="md:col-span-2">

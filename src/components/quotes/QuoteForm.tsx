@@ -383,7 +383,7 @@ const QuoteForm = () => {
                       <Textarea
                         value={item.description}
                         onChange={(e) => updateItem(index, 'description', e.target.value)}
-                        placeholder="Descrição do serviço ou produto"
+                        placeholder="Descrição do serviço ou produto (incluir SKU se aplicável)"
                         rows={2}
                       />
                     </div>

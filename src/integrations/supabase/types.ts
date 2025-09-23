@@ -1439,7 +1439,7 @@ export type Database = {
           reorder_point: number | null
           representation_commission_percent: number | null
           sale_unit: string | null
-          sku: string | null
+          sku: string
           stock_quantity: number
           supplier_code: string | null
           supplier_id: string | null
@@ -1497,7 +1497,7 @@ export type Database = {
           reorder_point?: number | null
           representation_commission_percent?: number | null
           sale_unit?: string | null
-          sku?: string | null
+          sku: string
           stock_quantity?: number
           supplier_code?: string | null
           supplier_id?: string | null
@@ -1555,7 +1555,7 @@ export type Database = {
           reorder_point?: number | null
           representation_commission_percent?: number | null
           sale_unit?: string | null
-          sku?: string | null
+          sku?: string
           stock_quantity?: number
           supplier_code?: string | null
           supplier_id?: string | null

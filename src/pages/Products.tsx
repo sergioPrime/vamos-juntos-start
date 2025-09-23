@@ -267,6 +267,15 @@ const Products = () => {
       return
     }
 
+    if (!formData.sku?.trim()) {
+      toast({
+        title: "Erro de validação",
+        description: "SKU (Código) do produto é obrigatório.",
+        variant: "destructive",
+      })
+      return
+    }
+
     if (!formData.product_genre) {
       toast({
         title: "Tipo/Gênero obrigatório",
@@ -562,22 +571,22 @@ const Products = () => {
                 {/* Quarta linha */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="sku">Código do Produto (SKU)</Label>
-                    <Input
-                      id="sku"
-                      value={formData.sku}
-                      onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value }))}
-                      placeholder="Digite o SKU"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
                     <Label htmlFor="category">Categoria</Label>
                     <Input
                       id="category"
                       value={formData.category}
                       onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                       placeholder="Digite a categoria"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Descrição</Label>
+                    <Input
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                      placeholder="Descrição do produto"
                     />
                   </div>
                 </div>
@@ -789,9 +798,7 @@ const Products = () => {
                       </Button>
                     </div>
                   </div>
-                  {product.sku && (
-                    <p className="text-sm text-muted-foreground">SKU: {product.sku}</p>
-                  )}
+                  <p className="text-sm font-medium text-primary">SKU: {product.sku}</p>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">

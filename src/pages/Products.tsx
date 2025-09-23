@@ -281,7 +281,16 @@ const Products = () => {
         ...formData,
         org_id: currentOrg?.id,
         owner_id: user?.id,
+        // Garantir que valores numéricos sejam válidos
+        min_stock_level: Number(formData.min_stock_level) || 0,
+        stock_quantity: Number(formData.stock_quantity) || 0,
+        unit_price: Number(formData.unit_price) || 0,
+        cost_price: Number(formData.cost_price) || 0,
+        validity_days: Number(formData.validity_days) || 0,
+        weight: Number(formData.weight) || 0,
       }
+
+      console.log('Dados do produto a serem salvos:', productData)
 
       if (editingProduct) {
         const { error } = await supabase
@@ -289,7 +298,10 @@ const Products = () => {
           .update(productData)
           .eq('id', editingProduct.id)
 
-        if (error) throw error
+        if (error) {
+          console.error('Erro detalhado:', error)
+          throw error
+        }
 
         toast({
           title: "Produto atualizado",
@@ -300,7 +312,10 @@ const Products = () => {
           .from('products')
           .insert(productData)
 
-        if (error) throw error
+        if (error) {
+          console.error('Erro detalhado:', error)
+          throw error
+        }
 
         toast({
           title: "Produto criado",
@@ -311,10 +326,11 @@ const Products = () => {
       setShowForm(false)
       resetForm()
       loadProducts()
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Erro completo:', error)
       toast({
         title: "Erro ao salvar produto",
-        description: "Ocorreu um erro ao salvar o produto.",
+        description: error?.message || "Ocorreu um erro ao salvar o produto.",
         variant: "destructive",
       })
     }
@@ -654,6 +670,27 @@ const Products = () => {
                             value={formData.stock_quantity}
                             onChange={(e) => setFormData(prev => ({ ...prev, stock_quantity: parseInt(e.target.value) || 0 }))}
                             placeholder="0"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="min_stock_level">Estoque Mínimo</Label>
+                          <Input
+                            id="min_stock_level"
+                            type="number"
+                            value={formData.min_stock_level}
+                            onChange={(e) => setFormData(prev => ({ ...prev, min_stock_level: parseInt(e.target.value) || 0 }))}
+                            placeholder="0"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="unit">Unidade</Label>
+                          <Input
+                            id="unit"
+                            value={formData.unit}
+                            onChange={(e) => setFormData(prev => ({ ...prev, unit: e.target.value }))}
+                            placeholder="un"
                           />
                         </div>
                       </div>

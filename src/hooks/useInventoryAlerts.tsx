@@ -50,28 +50,33 @@ export function useInventoryAlerts() {
     if (!currentOrg?.id || !alertSettings.low_stock_enabled) return []
 
     try {
+      // First get all active products
       const { data: products, error } = await supabase
         .from('products')
         .select('id, name, stock_quantity, min_stock_level')
         .eq('org_id', currentOrg.id)
         .eq('active', true)
-        .filter('stock_quantity', 'lte', 'min_stock_level')
 
       if (error) throw error
 
-      return products?.map(product => ({
+      // Filter products where stock_quantity <= min_stock_level
+      const lowStockProducts = products?.filter(product => 
+        product.stock_quantity <= (product.min_stock_level || 0)
+      ) || []
+
+      return lowStockProducts.map(product => ({
         id: `low_stock_${product.id}`,
         type: 'low_stock' as const,
         severity: product.stock_quantity === 0 ? 'critical' as const : 'high' as const,
         title: product.stock_quantity === 0 ? 'Produto sem estoque' : 'Estoque baixo',
-        description: `${product.name} - Estoque atual: ${product.stock_quantity}, Mínimo: ${product.min_stock_level}`,
+        description: `${product.name} - Estoque atual: ${product.stock_quantity}, Mínimo: ${product.min_stock_level || 0}`,
         product_id: product.id,
         product_name: product.name,
         current_value: product.stock_quantity,
-        threshold_value: product.min_stock_level,
+        threshold_value: product.min_stock_level || 0,
         created_at: new Date().toISOString(),
         resolved: false
-      })) || []
+      }))
     } catch (error) {
       console.error('Error checking low stock alerts:', error)
       return []
@@ -103,11 +108,10 @@ export function useInventoryAlerts() {
 
       if (error) throw error
 
-      return lots?.filter(lot => lot.products && Array.isArray(lot.products) && lot.products.length > 0)
-        .map(lot => {
+      return lots?.map(lot => {
         const expirationDate = new Date(lot.expiration_date!)
         const daysUntilExpiry = Math.ceil((expirationDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000))
-        const product = Array.isArray(lot.products) ? lot.products[0] : lot.products
+        const product = lot.products
         
         return {
           id: `near_expiry_${lot.id}`,
@@ -173,7 +177,7 @@ export function useInventoryAlerts() {
         .select(`
           product_id,
           quantity,
-          products!inner(id, name, stock_quantity, min_stock_level)
+          products(id, name, stock_quantity, min_stock_level)
         `)
         .eq('org_id', currentOrg.id)
         .eq('movement_type', 'out')

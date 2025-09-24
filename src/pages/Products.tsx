@@ -297,6 +297,8 @@ const Products = () => {
         cost_price: Number(formData.cost_price) || 0,
         validity_days: Number(formData.validity_days) || 0,
         weight: Number(formData.weight) || 0,
+        // Garantir que campos UUID vazios sejam null
+        supplier_id: formData.supplier_id?.trim() || null,
       }
 
       console.log('Dados do produto a serem salvos:', productData)

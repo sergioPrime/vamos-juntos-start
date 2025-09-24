@@ -442,7 +442,7 @@ const Products = () => {
               </TabsList>
               
               <TabsContent value="dados" className="space-y-6 mt-6">
-                {/* Primeira linha */}
+                {/* Primeira linha - Nome e SKU obrigatórios */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name" className="required">Nome do Produto</Label>
@@ -456,12 +456,59 @@ const Products = () => {
                   </div>
                   
                   <div className="space-y-2">
+                    <Label htmlFor="sku" className="required flex items-center gap-2">
+                      <span>SKU (Código)</span>
+                      <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="sku"
+                      value={formData.sku}
+                      onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value.toUpperCase() }))}
+                      placeholder="Código único do produto"
+                      required
+                      className="font-mono"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
                     <Label htmlFor="brand">Marca</Label>
                     <Input
                       id="brand"
                       value={formData.brand}
                       onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
                       placeholder="Digite a marca"
+                    />
+                  </div>
+                </div>
+
+                {/* Segunda linha - Tipo, Modelo e Validade */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="product_type" className="required">Tipo do Produto</Label>
+                    <Select 
+                      value={formData.product_type} 
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, product_type: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PRODUCT_TYPES.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="model">Modelo</Label>
+                    <Input
+                      id="model"
+                      value={formData.model}
+                      onChange={(e) => setFormData(prev => ({ ...prev, model: e.target.value }))}
+                      placeholder="Digite o modelo"
                     />
                   </div>
                   
@@ -477,7 +524,49 @@ const Products = () => {
                   </div>
                 </div>
 
-                {/* Segunda linha */}
+                {/* Terceira linha */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="sale_unit">Produto é vendido por</Label>
+                    <Select 
+                      value={formData.sale_unit} 
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, sale_unit: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a unidade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SALE_UNITS.map((unit) => (
+                          <SelectItem key={unit.value} value={unit.value}>
+                            {unit.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="system_code">Código do Sistema</Label>
+                    <Input
+                      id="system_code"
+                      value={formData.system_code}
+                      onChange={(e) => setFormData(prev => ({ ...prev, system_code: e.target.value }))}
+                      placeholder="Código automático"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="supplier_code">Código do Fornecedor</Label>
+                    <Input
+                      id="supplier_code"
+                      value={formData.supplier_code}
+                      onChange={(e) => setFormData(prev => ({ ...prev, supplier_code: e.target.value }))}
+                      placeholder="Digite o código"
+                    />
+                  </div>
+                </div>
+
+                {/* Quarta linha */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="product_type" className="required">Tipo do Produto</Label>
@@ -570,8 +659,27 @@ const Products = () => {
                   </div>
                 </div>
 
-                {/* Quarta linha */}
+                {/* Quarta linha - Fornecedor, Categoria e Descrição */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="supplier_id">Fornecedor Padrão</Label>
+                    <Select 
+                      value={formData.supplier_id} 
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, supplier_id: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o fornecedor" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {suppliers.map((supplier) => (
+                          <SelectItem key={supplier.id} value={supplier.id}>
+                            {supplier.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
                   <div className="space-y-2">
                     <Label htmlFor="category">Categoria</Label>
                     <Input
@@ -581,7 +689,10 @@ const Products = () => {
                       placeholder="Digite a categoria"
                     />
                   </div>
-                  
+                </div>
+
+                {/* Quinta linha - Descrição e Tipo/Gênero */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="description">Descrição</Label>
                     <Input
@@ -591,26 +702,25 @@ const Products = () => {
                       placeholder="Descrição do produto"
                     />
                   </div>
-                </div>
-
-                {/* Quinta linha */}
-                <div className="space-y-2">
-                  <Label htmlFor="product_genre" className="required">Tipo/Gênero</Label>
-                  <Select 
-                    value={formData.product_genre} 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, product_genre: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o tipo/gênero" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PRODUCT_GENRES.map((genre) => (
-                        <SelectItem key={genre.value} value={genre.value}>
-                          {genre.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="product_genre" className="required">Tipo/Gênero</Label>
+                    <Select 
+                      value={formData.product_genre} 
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, product_genre: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo/gênero" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PRODUCT_GENRES.map((genre) => (
+                          <SelectItem key={genre.value} value={genre.value}>
+                            {genre.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 {/* Switches */}

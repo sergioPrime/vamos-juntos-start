@@ -134,6 +134,11 @@ export default function Auth() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="text-center mb-6">
+            <p className="text-sm text-muted-foreground">
+              Acesse sua conta ou crie uma nova para começar a usar todas as funcionalidades do Prime ERP
+            </p>
+          </div>
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Entrar</TabsTrigger>
@@ -175,9 +180,16 @@ export default function Auth() {
                 onClick={handleSignIn}
                 disabled={loading || !email || !password}
                 className="w-full"
+                onKeyDown={(e) => e.key === 'Enter' && handleSignIn()}
               >
                 {loading ? "Entrando..." : "Entrar"}
               </Button>
+              
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground">
+                  Esqueceu sua senha? Entre em contato com o suporte
+                </p>
+              </div>
             </TabsContent>
             
             <TabsContent value="signup" className="space-y-4">
@@ -215,9 +227,16 @@ export default function Auth() {
                 onClick={handleSignUp}
                 disabled={loading || !email || !password}
                 className="w-full"
+                onKeyDown={(e) => e.key === 'Enter' && handleSignUp()}
               >
                 {loading ? "Cadastrando..." : "Cadastrar"}
               </Button>
+              
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground">
+                  Ao se cadastrar, você concorda com nossos termos de uso e política de privacidade
+                </p>
+              </div>
             </TabsContent>
           </Tabs>
         </CardContent>

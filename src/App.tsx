@@ -59,6 +59,7 @@ import PlanoDeContas from "./pages/settings/PlanoDeContas";
 import CentrosDeCusto from "./pages/settings/CentrosDeCusto";
 import PaymentMethods from "./pages/cadastros/PaymentMethods";
 import BankAccounts from "./pages/cadastros/BankAccounts";
+import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
@@ -75,7 +76,11 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
         <Routes>
-          <Route path="/" element={<AuthRedirect />} />
+          <Route path="/" element={
+            <PageTransition direction="fade">
+              <Index />
+            </PageTransition>
+          } />
           <Route path="/auth" element={<Auth />} />
           <Route path="/planos-novos-usuarios" element={
             <ProtectedRoute>

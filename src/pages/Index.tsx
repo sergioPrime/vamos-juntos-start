@@ -25,9 +25,9 @@ const Index = () => {
   const navigate = useNavigate()
   const { user, loading } = useAuth()
 
-  // Redirect authenticated users to dashboard
+  // Redirect authenticated users to dashboard (only if they manually navigate to this page)
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && window.location.pathname === '/') {
       navigate('/dashboard', { replace: true })
     }
   }, [user, loading, navigate])

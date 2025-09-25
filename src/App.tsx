@@ -14,7 +14,7 @@ import { AnimationProvider } from "./contexts/AnimationContext";
 import { ThemeProvider } from "./hooks/useTheme";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { SuperAdminRoute } from "./components/auth/SuperAdminRoute";
-import { AuthRedirect } from "./components/auth/AuthRedirect";
+
 import Dashboard from "./pages/Dashboard";
 import Lancamentos from "./pages/finance/Lancamentos";
 import FinancialReports from "./pages/finance/FinancialReports";

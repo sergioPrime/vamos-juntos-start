@@ -1650,6 +1650,90 @@ export type Database = {
         }
         Relationships: []
       }
+      purchase_items: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string | null
+          product_name: string
+          purchase_id: string
+          quantity: number
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          product_name: string
+          purchase_id: string
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          product_name?: string
+          purchase_id?: string
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          notes: string | null
+          org_id: string
+          payment_status: string
+          purchase_date: string
+          purchase_number: string
+          received_at: string | null
+          status: string
+          subtotal: number
+          supplier_id: string | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          notes?: string | null
+          org_id: string
+          payment_status?: string
+          purchase_date?: string
+          purchase_number: string
+          received_at?: string | null
+          status?: string
+          subtotal?: number
+          supplier_id?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          notes?: string | null
+          org_id?: string
+          payment_status?: string
+          purchase_date?: string
+          purchase_number?: string
+          received_at?: string | null
+          status?: string
+          subtotal?: number
+          supplier_id?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       quote_items: {
         Row: {
           created_at: string
@@ -2534,6 +2618,10 @@ export type Database = {
         Returns: number
       }
       generate_next_payment_method_code: {
+        Args: { p_org_id: string }
+        Returns: string
+      }
+      generate_next_purchase_number: {
         Args: { p_org_id: string }
         Returns: string
       }

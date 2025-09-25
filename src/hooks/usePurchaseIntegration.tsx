@@ -19,24 +19,41 @@ export function usePurchaseIntegration() {
     try {
       // Only process when purchase is received
       if (purchaseData.status === 'received') {
-        // For now, we'll create a mock purchase items structure
-        // In a real implementation, this would come from a purchases table
-        const mockPurchaseItems = [
-          {
-            product_id: 'sample-product-id',
-            quantity: 10,
-            cost_price: 25.50
-          }
-        ]
+        // Get purchase items for stock movement
+        const { data: purchaseItems, error: itemsError } = await supabase
+          .from('purchase_items')
+          .select('product_id, quantity, unit_price')
+          .eq('purchase_id', purchaseData.purchase_id)
 
-        // Process automatic stock entry
-        await processPurchaseReceipt({
-          purchase_id: purchaseData.purchase_id,
-          items: mockPurchaseItems
-        })
+        if (itemsError) throw itemsError
 
-        // Create financial entry (payable) - mock for now
-        await createFromPurchase(purchaseData.purchase_id, "mock-supplier-id", 255.00)
+        // Get purchase details for financial entry
+        const { data: purchase, error: purchaseError } = await supabase
+          .from('purchases')
+          .select('supplier_id, total_amount')
+          .eq('id', purchaseData.purchase_id)
+          .single()
+
+        if (purchaseError) throw purchaseError
+
+        if (purchaseItems && purchaseItems.length > 0) {
+          // Process automatic stock entry with real data
+          await processPurchaseReceipt({
+            purchase_id: purchaseData.purchase_id,
+            items: purchaseItems.map(item => ({
+              product_id: item.product_id || '',
+              quantity: item.quantity,
+              cost_price: item.unit_price
+            }))
+          })
+
+          // Create financial entry (payable) with real data
+          await createFromPurchase(
+            purchaseData.purchase_id, 
+            purchase.supplier_id || '', 
+            purchase.total_amount
+          )
+        }
 
         toast({
           title: "Integração automática",

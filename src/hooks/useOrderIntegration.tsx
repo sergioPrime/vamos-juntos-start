@@ -39,8 +39,21 @@ export function useOrderIntegration() {
             }))
           })
 
-          // Create financial entry (receivable) - mock for now
-          await createFromOrder(orderData.order_id, "mock-customer-id", 100.00)
+          // Get order details for financial entry
+          const { data: order, error: orderError } = await supabase
+            .from('orders')
+            .select('customer_id, total_amount')
+            .eq('id', orderData.order_id)
+            .single()
+
+          if (orderError) throw orderError
+
+          // Create financial entry (receivable) with real data
+          await createFromOrder(
+            orderData.order_id, 
+            order.customer_id || '', 
+            order.total_amount
+          )
 
           toast({
             title: "Integração automática",

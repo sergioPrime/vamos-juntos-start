@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
 import { useOrderIntegration } from "@/hooks/useOrderIntegration"
+import { useStockValidation } from "@/hooks/useStockValidation"
+import { useBusinessNotifications } from "@/hooks/useBusinessNotifications"
 
 interface Order {
   id: string
@@ -76,6 +78,8 @@ const Orders = () => {
   const { toast } = useToast()
   const navigate = useNavigate()
   const { completeOrderWithIntegration } = useOrderIntegration()
+  const { validateOrderStock, showValidationMessages } = useStockValidation()
+  const { runPeriodicChecks } = useBusinessNotifications()
   
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(false)
@@ -88,10 +92,11 @@ const Orders = () => {
   useEffect(() => {
     if (currentOrg?.id) {
       loadOrders()
+      runPeriodicChecks() // Check for business notifications
     } else if (!orgLoading && !currentOrg) {
       setLoading(false)
     }
-  }, [currentOrg, orgLoading])
+  }, [currentOrg, orgLoading, runPeriodicChecks])
 
   const loadOrders = async () => {
     if (!currentOrg?.id) return
@@ -137,6 +142,28 @@ const Orders = () => {
 
   const completeOrder = async (order: Order) => {
     try {
+      // Validate stock before completing order
+      if (order.order_items && order.order_items.length > 0) {
+        const stockValidation = await validateOrderStock(
+          order.order_items.map(item => ({
+            product_id: item.product_id || '',
+            quantity: item.quantity,
+            product_name: item.product_name
+          }))
+        )
+
+        showValidationMessages(stockValidation)
+
+        if (!stockValidation.isValid) {
+          toast({
+            title: "Erro de Validação",
+            description: "Não é possível finalizar o pedido devido a problemas de estoque.",
+            variant: "destructive",
+          })
+          return
+        }
+      }
+
       await completeOrderWithIntegration(order.id)
       toast({
         title: "Pedido finalizado",

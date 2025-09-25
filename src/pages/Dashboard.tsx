@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react"
 import { AlertsSection } from "@/components/dashboard/AlertsSection"
 import { WelcomeCard } from "@/components/dashboard/WelcomeCard"
 import { EmptyState } from "@/components/dashboard/EmptyState"
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
 import { useDashboardData } from "@/hooks/useDashboardData"
+import { supabase } from "@/integrations/supabase/client"
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -26,9 +28,37 @@ import { useNavigate } from "react-router-dom"
 
 export default function Dashboard() {
   const [hasData, setHasData] = useState(false)
-  const { currentOrg } = useOrganization()
-  const { metrics, loading } = useDashboardData()
+  const { user } = useAuth()
   const { currentOrg, loading: orgLoading } = useOrganization()
+  const { metrics, loading } = useDashboardData()
+  const navigate = useNavigate()
+
+  // Check if user has data in the system
+  useEffect(() => {
+    const checkForData = async () => {
+      if (!currentOrg?.id) return
+
+      try {
+        // Check for any data that indicates the user has started using the system
+        const [orders, products, customers] = await Promise.all([
+          supabase.from('orders').select('id').eq('org_id', currentOrg.id).limit(1),
+          supabase.from('products').select('id').eq('org_id', currentOrg.id).limit(1),
+          supabase.from('pessoas').select('id').eq('org_id', currentOrg.id).limit(1)
+        ])
+
+        const hasAnyData = 
+          (orders.data && orders.data.length > 0) ||
+          (products.data && products.data.length > 0) ||
+          (customers.data && customers.data.length > 0)
+
+        setHasData(hasAnyData)
+      } catch (error) {
+        console.error('Error checking for data:', error)
+      }
+    }
+
+    checkForData()
+  }, [currentOrg?.id])
   
   // Check if this is a new user (simple check - could be enhanced)
   const isNewUser = !metrics || (metrics.currentBalance === 0 && metrics.monthlyRevenue === 0 && metrics.recentActivities?.length === 0)
@@ -72,173 +102,51 @@ export default function Dashboard() {
     }
   ]
 
-  return (
-    <div className="page-container space-y-6">
-      {/* Welcome Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {greeting}, {firstName}! 👋
-          </h1>
-          <p className="text-muted-foreground">
-            Aqui está um resumo do seu negócio hoje
-            {currentOrg && (
-              <span className="ml-2">
-                • <span className="font-medium">{currentOrg.name}</span>
-              </span>
-            )}
+  if (orgLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-lg">Carregando...</div>
+      </div>
+    )
+  }
+
+  if (!currentOrg) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="text-lg mb-4">Nenhuma organização encontrada</div>
+          <p className="text-muted-foreground mb-4">
+            Você precisa estar associado a uma organização para acessar o dashboard.
           </p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Badge variant="outline" className="flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
-            {new Date().toLocaleDateString('pt-BR', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}
-          </Badge>
+          <Button onClick={() => navigate('/settings')}>
+            Ir para Configurações
+          </Button>
         </div>
       </div>
+    )
+  }
 
-      {/* Quick Stats */}
-      {!loading && metrics && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Saldo Total</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                R$ {metrics.currentBalance?.toFixed(2) || '0,00'}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Disponível em contas
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Receita Mensal</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                R$ {metrics.monthlyRevenue?.toFixed(2) || '0,00'}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                +12% em relação ao mês anterior
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">A Receber</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                R$ {metrics.receivables?.toFixed(2) || '0,00'}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Em contas pendentes
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Atividades</CardTitle>
-              <Target className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {metrics.recentActivities?.length || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Nos últimos 7 dias
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header com Saudação */}
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold">
+          {greeting}, {firstName}! 👋
+        </h1>
+        <p className="text-muted-foreground">
+          Bem-vindo ao seu painel de controle do Prime ERP
+        </p>
+      </div>
+
+      {/* Welcome Card para novos usuários */}
+      {!hasData && <WelcomeCard />}
+
+      {/* Business Insights ou Empty State */}
+      {hasData ? (
+        <BusinessInsightsPanel />
+      ) : (
+        <EmptyState />
       )}
-
-      {/* Welcome Card for New Users */}
-      {isNewUser && <WelcomeCard />}
-
-      {/* Empty State for completely new systems */}
-      {hasNoData && <EmptyState />}
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5" />
-            Ações Rápidas
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {quickActions.map((action, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                className="h-auto p-4 flex flex-col items-start space-y-2 hover:shadow-md transition-all"
-                onClick={action.action}
-              >
-                <div className={`p-2 rounded-md text-white ${action.color}`}>
-                  {action.icon}
-                </div>
-                <div className="text-left">
-                  <div className="font-medium">{action.title}</div>
-                  <div className="text-xs text-muted-foreground">{action.description}</div>
-                </div>
-                <ArrowRight className="h-4 w-4 ml-auto opacity-50" />
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Recent Activities */}
-      {!loading && metrics?.recentActivities && metrics.recentActivities.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Atividades Recentes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {metrics.recentActivities.slice(0, 5).map((activity, index) => (
-                <div key={index} className="flex items-center space-x-4 pb-4 border-b last:border-b-0">
-                  <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                    {activity.type === 'invoice' && <DollarSign className="h-4 w-4" />}
-                    {activity.type === 'customer' && <Users className="h-4 w-4" />}
-                    {activity.type === 'quote' && <ShoppingCart className="h-4 w-4" />}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{activity.description}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(activity.date).toLocaleDateString('pt-BR')}
-                    </p>
-                  </div>
-                  {activity.amount && (
-                    <div className="text-sm font-medium">
-                      R$ {activity.amount.toFixed(2)}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Alerts Section */}
-      <AlertsSection />
     </div>
   )
 }

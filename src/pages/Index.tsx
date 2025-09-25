@@ -25,12 +25,8 @@ const Index = () => {
   const navigate = useNavigate()
   const { user, loading } = useAuth()
 
-  // Redirect authenticated users to dashboard (only if they manually navigate to this page)
-  useEffect(() => {
-    if (!loading && user && window.location.pathname === '/') {
-      navigate('/dashboard', { replace: true })
-    }
-  }, [user, loading, navigate])
+  // Only redirect if user is authenticated AND clicked on navigation buttons
+  // Do not auto-redirect on initial page load
 
   // Show loading while checking auth
   if (loading) {

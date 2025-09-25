@@ -60,8 +60,8 @@ export function OverdueReceivablesFilters({
       dueDateTo: undefined,
       minAmount: '',
       maxAmount: '',
-      status: '',
-      costCenter: ''
+      status: 'all',
+      costCenter: 'all'
     })
   }
 
@@ -193,11 +193,11 @@ export function OverdueReceivablesFilters({
         <div className="space-y-2">
           <Label htmlFor="status">Status</Label>
           <Select value={filters.status} onValueChange={(value) => updateFilter('status', value)}>
-            <SelectTrigger className="bg-background">
+            <SelectTrigger className="bg-background border">
               <SelectValue placeholder="Todos os status" />
             </SelectTrigger>
-            <SelectContent className="bg-background">
-              <SelectItem value="">Todos os status</SelectItem>
+            <SelectContent className="bg-background z-50">
+              <SelectItem value="all">Todos os status</SelectItem>
               <SelectItem value="open">Em aberto</SelectItem>
               <SelectItem value="partial">Parcial</SelectItem>
               <SelectItem value="renegotiated">Renegociado</SelectItem>
@@ -230,11 +230,11 @@ export function OverdueReceivablesFilters({
         <div className="space-y-2">
           <Label htmlFor="costCenter">Centro de Custo</Label>
           <Select value={filters.costCenter} onValueChange={(value) => updateFilter('costCenter', value)}>
-            <SelectTrigger className="bg-background">
+            <SelectTrigger className="bg-background border">
               <SelectValue placeholder="Todos os centros" />
             </SelectTrigger>
-            <SelectContent className="bg-background">
-              <SelectItem value="">Todos os centros</SelectItem>
+            <SelectContent className="bg-background z-50">
+              <SelectItem value="all">Todos os centros</SelectItem>
               <SelectItem value="vendas">Vendas</SelectItem>
               <SelectItem value="marketing">Marketing</SelectItem>
               <SelectItem value="administrativo">Administrativo</SelectItem>

@@ -22,8 +22,8 @@ export default function Charges() {
     dueDateTo: undefined,
     minAmount: '',
     maxAmount: '',
-    status: '',
-    costCenter: ''
+    status: 'all',
+    costCenter: 'all'
   })
 
   // Filtrar dados baseado nos filtros aplicados
@@ -65,6 +65,16 @@ export default function Charges() {
       if (filters.maxAmount) {
         const maxAmount = parseFloat(filters.maxAmount)
         if (receivable.open_amount > maxAmount) return false
+      }
+
+      // Filtro por status (ignorar 'all')
+      if (filters.status && filters.status !== 'all') {
+        // Implementar lógica de status quando necessário
+      }
+
+      // Filtro por centro de custo (ignorar 'all')
+      if (filters.costCenter && filters.costCenter !== 'all') {
+        // Implementar lógica de centro de custo quando necessário
       }
 
       return true

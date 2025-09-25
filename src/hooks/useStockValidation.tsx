@@ -43,11 +43,22 @@ export function useStockValidation() {
         .in('id', productIds)
         .eq('org_id', currentOrg.id)
 
-      if (error) throw error
+      if (error) {
+        console.error('Database error:', error)
+        result.errors.push('Erro ao consultar produtos no banco de dados')
+        result.isValid = false
+        return result
+      }
+
+      if (!products) {
+        result.errors.push('Nenhum produto encontrado')
+        result.isValid = false
+        return result
+      }
 
       // Validate each item
       for (const item of items) {
-        const product = products?.find(p => p.id === item.product_id)
+        const product = products.find(p => p.id === item.product_id)
         
         if (!product) {
           result.errors.push(`Produto não encontrado: ${item.product_name || item.product_id}`)
@@ -57,12 +68,15 @@ export function useStockValidation() {
 
         // Only validate stock if product tracks stock
         if (product.track_stock) {
-          if (product.stock_quantity < item.quantity) {
+          const currentStock = product.stock_quantity || 0
+          const minStock = product.min_stock_level || 0
+          
+          if (currentStock < item.quantity) {
             result.errors.push(
-              `Estoque insuficiente para ${product.name}: disponível ${product.stock_quantity}, solicitado ${item.quantity}`
+              `Estoque insuficiente para ${product.name}: disponível ${currentStock}, solicitado ${item.quantity}`
             )
             result.isValid = false
-          } else if (product.stock_quantity - item.quantity < (product.min_stock_level || 0)) {
+          } else if (currentStock - item.quantity < minStock) {
             result.warnings.push(
               `${product.name} ficará abaixo do estoque mínimo após esta venda`
             )
@@ -89,11 +103,17 @@ export function useStockValidation() {
         .select('id, name, stock_quantity, min_stock_level, reorder_point')
         .eq('org_id', currentOrg.id)
         .eq('track_stock', true)
-        .filter('stock_quantity', 'lte', 'min_stock_level')
+        .not('min_stock_level', 'is', null)
 
-      if (error) throw error
+      if (error) {
+        console.error('Error checking low stock:', error)
+        return []
+      }
 
-      return lowStockProducts || []
+      // Filter products where stock is below minimum
+      return (lowStockProducts || []).filter(product => 
+        (product.stock_quantity || 0) <= (product.min_stock_level || 0)
+      )
     } catch (error) {
       console.error('Error checking low stock:', error)
       return []

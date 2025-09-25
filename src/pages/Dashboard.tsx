@@ -1,6 +1,7 @@
 import { AlertsSection } from "@/components/dashboard/AlertsSection"
 import { WelcomeCard } from "@/components/dashboard/WelcomeCard"
 import { EmptyState } from "@/components/dashboard/EmptyState"
+import { BusinessInsightsPanel } from "@/components/dashboard/BusinessInsightsPanel"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -24,10 +25,10 @@ import {
 import { useNavigate } from "react-router-dom"
 
 export default function Dashboard() {
-  const { user } = useAuth()
+  const [hasData, setHasData] = useState(false)
   const { currentOrg } = useOrganization()
   const { metrics, loading } = useDashboardData()
-  const navigate = useNavigate()
+  const { currentOrg, loading: orgLoading } = useOrganization()
   
   // Check if this is a new user (simple check - could be enhanced)
   const isNewUser = !metrics || (metrics.currentBalance === 0 && metrics.monthlyRevenue === 0 && metrics.recentActivities?.length === 0)

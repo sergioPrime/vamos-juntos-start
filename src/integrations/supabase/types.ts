@@ -1444,6 +1444,7 @@ export type Database = {
           supplier_code: string | null
           supplier_id: string | null
           system_code: string | null
+          track_stock: boolean
           unit: string | null
           unit_id: string | null
           unit_price: number
@@ -1502,6 +1503,7 @@ export type Database = {
           supplier_code?: string | null
           supplier_id?: string | null
           system_code?: string | null
+          track_stock?: boolean
           unit?: string | null
           unit_id?: string | null
           unit_price?: number
@@ -1560,6 +1562,7 @@ export type Database = {
           supplier_code?: string | null
           supplier_id?: string | null
           system_code?: string | null
+          track_stock?: boolean
           unit?: string | null
           unit_id?: string | null
           unit_price?: number

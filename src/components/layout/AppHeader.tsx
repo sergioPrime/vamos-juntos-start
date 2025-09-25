@@ -15,6 +15,7 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { UserProfileDialog } from "@/components/UserProfileDialog"
 import { useAuth } from "@/hooks/useAuth"
+import { NotificationCenter } from "@/components/dashboard/NotificationCenter"
 import { useToast } from "@/hooks/use-toast"
 import { useTheme } from "@/hooks/useTheme"
 import { useSuperAdmin } from "@/hooks/useSuperAdmin"
@@ -121,6 +122,9 @@ export function AppHeader() {
               <p>Orçamento</p>
             </TooltipContent>
           </Tooltip>
+          
+          {/* Notification Center */}
+          <NotificationCenter />
           
           {/* Alert Notification Bell */}
           <AlertNotificationBell />

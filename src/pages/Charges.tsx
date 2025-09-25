@@ -94,7 +94,7 @@ export default function Charges() {
 
   return (
     <PageTransition direction="left">
-      <div className="page-container space-y-6">
+      <div className="min-h-screen bg-background text-foreground p-6 space-y-6">
         {/* Cabeçalho */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>

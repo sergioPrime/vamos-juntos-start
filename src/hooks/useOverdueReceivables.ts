@@ -162,6 +162,15 @@ export function useOverdueReceivables() {
   useEffect(() => {
     if (currentOrg?.id) {
       loadOverdueReceivables()
+    } else {
+      setLoading(false)
+      setReceivables([])
+      setSummary({
+        total_documents: 0,
+        total_open_amount: 0,
+        total_overdue_30_days: 0,
+        total_overdue_60_days: 0
+      })
     }
   }, [currentOrg?.id])
 

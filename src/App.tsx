@@ -11,6 +11,7 @@ import { OrganizationProvider } from "./hooks/useOrganization";
 import { SubscriptionProvider } from "./hooks/useSubscription";
 import { SidebarConfigProvider } from "./contexts/SidebarConfigContext";
 import { AnimationProvider } from "./contexts/AnimationContext";
+import { ThemeProvider } from "./hooks/useTheme";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { SuperAdminRoute } from "./components/auth/SuperAdminRoute";
 import { AuthRedirect } from "./components/auth/AuthRedirect";
@@ -65,13 +66,14 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <OrganizationProvider>
-        <SubscriptionProvider>
-          <SidebarConfigProvider>
-            <AnimationProvider>
-              <TooltipProvider>
-                <NotificationProvider>
+    <ThemeProvider defaultTheme="light" storageKey="vamos-juntos-theme">
+      <AuthProvider>
+        <OrganizationProvider>
+          <SubscriptionProvider>
+            <SidebarConfigProvider>
+              <AnimationProvider>
+                <TooltipProvider>
+                  <NotificationProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -417,7 +419,8 @@ const App = () => (
           </SubscriptionProvider>
         </OrganizationProvider>
       </AuthProvider>
-    </QueryClientProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
 );
 
 export default App;

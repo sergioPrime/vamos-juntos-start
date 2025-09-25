@@ -19,6 +19,7 @@ import {
   Shield,
   Globe
 } from "lucide-react"
+import { ClientsSection } from "@/components/landing/ClientsSection"
 
 const Index = () => {
   const navigate = useNavigate()
@@ -258,6 +259,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Clients Section */}
+      <ClientsSection />
 
       {/* CTA Section */}
       <section className="container mx-auto px-6 py-20 text-center">

@@ -7,7 +7,7 @@ export function ExpirationAlert() {
   const { showExpirationAlert, daysUntilExpiration, subscription_end } = useSubscription()
 
   const handleRenewSubscription = () => {
-    window.location.href = '/settings?tab=planos'
+    window.location.href = '/settings/renovar-licenca'
   }
 
   if (!showExpirationAlert) return null

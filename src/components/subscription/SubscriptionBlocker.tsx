@@ -7,7 +7,7 @@ export function SubscriptionBlocker() {
   const { isExpired, daysUntilExpiration, subscription_end } = useSubscription()
 
   const handleRenewSubscription = () => {
-    window.location.href = '/settings?tab=planos'
+    window.location.href = '/settings/renovar-licenca'
   }
 
   if (!isExpired) return null

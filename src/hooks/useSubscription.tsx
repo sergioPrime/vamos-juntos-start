@@ -111,7 +111,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
               action: {
                 label: 'Renovar Agora',
                 onClick: () => {
-                  window.location.href = '/settings?tab=planos'
+                  window.location.href = '/settings/renovar-licenca'
                 }
               }
             }
@@ -124,9 +124,9 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
             duration: 10000,
             action: {
               label: 'Renovar Agora',
-              onClick: () => {
-                window.location.href = '/settings?tab=planos'
-              }
+                onClick: () => {
+                  window.location.href = '/settings/renovar-licenca'
+                }
             }
           })
         }

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AppointmentForm } from '@/components/appointments/AppointmentForm';
+import { NotificationTester } from '@/components/appointments/NotificationTester';
 import { AppointmentsList } from '@/components/appointments/AppointmentsList';
 import { AppointmentCalendar } from '@/components/appointments/AppointmentCalendar';
 import { useAppointments } from '@/hooks/useAppointments';
@@ -140,6 +141,11 @@ export default function Appointments() {
           isModal={true}
         />
       )}
+
+      {/* Testador de Notificações - apenas para demonstração */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <NotificationTester />
+      </div>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { Plus, FileText, Calculator, User, MoreHorizontal, LogOut, Moon, Sun, Za
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { AlertNotificationBell } from "@/components/inventory/AlertNotificationBell"
+import { OverdueNotifications } from "@/components/appointments/OverdueNotifications"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -123,11 +124,14 @@ export function AppHeader() {
             </TooltipContent>
           </Tooltip>
           
-          {/* Notification Center */}
-          <NotificationCenter />
-          
-          {/* Alert Notification Bell */}
-          <AlertNotificationBell />
+           {/* Notification Center */}
+           <NotificationCenter />
+           
+           {/* Overdue Appointments */}
+           <OverdueNotifications />
+           
+           {/* Alert Notification Bell */}
+           <AlertNotificationBell />
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -177,20 +181,23 @@ export function AppHeader() {
 
         {/* Mobile Actions */}
         <div className="flex lg:hidden items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                onClick={() => navigate("/finance/receivables")}
-                className="bg-primary text-primary-foreground hover:bg-primary/90"
-                size="icon"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Cobrança Pix</p>
-            </TooltipContent>
-          </Tooltip>
+           {/* Overdue Appointments Mobile */}
+           <OverdueNotifications />
+           
+           <Tooltip>
+             <TooltipTrigger asChild>
+               <Button 
+                 onClick={() => navigate("/finance/receivables")}
+                 className="bg-primary text-primary-foreground hover:bg-primary/90"
+                 size="icon"
+               >
+                 <Plus className="h-4 w-4" />
+               </Button>
+             </TooltipTrigger>
+             <TooltipContent>
+               <p>Cobrança Pix</p>
+             </TooltipContent>
+           </Tooltip>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

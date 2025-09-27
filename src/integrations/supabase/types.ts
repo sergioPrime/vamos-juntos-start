@@ -56,6 +56,98 @@ export type Database = {
         }
         Relationships: []
       }
+      appointment_types: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          org_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+          org_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          org_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      appointments: {
+        Row: {
+          appointment_date: string
+          appointment_time: string
+          appointment_type_id: string | null
+          created_at: string
+          created_by: string
+          customer_id: string | null
+          id: string
+          is_completed: boolean
+          is_task: boolean
+          notes: string | null
+          opportunity: string | null
+          org_id: string
+          remind_responsible: boolean
+          responsible: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_date: string
+          appointment_time: string
+          appointment_type_id?: string | null
+          created_at?: string
+          created_by: string
+          customer_id?: string | null
+          id?: string
+          is_completed?: boolean
+          is_task?: boolean
+          notes?: string | null
+          opportunity?: string | null
+          org_id: string
+          remind_responsible?: boolean
+          responsible: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_date?: string
+          appointment_time?: string
+          appointment_type_id?: string | null
+          created_at?: string
+          created_by?: string
+          customer_id?: string | null
+          id?: string
+          is_completed?: boolean
+          is_task?: boolean
+          notes?: string | null
+          opportunity?: string | null
+          org_id?: string
+          remind_responsible?: boolean
+          responsible?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_appointment_type_id_fkey"
+            columns: ["appointment_type_id"]
+            isOneToOne: false
+            referencedRelation: "appointment_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       approval_policies: {
         Row: {
           cost_center: string | null

@@ -60,6 +60,8 @@ import PlanoDeContas from "./pages/settings/PlanoDeContas";
 import CentrosDeCusto from "./pages/settings/CentrosDeCusto";
 import PaymentMethods from "./pages/cadastros/PaymentMethods";
 import BankAccounts from "./pages/cadastros/BankAccounts";
+import Appointments from "./pages/cadastros/Appointments";
+import AppointmentTypes from "./pages/cadastros/AppointmentTypes";
 import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
@@ -392,6 +394,24 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <BankAccounts />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/agendamentos" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Appointments />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/tipos-compromisso" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <AppointmentTypes />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

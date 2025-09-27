@@ -25,9 +25,15 @@ export function OverdueNotifications() {
     navigate('/cadastros/agendamentos');
   };
 
-  const testNotificationSound = () => {
+  const testNotificationSound = async () => {
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // Resume audio context if suspended
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
+      
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
 
@@ -43,6 +49,8 @@ export function OverdueNotifications() {
 
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.3);
+      
+      console.log('Test notification sound played successfully');
     } catch (error) {
       console.warn('Failed to play test sound:', error);
     }

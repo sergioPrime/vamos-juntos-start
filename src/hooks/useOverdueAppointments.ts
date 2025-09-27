@@ -11,10 +11,16 @@ export const useOverdueAppointments = () => {
   const [lastCheck, setLastCheck] = useState<Date>(new Date());
   const [notifiedAppointments, setNotifiedAppointments] = useState<Set<string>>(new Set());
 
-  const playNotificationSound = useCallback(() => {
+  const playNotificationSound = useCallback(async () => {
     try {
       // Create a simple notification sound using Web Audio API
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // Resume audio context if suspended
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
+      
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
 
@@ -30,12 +36,16 @@ export const useOverdueAppointments = () => {
 
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.3);
+      
+      console.log('Notification sound played successfully');
     } catch (error) {
       console.warn('Failed to play notification sound:', error);
     }
   }, []);
 
   const checkOverdueAppointments = useCallback(() => {
+    if (!appointments || appointments.length === 0) return;
+    
     const now = new Date();
     const newOverdueAppointments: OverdueAppointment[] = [];
     const newlyOverdue: string[] = [];
@@ -54,17 +64,26 @@ export const useOverdueAppointments = () => {
 
         // Check if this appointment is newly overdue (not notified before)
         if (!notifiedAppointments.has(appointment.id)) {
-          // Check if it became overdue in the last check interval (1 minute)
-          const oneMinuteAgo = new Date(now.getTime() - 60000);
-          if (appointmentDateTime >= oneMinuteAgo && appointmentDateTime <= now) {
-            newlyOverdue.push(appointment.id);
-          }
+          newlyOverdue.push(appointment.id);
         }
       }
     });
 
-    // Play sound for newly overdue appointments
+    // Update state only if there are changes
+    setOverdueAppointments(prev => {
+      const prevIds = prev.map(a => a.id).sort();
+      const newIds = newOverdueAppointments.map(a => a.id).sort();
+      
+      // Only update if the lists are different
+      if (JSON.stringify(prevIds) !== JSON.stringify(newIds)) {
+        return newOverdueAppointments;
+      }
+      return prev;
+    });
+
+    // Play sound and mark as notified for newly overdue appointments
     if (newlyOverdue.length > 0) {
+      console.log('Playing notification sound for newly overdue appointments:', newlyOverdue);
       playNotificationSound();
       setNotifiedAppointments(prev => {
         const newSet = new Set(prev);
@@ -73,30 +92,36 @@ export const useOverdueAppointments = () => {
       });
     }
 
-    setOverdueAppointments(newOverdueAppointments);
     setLastCheck(now);
   }, [appointments, playNotificationSound, notifiedAppointments]);
 
+  // Initial check and setup interval
   useEffect(() => {
-    checkOverdueAppointments();
+    if (appointments && appointments.length > 0) {
+      checkOverdueAppointments();
+    }
     
-    // Check every minute for new overdue appointments
-    const interval = setInterval(checkOverdueAppointments, 60000);
+    // Check every 30 seconds for new overdue appointments
+    const interval = setInterval(() => {
+      if (appointments && appointments.length > 0) {
+        checkOverdueAppointments();
+      }
+    }, 30000);
     
     return () => clearInterval(interval);
-  }, [checkOverdueAppointments]);
+  }, [appointments, checkOverdueAppointments]);
 
-  // Clear notification tracking when appointments are completed or updated
+  // Clean up notified appointments that are no longer overdue
   useEffect(() => {
+    const currentOverdueIds = new Set(overdueAppointments.map(a => a.id));
     setNotifiedAppointments(prev => {
-      const currentOverdueIds = new Set(overdueAppointments.map(a => a.id));
-      const newSet = new Set<string>();
+      const filtered = new Set<string>();
       prev.forEach(id => {
         if (currentOverdueIds.has(id)) {
-          newSet.add(id);
+          filtered.add(id);
         }
       });
-      return newSet;
+      return filtered;
     });
   }, [overdueAppointments]);
 

@@ -55,7 +55,6 @@ const inventoryItems = [
 const cadastrosItems = [
   { title: "Pessoas", url: "/cadastros/pessoas", icon: Users },
   { title: "Produtos", url: "/products", icon: Package },
-  { title: "Agendamentos", url: "/cadastros/agendamentos", icon: Calendar },
   { title: "Tipo de Compromisso", url: "/cadastros/tipos-compromisso", icon: Settings },
   { title: "Plano de Contas", url: "/cadastros/plano-de-contas", icon: Calculator },
   { title: "Centros de Custo", url: "/cadastros/centros-de-custo", icon: Target },

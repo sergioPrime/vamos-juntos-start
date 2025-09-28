@@ -34,6 +34,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import PDV from "./pages/PDV";
 import Products from "./pages/Products";
 import Orders from "./pages/Orders";
+import OrdersAndQuotes from "./pages/OrdersAndQuotes";
+import OrdersQuotesForm from "./pages/OrdersQuotesForm";
 import PurchaseRequests from "./pages/purchases/PurchaseRequests";
 import PurchaseReports from "./pages/purchases/PurchaseReports";
 import Suppliers from "./pages/Suppliers";
@@ -268,6 +270,33 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <QuoteForm />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/orders-quotes" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <OrdersAndQuotes />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/orders-quotes/new" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <OrdersQuotesForm />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/orders-quotes/:id" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <OrdersQuotesForm />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

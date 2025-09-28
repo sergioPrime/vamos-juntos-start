@@ -36,8 +36,7 @@ const financeItems = [
 const businessItems = [
   { title: "NFS-e", url: "/nfse", icon: FileText },
   { title: "PDV", url: "/pdv", icon: Zap },
-  { title: "Pedidos", url: "/orders", icon: Receipt },
-  { title: "Orçamentos", url: "/quotes", icon: Quote },
+  { title: "Pedidos e Orçamentos", url: "/orders-quotes", icon: Quote },
   { title: "Relatórios", url: "/reports", icon: BarChart3 },
 ]
 

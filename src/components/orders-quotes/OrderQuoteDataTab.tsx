@@ -296,7 +296,6 @@ export function OrderQuoteDataTab({ formData, onUpdateFormData, onCalculateTotal
                 <SelectValue placeholder="Selecione a categoria" />
               </SelectTrigger>
                <SelectContent>
-                <SelectItem value="">Selecione uma categoria</SelectItem>
                 {salesCategories.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     {category.name}

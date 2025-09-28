@@ -105,13 +105,21 @@ export function OrderQuoteDataTab({ formData, onUpdateFormData, onCalculateTotal
     try {
       const { data, error } = await supabase
         .from('companies')
-        .select('id, name')
+        .select('id, name, is_default')
         .eq('org_id', currentOrg?.id)
         .eq('is_active', true)
         .order('name')
 
       if (error) throw error
       setCompanies(data || [])
+      
+      // Auto-select the default company if no company is currently selected
+      if (data && data.length > 0 && !formData.company_id) {
+        const defaultCompany = data.find(company => company.is_default)
+        if (defaultCompany) {
+          onUpdateFormData({ company_id: defaultCompany.id })
+        }
+      }
     } catch (error) {
       console.error('Error loading companies:', error)
     }

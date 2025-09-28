@@ -55,6 +55,7 @@ const cadastrosItems = [
   { title: "Pessoas", url: "/cadastros/pessoas", icon: Users },
   { title: "Produtos", url: "/products", icon: Package },
   { title: "Tipo de Compromisso", url: "/cadastros/tipos-compromisso", icon: Settings },
+  { title: "Categorias de Vendas", url: "/cadastros/categorias-vendas", icon: ShoppingCart },
   { title: "Plano de Contas", url: "/cadastros/plano-de-contas", icon: Calculator },
   { title: "Centros de Custo", url: "/cadastros/centros-de-custo", icon: Target },
   { title: "Formas de Pagamento", url: "/cadastros/formas-de-pagamento", icon: CreditCard },

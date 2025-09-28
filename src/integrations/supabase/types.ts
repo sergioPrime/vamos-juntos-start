@@ -2037,6 +2037,45 @@ export type Database = {
         }
         Relationships: []
       }
+      sales_categories: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          is_active: boolean
+          moves_financial: boolean
+          moves_stock: boolean
+          name: string
+          org_id: string
+          updated_at: string
+          visible_in_fiscal_operations: boolean
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          is_active?: boolean
+          moves_financial?: boolean
+          moves_stock?: boolean
+          name: string
+          org_id: string
+          updated_at?: string
+          visible_in_fiscal_operations?: boolean
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean
+          moves_financial?: boolean
+          moves_stock?: boolean
+          name?: string
+          org_id?: string
+          updated_at?: string
+          visible_in_fiscal_operations?: boolean
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           active: boolean

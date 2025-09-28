@@ -12,6 +12,14 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useOrganization } from "@/hooks/useOrganization"
 
+interface SalesCategory {
+  id: string
+  name: string
+  moves_stock: boolean
+  moves_financial: boolean
+  visible_in_fiscal_operations: boolean
+}
+
 interface OrderQuoteFormData {
   id?: string
   number: string
@@ -70,6 +78,8 @@ export function OrderQuoteDataTab({ formData, onUpdateFormData, onCalculateTotal
   const { currentOrg } = useOrganization()
   const { toast } = useToast()
   
+  const [salesCategories, setSalesCategories] = useState<SalesCategory[]>([])
+  
   const [customers, setCustomers] = useState<Customer[]>([])
   const [companies, setCompanies] = useState<Company[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -82,6 +92,7 @@ export function OrderQuoteDataTab({ formData, onUpdateFormData, onCalculateTotal
       loadCustomers()
       loadCompanies()
       loadProducts()
+      loadSalesCategories()
     }
   }, [currentOrg])
 
@@ -134,6 +145,22 @@ export function OrderQuoteDataTab({ formData, onUpdateFormData, onCalculateTotal
       ])
     } catch (error) {
       console.error('Error loading products:', error)
+    }
+  }
+
+  const loadSalesCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('sales_categories')
+        .select('id, name, moves_stock, moves_financial, visible_in_fiscal_operations')
+        .eq('org_id', currentOrg?.id)
+        .eq('is_active', true)
+        .order('name')
+
+      if (error) throw error
+      setSalesCategories(data || [])
+    } catch (error) {
+      console.error('Error loading sales categories:', error)
     }
   }
 
@@ -268,10 +295,13 @@ export function OrderQuoteDataTab({ formData, onUpdateFormData, onCalculateTotal
               <SelectTrigger>
                 <SelectValue placeholder="Selecione a categoria" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="electronics">Eletrônicos</SelectItem>
-                <SelectItem value="services">Serviços</SelectItem>
-                <SelectItem value="products">Produtos</SelectItem>
+               <SelectContent>
+                <SelectItem value="">Selecione uma categoria</SelectItem>
+                {salesCategories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

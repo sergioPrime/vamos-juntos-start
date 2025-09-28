@@ -64,6 +64,8 @@ import PaymentMethods from "./pages/cadastros/PaymentMethods";
 import BankAccounts from "./pages/cadastros/BankAccounts";
 import Appointments from "./pages/cadastros/Appointments";
 import AppointmentTypes from "./pages/cadastros/AppointmentTypes";
+import SalesCategories from "./pages/cadastros/SalesCategories";
+import SalesCategoriesForm from "./pages/cadastros/SalesCategoriesForm";
 import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
@@ -441,6 +443,33 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <AppointmentTypes />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/categorias-vendas" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <SalesCategories />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/categorias-vendas/novo" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <SalesCategoriesForm />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/categorias-vendas/:id" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <SalesCategoriesForm />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

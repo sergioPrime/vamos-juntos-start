@@ -1344,6 +1344,93 @@ export type Database = {
         }
         Relationships: []
       }
+      price_table_products: {
+        Row: {
+          created_at: string
+          id: string
+          mva: number
+          price_table_id: string
+          product_id: string
+          representative_commission: number
+          sale_price: number
+          seller_commission: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mva?: number
+          price_table_id: string
+          product_id: string
+          representative_commission?: number
+          sale_price?: number
+          seller_commission?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mva?: number
+          price_table_id?: string
+          product_id?: string
+          representative_commission?: number
+          sale_price?: number
+          seller_commission?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      price_tables: {
+        Row: {
+          auto_update_commission_changes: boolean
+          auto_update_cost_changes: boolean
+          created_at: string
+          created_by: string
+          default_mva: number
+          default_representative_commission: number
+          default_seller_commission: number
+          gender: string
+          id: string
+          is_active: boolean
+          name: string
+          org_id: string
+          updated_at: string
+          visible_in_pdv: boolean
+        }
+        Insert: {
+          auto_update_commission_changes?: boolean
+          auto_update_cost_changes?: boolean
+          created_at?: string
+          created_by: string
+          default_mva?: number
+          default_representative_commission?: number
+          default_seller_commission?: number
+          gender: string
+          id?: string
+          is_active?: boolean
+          name: string
+          org_id: string
+          updated_at?: string
+          visible_in_pdv?: boolean
+        }
+        Update: {
+          auto_update_commission_changes?: boolean
+          auto_update_cost_changes?: boolean
+          created_at?: string
+          created_by?: string
+          default_mva?: number
+          default_representative_commission?: number
+          default_seller_commission?: number
+          gender?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          org_id?: string
+          updated_at?: string
+          visible_in_pdv?: boolean
+        }
+        Relationships: []
+      }
       product_categories: {
         Row: {
           created_at: string

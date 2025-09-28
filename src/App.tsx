@@ -66,6 +66,8 @@ import Appointments from "./pages/cadastros/Appointments";
 import AppointmentTypes from "./pages/cadastros/AppointmentTypes";
 import SalesCategories from "./pages/cadastros/SalesCategories";
 import SalesCategoriesForm from "./pages/cadastros/SalesCategoriesForm";
+import PriceTables from "./pages/cadastros/PriceTables";
+import PriceTablesForm from "./pages/cadastros/PriceTablesForm";
 import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
@@ -470,6 +472,24 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <SalesCategoriesForm />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/tabela-precos" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <PriceTables />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/tabela-precos/:id" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <PriceTablesForm />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

@@ -20,6 +20,13 @@ interface SalesCategory {
   visible_in_fiscal_operations: boolean
 }
 
+interface PriceTable {
+  id: string
+  name: string
+  gender: string
+  visible_in_pdv: boolean
+}
+
 interface OrderQuoteFormData {
   id?: string
   number: string
@@ -79,6 +86,7 @@ export function OrderQuoteDataTab({ formData, onUpdateFormData, onCalculateTotal
   const { toast } = useToast()
   
   const [salesCategories, setSalesCategories] = useState<SalesCategory[]>([])
+  const [priceTables, setPriceTables] = useState<PriceTable[]>([])
   
   const [customers, setCustomers] = useState<Customer[]>([])
   const [companies, setCompanies] = useState<Company[]>([])
@@ -93,6 +101,7 @@ export function OrderQuoteDataTab({ formData, onUpdateFormData, onCalculateTotal
       loadCompanies()
       loadProducts()
       loadSalesCategories()
+      loadPriceTables()
     }
   }, [currentOrg])
 
@@ -161,6 +170,22 @@ export function OrderQuoteDataTab({ formData, onUpdateFormData, onCalculateTotal
       setSalesCategories(data || [])
     } catch (error) {
       console.error('Error loading sales categories:', error)
+    }
+  }
+
+  const loadPriceTables = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('price_tables')
+        .select('id, name, gender, visible_in_pdv')
+        .eq('org_id', currentOrg?.id)
+        .eq('is_active', true)
+        .order('name')
+
+      if (error) throw error
+      setPriceTables(data || [])
+    } catch (error) {
+      console.error('Error loading price tables:', error)
     }
   }
 
@@ -312,9 +337,11 @@ export function OrderQuoteDataTab({ formData, onUpdateFormData, onCalculateTotal
                 <SelectValue placeholder="Selecione a tabela" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="standard">Padrão</SelectItem>
-                <SelectItem value="wholesale">Atacado</SelectItem>
-                <SelectItem value="retail">Varejo</SelectItem>
+                {priceTables.map((table) => (
+                  <SelectItem key={table.id} value={table.id}>
+                    {table.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

@@ -91,6 +91,9 @@ export default function PriceTablesForm() {
     model: "",
     order: "name",
   });
+  
+  const [filteredProducts, setFilteredProducts] = useState<PriceTableProduct[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
     if (id && id !== "novo") {
@@ -358,6 +361,48 @@ export default function PriceTablesForm() {
     }
   };
 
+  const handleSearchProducts = () => {
+    let filtered = [...products];
+    
+    // Se não há filtros aplicados, mostra todos os produtos
+    const hasFilters = searchFilters.name || searchFilters.category || searchFilters.brand || searchFilters.model;
+    
+    if (hasFilters) {
+      filtered = products.filter(product => {
+        const matchesName = !searchFilters.name || 
+          product.product?.name?.toLowerCase().includes(searchFilters.name.toLowerCase()) ||
+          product.product?.sku?.toLowerCase().includes(searchFilters.name.toLowerCase());
+        
+        // Por enquanto, apenas filtro por nome/código está funcional
+        // Os outros filtros podem ser implementados quando as colunas estiverem disponíveis na tabela products
+        return matchesName;
+      });
+    }
+    
+    // Ordenar resultados
+    filtered.sort((a, b) => {
+      switch (searchFilters.order) {
+        case "sku":
+          return (a.product?.sku || "").localeCompare(b.product?.sku || "");
+        case "cost_price":
+          return (a.product?.cost_price || 0) - (b.product?.cost_price || 0);
+        case "sale_price":
+          return a.sale_price - b.sale_price;
+        default: // name
+          return (a.product?.name || "").localeCompare(b.product?.name || "");
+      }
+    });
+    
+    setFilteredProducts(filtered);
+    setHasSearched(true);
+  };
+
+  const handleClearFilters = () => {
+    setSearchFilters({ name: "", category: "", brand: "", model: "", order: "name" });
+    setFilteredProducts([]);
+    setHasSearched(false);
+  };
+
   if (!currentOrg) {
     return <div className="p-6">Selecione uma organização para continuar.</div>;
   }
@@ -589,11 +634,11 @@ export default function PriceTablesForm() {
                       </Select>
                     </div>
                     <div className="flex gap-2 mt-4">
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={handleSearchProducts}>
                         <Search className="mr-2 h-4 w-4" />
                         Buscar
                       </Button>
-                      <Button variant="outline" onClick={() => setSearchFilters({ name: "", category: "", brand: "", model: "", order: "name" })}>
+                      <Button variant="outline" onClick={handleClearFilters}>
                         Limpar Filtros
                       </Button>
                     </div>
@@ -693,7 +738,7 @@ export default function PriceTablesForm() {
                           </tr>
                         </thead>
                         <tbody>
-                          {products.map((product) => (
+                          {(hasSearched ? filteredProducts : products).map((product) => (
                             <tr key={product.id} className="border-b">
                               <td className="p-2">{product.product?.sku}</td>
                               <td className="p-2">{product.product?.name}</td>
@@ -756,9 +801,9 @@ export default function PriceTablesForm() {
                         </tbody>
                       </table>
                     </div>
-                    {products.length === 0 && (
+                    {(hasSearched ? filteredProducts : products).length === 0 && (
                       <div className="text-center py-8 text-muted-foreground">
-                        Nenhum produto associado a esta tabela
+                        {hasSearched ? "Nenhum produto encontrado com os filtros aplicados" : "Nenhum produto associado a esta tabela"}
                       </div>
                     )}
                   </CardContent>

@@ -132,21 +132,35 @@ export default function PriceTablesForm() {
     if (!id || id === "novo") return;
 
     try {
-      const { data, error } = await supabase
+      // Buscar produtos da tabela de preços
+      const { data: priceTableProducts, error: priceTableError } = await supabase
         .from("price_table_products")
-        .select(`
-          *,
-          products (
-            id,
-            name,
-            sku,
-            cost_price
-          )
-        `)
+        .select("*")
         .eq("price_table_id", id);
 
-      if (error) throw error;
-      setProducts(data || []);
+      if (priceTableError) throw priceTableError;
+
+      if (!priceTableProducts || priceTableProducts.length === 0) {
+        setProducts([]);
+        return;
+      }
+
+      // Buscar informações dos produtos
+      const productIds = priceTableProducts.map(ptp => ptp.product_id);
+      const { data: productsInfo, error: productsError } = await supabase
+        .from("products")
+        .select("id, name, sku, cost_price")
+        .in("id", productIds);
+
+      if (productsError) throw productsError;
+
+      // Combinar os dados
+      const combinedData = priceTableProducts.map(ptp => ({
+        ...ptp,
+        products: productsInfo?.find(p => p.id === ptp.product_id) || null
+      }));
+
+      setProducts(combinedData);
     } catch (error) {
       console.error("Erro ao carregar produtos:", error);
     }

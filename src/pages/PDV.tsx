@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
+import PDVHeader from "@/components/pdv/PDVHeader"
 
 interface Product {
   id: string
@@ -50,6 +51,12 @@ const PDV = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("")
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  
+  // PDV Header states
+  const [selectedSeller, setSelectedSeller] = useState(user?.id || "")
+  const [selectedCompany, setSelectedCompany] = useState("")
+  const [selectedTerminal, setSelectedTerminal] = useState("pdv01")
+  const [selectedPriceTable, setSelectedPriceTable] = useState("")
 
   useEffect(() => {
     console.log('PDV useEffect - currentOrg:', currentOrg, 'orgLoading:', orgLoading)
@@ -62,31 +69,71 @@ const PDV = () => {
     }
   }, [currentOrg, orgLoading])
 
+  // Auto-select current user as seller
+  useEffect(() => {
+    if (user?.id && !selectedSeller) {
+      setSelectedSeller(user.id)
+    }
+  }, [user, selectedSeller])
+
   const loadProducts = async () => {
     if (!currentOrg?.id) return
     setLoading(true)
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('products')
-        .select('*')
+        .select(`
+          *,
+          price_table_products!inner(
+            unit_price
+          )
+        `)
         .eq('org_id', currentOrg?.id)
         .eq('active', true)
-        .order('name')
+
+      // Apply price table filter if selected
+      if (selectedPriceTable) {
+        query = query.eq('price_table_products.price_table_id', selectedPriceTable)
+      }
+
+      const { data, error } = await query.order('name')
 
       if (error) throw error
 
-      setProducts(data || [])
+      // Map products with price table prices
+      const mappedProducts = data?.map((product: any) => ({
+        ...product,
+        unit_price: product.price_table_products?.[0]?.unit_price || product.unit_price
+      })) || []
+
+      setProducts(mappedProducts)
       
       // Extract unique categories
-      const uniqueCategories = [...new Set(data?.map(p => p.category).filter(Boolean) as string[])]
+      const uniqueCategories = [...new Set(mappedProducts?.map(p => p.category).filter(Boolean) as string[])]
       setCategories(uniqueCategories)
     } catch (error) {
       console.error('Error loading products:', error)
-      toast({
-        title: "Erro ao carregar produtos",
-        description: "Não foi possível carregar os produtos.",
-        variant: "destructive",
-      })
+      // Fallback to loading without price table
+      try {
+        const { data, error: fallbackError } = await supabase
+          .from('products')
+          .select('*')
+          .eq('org_id', currentOrg?.id)
+          .eq('active', true)
+          .order('name')
+
+        if (fallbackError) throw fallbackError
+        setProducts(data || [])
+        
+        const uniqueCategories = [...new Set(data?.map(p => p.category).filter(Boolean) as string[])]
+        setCategories(uniqueCategories)
+      } catch (fallbackError) {
+        toast({
+          title: "Erro ao carregar produtos",
+          description: "Não foi possível carregar os produtos.",
+          variant: "destructive",
+        })
+      }
     } finally {
       setLoading(false)
     }
@@ -333,8 +380,26 @@ const PDV = () => {
   }
 
   return (
-    <div className="page-container container mx-auto p-6">
-      <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-8rem)]">
+    <div className="min-h-screen bg-background">
+      <PDVHeader
+        selectedSeller={selectedSeller}
+        selectedCompany={selectedCompany}
+        selectedTerminal={selectedTerminal}
+        selectedPriceTable={selectedPriceTable}
+        onSellerChange={setSelectedSeller}
+        onCompanyChange={setSelectedCompany}
+        onTerminalChange={setSelectedTerminal}
+        onPriceTableChange={(value) => {
+          setSelectedPriceTable(value)
+          // Reload products when price table changes
+          if (currentOrg?.id) {
+            loadProducts()
+          }
+        }}
+      />
+      
+      <div className="page-container container mx-auto p-6">
+        <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-12rem)]">
         {/* Products Section */}
         <div className="flex-1 flex flex-col">
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -540,6 +605,7 @@ const PDV = () => {
           </Card>
         </div>
       </div>
+    </div>
     </div>
   )
 }

@@ -153,6 +153,8 @@ export default function PriceTablesForm() {
   };
 
   const loadAvailableProducts = async () => {
+    if (!currentOrg?.id) return;
+    
     try {
       const { data, error } = await supabase
         .from("products")
@@ -362,20 +364,15 @@ export default function PriceTablesForm() {
   };
 
   const handleSearchProducts = () => {
+    // Sempre mostra todos os produtos disponíveis, aplicando filtros se houver
     let filtered = [...availableProducts];
     
-    // Se não há filtros aplicados, mostra todos os produtos disponíveis
-    const hasFilters = searchFilters.name || searchFilters.category || searchFilters.brand || searchFilters.model;
-    
-    if (hasFilters) {
-      filtered = availableProducts.filter(product => {
-        const matchesName = !searchFilters.name || 
-          product.name?.toLowerCase().includes(searchFilters.name.toLowerCase()) ||
-          product.sku?.toLowerCase().includes(searchFilters.name.toLowerCase());
-        
-        // Por enquanto, apenas filtro por nome/código está funcional
-        // Os outros filtros podem ser implementados quando as colunas estiverem disponíveis na tabela products
-        return matchesName;
+    // Aplicar filtros se existirem
+    if (searchFilters.name && searchFilters.name.trim()) {
+      filtered = filtered.filter(product => {
+        const searchTerm = searchFilters.name.toLowerCase();
+        return product.name?.toLowerCase().includes(searchTerm) ||
+               product.sku?.toLowerCase().includes(searchTerm);
       });
     }
     

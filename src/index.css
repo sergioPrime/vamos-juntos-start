@@ -138,55 +138,59 @@ All colors MUST be HSL.
     --header-height: 56px;
     --page-top-offset: calc(var(--header-height) + 12px);
     
-    /* === MODO CLARO - CORES AZUIS E VERDES === */
-    /* Nível 1: Fundo Principal (muito claro) */
-    --background: 210 40% 98%;
-    --foreground: 215 25% 27%;
+    /* === MODO CLARO VIBRANTE - CORES MAIS CONTRASTANTES E DINÂMICAS === */
+    /* Nível 1: Fundo Principal (branco puro para máximo contraste) */
+    --background: 0 0% 100%;
+    --foreground: 215 25% 17%;
 
-    /* Nível 2: Cards e Containers (intermediário) */
-    --card: 210 40% 95%;
-    --card-foreground: 215 25% 27%;
+    /* Nível 2: Cards e Containers (branco com bordas sutis) */
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 17%;
     
-    /* Nível 3: Elementos Flutuantes/Destaques (mais claro) */
-    --elevated: 210 40% 92%;
-    --elevated-foreground: 215 25% 27%;
+    /* Nível 3: Elementos Flutuantes/Destaques (cinza muito claro) */
+    --elevated: 210 20% 98%;
+    --elevated-foreground: 215 25% 17%;
 
-    --popover: 210 40% 92%;
-    --popover-foreground: 215 25% 27%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 17%;
 
-    --primary: 213 94% 68%;
-    --primary-foreground: 210 40% 98%;
-    --primary-hover: 213 94% 72%;
-    --primary-active: 213 94% 60%;
+    /* Azul primário vibrante (conforme especificação #2563eb) */
+    --primary: 218 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 218 91% 55%;
+    --primary-active: 218 91% 50%;
 
-    /* Cores de ação com mais presença */
-    --action-primary: 213 94% 68%;
-    --action-primary-hover: 213 94% 72%;
-    --action-primary-active: 213 94% 60%;
-    --action-secondary: 158 64% 52%;
-    --action-secondary-hover: 158 64% 57%;
-    --action-destructive: 0 84% 65%;
-    --action-destructive-hover: 0 84% 70%;
+    /* Cores de ação mais vibrantes e contrastantes */
+    --action-primary: 218 91% 60%;
+    --action-primary-hover: 218 91% 55%;
+    --action-primary-active: 218 91% 50%;
+    --action-secondary: 210 16% 82%;
+    --action-secondary-hover: 210 20% 98%;
+    --action-destructive: 0 84% 60%;
+    --action-destructive-hover: 0 84% 65%;
 
-    
-    --secondary: 210 40% 85%;
-    --secondary-foreground: 215 25% 27%;
+    /* Botão secundário mais contrastante */
+    --secondary: 210 16% 82%;
+    --secondary-foreground: 215 25% 35%;
 
-    --muted: 210 40% 88%;
-    --muted-foreground: 215 25% 55%;
+    /* Muted mais contrastante para melhor legibilidade */
+    --muted: 210 20% 98%;
+    --muted-foreground: 215 16% 46%;
 
-    --accent: 213 94% 68%;
-    --accent-foreground: 210 40% 98%;
+    /* Accent mais vibrante */
+    --accent: 200 96% 88%;
+    --accent-foreground: 218 91% 50%;
 
-    --destructive: 0 84% 65%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
     --success: 158 64% 52%;
-    --success-foreground: 210 40% 98%;
+    --success-foreground: 0 0% 100%;
 
-    --border: 210 40% 82%;
-    --input: 210 40% 90%;
-    --ring: 213 94% 65%;
+    /* Bordas mais contrastantes conforme especificação */
+    --border: 215 16% 75%;
+    --input: 0 0% 100%;
+    --ring: 218 91% 60%;
 
     /* Gradientes para hierarquia visual */
     --gradient-primary: linear-gradient(135deg, hsl(213 94% 65%), hsl(158 64% 52%));

@@ -404,6 +404,23 @@ export default function PriceTablesForm() {
     if (!currentOrg?.id || !id || id === "novo") return;
 
     try {
+      // Verificar se o produto já está associado a esta tabela de preços
+      const { data: existingProduct } = await supabase
+        .from("price_table_products")
+        .select("id")
+        .eq("price_table_id", id)
+        .eq("product_id", product.id)
+        .single();
+
+      if (existingProduct) {
+        toast({
+          title: "Aviso",
+          description: "Este produto já está associado a esta tabela de preços",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const newPriceTableProduct = {
         price_table_id: id,
         product_id: product.id,

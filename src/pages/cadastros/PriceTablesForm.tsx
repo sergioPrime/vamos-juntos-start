@@ -17,10 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Save, MoreHorizontal, Plus, Search, Trash2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
+import { ArrowLeft, Save, MoreHorizontal, Calculator } from "lucide-react";
+import { PriceTableProductsManager } from "@/components/price-tables/PriceTableProductsManager";
 
 interface PriceTableFormData {
   id?: string;
@@ -48,7 +46,7 @@ interface PriceTableProduct {
   seller_commission: number;
   representative_commission: number;
   mva: number;
-  product?: Product;
+  products?: Product;
 }
 
 const genderOptions = [
@@ -82,18 +80,6 @@ export default function PriceTablesForm() {
   const [availableProducts, setAvailableProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "dados");
-  const [showProductModal, setShowProductModal] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
-  const [searchFilters, setSearchFilters] = useState({
-    name: "",
-    category: "",
-    brand: "",
-    model: "",
-    order: "name",
-  });
-  
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
     if (id && id !== "novo") {
@@ -290,11 +276,30 @@ export default function PriceTablesForm() {
     }
   };
 
-  const handleAddProducts = async () => {
-    if (selectedProducts.length === 0) return;
+  const handleAddProducts = async (productIds: string[]) => {
+    if (productIds.length === 0) return;
 
     try {
-      const newProducts = selectedProducts.map((productId) => ({
+      // Verificar duplicatas
+      const { data: existingProducts } = await supabase
+        .from("price_table_products")
+        .select("product_id")
+        .eq("price_table_id", id)
+        .in("product_id", productIds);
+
+      const existingIds = existingProducts?.map(p => p.product_id) || [];
+      const newProductIds = productIds.filter(id => !existingIds.includes(id));
+
+      if (newProductIds.length === 0) {
+        toast({
+          title: "Aviso",
+          description: "Todos os produtos selecionados já estão na tabela",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const newProducts = newProductIds.map((productId) => ({
         price_table_id: id,
         product_id: productId,
         sale_price: 0,
@@ -311,11 +316,9 @@ export default function PriceTablesForm() {
 
       toast({
         title: "Sucesso",
-        description: `${selectedProducts.length} produto(s) adicionado(s) com sucesso`,
+        description: `${newProductIds.length} produto(s) adicionado(s) com sucesso`,
       });
 
-      setSelectedProducts([]);
-      setShowProductModal(false);
       loadPriceTableProducts();
     } catch (error) {
       console.error("Erro ao adicionar produtos:", error);
@@ -327,12 +330,12 @@ export default function PriceTablesForm() {
     }
   };
 
-  const handleRemoveProduct = async (productId: string) => {
+  const handleRemoveProduct = async (productTableId: string) => {
     try {
       const { error } = await supabase
         .from("price_table_products")
         .delete()
-        .eq("id", productId);
+        .eq("id", productTableId);
 
       if (error) throw error;
 
@@ -377,97 +380,6 @@ export default function PriceTablesForm() {
     }
   };
 
-  const handleSearchProducts = () => {
-    // Sempre mostra todos os produtos disponíveis, aplicando filtros se houver
-    let filtered = [...availableProducts];
-    
-    // Aplicar filtros se existirem
-    if (searchFilters.name && searchFilters.name.trim()) {
-      filtered = filtered.filter(product => {
-        const searchTerm = searchFilters.name.toLowerCase();
-        return product.name?.toLowerCase().includes(searchTerm) ||
-               product.sku?.toLowerCase().includes(searchTerm);
-      });
-    }
-    
-    // Ordenar resultados
-    filtered.sort((a, b) => {
-      switch (searchFilters.order) {
-        case "sku":
-          return (a.sku || "").localeCompare(b.sku || "");
-        case "cost_price":
-          return (a.cost_price || 0) - (b.cost_price || 0);
-        case "sale_price":
-          return 0; // Produtos não têm preço de venda até serem adicionados à tabela
-        default: // name
-          return (a.name || "").localeCompare(b.name || "");
-      }
-    });
-    
-    setFilteredProducts(filtered);
-    setHasSearched(true);
-  };
-
-  const handleClearFilters = () => {
-    setSearchFilters({ name: "", category: "", brand: "", model: "", order: "name" });
-    setFilteredProducts([]);
-    setHasSearched(false);
-  };
-
-  const addProductToTable = async (product: Product) => {
-    if (!currentOrg?.id || !id || id === "novo") return;
-
-    try {
-      // Verificar se o produto já está associado a esta tabela de preços
-      const { data: existingProduct } = await supabase
-        .from("price_table_products")
-        .select("id")
-        .eq("price_table_id", id)
-        .eq("product_id", product.id)
-        .single();
-
-      if (existingProduct) {
-        toast({
-          title: "Aviso",
-          description: "Este produto já está associado a esta tabela de preços",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const newPriceTableProduct = {
-        price_table_id: id,
-        product_id: product.id,
-        sale_price: 0,
-        seller_commission: formData.default_seller_commission || 0,
-        representative_commission: formData.default_representative_commission || 0,
-        mva: formData.default_mva || 0,
-      };
-
-      const { data, error } = await supabase
-        .from("price_table_products")
-        .insert(newPriceTableProduct)
-        .single();
-
-      if (error) throw error;
-
-      // Recarregar a lista de produtos da tabela
-      await loadPriceTableProducts();
-      
-      toast({
-        title: "Produto adicionado",
-        description: "Produto adicionado à tabela com sucesso",
-      });
-    } catch (error) {
-      console.error("Erro ao adicionar produto:", error);
-      toast({
-        title: "Erro",
-        description: "Erro ao adicionar produto à tabela",
-        variant: "destructive",
-      });
-    }
-  };
-
   if (!currentOrg) {
     return <div className="p-6">Selecione uma organização para continuar.</div>;
   }
@@ -497,53 +409,36 @@ export default function PriceTablesForm() {
             <Save className="mr-2 h-4 w-4" />
             Salvar
           </Button>
-          <Button variant="outline" onClick={() => navigate("/cadastros/tabela-precos")}>
-            Voltar
-          </Button>
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Formulário */}
       <Card>
-        <CardContent className="p-0">
+        <CardContent className="p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0">
-              <TabsTrigger 
-                value="dados" 
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary"
-              >
-                Dados
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="dados">Dados</TabsTrigger>
+              <TabsTrigger value="produtos" disabled={!isEditing}>
+                Produtos
               </TabsTrigger>
-              {isEditing && (
-                <TabsTrigger 
-                  value="produtos" 
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary"
-                >
-                  Produtos
-                </TabsTrigger>
-              )}
             </TabsList>
 
-            {/* Aba Dados */}
-            <TabsContent value="dados" className="p-6 space-y-6">
+            <TabsContent value="dados" className="space-y-6 mt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Nome */}
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nome *</Label>
+                  <Label htmlFor="name">Nome da Tabela *</Label>
                   <Input
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Ex: PROMOCOES, ATACADO, VAREJO"
-                    maxLength={100}
+                    placeholder="Ex: Tabela Varejo"
                   />
                 </div>
 
-                {/* Gênero */}
                 <div className="space-y-2">
-                  <Label>Gênero *</Label>
-                  <Select 
-                    value={formData.gender} 
+                  <Label htmlFor="gender">Gênero *</Label>
+                  <Select
+                    value={formData.gender}
                     onValueChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}
                   >
                     <SelectTrigger>
@@ -560,42 +455,70 @@ export default function PriceTablesForm() {
                 </div>
               </div>
 
-              {/* Switches */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="flex items-center space-x-2">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Configurações</h3>
+                
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="visible_pdv">Visível no PDV</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Esta tabela aparecerá no Ponto de Venda
+                    </p>
+                  </div>
                   <Switch
                     id="visible_pdv"
                     checked={formData.visible_in_pdv}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, visible_in_pdv: checked }))}
                   />
-                  <Label htmlFor="visible_pdv">Visível no PDV?</Label>
                 </div>
 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="auto_cost">Auto Atualização por Custo</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Atualizar preços automaticamente quando o custo mudar
+                    </p>
+                  </div>
                   <Switch
                     id="auto_cost"
                     checked={formData.auto_update_cost_changes}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, auto_update_cost_changes: checked }))}
                   />
-                  <Label htmlFor="auto_cost">Atualizar Preços ao alterar custo</Label>
                 </div>
 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="auto_commission">Auto Atualização por Comissão</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Atualizar preços quando as comissões mudarem
+                    </p>
+                  </div>
                   <Switch
                     id="auto_commission"
                     checked={formData.auto_update_commission_changes}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, auto_update_commission_changes: checked }))}
                   />
-                  <Label htmlFor="auto_commission">Atualizar Preços ao alterar Comissão</Label>
                 </div>
               </div>
 
-              {/* Regras Padrão */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Regras Padrão</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Regras Padrão</h3>
+                  {isEditing && products.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleApplyDefaultRules}
+                    >
+                      <Calculator className="h-4 w-4 mr-2" />
+                      Aplicar a Todos os Produtos
+                    </Button>
+                  )}
+                </div>
+                
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="seller_commission">Comissão Vendedor Padrão %</Label>
+                    <Label htmlFor="seller_commission">Comissão Vendedor (%)</Label>
                     <Input
                       id="seller_commission"
                       type="number"
@@ -603,15 +526,12 @@ export default function PriceTablesForm() {
                       max="100"
                       step="0.01"
                       value={formData.default_seller_commission}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        default_seller_commission: parseFloat(e.target.value) || 0 
-                      }))}
+                      onChange={(e) => setFormData(prev => ({ ...prev, default_seller_commission: parseFloat(e.target.value) || 0 }))}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="representative_commission">Comissão Representante Padrão %</Label>
+                    <Label htmlFor="representative_commission">Comissão Representante (%)</Label>
                     <Input
                       id="representative_commission"
                       type="number"
@@ -619,307 +539,43 @@ export default function PriceTablesForm() {
                       max="100"
                       step="0.01"
                       value={formData.default_representative_commission}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        default_representative_commission: parseFloat(e.target.value) || 0 
-                      }))}
+                      onChange={(e) => setFormData(prev => ({ ...prev, default_representative_commission: parseFloat(e.target.value) || 0 }))}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="mva">Padrão MVA %</Label>
+                    <Label htmlFor="mva">MVA (%)</Label>
                     <Input
                       id="mva"
                       type="number"
                       min="0"
-                      max="100"
+                      max="1000"
                       step="0.01"
                       value={formData.default_mva}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        default_mva: parseFloat(e.target.value) || 0 
-                      }))}
+                      onChange={(e) => setFormData(prev => ({ ...prev, default_mva: parseFloat(e.target.value) || 0 }))}
                     />
                   </div>
                 </div>
-
-                {isEditing && (
-                  <div className="flex justify-end">
-                    <Button onClick={handleApplyDefaultRules}>
-                      Aplicar Regras Padrão
-                    </Button>
-                  </div>
-                )}
               </div>
             </TabsContent>
 
-            {/* Aba Produtos */}
-            {isEditing && (
-              <TabsContent value="produtos" className="p-6 space-y-6">
-                {/* Busca Avançada */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Search className="h-5 w-5" />
-                      Busca Avançada
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                      <Input
-                        placeholder="Nome/Código do Produto"
-                        value={searchFilters.name}
-                        onChange={(e) => setSearchFilters(prev => ({ ...prev, name: e.target.value }))}
-                      />
-                      <Input
-                        placeholder="Categoria"
-                        value={searchFilters.category}
-                        onChange={(e) => setSearchFilters(prev => ({ ...prev, category: e.target.value }))}
-                      />
-                      <Input
-                        placeholder="Marca"
-                        value={searchFilters.brand}
-                        onChange={(e) => setSearchFilters(prev => ({ ...prev, brand: e.target.value }))}
-                      />
-                      <Input
-                        placeholder="Modelo"
-                        value={searchFilters.model}
-                        onChange={(e) => setSearchFilters(prev => ({ ...prev, model: e.target.value }))}
-                      />
-                      <Select value={searchFilters.order} onValueChange={(value) => setSearchFilters(prev => ({ ...prev, order: value }))}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="name">Nome</SelectItem>
-                          <SelectItem value="sku">Código</SelectItem>
-                          <SelectItem value="cost_price">Preço Custo</SelectItem>
-                          <SelectItem value="sale_price">Preço Venda</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex gap-2 mt-4">
-                      <Button variant="outline" onClick={handleSearchProducts}>
-                        <Search className="mr-2 h-4 w-4" />
-                        Buscar
-                      </Button>
-                      <Button variant="outline" onClick={handleClearFilters}>
-                        Limpar Filtros
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Botão Adicionar e Lista de Produtos */}
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold">Produtos Associados</h3>
-                  <Dialog open={showProductModal} onOpenChange={setShowProductModal}>
-                    <DialogTrigger asChild>
-                      <Button>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Adicionar Produto(s)
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl">
-                      <DialogHeader>
-                        <DialogTitle>Adicionar Produtos</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div className="max-h-96 overflow-y-auto">
-                          <table className="w-full">
-                            <thead>
-                              <tr className="border-b">
-                                <th className="p-2 text-left">
-                                  <Checkbox 
-                                    checked={selectedProducts.length === availableProducts.filter(p => !products.some(ep => ep.product_id === p.id)).length}
-                                    onCheckedChange={(checked) => {
-                                      if (checked) {
-                                        setSelectedProducts(availableProducts.filter(p => !products.some(ep => ep.product_id === p.id)).map(p => p.id));
-                                      } else {
-                                        setSelectedProducts([]);
-                                      }
-                                    }}
-                                  />
-                                </th>
-                                <th className="p-2 text-left">Código</th>
-                                <th className="p-2 text-left">Nome</th>
-                                <th className="p-2 text-left">Preço Custo</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {availableProducts
-                                .filter(product => !products.some(ep => ep.product_id === product.id))
-                                .map((product) => (
-                                <tr key={product.id} className="border-b">
-                                  <td className="p-2">
-                                    <Checkbox 
-                                      checked={selectedProducts.includes(product.id)}
-                                      onCheckedChange={(checked) => {
-                                        if (checked) {
-                                          setSelectedProducts(prev => [...prev, product.id]);
-                                        } else {
-                                          setSelectedProducts(prev => prev.filter(id => id !== product.id));
-                                        }
-                                      }}
-                                    />
-                                  </td>
-                                  <td className="p-2">{product.sku}</td>
-                                  <td className="p-2">{product.name}</td>
-                                  <td className="p-2">R$ {product.cost_price?.toFixed(2) || "0,00"}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                        <div className="flex justify-end gap-2">
-                          <Button variant="outline" onClick={() => setShowProductModal(false)}>
-                            Cancelar
-                          </Button>
-                          <Button onClick={handleAddProducts} disabled={selectedProducts.length === 0}>
-                            Adicionar Selecionados ({selectedProducts.length})
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-
-                {/* Tabela de Produtos */}
-                <Card>
-                  <CardContent className="p-0">
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b">
-                            <th className="p-2 text-left">Código</th>
-                            <th className="p-2 text-left">Nome</th>
-                            <th className="p-2 text-right">Preço Custo</th>
-                            <th className="p-2 text-right">Despesas</th>
-                            <th className="p-2 text-right">Preço Venda</th>
-                            <th className="p-2 text-right">Comissão Vendedor (%)</th>
-                            <th className="p-2 text-right">Comissão Representação (%)</th>
-                            <th className="p-2 text-right">MVA (%)</th>
-                            <th className="p-2 text-center">Ações</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {/* Produtos já associados à tabela */}
-                          {products.map((product) => (
-                            <tr key={product.id} className="border-b">
-                              <td className="p-2">{product.product?.sku}</td>
-                              <td className="p-2">{product.product?.name}</td>
-                              <td className="p-2 text-right">R$ {product.product?.cost_price?.toFixed(2) || "0,00"}</td>
-                              <td className="p-2 text-right">R$ 0,00</td>
-                              <td className="p-2">
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                  value={product.sale_price}
-                                  onChange={(e) => updateProductField(product.id, "sale_price", parseFloat(e.target.value) || 0)}
-                                  className="w-24 text-right"
-                                />
-                              </td>
-                              <td className="p-2">
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  max="100"
-                                  step="0.01"
-                                  value={product.seller_commission}
-                                  onChange={(e) => updateProductField(product.id, "seller_commission", parseFloat(e.target.value) || 0)}
-                                  className="w-20 text-right"
-                                />
-                              </td>
-                              <td className="p-2">
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  max="100"
-                                  step="0.01"
-                                  value={product.representative_commission}
-                                  onChange={(e) => updateProductField(product.id, "representative_commission", parseFloat(e.target.value) || 0)}
-                                  className="w-20 text-right"
-                                />
-                              </td>
-                              <td className="p-2">
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  max="100"
-                                  step="0.01"
-                                  value={product.mva}
-                                  onChange={(e) => updateProductField(product.id, "mva", parseFloat(e.target.value) || 0)}
-                                  className="w-20 text-right"
-                                />
-                              </td>
-                              <td className="p-2 text-center">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleRemoveProduct(product.id)}
-                                >
-                                  <Trash2 className="h-4 w-4 text-red-600" />
-                                </Button>
-                              </td>
-                            </tr>
-                           ))}
-                          
-                          {/* Seção de produtos encontrados na busca */}
-                          {hasSearched && (
-                            <>
-                              <tr>
-                                <td colSpan={9} className="p-4 bg-muted">
-                                  <div className="flex items-center gap-2">
-                                    <Search className="h-4 w-4" />
-                                    <span className="font-medium">Produtos Encontrados ({filteredProducts.length})</span>
-                                  </div>
-                                </td>
-                              </tr>
-                              {filteredProducts.map((product) => {
-                                const isAlreadyAdded = products.some(p => p.product_id === product.id);
-                                return (
-                                  <tr key={`search-${product.id}`} className="border-b bg-blue-50">
-                                    <td className="p-2">{product.sku}</td>
-                                    <td className="p-2">{product.name}</td>
-                                    <td className="p-2 text-right">R$ {product.cost_price?.toFixed(2) || "0,00"}</td>
-                                    <td className="p-2 text-right">R$ 0,00</td>
-                                    <td className="p-2 text-center" colSpan={4}>
-                                      {isAlreadyAdded ? (
-                                        <span className="text-sm text-muted-foreground">Já adicionado à tabela</span>
-                                      ) : (
-                                        <Button 
-                                          size="sm" 
-                                          onClick={() => addProductToTable(product)}
-                                        >
-                                          <Plus className="h-4 w-4 mr-1" />
-                                          Adicionar à Tabela
-                                        </Button>
-                                      )}
-                                    </td>
-                                    <td className="p-2"></td>
-                                  </tr>
-                                );
-                              })}
-                            </>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                    {products.length === 0 && !hasSearched && (
-                      <div className="text-center py-8 text-muted-foreground">
-                        Nenhum produto associado a esta tabela
-                      </div>
-                    )}
-                    {hasSearched && filteredProducts.length === 0 && (
-                      <div className="text-center py-8 text-muted-foreground">
-                        Nenhum produto encontrado com os filtros aplicados
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            )}
+            <TabsContent value="produtos" className="mt-6">
+              {isEditing && (
+                <PriceTableProductsManager
+                  products={products}
+                  availableProducts={availableProducts}
+                  onAddProducts={handleAddProducts}
+                  onRemoveProduct={handleRemoveProduct}
+                  onUpdateProduct={updateProductField}
+                  onApplyDefaultRules={handleApplyDefaultRules}
+                  defaultRules={{
+                    seller_commission: formData.default_seller_commission,
+                    representative_commission: formData.default_representative_commission,
+                    mva: formData.default_mva,
+                  }}
+                />
+              )}
+            </TabsContent>
           </Tabs>
         </CardContent>
       </Card>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -6,8 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Check, X, Plus, Edit, Trash2, Eye } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +18,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { PriceTableCard } from "@/components/price-tables/PriceTableCard";
+import { PriceTableFilters } from "@/components/price-tables/PriceTableFilters";
 
 interface PriceTable {
   id: string;
@@ -30,6 +31,14 @@ interface PriceTable {
   default_mva: number;
   created_at: string;
   updated_at: string;
+  product_count?: number;
+}
+
+interface FilterState {
+  search: string;
+  gender: string;
+  pdv_visibility: string;
+  has_rules: string;
 }
 
 export default function PriceTables() {
@@ -39,6 +48,16 @@ export default function PriceTables() {
   const { toast } = useToast();
   const [priceTables, setPriceTables] = useState<PriceTable[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState<FilterState>({
+    search: "",
+    gender: "",
+    pdv_visibility: "",
+    has_rules: ""
+  });
+  const [showDeleteDialog, setShowDeleteDialog] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   useEffect(() => {
     if (currentOrg?.id) {
@@ -49,15 +68,33 @@ export default function PriceTables() {
   const loadPriceTables = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // Carregar tabelas com contagem de produtos
+      const { data: tables, error: tablesError } = await supabase
         .from("price_tables")
         .select("*")
         .eq("org_id", currentOrg?.id)
         .eq("is_active", true)
         .order("name");
 
-      if (error) throw error;
-      setPriceTables(data || []);
+      if (tablesError) throw tablesError;
+
+      // Carregar contagem de produtos para cada tabela
+      const tablesWithCount = await Promise.all(
+        (tables || []).map(async (table) => {
+          const { count } = await supabase
+            .from("price_table_products")
+            .select("*", { count: "exact", head: true })
+            .eq("price_table_id", table.id);
+          
+          return {
+            ...table,
+            product_count: count || 0
+          };
+        })
+      );
+
+      setPriceTables(tablesWithCount);
     } catch (error) {
       console.error("Erro ao carregar tabelas de preços:", error);
       toast({
@@ -72,14 +109,16 @@ export default function PriceTables() {
 
   const handleDelete = async (id: string, name: string) => {
     try {
-      // Verificar se há pedidos/orçamentos vinculados
-      // Verificar se há pedidos/orçamentos vinculados - simulação pois não temos tabela orders ainda
-      const orders: any[] = [];
+      // Verificar se há produtos vinculados
+      const { count } = await supabase
+        .from("price_table_products")
+        .select("*", { count: "exact", head: true })
+        .eq("price_table_id", id);
 
-      if (orders && orders.length > 0) {
+      if (count && count > 0) {
         toast({
           title: "Não é possível excluir",
-          description: `Não é possível excluir esta tabela porque está vinculada a pedidos.`,
+          description: `Esta tabela possui ${count} produto(s) vinculado(s). Remova os produtos antes de excluir.`,
           variant: "destructive",
         });
         return;
@@ -97,6 +136,7 @@ export default function PriceTables() {
         description: "Tabela de preços excluída com sucesso",
       });
 
+      setShowDeleteDialog(null);
       loadPriceTables();
     } catch (error) {
       console.error("Erro ao excluir tabela de preços:", error);
@@ -106,6 +146,55 @@ export default function PriceTables() {
         variant: "destructive",
       });
     }
+  };
+
+  // Aplicar filtros nas tabelas
+  const filteredTables = useMemo(() => {
+    return priceTables.filter(table => {
+      // Filtro por busca
+      if (filters.search) {
+        const searchTerm = filters.search.toLowerCase();
+        if (!table.name.toLowerCase().includes(searchTerm)) {
+          return false;
+        }
+      }
+
+      // Filtro por gênero
+      if (filters.gender && table.gender !== filters.gender) {
+        return false;
+      }
+
+      // Filtro por visibilidade no PDV
+      if (filters.pdv_visibility) {
+        const isVisible = filters.pdv_visibility === "true";
+        if (table.visible_in_pdv !== isVisible) {
+          return false;
+        }
+      }
+
+      // Filtro por regras configuradas
+      if (filters.has_rules) {
+        const hasRules = 
+          table.default_seller_commission > 0 ||
+          table.default_representative_commission > 0 ||
+          table.default_mva > 0;
+        const shouldHaveRules = filters.has_rules === "true";
+        if (hasRules !== shouldHaveRules) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [priceTables, filters]);
+
+  const handleClearFilters = () => {
+    setFilters({
+      search: "",
+      gender: "",
+      pdv_visibility: "",
+      has_rules: ""
+    });
   };
 
   if (!currentOrg) {
@@ -119,127 +208,103 @@ export default function PriceTables() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
         <div>
           <h1 className="text-3xl font-bold">Tabela de Preços</h1>
           <p className="text-muted-foreground">
             Gerencie as tabelas de preços da sua organização
           </p>
         </div>
-        <Button onClick={() => navigate("/cadastros/tabela-precos/novo")}>
+        <Button onClick={() => navigate("/cadastros/tabela-precos/novo")} className="shrink-0">
           <Plus className="mr-2 h-4 w-4" />
-          Novo
+          Nova Tabela
         </Button>
       </div>
 
-      {/* Lista de Tabelas */}
+      {/* Filtros */}
       <Card>
         <CardHeader>
-          <CardTitle>Tabelas Cadastradas</CardTitle>
+          <CardTitle>Filtros de Busca</CardTitle>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <div className="text-center py-8">Carregando...</div>
-          ) : priceTables.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Nenhuma tabela de preços cadastrada
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-2 font-medium">Nome da Tabela</th>
-                    <th className="text-left p-2 font-medium">Gênero</th>
-                    <th className="text-center p-2 font-medium">Visível no PDV?</th>
-                    <th className="text-center p-2 font-medium">Regras Padrão</th>
-                    <th className="text-left p-2 font-medium">Atualizado em</th>
-                    <th className="text-center p-2 font-medium">Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {priceTables.map((table) => (
-                    <tr key={table.id} className="border-b hover:bg-muted/50">
-                      <td className="p-2 font-medium">{table.name}</td>
-                      <td className="p-2">{table.gender}</td>
-                      <td className="p-2 text-center">
-                        {table.visible_in_pdv ? (
-                          <Badge variant="default" className="bg-green-100 text-green-800">
-                            <Check className="h-3 w-3 mr-1" />
-                            Sim
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="bg-red-100 text-red-800">
-                            <X className="h-3 w-3 mr-1" />
-                            Não
-                          </Badge>
-                        )}
-                      </td>
-                      <td className="p-2 text-center">
-                        {table.default_seller_commission > 0 ||
-                        table.default_representative_commission > 0 ||
-                        table.default_mva > 0 ? (
-                          <Badge variant="default" className="bg-blue-100 text-blue-800">
-                            Aplicadas
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">Não aplicadas</Badge>
-                        )}
-                      </td>
-                      <td className="p-2">
-                        {new Date(table.updated_at).toLocaleDateString("pt-BR")}
-                      </td>
-                      <td className="p-2">
-                        <div className="flex items-center justify-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => navigate(`/cadastros/tabela-precos/${table.id}`)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => navigate(`/cadastros/tabela-precos/${table.id}?tab=produtos`)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <Trash2 className="h-4 w-4 text-red-600" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Excluir Tabela de Preços</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Tem certeza que deseja excluir a tabela "{table.name}"?
-                                  Esta ação não pode ser desfeita.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDelete(table.id, table.name)}
-                                  className="bg-red-600 hover:bg-red-700"
-                                >
-                                  Excluir
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <PriceTableFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+            onClearFilters={handleClearFilters}
+            totalResults={filteredTables.length}
+          />
         </CardContent>
       </Card>
+
+      {/* Lista de Tabelas */}
+      {loading ? (
+        <Card>
+          <CardContent className="py-12">
+            <div className="text-center">
+              <div className="animate-pulse">
+                <div className="h-4 bg-muted rounded w-48 mx-auto mb-4"></div>
+                <div className="h-4 bg-muted rounded w-32 mx-auto"></div>
+              </div>
+              <p className="mt-4 text-muted-foreground">Carregando tabelas...</p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : filteredTables.length === 0 ? (
+        <Card>
+          <CardContent className="py-12">
+            <div className="text-center">
+              <div className="text-6xl mb-4">📋</div>
+              <h3 className="text-lg font-medium mb-2">
+                {priceTables.length === 0 ? "Nenhuma tabela criada" : "Nenhuma tabela encontrada"}
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                {priceTables.length === 0 
+                  ? "Comece criando sua primeira tabela de preços"
+                  : "Tente ajustar os filtros para encontrar a tabela desejada"
+                }
+              </p>
+              {priceTables.length === 0 && (
+                <Button onClick={() => navigate("/cadastros/tabela-precos/novo")}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Criar Primeira Tabela
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredTables.map((table) => (
+            <PriceTableCard
+              key={table.id}
+              table={table}
+              onDelete={(id, name) => setShowDeleteDialog({ id, name })}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Dialog de Confirmação de Exclusão */}
+      <AlertDialog open={!!showDeleteDialog} onOpenChange={() => setShowDeleteDialog(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Tabela de Preços</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir a tabela "{showDeleteDialog?.name}"?
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => showDeleteDialog && handleDelete(showDeleteDialog.id, showDeleteDialog.name)}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

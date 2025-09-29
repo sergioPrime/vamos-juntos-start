@@ -117,17 +117,17 @@ export function ProductSearchModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
             Adicionar Produtos à Tabela
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 flex flex-col space-y-4">
+        <div className="flex-1 flex flex-col space-y-4 min-h-0">
           {/* Filtros e Busca */}
-          <div className="space-y-3">
+          <div className="space-y-3 flex-shrink-0">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
@@ -163,8 +163,8 @@ export function ProductSearchModal({
           </div>
 
           {/* Lista de Produtos */}
-          <div className="flex-1">
-            <ScrollArea className="h-[400px] border rounded-md">
+          <div className="flex-1 min-h-0">
+            <ScrollArea className="h-full border rounded-md">
               {filteredProducts.length === 0 ? (
                 <div className="p-8 text-center text-muted-foreground">
                   {searchTerm || categoryFilter ? (
@@ -216,23 +216,26 @@ export function ProductSearchModal({
             </ScrollArea>
           </div>
 
-          {/* Rodapé com ações */}
-          <div className="flex justify-between items-center pt-3 border-t">
-            <div className="text-sm text-muted-foreground">
-              {selectedProducts.length} produto{selectedProducts.length !== 1 ? 's' : ''} selecionado{selectedProducts.length !== 1 ? 's' : ''}
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={onClose}>
-                Cancelar
-              </Button>
-              <Button 
-                onClick={handleAddSelected}
-                disabled={selectedProducts.length === 0}
-                className="bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Salvar Produtos {selectedProducts.length > 0 && `(${selectedProducts.length})`}
-              </Button>
+          {/* Rodapé com ações - Fixo na parte inferior */}
+          <div className="flex-shrink-0 bg-background border-t pt-4 pb-2">
+            <div className="flex justify-between items-center">
+              <div className="text-sm text-muted-foreground">
+                {selectedProducts.length} produto{selectedProducts.length !== 1 ? 's' : ''} selecionado{selectedProducts.length !== 1 ? 's' : ''}
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={onClose} size="lg">
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={handleAddSelected}
+                  disabled={selectedProducts.length === 0}
+                  size="lg"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Salvar Produtos {selectedProducts.length > 0 && `(${selectedProducts.length})`}
+                </Button>
+              </div>
             </div>
           </div>
         </div>

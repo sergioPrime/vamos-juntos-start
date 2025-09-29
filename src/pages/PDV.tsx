@@ -157,11 +157,30 @@ const PDV = () => {
   }
 
   const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.barcode?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
-    return matchesSearch && matchesCategory
+    if (!searchTerm.trim()) return false
+    
+    const search = searchTerm.toLowerCase().trim()
+    const matchesSearch = product.name.toLowerCase().includes(search) ||
+                         product.sku?.toLowerCase().includes(search) ||
+                         product.barcode?.toLowerCase().includes(search) ||
+                         product.sku?.toLowerCase().startsWith(search) ||
+                         product.name.toLowerCase().startsWith(search)
+    
+    return matchesSearch
+  }).sort((a, b) => {
+    // Priorizar produtos que começam com o termo buscado
+    const search = searchTerm.toLowerCase().trim()
+    const aStartsWithSku = a.sku?.toLowerCase().startsWith(search)
+    const bStartsWithSku = b.sku?.toLowerCase().startsWith(search)
+    const aStartsWithName = a.name.toLowerCase().startsWith(search)
+    const bStartsWithName = b.name.toLowerCase().startsWith(search)
+    
+    if (aStartsWithSku && !bStartsWithSku) return -1
+    if (!aStartsWithSku && bStartsWithSku) return 1
+    if (aStartsWithName && !bStartsWithName) return -1
+    if (!aStartsWithName && bStartsWithName) return 1
+    
+    return a.name.localeCompare(b.name)
   })
 
   const addToCart = (product: Product) => {
@@ -428,22 +447,45 @@ const PDV = () => {
 
           {/* Product suggestions dropdown */}
           {searchTerm && filteredProducts.length > 0 && (
-            <div className="absolute z-50 w-full max-w-md bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
-              {filteredProducts.slice(0, 5).map(product => (
+            <div className="absolute z-50 w-full bg-background border rounded-md shadow-lg max-h-80 overflow-auto mt-1">
+              <div className="bg-gray-100 dark:bg-gray-800 px-3 py-2 text-xs font-medium text-muted-foreground border-b">
+                Produtos encontrados ({filteredProducts.length})
+              </div>
+              {filteredProducts.slice(0, 8).map(product => (
                 <div
                   key={product.id}
-                  className="p-3 hover:bg-accent cursor-pointer border-b"
+                  className="p-3 hover:bg-accent cursor-pointer border-b last:border-b-0 transition-colors"
                   onClick={() => {
                     addToCart(product)
                     setSearchTerm("")
                   }}
                 >
-                  <div className="font-medium text-sm">{product.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    SKU: {product.sku} | R$ {product.unit_price.toFixed(2)} | Estoque: {product.stock_quantity}
+                  <div className="flex justify-between items-start gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm text-primary mb-1">{product.sku}</div>
+                      <div className="font-medium text-sm truncate">{product.name}</div>
+                      {product.category && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Categoria: {product.category}
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-sm text-green-600">
+                        R$ {product.unit_price.toFixed(2)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Estoque: {product.stock_quantity}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
+              {filteredProducts.length > 8 && (
+                <div className="px-3 py-2 text-xs text-muted-foreground bg-gray-50 dark:bg-gray-800 text-center">
+                  + {filteredProducts.length - 8} produtos encontrados. Continue digitando para refinar a busca.
+                </div>
+              )}
             </div>
           )}
 

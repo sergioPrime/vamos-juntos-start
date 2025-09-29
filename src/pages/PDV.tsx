@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { Search, Plus, Minus, ShoppingCart, CreditCard } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -156,32 +156,44 @@ const PDV = () => {
     }
   }
 
-  const filteredProducts = products.filter(product => {
-    if (!searchTerm.trim()) return false
+  // Debounced search for better performance
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("")
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+    }, 300)
     
-    const search = searchTerm.toLowerCase().trim()
-    const matchesSearch = product.name.toLowerCase().includes(search) ||
-                         product.sku?.toLowerCase().includes(search) ||
-                         product.barcode?.toLowerCase().includes(search) ||
-                         product.sku?.toLowerCase().startsWith(search) ||
-                         product.name.toLowerCase().startsWith(search)
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
+  const filteredProducts = useMemo(() => {
+    if (!debouncedSearchTerm.trim() || debouncedSearchTerm.trim().length < 2) return []
     
-    return matchesSearch
-  }).sort((a, b) => {
-    // Priorizar produtos que começam com o termo buscado
-    const search = searchTerm.toLowerCase().trim()
-    const aStartsWithSku = a.sku?.toLowerCase().startsWith(search)
-    const bStartsWithSku = b.sku?.toLowerCase().startsWith(search)
-    const aStartsWithName = a.name.toLowerCase().startsWith(search)
-    const bStartsWithName = b.name.toLowerCase().startsWith(search)
-    
-    if (aStartsWithSku && !bStartsWithSku) return -1
-    if (!aStartsWithSku && bStartsWithSku) return 1
-    if (aStartsWithName && !bStartsWithName) return -1
-    if (!aStartsWithName && bStartsWithName) return 1
-    
-    return a.name.localeCompare(b.name)
-  })
+    const search = debouncedSearchTerm.toLowerCase().trim()
+    return products.filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(search) ||
+                           product.sku?.toLowerCase().includes(search) ||
+                           product.barcode?.toLowerCase().includes(search) ||
+                           product.sku?.toLowerCase().startsWith(search) ||
+                           product.name.toLowerCase().startsWith(search)
+      
+      return matchesSearch
+    }).sort((a, b) => {
+      // Priorizar produtos que começam com o termo buscado
+      const aStartsWithSku = a.sku?.toLowerCase().startsWith(search)
+      const bStartsWithSku = b.sku?.toLowerCase().startsWith(search)
+      const aStartsWithName = a.name.toLowerCase().startsWith(search)
+      const bStartsWithName = b.name.toLowerCase().startsWith(search)
+      
+      if (aStartsWithSku && !bStartsWithSku) return -1
+      if (!aStartsWithSku && bStartsWithSku) return 1
+      if (aStartsWithName && !bStartsWithName) return -1
+      if (!aStartsWithName && bStartsWithName) return 1
+      
+      return a.name.localeCompare(b.name)
+    })
+  }, [products, debouncedSearchTerm])
 
   const addToCart = (product: Product) => {
     const existingItem = cart.find(item => item.id === product.id)
@@ -420,7 +432,7 @@ const PDV = () => {
       <div className="page-container container mx-auto p-6">
         <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-12rem)]">
         {/* Products Section */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col relative">
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -432,6 +444,9 @@ const PDV = () => {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && filteredProducts.length > 0) {
                     addToCart(filteredProducts[0])
+                    setSearchTerm("")
+                  }
+                  if (e.key === 'Escape') {
                     setSearchTerm("")
                   }
                 }}
@@ -446,44 +461,53 @@ const PDV = () => {
           </div>
 
           {/* Product suggestions dropdown */}
-          {searchTerm && filteredProducts.length > 0 && (
-            <div className="absolute z-50 w-full bg-background border rounded-md shadow-lg max-h-80 overflow-auto mt-1">
-              <div className="bg-gray-100 dark:bg-gray-800 px-3 py-2 text-xs font-medium text-muted-foreground border-b">
-                Produtos encontrados ({filteredProducts.length})
-              </div>
-              {filteredProducts.slice(0, 8).map(product => (
-                <div
-                  key={product.id}
-                  className="p-3 hover:bg-accent cursor-pointer border-b last:border-b-0 transition-colors"
-                  onClick={() => {
-                    addToCart(product)
-                    setSearchTerm("")
-                  }}
-                >
-                  <div className="flex justify-between items-start gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm text-primary mb-1">{product.sku}</div>
-                      <div className="font-medium text-sm truncate">{product.name}</div>
-                      {product.category && (
-                        <div className="text-xs text-muted-foreground mt-1">
-                          Categoria: {product.category}
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-sm text-green-600">
-                        R$ {product.unit_price.toFixed(2)}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Estoque: {product.stock_quantity}
-                      </div>
-                    </div>
+          {searchTerm.length >= 2 && (
+            <div className="absolute top-16 left-0 right-0 z-50 bg-background border rounded-md shadow-lg max-h-80 overflow-auto">
+              {filteredProducts.length > 0 ? (
+                <>
+                  <div className="bg-gray-100 dark:bg-gray-800 px-3 py-2 text-xs font-medium text-muted-foreground border-b">
+                    Produtos encontrados ({filteredProducts.length})
                   </div>
-                </div>
-              ))}
-              {filteredProducts.length > 8 && (
-                <div className="px-3 py-2 text-xs text-muted-foreground bg-gray-50 dark:bg-gray-800 text-center">
-                  + {filteredProducts.length - 8} produtos encontrados. Continue digitando para refinar a busca.
+                  {filteredProducts.slice(0, 8).map(product => (
+                    <div
+                      key={product.id}
+                      className="p-3 hover:bg-accent cursor-pointer border-b last:border-b-0 transition-colors"
+                      onClick={() => {
+                        addToCart(product)
+                        setSearchTerm("")
+                      }}
+                    >
+                      <div className="flex justify-between items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm text-primary mb-1">{product.sku}</div>
+                          <div className="font-medium text-sm truncate">{product.name}</div>
+                          {product.category && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              Categoria: {product.category}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-sm text-green-600">
+                            R$ {product.unit_price.toFixed(2)}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Estoque: {product.stock_quantity}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {filteredProducts.length > 8 && (
+                    <div className="px-3 py-2 text-xs text-muted-foreground bg-gray-50 dark:bg-gray-800 text-center">
+                      + {filteredProducts.length - 8} produtos encontrados. Continue digitando para refinar a busca.
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="p-4 text-center text-muted-foreground">
+                  <div className="text-sm">Nenhum produto encontrado</div>
+                  <div className="text-xs mt-1">Tente buscar por código ou nome do produto</div>
                 </div>
               )}
             </div>

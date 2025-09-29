@@ -32,8 +32,8 @@ export function PriceTableFilters({
   onClearFilters, 
   totalResults 
 }: PriceTableFiltersProps) {
-  const hasActiveFilters = Object.values(filters).some(value => value !== "");
-  const activeFilterCount = Object.values(filters).filter(value => value !== "").length;
+  const hasActiveFilters = Object.values(filters).some(value => value !== "" && value !== "all");
+  const activeFilterCount = Object.values(filters).filter(value => value !== "" && value !== "all").length;
 
   return (
     <div className="space-y-4">
@@ -58,7 +58,7 @@ export function PriceTableFilters({
             <SelectValue placeholder="Filtrar por gênero" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos os gêneros</SelectItem>
+            <SelectItem value="all">Todos os gêneros</SelectItem>
             {genderOptions.map((option) => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
@@ -75,7 +75,7 @@ export function PriceTableFilters({
             <SelectValue placeholder="Visibilidade no PDV" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas</SelectItem>
+            <SelectItem value="all">Todas</SelectItem>
             <SelectItem value="true">Visível no PDV</SelectItem>
             <SelectItem value="false">Não visível no PDV</SelectItem>
           </SelectContent>
@@ -89,7 +89,7 @@ export function PriceTableFilters({
             <SelectValue placeholder="Regras configuradas" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas</SelectItem>
+            <SelectItem value="all">Todas</SelectItem>
             <SelectItem value="true">Com regras</SelectItem>
             <SelectItem value="false">Sem regras</SelectItem>
           </SelectContent>

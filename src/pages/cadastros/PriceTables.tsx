@@ -50,9 +50,9 @@ export default function PriceTables() {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<FilterState>({
     search: "",
-    gender: "",
-    pdv_visibility: "",
-    has_rules: ""
+    gender: "all",
+    pdv_visibility: "all",
+    has_rules: "all"
   });
   const [showDeleteDialog, setShowDeleteDialog] = useState<{
     id: string;
@@ -160,12 +160,12 @@ export default function PriceTables() {
       }
 
       // Filtro por gênero
-      if (filters.gender && table.gender !== filters.gender) {
+      if (filters.gender && filters.gender !== "all" && table.gender !== filters.gender) {
         return false;
       }
 
       // Filtro por visibilidade no PDV
-      if (filters.pdv_visibility) {
+      if (filters.pdv_visibility && filters.pdv_visibility !== "all") {
         const isVisible = filters.pdv_visibility === "true";
         if (table.visible_in_pdv !== isVisible) {
           return false;
@@ -173,7 +173,7 @@ export default function PriceTables() {
       }
 
       // Filtro por regras configuradas
-      if (filters.has_rules) {
+      if (filters.has_rules && filters.has_rules !== "all") {
         const hasRules = 
           table.default_seller_commission > 0 ||
           table.default_representative_commission > 0 ||
@@ -191,9 +191,9 @@ export default function PriceTables() {
   const handleClearFilters = () => {
     setFilters({
       search: "",
-      gender: "",
-      pdv_visibility: "",
-      has_rules: ""
+      gender: "all",
+      pdv_visibility: "all",
+      has_rules: "all"
     });
   };
 

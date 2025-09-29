@@ -192,7 +192,7 @@ const PDV = () => {
       if (!aStartsWithName && bStartsWithName) return 1
       
       return a.name.localeCompare(b.name)
-    })
+    }).slice(0, 20) // Limit to 20 items
   }, [products, debouncedSearchTerm])
 
   const addToCart = (product: Product) => {
@@ -465,44 +465,38 @@ const PDV = () => {
             <div className="absolute top-16 left-0 right-0 z-50 bg-background border rounded-md shadow-lg max-h-80 overflow-auto">
               {filteredProducts.length > 0 ? (
                 <>
-                  <div className="bg-gray-100 dark:bg-gray-800 px-3 py-2 text-xs font-medium text-muted-foreground border-b">
-                    Produtos encontrados ({filteredProducts.length})
-                  </div>
-                  {filteredProducts.slice(0, 8).map(product => (
-                    <div
-                      key={product.id}
-                      className="p-3 hover:bg-accent cursor-pointer border-b last:border-b-0 transition-colors"
-                      onClick={() => {
-                        addToCart(product)
-                        setSearchTerm("")
-                      }}
-                    >
-                      <div className="flex justify-between items-start gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm text-primary mb-1">{product.sku}</div>
-                          <div className="font-medium text-sm truncate">{product.name}</div>
-                          {product.category && (
-                            <div className="text-xs text-muted-foreground mt-1">
-                              Categoria: {product.category}
-                            </div>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <div className="font-bold text-sm text-green-600">
-                            R$ {product.unit_price.toFixed(2)}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            Estoque: {product.stock_quantity}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {filteredProducts.length > 8 && (
-                    <div className="px-3 py-2 text-xs text-muted-foreground bg-gray-50 dark:bg-gray-800 text-center">
-                      + {filteredProducts.length - 8} produtos encontrados. Continue digitando para refinar a busca.
-                    </div>
-                  )}
+                   <div className="bg-gray-100 dark:bg-gray-800 px-3 py-2 text-xs font-medium text-muted-foreground border-b">
+                     Produtos encontrados ({Math.min(filteredProducts.length, 20)})
+                   </div>
+                   {filteredProducts.map(product => (
+                     <div
+                       key={product.id}
+                       className="p-2 hover:bg-accent cursor-pointer border-b last:border-b-0 transition-colors"
+                       onClick={() => {
+                         addToCart(product)
+                         setSearchTerm("")
+                       }}
+                     >
+                       <div className="flex items-center justify-between gap-2">
+                         <div className="flex items-center gap-2 flex-1 min-w-0">
+                           <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded">
+                             {product.sku || 'N/A'}
+                           </span>
+                           <span className="text-xs font-medium truncate">
+                             {product.name}
+                           </span>
+                         </div>
+                         <div className="flex items-center gap-2 text-xs">
+                           <span className="font-bold text-green-600">
+                             R$ {product.unit_price.toFixed(2)}
+                           </span>
+                           <span className="text-muted-foreground">
+                             Estoque: {product.stock_quantity}
+                           </span>
+                         </div>
+                       </div>
+                     </div>
+                   ))}
                 </>
               ) : (
                 <div className="p-4 text-center text-muted-foreground">

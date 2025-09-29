@@ -92,7 +92,7 @@ export default function PriceTablesForm() {
     order: "name",
   });
   
-  const [filteredProducts, setFilteredProducts] = useState<PriceTableProduct[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
@@ -362,16 +362,16 @@ export default function PriceTablesForm() {
   };
 
   const handleSearchProducts = () => {
-    let filtered = [...products];
+    let filtered = [...availableProducts];
     
-    // Se não há filtros aplicados, mostra todos os produtos
+    // Se não há filtros aplicados, mostra todos os produtos disponíveis
     const hasFilters = searchFilters.name || searchFilters.category || searchFilters.brand || searchFilters.model;
     
     if (hasFilters) {
-      filtered = products.filter(product => {
+      filtered = availableProducts.filter(product => {
         const matchesName = !searchFilters.name || 
-          product.product?.name?.toLowerCase().includes(searchFilters.name.toLowerCase()) ||
-          product.product?.sku?.toLowerCase().includes(searchFilters.name.toLowerCase());
+          product.name?.toLowerCase().includes(searchFilters.name.toLowerCase()) ||
+          product.sku?.toLowerCase().includes(searchFilters.name.toLowerCase());
         
         // Por enquanto, apenas filtro por nome/código está funcional
         // Os outros filtros podem ser implementados quando as colunas estiverem disponíveis na tabela products
@@ -383,13 +383,13 @@ export default function PriceTablesForm() {
     filtered.sort((a, b) => {
       switch (searchFilters.order) {
         case "sku":
-          return (a.product?.sku || "").localeCompare(b.product?.sku || "");
+          return (a.sku || "").localeCompare(b.sku || "");
         case "cost_price":
-          return (a.product?.cost_price || 0) - (b.product?.cost_price || 0);
+          return (a.cost_price || 0) - (b.cost_price || 0);
         case "sale_price":
-          return a.sale_price - b.sale_price;
+          return 0; // Produtos não têm preço de venda até serem adicionados à tabela
         default: // name
-          return (a.product?.name || "").localeCompare(b.product?.name || "");
+          return (a.name || "").localeCompare(b.name || "");
       }
     });
     
@@ -401,6 +401,43 @@ export default function PriceTablesForm() {
     setSearchFilters({ name: "", category: "", brand: "", model: "", order: "name" });
     setFilteredProducts([]);
     setHasSearched(false);
+  };
+
+  const addProductToTable = async (product: Product) => {
+    if (!currentOrg?.id || !id || id === "novo") return;
+
+    try {
+      const newPriceTableProduct = {
+        price_table_id: id,
+        product_id: product.id,
+        sale_price: 0,
+        seller_commission: formData.default_seller_commission || 0,
+        representative_commission: formData.default_representative_commission || 0,
+        mva: formData.default_mva || 0,
+      };
+
+      const { data, error } = await supabase
+        .from("price_table_products")
+        .insert(newPriceTableProduct)
+        .single();
+
+      if (error) throw error;
+
+      // Recarregar a lista de produtos da tabela
+      await loadPriceTableProducts();
+      
+      toast({
+        title: "Produto adicionado",
+        description: "Produto adicionado à tabela com sucesso",
+      });
+    } catch (error) {
+      console.error("Erro ao adicionar produto:", error);
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar produto à tabela",
+        variant: "destructive",
+      });
+    }
   };
 
   if (!currentOrg) {
@@ -738,7 +775,8 @@ export default function PriceTablesForm() {
                           </tr>
                         </thead>
                         <tbody>
-                          {(hasSearched ? filteredProducts : products).map((product) => (
+                          {/* Produtos já associados à tabela */}
+                          {products.map((product) => (
                             <tr key={product.id} className="border-b">
                               <td className="p-2">{product.product?.sku}</td>
                               <td className="p-2">{product.product?.name}</td>
@@ -797,13 +835,57 @@ export default function PriceTablesForm() {
                                 </Button>
                               </td>
                             </tr>
-                          ))}
+                           ))}
+                          
+                          {/* Seção de produtos encontrados na busca */}
+                          {hasSearched && (
+                            <>
+                              <tr>
+                                <td colSpan={9} className="p-4 bg-muted">
+                                  <div className="flex items-center gap-2">
+                                    <Search className="h-4 w-4" />
+                                    <span className="font-medium">Produtos Encontrados ({filteredProducts.length})</span>
+                                  </div>
+                                </td>
+                              </tr>
+                              {filteredProducts.map((product) => {
+                                const isAlreadyAdded = products.some(p => p.product_id === product.id);
+                                return (
+                                  <tr key={`search-${product.id}`} className="border-b bg-blue-50">
+                                    <td className="p-2">{product.sku}</td>
+                                    <td className="p-2">{product.name}</td>
+                                    <td className="p-2 text-right">R$ {product.cost_price?.toFixed(2) || "0,00"}</td>
+                                    <td className="p-2 text-right">R$ 0,00</td>
+                                    <td className="p-2 text-center" colSpan={4}>
+                                      {isAlreadyAdded ? (
+                                        <span className="text-sm text-muted-foreground">Já adicionado à tabela</span>
+                                      ) : (
+                                        <Button 
+                                          size="sm" 
+                                          onClick={() => addProductToTable(product)}
+                                        >
+                                          <Plus className="h-4 w-4 mr-1" />
+                                          Adicionar à Tabela
+                                        </Button>
+                                      )}
+                                    </td>
+                                    <td className="p-2"></td>
+                                  </tr>
+                                );
+                              })}
+                            </>
+                          )}
                         </tbody>
                       </table>
                     </div>
-                    {(hasSearched ? filteredProducts : products).length === 0 && (
+                    {products.length === 0 && !hasSearched && (
                       <div className="text-center py-8 text-muted-foreground">
-                        {hasSearched ? "Nenhum produto encontrado com os filtros aplicados" : "Nenhum produto associado a esta tabela"}
+                        Nenhum produto associado a esta tabela
+                      </div>
+                    )}
+                    {hasSearched && filteredProducts.length === 0 && (
+                      <div className="text-center py-8 text-muted-foreground">
+                        Nenhum produto encontrado com os filtros aplicados
                       </div>
                     )}
                   </CardContent>

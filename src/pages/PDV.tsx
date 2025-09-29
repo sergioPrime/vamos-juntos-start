@@ -251,6 +251,38 @@ const PDV = () => {
         if (stockError) throw stockError
       }
 
+      // Verificar se há caixa aberto e registrar venda
+      const { data: caixaAberto } = await supabase
+        .from('caixa_sessoes')
+        .select('id, valor_atual')
+        .eq('org_id', currentOrg?.id)
+        .eq('status', 'aberto')
+        .maybeSingle()
+
+      if (caixaAberto) {
+        // Atualizar valor do caixa
+        await supabase
+          .from('caixa_sessoes')
+          .update({
+            valor_atual: caixaAberto.valor_atual + cartTotal
+          })
+          .eq('id', caixaAberto.id)
+
+        // Registrar movimentação do caixa
+        await supabase
+          .from('caixa_movimentacoes')
+          .insert({
+            org_id: currentOrg?.id,
+            sessao_id: caixaAberto.id,
+            tipo: 'venda',
+            valor: cartTotal,
+            descricao: `Venda PDV - ${orderNumber}`,
+            reference_id: order.id,
+            reference_type: 'order',
+            created_by: user?.id
+          })
+      }
+
       toast({
         title: "Venda finalizada com sucesso!",
         description: `Pedido ${orderNumber} criado.`,

@@ -32,6 +32,8 @@ import ERPConfig from "./pages/settings/ERPConfig";
 import RenovarLicenca from "./pages/RenovarLicenca";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import PDV from "./pages/PDV";
+import OperacoesPDV from "./pages/pdv/OperacoesPDV";
+import TestePDV from "./pages/pdv/TestePDV";
 import Products from "./pages/Products";
 import Orders from "./pages/Orders";
 import OrdersAndQuotes from "./pages/OrdersAndQuotes";
@@ -178,6 +180,24 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <PDV />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/pdv/operacoes" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <OperacoesPDV />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/pdv/teste" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <TestePDV />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

@@ -446,6 +446,99 @@ export type Database = {
           },
         ]
       }
+      caixa_movimentacoes: {
+        Row: {
+          created_at: string
+          created_by: string
+          descricao: string
+          id: string
+          observacoes: string | null
+          org_id: string
+          reference_id: string | null
+          reference_type: string | null
+          sessao_id: string | null
+          tipo: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          descricao: string
+          id?: string
+          observacoes?: string | null
+          org_id: string
+          reference_id?: string | null
+          reference_type?: string | null
+          sessao_id?: string | null
+          tipo: string
+          valor: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          descricao?: string
+          id?: string
+          observacoes?: string | null
+          org_id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          sessao_id?: string | null
+          tipo?: string
+          valor?: number
+        }
+        Relationships: []
+      }
+      caixa_sessoes: {
+        Row: {
+          abertura_em: string
+          created_at: string
+          diferenca: number | null
+          fechamento_em: string | null
+          id: string
+          observacoes_fechamento: string | null
+          org_id: string
+          status: string
+          updated_at: string
+          usuario_abertura: string
+          usuario_fechamento: string | null
+          valor_atual: number
+          valor_contado: number | null
+          valor_inicial: number
+        }
+        Insert: {
+          abertura_em?: string
+          created_at?: string
+          diferenca?: number | null
+          fechamento_em?: string | null
+          id?: string
+          observacoes_fechamento?: string | null
+          org_id: string
+          status?: string
+          updated_at?: string
+          usuario_abertura: string
+          usuario_fechamento?: string | null
+          valor_atual?: number
+          valor_contado?: number | null
+          valor_inicial?: number
+        }
+        Update: {
+          abertura_em?: string
+          created_at?: string
+          diferenca?: number | null
+          fechamento_em?: string | null
+          id?: string
+          observacoes_fechamento?: string | null
+          org_id?: string
+          status?: string
+          updated_at?: string
+          usuario_abertura?: string
+          usuario_fechamento?: string | null
+          valor_atual?: number
+          valor_contado?: number | null
+          valor_inicial?: number
+        }
+        Relationships: []
+      }
       cash_flow_projections: {
         Row: {
           bank_account_id: string | null

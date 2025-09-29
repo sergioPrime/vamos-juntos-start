@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { 
-  CashRegister, 
+  Calculator, 
   Plus, 
   Minus, 
   RotateCcw, 
@@ -33,6 +33,9 @@ interface CaixaStatus {
   fechamento_em?: string
   usuario_abertura: string
   usuario_fechamento?: string
+  valor_contado?: number
+  diferenca?: number
+  observacoes_fechamento?: string
 }
 
 const OperacoesPDV = () => {
@@ -64,10 +67,10 @@ const OperacoesPDV = () => {
         .eq('status', 'aberto')
         .order('abertura_em', { ascending: false })
         .limit(1)
-        .single()
+        .maybeSingle()
 
-      if (error && error.code !== 'PGRST116') throw error
-      setCaixaStatus(data)
+      if (error) throw error
+      setCaixaStatus(data as CaixaStatus)
     } catch (error) {
       console.error('Error loading caixa status:', error)
     } finally {
@@ -125,7 +128,7 @@ const OperacoesPDV = () => {
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <CashRegister className="h-5 w-5" />
+            <Calculator className="h-5 w-5" />
             Status do Caixa
           </CardTitle>
         </CardHeader>
@@ -163,7 +166,7 @@ const OperacoesPDV = () => {
             <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
               caixaAberto ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
             }`}>
-              <CashRegister className="h-8 w-8" />
+              <Calculator className="h-8 w-8" />
             </div>
             <h3 className="font-semibold mb-2">
               {caixaAberto ? 'Fechar Caixa' : 'Abrir Caixa'}

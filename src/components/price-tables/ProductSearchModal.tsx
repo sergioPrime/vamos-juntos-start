@@ -228,9 +228,10 @@ export function ProductSearchModal({
               <Button 
                 onClick={handleAddSelected}
                 disabled={selectedProducts.length === 0}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Adicionar {selectedProducts.length > 0 && `(${selectedProducts.length})`}
+                Salvar Produtos {selectedProducts.length > 0 && `(${selectedProducts.length})`}
               </Button>
             </div>
           </div>

@@ -37,14 +37,14 @@ const actionTypeLabels = {
 };
 
 export function AuditLogsTable() {
-  const [transactionType, setTransactionType] = useState<string>('');
-  const [actionType, setActionType] = useState<string>('');
+  const [transactionType, setTransactionType] = useState<string>('all');
+  const [actionType, setActionType] = useState<string>('all');
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [showDetails, setShowDetails] = useState(false);
 
   const { logs, loading, refresh } = useAuditLogs({
-    transactionType: transactionType || undefined,
-    actionType: actionType || undefined,
+    transactionType: transactionType !== 'all' ? transactionType : undefined,
+    actionType: actionType !== 'all' ? actionType : undefined,
   });
 
   const handleViewDetails = (log: AuditLog) => {
@@ -83,7 +83,7 @@ export function AuditLogsTable() {
                   <SelectValue placeholder="Todos os tipos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os tipos</SelectItem>
+                  <SelectItem value="all">Todos os tipos</SelectItem>
                   {Object.entries(transactionTypeLabels).map(([key, label]) => (
                     <SelectItem key={key} value={key}>
                       {label}
@@ -100,7 +100,7 @@ export function AuditLogsTable() {
                   <SelectValue placeholder="Todas as ações" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as ações</SelectItem>
+                  <SelectItem value="all">Todas as ações</SelectItem>
                   <SelectItem value="INSERT">Criação</SelectItem>
                   <SelectItem value="UPDATE">Atualização</SelectItem>
                   <SelectItem value="DELETE">Exclusão</SelectItem>

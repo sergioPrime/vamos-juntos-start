@@ -54,7 +54,15 @@ export function AuditLogsTable() {
 
   const getUserName = (log: AuditLog) => {
     if (log.profiles) {
-      return `${log.profiles.first_name} ${log.profiles.last_name}`;
+      const firstName = log.profiles.first_name || '';
+      const lastName = log.profiles.last_name || '';
+      const fullName = `${firstName} ${lastName}`.trim();
+      
+      if (fullName) {
+        return fullName;
+      }
+      
+      return log.profiles.email || 'Usuário desconhecido';
     }
     return 'Usuário desconhecido';
   };

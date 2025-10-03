@@ -2655,6 +2655,59 @@ export type Database = {
         }
         Relationships: []
       }
+      transaction_audit: {
+        Row: {
+          action_type: string
+          created_at: string
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          org_id: string
+          record_id: string
+          table_name: string
+          transaction_type: string
+          user_agent: string | null
+          user_id: string
+          user_ip: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          org_id: string
+          record_id: string
+          table_name: string
+          transaction_type: string
+          user_agent?: string | null
+          user_id: string
+          user_ip?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          org_id?: string
+          record_id?: string
+          table_name?: string
+          transaction_type?: string
+          user_agent?: string | null
+          user_id?: string
+          user_ip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_audit_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       units_of_measurement: {
         Row: {
           created_at: string

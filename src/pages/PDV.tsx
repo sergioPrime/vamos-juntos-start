@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
 import PDVHeader from "@/components/pdv/PDVHeader"
+import { usePermissionGuard } from "@/hooks/usePermissionGuard"
 
 interface Product {
   id: string
@@ -37,6 +38,7 @@ interface PaymentMethod {
 }
 
 const PDV = () => {
+  usePermissionGuard('vendas', 'read')
   const { user } = useAuth()
   const { currentOrg, loading: orgLoading } = useOrganization()
   const { toast } = useToast()

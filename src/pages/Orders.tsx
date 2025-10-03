@@ -14,6 +14,7 @@ import { useOrganization } from "@/hooks/useOrganization"
 import { useOrderIntegration } from "@/hooks/useOrderIntegration"
 import { useStockValidation } from "@/hooks/useStockValidation"
 import { useBusinessNotifications } from "@/hooks/useBusinessNotifications"
+import { usePermissionGuard } from "@/hooks/usePermissionGuard"
 
 interface Order {
   id: string
@@ -74,6 +75,7 @@ const paymentStatusLabels = {
 }
 
 const Orders = () => {
+  usePermissionGuard('vendas', 'read')
   const { user } = useAuth()
   const { currentOrg, loading: orgLoading } = useOrganization()
   const { toast } = useToast()

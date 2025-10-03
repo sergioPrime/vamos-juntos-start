@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
 import { ResponsiveTable } from "@/components/ui/responsive-table"
+import { usePermissionGuard } from "@/hooks/usePermissionGuard"
 
 interface Product {
   id: string
@@ -58,6 +59,7 @@ interface InventoryCount {
 }
 
 const Inventory = () => {
+  usePermissionGuard('estoque', 'read')
   const { user } = useAuth()
   const { currentOrg, loading: orgLoading } = useOrganization()
   const { toast } = useToast()

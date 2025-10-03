@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { toast } from '@/hooks/use-toast'
 import { Plus, Search, CheckCircle, XCircle, Clock, AlertCircle, Edit, Trash2 } from 'lucide-react'
+import { usePermissionGuard } from '@/hooks/usePermissionGuard'
 
 interface PurchaseRequest {
   id: string
@@ -61,6 +62,7 @@ interface NewRequestForm {
 }
 
 const PurchaseRequests = () => {
+  usePermissionGuard('compras', 'read')
   const { user } = useAuth()
   const { currentOrg: currentOrganization } = useOrganization()
   const [purchaseRequests, setPurchaseRequests] = useState<PurchaseRequest[]>([])

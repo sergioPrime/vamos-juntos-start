@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
+import { usePermissionGuard } from "@/hooks/usePermissionGuard"
 
 interface Product {
   id: string

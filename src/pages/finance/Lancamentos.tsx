@@ -14,6 +14,7 @@ import { useBankAccounts } from "@/hooks/useBankAccounts"
 import { useCostCenters } from "@/hooks/useCostCenters"
 import { useAsyncSearch } from "@/hooks/useAsyncSearch"
 import { FinancialListingTab } from "@/components/finance/FinancialListingTab"
+import { usePermissionGuard } from "@/hooks/usePermissionGuard"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -79,6 +80,7 @@ interface FinancialEntry {
 }
 
 export default function Lancamentos() {
+  usePermissionGuard('financeiro', 'read')
   const organization = useOrganization()
   const { user } = useAuth()
   const { toast } = useToast()

@@ -11,9 +11,11 @@ import { useNavigate } from "react-router-dom"
 import { ResponsiveTable } from "@/components/ui/responsive-table"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { usePermissionGuard } from "@/hooks/usePermissionGuard"
 
 
 export default function Customers() {
+  usePermissionGuard('vendas', 'read')
   const navigate = useNavigate()
   const { toast } = useToast()
   const [customers, setCustomers] = useState<any[]>([])

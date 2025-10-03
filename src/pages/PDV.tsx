@@ -271,6 +271,32 @@ const PDV = () => {
       return
     }
 
+    // VALIDAÇÃO DE SEGURANÇA: Verificar se há caixa aberto antes de processar venda
+    const { data: caixaAberto, error: caixaError } = await supabase
+      .from('caixa_sessoes')
+      .select('id, valor_atual')
+      .eq('org_id', currentOrg?.id)
+      .eq('status', 'aberto')
+      .maybeSingle()
+
+    if (caixaError) {
+      toast({
+        title: "Erro ao verificar caixa",
+        description: "Não foi possível verificar o status do caixa.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!caixaAberto) {
+      toast({
+        title: "Caixa fechado",
+        description: "Não é possível realizar vendas com o caixa fechado. Abra o caixa primeiro em 'Operações PDV'.",
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
       // Generate order number
       const orderNumber = `PDV-${Date.now()}`
@@ -329,37 +355,28 @@ const PDV = () => {
         if (stockError) throw stockError
       }
 
-      // Verificar se há caixa aberto e registrar venda
-      const { data: caixaAberto } = await supabase
+      // Registrar venda no caixa (já verificado que está aberto)
+      // Atualizar valor do caixa
+      await supabase
         .from('caixa_sessoes')
-        .select('id, valor_atual')
-        .eq('org_id', currentOrg?.id)
-        .eq('status', 'aberto')
-        .maybeSingle()
+        .update({
+          valor_atual: caixaAberto.valor_atual + cartTotal
+        })
+        .eq('id', caixaAberto.id)
 
-      if (caixaAberto) {
-        // Atualizar valor do caixa
-        await supabase
-          .from('caixa_sessoes')
-          .update({
-            valor_atual: caixaAberto.valor_atual + cartTotal
-          })
-          .eq('id', caixaAberto.id)
-
-        // Registrar movimentação do caixa
-        await supabase
-          .from('caixa_movimentacoes')
-          .insert({
-            org_id: currentOrg?.id,
-            sessao_id: caixaAberto.id,
-            tipo: 'venda',
-            valor: cartTotal,
-            descricao: `Venda PDV - ${orderNumber}`,
-            reference_id: order.id,
-            reference_type: 'order',
-            created_by: user?.id
-          })
-      }
+      // Registrar movimentação do caixa
+      await supabase
+        .from('caixa_movimentacoes')
+        .insert({
+          org_id: currentOrg?.id,
+          sessao_id: caixaAberto.id,
+          tipo: 'venda',
+          valor: cartTotal,
+          descricao: `Venda PDV - ${orderNumber}`,
+          reference_id: order.id,
+          reference_type: 'order',
+          created_by: user?.id
+        })
 
       toast({
         title: "Venda finalizada com sucesso!",

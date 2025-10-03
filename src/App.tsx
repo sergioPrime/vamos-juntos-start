@@ -26,6 +26,7 @@ import Customers from "./pages/Customers";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import Permissions from "./pages/settings/Permissions";
+import AuditLogs from "./pages/settings/AuditLogs";
 import Companies from "./pages/settings/Companies";
 import Integrations from "./pages/settings/Integrations";
 import ERPConfig from "./pages/settings/ERPConfig";
@@ -375,6 +376,15 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <Permissions />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/settings/audit-logs" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <AuditLogs />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

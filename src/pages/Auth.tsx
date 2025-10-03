@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { Mail, Lock } from "lucide-react"
+import { validatePassword } from "@/utils/passwordValidation"
+import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator"
 
 export default function Auth() {
   const [email, setEmail] = useState("")
@@ -49,6 +51,17 @@ export default function Auth() {
   }
 
   const handleSignUp = async () => {
+    // Validar força da senha antes de prosseguir
+    const passwordValidation = validatePassword(password)
+    if (!passwordValidation.isValid) {
+      toast({
+        title: "Senha insegura",
+        description: "Por favor, corrija os problemas indicados antes de continuar.",
+        variant: "destructive",
+      })
+      return
+    }
+
     setLoading(true)
     try {
       // Call edge function to create user with confirmed email
@@ -221,6 +234,7 @@ export default function Auth() {
                     className="pl-10"
                   />
                 </div>
+                {password && <PasswordStrengthIndicator password={password} />}
               </div>
               
               <Button

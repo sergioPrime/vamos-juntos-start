@@ -818,6 +818,53 @@ export type Database = {
           },
         ]
       }
+      feature_permissions: {
+        Row: {
+          can_create: boolean
+          can_delete: boolean
+          can_read: boolean
+          can_update: boolean
+          created_at: string
+          feature_key: string
+          id: string
+          org_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          can_create?: boolean
+          can_delete?: boolean
+          can_read?: boolean
+          can_update?: boolean
+          created_at?: string
+          feature_key: string
+          id?: string
+          org_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          can_create?: boolean
+          can_delete?: boolean
+          can_read?: boolean
+          can_update?: boolean
+          created_at?: string
+          feature_key?: string
+          id?: string
+          org_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_permissions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_entries: {
         Row: {
           amount: number
@@ -1112,6 +1159,53 @@ export type Database = {
             columns: ["quote_id"]
             isOneToOne: false
             referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_permissions: {
+        Row: {
+          can_create: boolean
+          can_delete: boolean
+          can_read: boolean
+          can_update: boolean
+          created_at: string
+          id: string
+          module_key: string
+          org_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          can_create?: boolean
+          can_delete?: boolean
+          can_read?: boolean
+          can_update?: boolean
+          created_at?: string
+          id?: string
+          module_key: string
+          org_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          can_create?: boolean
+          can_delete?: boolean
+          can_read?: boolean
+          can_update?: boolean
+          created_at?: string
+          id?: string
+          module_key?: string
+          org_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_permissions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -2994,6 +3088,24 @@ export type Database = {
       }
       has_children: {
         Args: { item_id: string; table_name: string }
+        Returns: boolean
+      }
+      has_feature_permission: {
+        Args: {
+          _feature_key: string
+          _org_id: string
+          _permission_type: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      has_module_permission: {
+        Args: {
+          _module_key: string
+          _org_id: string
+          _permission_type: string
+          _user_id: string
+        }
         Returns: boolean
       }
       has_role: {

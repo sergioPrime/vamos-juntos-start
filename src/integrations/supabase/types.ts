@@ -2939,26 +2939,6 @@ export type Database = {
         Args: { p_org_id: string }
         Returns: string
       }
-      gtrgm_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gtrgm_decompress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gtrgm_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gtrgm_options: {
-        Args: { "": unknown }
-        Returns: undefined
-      }
-      gtrgm_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
       has_children: {
         Args: { item_id: string; table_name: string }
         Returns: boolean
@@ -2973,18 +2953,6 @@ export type Database = {
       is_used_in_financial_entries: {
         Args: { item_id: string; reference_type: string }
         Returns: boolean
-      }
-      set_limit: {
-        Args: { "": number }
-        Returns: number
-      }
-      show_limit: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      show_trgm: {
-        Args: { "": string }
-        Returns: string[]
       }
       validate_account_code_hierarchy: {
         Args: { new_account_code: string; parent_account_code: string }

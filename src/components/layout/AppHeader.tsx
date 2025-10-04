@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Plus, FileText, Calculator, User, MoreHorizontal, LogOut, Moon, Sun, Zap, Shield } from "lucide-react"
+import { Plus, FileText, Calculator, User, MoreHorizontal, LogOut, Moon, Sun, Zap, Shield, Settings, Lock, Link2, Camera, DollarSign, UserCog } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { AlertNotificationBell } from "@/components/inventory/AlertNotificationBell"
 import { OverdueNotifications } from "@/components/appointments/OverdueNotifications"
 import {
@@ -13,13 +13,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
-import { UserProfileDialog } from "@/components/UserProfileDialog"
 import { useAuth } from "@/hooks/useAuth"
 import { NotificationCenter } from "@/components/dashboard/NotificationCenter"
 import { useToast } from "@/hooks/use-toast"
 import { useTheme } from "@/hooks/useTheme"
 import { useSuperAdmin } from "@/hooks/useSuperAdmin"
+import { useRoleCheck } from "@/hooks/useRoleCheck"
 import {
   Tooltip,
   TooltipContent,
@@ -33,7 +35,19 @@ export function AppHeader() {
   const { toast } = useToast()
   const { theme, toggleTheme } = useTheme()
   const { isSuperAdmin } = useSuperAdmin()
-  const [showProfile, setShowProfile] = useState(false)
+  const { role } = useRoleCheck()
+  
+  const getInitials = (email: string) => {
+    return email.split('@')[0].substring(0, 2).toUpperCase()
+  }
+  
+  const getRoleLabel = () => {
+    if (role === 'superadmin') return 'Super Admin'
+    if (role === 'admin') return 'Administrador'
+    return 'Membro Normal'
+  }
+  
+  const appVersion = "3.2.100.0"
 
   const handleSignOut = async () => {
     try {
@@ -136,47 +150,93 @@ export function AppHeader() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
-                <User className="h-4 w-4" />
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="text-xs font-semibold bg-primary text-primary-foreground">
+                    {getInitials(user?.email || '')}
+                  </AvatarFallback>
+                </Avatar>
               </Button>
             </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem onClick={() => setShowProfile(true)}>
-              <User className="h-4 w-4 mr-2" />
-              Perfil
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex items-center justify-between py-1">
-                <div className="flex items-center space-x-2">
-                  {theme === 'dark' ? (
-                    <Moon className="h-4 w-4" />
-                  ) : (
-                    <Sun className="h-4 w-4" />
-                  )}
-                  <span className="text-sm">Modo Dark</span>
+            <DropdownMenuContent align="end" className="w-72">
+              <div className="flex flex-col items-center gap-2 p-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarFallback className="text-lg font-semibold bg-primary text-primary-foreground">
+                    {getInitials(user?.email || '')}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="text-center">
+                  <p className="text-sm font-medium">{user?.email}</p>
+                  <Badge variant="secondary" className="text-xs mt-1">
+                    {getRoleLabel()}
+                  </Badge>
+                  <p className="text-xs text-muted-foreground mt-1">Versão {appVersion}</p>
                 </div>
-                <Switch
-                  checked={theme === 'dark'}
-                  onCheckedChange={toggleTheme}
-                />
               </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {isSuperAdmin && (
-              <>
-                <DropdownMenuItem onClick={() => navigate("/admin")}>
-                  <Shield className="h-4 w-4 mr-2" />
-                  Admin
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-              </>
-            )}
-            <DropdownMenuItem onClick={handleSignOut}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Sair
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuItem>
+                <Camera className="h-4 w-4 mr-2" />
+                Foto Usuário
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem>
+                <DollarSign className="h-4 w-4 mr-2" />
+                Configurações de Comissões
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem>
+                <UserCog className="h-4 w-4 mr-2" />
+                Alterar meus Dados
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem>
+                <Lock className="h-4 w-4 mr-2" />
+                Alterar Senha
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem>
+                <Link2 className="h-4 w-4 mr-2" />
+                Gerar Link de Acesso Temporário
+              </DropdownMenuItem>
+              
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex items-center justify-between py-1">
+                  <div className="flex items-center space-x-2">
+                    {theme === 'dark' ? (
+                      <Moon className="h-4 w-4" />
+                    ) : (
+                      <Sun className="h-4 w-4" />
+                    )}
+                    <span className="text-sm">Modo Dark</span>
+                  </div>
+                  <Switch
+                    checked={theme === 'dark'}
+                    onCheckedChange={toggleTheme}
+                  />
+                </div>
+              </DropdownMenuLabel>
+              
+              {isSuperAdmin && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/admin")}>
+                    <Shield className="h-4 w-4 mr-2" />
+                    Admin
+                  </DropdownMenuItem>
+                </>
+              )}
+              
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuItem onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sair do ERP
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
       </div>
 
         {/* Mobile Actions */}
@@ -205,62 +265,102 @@ export function AppHeader() {
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => navigate("/pdv")}>
-              <Zap className="h-4 w-4 mr-2" />
-              PDV
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/nfse")}>
-              <FileText className="h-4 w-4 mr-2" />
-              Emitir NFS-e
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/quotes")}>
-              <Calculator className="h-4 w-4 mr-2" />
-              Orçamento
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setShowProfile(true)}>
-              <User className="h-4 w-4 mr-2" />
-              Perfil
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <div className="px-3 py-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  {theme === 'dark' ? (
-                    <Moon className="h-4 w-4" />
-                  ) : (
-                    <Sun className="h-4 w-4" />
-                  )}
-                  <span className="text-sm">Modo Dark</span>
+            <DropdownMenuContent align="end" className="w-72">
+              <div className="flex flex-col items-center gap-2 p-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarFallback className="text-lg font-semibold bg-primary text-primary-foreground">
+                    {getInitials(user?.email || '')}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="text-center">
+                  <p className="text-sm font-medium">{user?.email}</p>
+                  <Badge variant="secondary" className="text-xs mt-1">
+                    {getRoleLabel()}
+                  </Badge>
+                  <p className="text-xs text-muted-foreground mt-1">Versão {appVersion}</p>
                 </div>
-                <Switch
-                  checked={theme === 'dark'}
-                  onCheckedChange={toggleTheme}
-                />
               </div>
-            </div>
-            <DropdownMenuSeparator />
-            {isSuperAdmin && (
-              <>
-                <DropdownMenuItem onClick={() => navigate("/admin")}>
-                  <Shield className="h-4 w-4 mr-2" />
-                  Admin
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-              </>
-            )}
-            <DropdownMenuItem onClick={handleSignOut}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Sair
-            </DropdownMenuItem>
+              
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuItem onClick={() => navigate("/pdv")}>
+                <Zap className="h-4 w-4 mr-2" />
+                PDV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/nfse")}>
+                <FileText className="h-4 w-4 mr-2" />
+                Emitir NFS-e
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/quotes")}>
+                <Calculator className="h-4 w-4 mr-2" />
+                Orçamento
+              </DropdownMenuItem>
+              
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuItem>
+                <Camera className="h-4 w-4 mr-2" />
+                Foto Usuário
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem>
+                <DollarSign className="h-4 w-4 mr-2" />
+                Configurações de Comissões
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem>
+                <UserCog className="h-4 w-4 mr-2" />
+                Alterar meus Dados
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem>
+                <Lock className="h-4 w-4 mr-2" />
+                Alterar Senha
+              </DropdownMenuItem>
+              
+              <DropdownMenuItem>
+                <Link2 className="h-4 w-4 mr-2" />
+                Gerar Link de Acesso Temporário
+              </DropdownMenuItem>
+              
+              <DropdownMenuSeparator />
+              
+              <div className="px-3 py-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    {theme === 'dark' ? (
+                      <Moon className="h-4 w-4" />
+                    ) : (
+                      <Sun className="h-4 w-4" />
+                    )}
+                    <span className="text-sm">Modo Dark</span>
+                  </div>
+                  <Switch
+                    checked={theme === 'dark'}
+                    onCheckedChange={toggleTheme}
+                  />
+                </div>
+              </div>
+              
+              {isSuperAdmin && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/admin")}>
+                    <Shield className="h-4 w-4 mr-2" />
+                    Admin
+                  </DropdownMenuItem>
+                </>
+              )}
+              
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuItem onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sair do ERP
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        
-        <UserProfileDialog 
-          open={showProfile} 
-          onOpenChange={setShowProfile}
-        />
       </header>
     </TooltipProvider>
   )

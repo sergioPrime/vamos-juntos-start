@@ -5,7 +5,6 @@ import {
   ChevronDown, 
   ChevronUp, 
   ArrowUpDown,
-  ExternalLink,
   CheckCircle,
   Clock,
   AlertCircle,
@@ -16,15 +15,6 @@ import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ResponsiveTable } from "@/components/ui/responsive-table"
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -95,7 +85,6 @@ export function FinancialTable({
   const { animationsEnabled } = useAnimation()
   const [sortField, setSortField] = useState<SortField>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>(null)
-  const [expandedRow, setExpandedRow] = useState<string | null>(null)
 
   const visibleColumns = columns.filter(col => col.visible)
 
@@ -195,6 +184,25 @@ export function FinancialTable({
     }
   }
 
+  const getColumnWidth = (columnKey: string): string => {
+    switch (columnKey) {
+      case 'status': return 'w-[140px]'
+      case 'entry_code': return 'w-[100px]'
+      case 'person_name': return 'w-[200px]'
+      case 'bank_account': return 'w-[180px]'
+      case 'created_at': return 'w-[120px]'
+      case 'due_date': return 'w-[130px]'
+      case 'settled_at': return 'w-[120px]'
+      case 'amount': return 'w-[140px]'
+      case 'balance': return 'w-[140px]'
+      case 'chart_of_account': return 'w-[180px]'
+      case 'cost_center': return 'w-[150px]'
+      case 'payment_method': return 'w-[150px]'
+      case 'description': return 'w-[250px]'
+      default: return 'w-[150px]'
+    }
+  }
+
   const getColumnAlignment = (columnKey: string): string => {
     switch (columnKey) {
       case 'amount':
@@ -208,8 +216,6 @@ export function FinancialTable({
   }
 
   const getCellValue = (entry: FinancialEntry, columnKey: string) => {
-    const alignment = getColumnAlignment(columnKey)
-    
     switch (columnKey) {
       case 'status':
         const statusInfo = getStatusInfo(entry)
@@ -241,16 +247,16 @@ export function FinancialTable({
         )
       
       case 'bank_account':
-        return entry.bank_account_name || '-'
+        return <span className="text-xs">{entry.bank_account_name || '-'}</span>
       
       case 'created_at':
-        return formatDate(entry.created_at)
+        return <span className="text-xs">{formatDate(entry.created_at)}</span>
       
       case 'due_date':
         const isOverdue = new Date(entry.due_date) < new Date() && !entry.is_settled
         return (
           <span className={cn(
-            "font-medium",
+            "font-medium text-xs",
             isOverdue && "text-red-600"
           )}>
             {formatDate(entry.due_date)}
@@ -258,55 +264,52 @@ export function FinancialTable({
         )
       
       case 'settled_at':
-        return entry.settled_at ? formatDate(entry.settled_at) : '-'
+        return <span className="text-xs">{entry.settled_at ? formatDate(entry.settled_at) : '-'}</span>
       
       case 'amount':
         return (
-          <div className="text-right">
-            <span className={cn(
-              "font-semibold",
-              entry.entry_type === 'receivable' ? "text-green-600" : "text-red-600"
-            )}>
-              {formatCurrency(entry.amount)}
-            </span>
-          </div>
+          <span className={cn(
+            "font-semibold text-xs",
+            entry.entry_type === 'receivable' ? "text-green-600" : "text-red-600"
+          )}>
+            {formatCurrency(entry.amount)}
+          </span>
         )
       
       case 'balance':
         const balance = entry.is_settled ? 0 : entry.amount
         return (
-          <div className="text-right">
-            <span className={cn(
-              "font-medium",
-              balance > 0 && "text-orange-600"
-            )}>
-              {formatCurrency(balance)}
-            </span>
-          </div>
+          <span className={cn(
+            "font-medium text-xs",
+            balance > 0 && "text-orange-600"
+          )}>
+            {formatCurrency(balance)}
+          </span>
         )
       
       case 'chart_of_account':
-        return entry.chart_of_account_name || '-'
+        return <span className="text-xs">{entry.chart_of_account_name || '-'}</span>
       
       case 'cost_center':
-        return entry.cost_center_name || (
+        return entry.cost_center_name ? (
+          <span className="text-xs">{entry.cost_center_name}</span>
+        ) : (
           <span className="text-muted-foreground text-xs">Centro de Custo removido</span>
         )
       
       case 'payment_method':
-        return entry.payment_method_name || '-'
+        return <span className="text-xs">{entry.payment_method_name || '-'}</span>
       
       case 'description':
         return (
-          <div className="max-w-xs">
-            <p className="truncate" title={entry.description}>
-              {entry.description || '-'}
-            </p>
-          </div>
+          <span className="text-xs truncate block" title={entry.description}>
+            {entry.description || '-'}
+          </span>
         )
       
       default:
-        return entry[columnKey as keyof FinancialEntry] || '-'
+        const value = entry[columnKey as keyof FinancialEntry]
+        return <span className="text-xs">{value || '-'}</span>
     }
   }
 
@@ -349,172 +352,166 @@ export function FinancialTable({
   }
 
   return (
-    <div className="relative">
-      <ResponsiveTable>
-        <div className="overflow-x-auto">
-          <Table className="w-full table-fixed text-xs">
-            <colgroup>
-              <col className="w-12" />
-              {visibleColumns.map((column) => (
-                <col key={column.key} className={cn(
-                  column.key === 'status' && "w-32",
-                  column.key === 'entry_code' && "w-28", 
-                  column.key === 'person_name' && "w-48",
-                  (column.key === 'amount' || column.key === 'balance') && "w-36",
-                  (column.key === 'due_date' || column.key === 'created_at' || column.key === 'settled_at') && "w-32",
-                  column.key === 'description' && "w-64",
-                  !['status', 'entry_code', 'person_name', 'amount', 'balance', 'due_date', 'created_at', 'settled_at', 'description'].includes(column.key) && "w-36"
-                )} />
-              ))}
-              <col className="w-24" />
-            </colgroup>
-          <TableHeader>
-            <TableRow className="border-b h-12">
-              <TableHead className="px-3 text-xs font-semibold text-center">
-                <Checkbox
-                  checked={selectedEntries.length === entries.length}
-                  onCheckedChange={handleSelectAll}
-                  aria-label="Selecionar todos"
-                />
-              </TableHead>
-              
-              {visibleColumns.map((column) => {
-                const alignment = getColumnAlignment(column.key)
+    <div className="relative w-full overflow-x-auto">
+      <div className="min-w-full inline-block align-middle">
+        <div className="overflow-hidden">
+          <table className="min-w-full divide-y divide-border">
+            {/* Header */}
+            <thead className="bg-muted/50">
+              <tr>
+                {/* Checkbox Column */}
+                <th className="px-3 py-3 w-[50px]">
+                  <div className="flex items-center justify-center">
+                    <Checkbox
+                      checked={selectedEntries.length === entries.length}
+                      onCheckedChange={handleSelectAll}
+                      aria-label="Selecionar todos"
+                    />
+                  </div>
+                </th>
                 
-                return (
-                  <TableHead 
-                    key={column.key} 
-                    className="font-semibold px-3 text-xs"
-                  >
-                    {column.sortable ? (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={cn(
-                          "h-auto p-0 font-semibold hover:bg-transparent text-xs w-full",
-                          alignment === 'text-right' ? 'justify-end pr-3' : 
-                          alignment === 'text-center' ? 'justify-center' : 'justify-start pl-0'
-                        )}
-                        onClick={() => handleSort(column.key as keyof FinancialEntry)}
-                      >
-                        <span className="mr-1">{column.label}</span>
-                        {getSortIcon(column.key)}
-                      </Button>
-                    ) : (
-                      <div className={cn("w-full flex", 
-                        alignment === 'text-right' ? 'justify-end' : 
-                        alignment === 'text-center' ? 'justify-center' : 'justify-start'
-                      )}>
-                        <span>{column.label}</span>
-                      </div>
-                    )}
-                  </TableHead>
-                )
-              })}
-              
-              <TableHead className="text-center px-3 text-xs font-semibold sticky right-0 bg-background z-10">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-        
-        <TableBody>
-          <StaggeredList delay={50}>
-            {sortedEntries.map((entry, index) => (
-              <TableRow
-                key={entry.id}
-                className={cn(
-                  "border-b transition-colors hover:bg-muted/50 h-10",
-                  selectedEntries.includes(entry.id) && "bg-muted/30",
-                  animationsEnabled && "hover:scale-[1.01] transition-transform duration-150"
-                )}
-              >
-                <TableCell className="px-3 py-3 text-xs text-center">
-                  <Checkbox
-                    checked={selectedEntries.includes(entry.id)}
-                    onCheckedChange={(checked) => handleSelectEntry(entry.id, checked as boolean)}
-                    aria-label={`Selecionar lançamento ${entry.id}`}
-                  />
-                </TableCell>
-                
+                {/* Data Columns */}
                 {visibleColumns.map((column) => {
                   const alignment = getColumnAlignment(column.key)
+                  const width = getColumnWidth(column.key)
                   
                   return (
-                    <TableCell 
-                      key={`${entry.id}-${column.key}`} 
-                      className={cn(
-                        "align-middle px-3 py-3 text-xs",
-                        alignment
-                      )}
+                    <th 
+                      key={column.key} 
+                      className={cn("px-3 py-3", width)}
                     >
-                      {getCellValue(entry, column.key)}
-                    </TableCell>
+                      {column.sortable ? (
+                        <button
+                          onClick={() => handleSort(column.key as keyof FinancialEntry)}
+                          className={cn(
+                            "flex items-center gap-1 font-semibold text-xs hover:text-primary transition-colors w-full",
+                            alignment === 'text-right' && 'justify-end',
+                            alignment === 'text-center' && 'justify-center',
+                            alignment === 'text-left' && 'justify-start'
+                          )}
+                        >
+                          <span>{column.label}</span>
+                          {getSortIcon(column.key)}
+                        </button>
+                      ) : (
+                        <div className={cn("font-semibold text-xs w-full", alignment)}>
+                          {column.label}
+                        </div>
+                      )}
+                    </th>
                   )
                 })}
                 
-                <TableCell className="text-center px-3 py-3 text-xs sticky right-0 bg-background z-10">
-                  <div className="flex items-center justify-center gap-1">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onEdit(entry)}
-                            className="h-7 w-7 p-0 hover:bg-blue-100 hover:text-blue-600"
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Editar lançamento</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                {/* Actions Column */}
+                <th className="px-3 py-3 w-[100px]">
+                  <div className="font-semibold text-xs text-center">Ações</div>
+                </th>
+              </tr>
+            </thead>
 
-                    <AlertDialog>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <AlertDialogTrigger asChild>
+            {/* Body */}
+            <tbody className="divide-y divide-border bg-background">
+              <StaggeredList delay={50}>
+                {sortedEntries.map((entry) => (
+                  <tr
+                    key={entry.id}
+                    className={cn(
+                      "transition-colors hover:bg-muted/50",
+                      selectedEntries.includes(entry.id) && "bg-muted/30",
+                      animationsEnabled && "hover:scale-[1.001] transition-transform duration-150"
+                    )}
+                  >
+                    {/* Checkbox Cell */}
+                    <td className="px-3 py-3">
+                      <div className="flex items-center justify-center">
+                        <Checkbox
+                          checked={selectedEntries.includes(entry.id)}
+                          onCheckedChange={(checked) => handleSelectEntry(entry.id, checked as boolean)}
+                          aria-label={`Selecionar lançamento ${entry.id}`}
+                        />
+                      </div>
+                    </td>
+                    
+                    {/* Data Cells */}
+                    {visibleColumns.map((column) => {
+                      const alignment = getColumnAlignment(column.key)
+                      const width = getColumnWidth(column.key)
+                      
+                      return (
+                        <td 
+                          key={`${entry.id}-${column.key}`} 
+                          className={cn("px-3 py-3", width, alignment)}
+                        >
+                          {getCellValue(entry, column.key)}
+                        </td>
+                      )
+                    })}
+                    
+                    {/* Actions Cell */}
+                    <td className="px-3 py-3">
+                      <div className="flex items-center justify-center gap-1">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600"
+                                onClick={() => onEdit(entry)}
+                                className="h-7 w-7 p-0 hover:bg-blue-100 hover:text-blue-600"
                               >
-                                <Trash2 className="h-3 w-3" />
+                                <Edit className="h-3 w-3" />
                               </Button>
-                            </AlertDialogTrigger>
-                          </TooltipTrigger>
-                          <TooltipContent>Excluir lançamento</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                            </TooltipTrigger>
+                            <TooltipContent>Editar lançamento</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
 
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Tem certeza que deseja excluir este lançamento? 
-                            Esta ação não pode ser desfeita.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => onDelete(entry.id)}
-                            className="bg-red-600 hover:bg-red-700"
-                          >
-                            Excluir
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </StaggeredList>
-        </TableBody>
-      </Table>
-    </div>
-  </ResponsiveTable>
+                        <AlertDialog>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                              </TooltipTrigger>
+                              <TooltipContent>Excluir lançamento</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja excluir este lançamento? 
+                                Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => onDelete(entry.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </StaggeredList>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   )
 }

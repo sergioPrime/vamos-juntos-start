@@ -43,6 +43,7 @@ interface FinancialEntry {
   entry_code?: number
   entry_type: "receivable" | "payable"
   person_type: "customer" | "supplier"
+  person_id: string
   amount: number
   due_date: string
   competence_date: string
@@ -250,6 +251,14 @@ export function FinancialTable({
           ? entry.customers?.name 
           : entry.suppliers?.name
         
+        console.log('Person data:', { 
+          person_type: entry.person_type, 
+          person_id: entry.person_id,
+          customers: entry.customers,
+          suppliers: entry.suppliers,
+          personName 
+        })
+        
         return (
           <div className="flex flex-col">
             <span className="font-medium text-xs">{personName || '-'}</span>
@@ -371,14 +380,23 @@ export function FinancialTable({
 
   return (
     <div className="w-full overflow-x-auto border rounded-lg">
-      <table className="w-full border-collapse">
+      <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
         <colgroup>
           <col style={{ width: '50px' }} />
-          {visibleColumns.map((column) => {
-            const width = getColumnWidth(column.key)
-            return <col key={column.key} className={width} />
-          })}
-          <col style={{ width: '100px' }} />
+          <col style={{ width: '140px' }} /> {/* status */}
+          <col style={{ width: '100px' }} /> {/* entry_code */}
+          <col style={{ width: '200px' }} /> {/* person_name */}
+          <col style={{ width: '180px' }} /> {/* bank_account */}
+          <col style={{ width: '120px' }} /> {/* created_at */}
+          <col style={{ width: '130px' }} /> {/* due_date */}
+          <col style={{ width: '120px' }} /> {/* settled_at */}
+          <col style={{ width: '140px' }} /> {/* amount */}
+          <col style={{ width: '140px' }} /> {/* balance */}
+          <col style={{ width: '180px' }} /> {/* chart_of_account */}
+          <col style={{ width: '150px' }} /> {/* cost_center */}
+          <col style={{ width: '150px' }} /> {/* payment_method */}
+          <col style={{ width: '250px' }} /> {/* description */}
+          <col style={{ width: '100px' }} /> {/* actions */}
         </colgroup>
 
         <thead className="bg-muted/50 sticky top-0 z-10">
@@ -400,7 +418,7 @@ export function FinancialTable({
               return (
                 <th 
                   key={column.key} 
-                  className={cn("px-3 py-3 border-b whitespace-nowrap", alignment, width)}
+                  className={cn("px-3 py-3 border-b", alignment)}
                 >
                   {column.sortable ? (
                     <button
@@ -459,7 +477,7 @@ export function FinancialTable({
                   return (
                     <td 
                       key={`${entry.id}-${column.key}`} 
-                      className={cn("px-3 py-3 align-middle whitespace-nowrap", alignment, width)}
+                      className={cn("px-3 py-3 align-middle", alignment)}
                     >
                       {getCellValue(entry, column.key)}
                     </td>

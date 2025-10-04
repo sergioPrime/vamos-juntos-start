@@ -4,6 +4,7 @@ import { Plus, FileText, Calculator, User, MoreHorizontal, LogOut, Moon, Sun, Za
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { UserPhotoDialog } from "@/components/UserPhotoDialog"
+import { UserDataDialog } from "@/components/UserDataDialog"
 import { supabase } from "@/integrations/supabase/client"
 import { AlertNotificationBell } from "@/components/inventory/AlertNotificationBell"
 import { OverdueNotifications } from "@/components/appointments/OverdueNotifications"
@@ -39,6 +40,7 @@ export function AppHeader() {
   const { isSuperAdmin } = useSuperAdmin()
   const { role } = useRoleCheck()
   const [photoDialogOpen, setPhotoDialogOpen] = useState(false)
+  const [dataDialogOpen, setDataDialogOpen] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   
   useEffect(() => {
@@ -208,7 +210,7 @@ export function AppHeader() {
                 Configurações de Comissões
               </DropdownMenuItem>
               
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDataDialogOpen(true)}>
                 <UserCog className="h-4 w-4 mr-2" />
                 Alterar meus Dados
               </DropdownMenuItem>
@@ -332,7 +334,7 @@ export function AppHeader() {
                 Configurações de Comissões
               </DropdownMenuItem>
               
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDataDialogOpen(true)}>
                 <UserCog className="h-4 w-4 mr-2" />
                 Alterar meus Dados
               </DropdownMenuItem>
@@ -391,6 +393,11 @@ export function AppHeader() {
           onOpenChange={setPhotoDialogOpen}
           avatarUrl={avatarUrl}
           onPhotoUpdate={setAvatarUrl}
+        />
+        
+        <UserDataDialog
+          open={dataDialogOpen}
+          onOpenChange={setDataDialogOpen}
         />
       </header>
     </TooltipProvider>

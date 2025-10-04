@@ -1949,7 +1949,9 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
+          pessoa_id: string | null
           updated_at: string
+          whatsapp: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -1958,7 +1960,9 @@ export type Database = {
           first_name?: string | null
           id: string
           last_name?: string | null
+          pessoa_id?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -1967,9 +1971,19 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          pessoa_id?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_profiles_pessoa"
+            columns: ["pessoa_id"]
+            isOneToOne: false
+            referencedRelation: "pessoas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       purchase_budgets: {
         Row: {

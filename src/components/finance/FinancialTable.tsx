@@ -391,20 +391,10 @@ export function FinancialTable({
       <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
         <colgroup>
           <col style={{ width: '50px' }} />
-          <col style={{ width: '140px' }} /> {/* status */}
-          <col style={{ width: '100px' }} /> {/* entry_code */}
-          <col style={{ width: '200px' }} /> {/* person_name */}
-          <col style={{ width: '180px' }} /> {/* bank_account */}
-          <col style={{ width: '120px' }} /> {/* created_at */}
-          <col style={{ width: '130px' }} /> {/* due_date */}
-          <col style={{ width: '120px' }} /> {/* settled_at */}
-          <col style={{ width: '140px' }} /> {/* amount */}
-          <col style={{ width: '140px' }} /> {/* balance */}
-          <col style={{ width: '180px' }} /> {/* chart_of_account */}
-          <col style={{ width: '150px' }} /> {/* cost_center */}
-          <col style={{ width: '150px' }} /> {/* payment_method */}
-          <col style={{ width: '250px' }} /> {/* description */}
-          <col style={{ width: '100px' }} /> {/* actions */}
+          {visibleColumns.map((column) => (
+            <col key={column.key} style={{ width: getColumnWidth(column.key) }} />
+          ))}
+          <col style={{ width: '100px' }} />
         </colgroup>
 
         <thead className="bg-muted/50 sticky top-0 z-10">

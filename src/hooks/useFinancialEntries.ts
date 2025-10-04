@@ -111,14 +111,7 @@ export function useFinancialEntries() {
       const costCenterIds = [...new Set(data.map(e => e.cost_center_id).filter(Boolean))]
       const paymentMethodIds = [...new Set(data.map(e => e.payment_method_id).filter(Boolean))]
       const bankAccountIds = [...new Set(data.map(e => e.bank_account_id).filter(Boolean))]
-      const customerIds = data
-        .filter(e => e.person_type === 'customer')
-        .map(e => e.person_id)
-        .filter(Boolean)
-      const supplierIds = data
-        .filter(e => e.person_type === 'supplier')
-        .map(e => e.person_id)
-        .filter(Boolean)
+      const pessoaIds = [...new Set(data.map(e => e.person_id).filter(Boolean))]
 
       // Buscar todos os dados relacionados em paralelo
       const [
@@ -127,8 +120,7 @@ export function useFinancialEntries() {
         costCentersData,
         paymentMethodsData,
         bankAccountsData,
-        customersData,
-        suppliersData
+        pessoasData
       ] = await Promise.all([
         companyIds.length > 0
           ? supabase.from('companies').select('id, name').in('id', companyIds)
@@ -145,11 +137,8 @@ export function useFinancialEntries() {
         bankAccountIds.length > 0
           ? supabase.from('bank_accounts').select('id, bank_name, account_number, bank_code, agency, agency_digit, account_digit').in('id', bankAccountIds)
           : Promise.resolve({ data: [] }),
-        customerIds.length > 0
-          ? supabase.from('customers').select('id, name').in('id', customerIds)
-          : Promise.resolve({ data: [] }),
-        supplierIds.length > 0
-          ? supabase.from('suppliers').select('id, name').in('id', supplierIds)
+        pessoaIds.length > 0
+          ? supabase.from('pessoas').select('id, nome_fantasia, razao_social, tipo_pessoa').in('id', pessoaIds)
           : Promise.resolve({ data: [] })
       ])
 
@@ -169,24 +158,24 @@ export function useFinancialEntries() {
       const bankAccountsMap = new Map(
         bankAccountsData.data?.map(b => [b.id, b] as const) || []
       )
-      const customersMap = new Map(
-        customersData.data?.map(c => [c.id, c] as const) || []
-      )
-      const suppliersMap = new Map(
-        suppliersData.data?.map(s => [s.id, s] as const) || []
+      const pessoasMap = new Map(
+        pessoasData.data?.map(p => [p.id, { ...p, name: p.nome_fantasia || p.razao_social || 'Sem nome' }] as const) || []
       )
 
       // Enriquecer dados com todas as informações relacionadas
-      const enrichedData = data.map(entry => ({
-        ...entry,
-        companies: entry.company_id ? companiesMap.get(entry.company_id) : null,
-        chart_of_accounts: entry.chart_of_account_id ? chartOfAccountsMap.get(entry.chart_of_account_id) : null,
-        cost_centers: entry.cost_center_id ? costCentersMap.get(entry.cost_center_id) : null,
-        payment_methods: entry.payment_method_id ? paymentMethodsMap.get(entry.payment_method_id) : null,
-        bank_accounts: entry.bank_account_id ? bankAccountsMap.get(entry.bank_account_id) : null,
-        customers: entry.person_type === 'customer' ? customersMap.get(entry.person_id) : null,
-        suppliers: entry.person_type === 'supplier' ? suppliersMap.get(entry.person_id) : null
-      }))
+      const enrichedData = data.map(entry => {
+        const pessoa = entry.person_id ? pessoasMap.get(entry.person_id) : null
+        return {
+          ...entry,
+          companies: entry.company_id ? companiesMap.get(entry.company_id) : null,
+          chart_of_accounts: entry.chart_of_account_id ? chartOfAccountsMap.get(entry.chart_of_account_id) : null,
+          cost_centers: entry.cost_center_id ? costCentersMap.get(entry.cost_center_id) : null,
+          payment_methods: entry.payment_method_id ? paymentMethodsMap.get(entry.payment_method_id) : null,
+          bank_accounts: entry.bank_account_id ? bankAccountsMap.get(entry.bank_account_id) : null,
+          customers: entry.person_type === 'customer' ? pessoa : null,
+          suppliers: entry.person_type === 'supplier' ? pessoa : null
+        }
+      })
 
       console.log("Loaded and enriched financial entries:", enrichedData)
       setEntries(enrichedData as any)

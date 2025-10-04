@@ -86,12 +86,20 @@ export function useFinancialEntries() {
     try {
       setLoading(true)
       
-      // First, try a simple query without any joins to isolate the issue
-      console.log("Attempting to load financial entries for org:", organization.currentOrg.id)
+      console.log("Loading financial entries for org:", organization.currentOrg.id)
       
       const { data, error } = await supabase
         .from("financial_entries")
-        .select("*, entry_code")
+        .select(`
+          *,
+          companies:company_id(name),
+          customers:person_id(name),
+          suppliers:person_id(name),
+          chart_of_accounts:chart_of_account_id(account_code, account_name),
+          cost_centers:cost_center_id(code, name),
+          payment_methods:payment_method_id(name),
+          bank_accounts:bank_account_id(bank_name, account_number, bank_code, agency, agency_digit, account_digit)
+        `)
         .eq("org_id", organization.currentOrg.id)
         .order("entry_code", { ascending: false })
 
@@ -100,80 +108,8 @@ export function useFinancialEntries() {
         throw error
       }
       
-      console.log("Raw financial entries data:", data)
-      
-      // If we have data, enrich it manually with related information
-      const enrichedEntries = await Promise.all((data || []).map(async (entry: any) => {
-        const enrichedEntry = { ...entry }
-        
-        // Fetch related data separately to avoid join issues
-        if (entry.company_id) {
-          const { data: company } = await supabase
-            .from('companies')
-            .select('name')
-            .eq('id', entry.company_id)
-            .maybeSingle();
-          enrichedEntry.companies = company;
-        }
-        
-        if (entry.chart_of_account_id) {
-          const { data: chartAccount } = await supabase
-            .from('chart_of_accounts')
-            .select('account_code, account_name')
-            .eq('id', entry.chart_of_account_id)
-            .maybeSingle();
-          enrichedEntry.chart_of_accounts = chartAccount;
-        }
-        
-        if (entry.cost_center_id) {
-          const { data: costCenter } = await supabase
-            .from('cost_centers')
-            .select('code, name')
-            .eq('id', entry.cost_center_id)
-            .maybeSingle();
-          enrichedEntry.cost_centers = costCenter;
-        }
-        
-        if (entry.payment_method_id) {
-          const { data: paymentMethod } = await supabase
-            .from('payment_methods')
-            .select('name')
-            .eq('id', entry.payment_method_id)
-            .maybeSingle();
-          enrichedEntry.payment_methods = paymentMethod;
-        }
-        
-        if (entry.bank_account_id) {
-          const { data: bankAccount } = await supabase
-            .from('bank_accounts')
-            .select('bank_name, account_number, bank_code, agency, agency_digit, account_digit')
-            .eq('id', entry.bank_account_id)
-            .maybeSingle();
-          enrichedEntry.bank_accounts = bankAccount;
-        }
-        
-        // Fetch customer or supplier name
-        if (entry.person_type === 'customer') {
-          const { data: customer } = await supabase
-            .from('customers')
-            .select('name')
-            .eq('id', entry.person_id)
-            .maybeSingle();
-          enrichedEntry.customers = customer;
-        } else if (entry.person_type === 'supplier') {
-          const { data: supplier } = await supabase
-            .from('suppliers')
-            .select('name')
-            .eq('id', entry.person_id)
-            .maybeSingle();
-          enrichedEntry.suppliers = supplier;
-        }
-        
-        return enrichedEntry;
-      }));
-
-      console.log("Enriched financial entries:", enrichedEntries)
-      setEntries(enrichedEntries as any)
+      console.log("Loaded financial entries with joins:", data)
+      setEntries(data as any)
     } catch (error) {
       console.error("Error loading financial entries:", error)
       toast({

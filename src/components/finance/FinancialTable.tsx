@@ -371,12 +371,13 @@ export function FinancialTable({
 
   return (
     <div className="w-full overflow-x-auto border rounded-lg">
-      <table className="w-full" style={{ tableLayout: 'auto' }}>
+      <table className="w-full border-collapse">
         <colgroup>
           <col style={{ width: '50px' }} />
-          {visibleColumns.map((column) => (
-            <col key={column.key} />
-          ))}
+          {visibleColumns.map((column) => {
+            const width = getColumnWidth(column.key)
+            return <col key={column.key} className={width} />
+          })}
           <col style={{ width: '100px' }} />
         </colgroup>
 

@@ -88,13 +88,12 @@ export function useFinancialEntries() {
       
       console.log("Loading financial entries for org:", organization.currentOrg.id)
       
+      // Primeira query: buscar lançamentos com joins que funcionam
       const { data, error } = await supabase
         .from("financial_entries")
         .select(`
           *,
           companies:company_id(name),
-          customers:person_id(name),
-          suppliers:person_id(name),
           chart_of_accounts:chart_of_account_id(account_code, account_name),
           cost_centers:cost_center_id(code, name),
           payment_methods:payment_method_id(name),
@@ -108,8 +107,48 @@ export function useFinancialEntries() {
         throw error
       }
       
-      console.log("Loaded financial entries with joins:", data)
-      setEntries(data as any)
+      if (!data || data.length === 0) {
+        setEntries([])
+        return
+      }
+
+      // Buscar clientes e fornecedores em lote
+      const customerIds = data
+        .filter(e => e.person_type === 'customer')
+        .map(e => e.person_id)
+        .filter(Boolean)
+      
+      const supplierIds = data
+        .filter(e => e.person_type === 'supplier')
+        .map(e => e.person_id)
+        .filter(Boolean)
+
+      const [customersData, suppliersData] = await Promise.all([
+        customerIds.length > 0
+          ? supabase.from('customers').select('id, name').in('id', customerIds)
+          : Promise.resolve({ data: [] }),
+        supplierIds.length > 0
+          ? supabase.from('suppliers').select('id, name').in('id', supplierIds)
+          : Promise.resolve({ data: [] })
+      ])
+
+      // Criar mapas para lookup rápido
+      const customersMap = new Map(
+        customersData.data?.map(c => [c.id, c] as const) || []
+      )
+      const suppliersMap = new Map(
+        suppliersData.data?.map(s => [s.id, s] as const) || []
+      )
+
+      // Enriquecer dados com informações de clientes/fornecedores
+      const enrichedData = data.map(entry => ({
+        ...entry,
+        customers: entry.person_type === 'customer' ? customersMap.get(entry.person_id) : null,
+        suppliers: entry.person_type === 'supplier' ? suppliersMap.get(entry.person_id) : null
+      }))
+
+      console.log("Loaded and enriched financial entries:", enrichedData)
+      setEntries(enrichedData as any)
     } catch (error) {
       console.error("Error loading financial entries:", error)
       toast({

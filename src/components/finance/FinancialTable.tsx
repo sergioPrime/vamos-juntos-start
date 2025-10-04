@@ -246,22 +246,30 @@ export function FinancialTable({
         )
       
       case 'person_name':
-        // Buscar nome do relacionamento correto
-        const personName = entry.person_type === 'customer' 
-          ? entry.customers?.name 
-          : entry.suppliers?.name
+        // Buscar nome do relacionamento correto baseado no person_type
+        let personName = '-'
         
-        console.log('Person data:', { 
-          person_type: entry.person_type, 
-          person_id: entry.person_id,
-          customers: entry.customers,
-          suppliers: entry.suppliers,
-          personName 
-        })
+        if (entry.person_type === 'customer' && entry.customers?.name) {
+          personName = entry.customers.name
+        } else if (entry.person_type === 'supplier' && entry.suppliers?.name) {
+          personName = entry.suppliers.name
+        }
+        
+        // Log para debug
+        if (!personName || personName === '-') {
+          console.log('⚠️ Person data missing:', { 
+            entry_id: entry.id,
+            person_type: entry.person_type, 
+            person_id: entry.person_id,
+            customers: entry.customers,
+            suppliers: entry.suppliers,
+            personName 
+          })
+        }
         
         return (
-          <div className="flex flex-col">
-            <span className="font-medium text-xs">{personName || '-'}</span>
+          <div className="flex flex-col min-w-0">
+            <span className="font-medium text-xs truncate">{personName}</span>
             <span className="text-[10px] text-muted-foreground">
               {entry.person_type === 'customer' ? 'Cliente' : 'Fornecedor'}
             </span>

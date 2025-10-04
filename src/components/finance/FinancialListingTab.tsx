@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client"
 
 import { FinancialFilters } from "./FinancialFilters"
 import { FinancialSummaryCards } from "./FinancialSummaryCards"
+import { FinancialSummaryHeader } from "./FinancialSummaryHeader"
 import { FinancialTable } from "./FinancialTable"
 import { ColumnManager, ColumnConfig } from "./ColumnManager"
 import { LoadingWrapper } from "@/components/animations/LoadingWrapper"
@@ -260,25 +261,31 @@ export function FinancialListingTab() {
     return result
   }, [entries, filters])
 
-  // Calculate summary data
+  // Calculate summary data for both old and new summary components
   const summaryData = useMemo(() => {
     const payables = filteredEntries.filter(e => e.entry_type === 'payable')
     const receivables = filteredEntries.filter(e => e.entry_type === 'receivable')
 
     const payablePlanned = payables.reduce((sum, e) => sum + e.amount, 0)
     const payableRealized = payables.filter(e => e.is_settled).reduce((sum, e) => sum + e.amount, 0)
+    const payableUnpaid = payables.filter(e => !e.is_settled).reduce((sum, e) => sum + e.amount, 0)
     
     const receivablePlanned = receivables.reduce((sum, e) => sum + e.amount, 0)
     const receivableRealized = receivables.filter(e => e.is_settled).reduce((sum, e) => sum + e.amount, 0)
+    const receivableUnpaid = receivables.filter(e => !e.is_settled).reduce((sum, e) => sum + e.amount, 0)
 
     return {
       payables: {
         planned: payablePlanned,
-        realized: payableRealized
+        realized: payableRealized,
+        forecasted: payablePlanned,
+        unpaid: payableUnpaid
       },
       receivables: {
         planned: receivablePlanned,
-        realized: receivableRealized
+        realized: receivableRealized,
+        forecasted: receivablePlanned,
+        unpaid: receivableUnpaid
       },
       balance: receivableRealized - payableRealized
     }
@@ -372,9 +379,20 @@ export function FinancialListingTab() {
           loading={isLoading}
         />
 
-        {/* Summary Cards */}
+        {/* New Summary Header */}
         <LoadingWrapper loading={isLoading} type="card">
-          <FinancialSummaryCards data={summaryData} loading={isLoading} />
+          <FinancialSummaryHeader 
+            payables={{
+              forecasted: summaryData.payables.forecasted,
+              realized: summaryData.payables.realized,
+              unpaid: summaryData.payables.unpaid
+            }}
+            receivables={{
+              forecasted: summaryData.receivables.forecasted,
+              realized: summaryData.receivables.realized,
+              unpaid: summaryData.receivables.unpaid
+            }}
+          />
         </LoadingWrapper>
 
         {/* Table Section */}

@@ -195,20 +195,20 @@ export function FinancialTable({
 
   const getColumnWidth = (columnKey: string): string => {
     switch (columnKey) {
-      case 'status': return 'w-[140px]'
-      case 'entry_code': return 'w-[100px]'
-      case 'person_name': return 'w-[200px]'
-      case 'bank_account': return 'w-[180px]'
-      case 'created_at': return 'w-[120px]'
-      case 'due_date': return 'w-[130px]'
-      case 'settled_at': return 'w-[120px]'
-      case 'amount': return 'w-[140px]'
-      case 'balance': return 'w-[140px]'
-      case 'chart_of_account': return 'w-[180px]'
-      case 'cost_center': return 'w-[150px]'
-      case 'payment_method': return 'w-[150px]'
-      case 'description': return 'w-[250px]'
-      default: return 'w-[150px]'
+      case 'status': return '140px'
+      case 'entry_code': return '100px'
+      case 'person_name': return '220px'
+      case 'bank_account': return '180px'
+      case 'created_at': return '140px'
+      case 'due_date': return '140px'
+      case 'settled_at': return '140px'
+      case 'amount': return '140px'
+      case 'balance': return '140px'
+      case 'chart_of_account': return '200px'
+      case 'cost_center': return '160px'
+      case 'payment_method': return '180px'
+      case 'description': return '250px'
+      default: return '150px'
     }
   }
 
@@ -388,13 +388,14 @@ export function FinancialTable({
 
   return (
     <div className="w-full overflow-x-auto border rounded-lg">
-      <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
+      <table className="w-full border-collapse">
         <colgroup>
-          <col style={{ width: '50px' }} />
-          {visibleColumns.map((column) => (
-            <col key={column.key} style={{ width: getColumnWidth(column.key) }} />
-          ))}
-          <col style={{ width: '100px' }} />
+          <col style={{ width: '50px', minWidth: '50px' }} />
+          {visibleColumns.map((column) => {
+            const width = getColumnWidth(column.key)
+            return <col key={column.key} style={{ width, minWidth: width }} />
+          })}
+          <col style={{ width: '120px', minWidth: '120px' }} />
         </colgroup>
 
         <thead className="bg-muted/50 sticky top-0 z-10">
@@ -411,18 +412,17 @@ export function FinancialTable({
             {/* Data Columns */}
             {visibleColumns.map((column) => {
               const alignment = getColumnAlignment(column.key)
-              const width = getColumnWidth(column.key)
               
               return (
                 <th 
                   key={column.key} 
-                  className={cn("px-3 py-3 border-b", alignment)}
+                  className="px-3 py-3 border-b"
                 >
                   {column.sortable ? (
                     <button
                       onClick={() => handleSort(column.key as keyof FinancialEntry)}
                       className={cn(
-                        "flex items-center gap-1 font-semibold text-xs hover:text-primary transition-colors",
+                        "flex items-center gap-1 font-semibold text-xs hover:text-primary transition-colors whitespace-nowrap",
                         alignment === 'text-right' && 'justify-end w-full',
                         alignment === 'text-center' && 'justify-center w-full',
                         alignment === 'text-left' && 'justify-start'
@@ -432,7 +432,7 @@ export function FinancialTable({
                       {getSortIcon(column.key)}
                     </button>
                   ) : (
-                    <div className={cn("font-semibold text-xs", alignment)}>
+                    <div className={cn("font-semibold text-xs whitespace-nowrap", alignment)}>
                       {column.label}
                     </div>
                   )}
@@ -470,14 +470,15 @@ export function FinancialTable({
                 {/* Data Cells */}
                 {visibleColumns.map((column) => {
                   const alignment = getColumnAlignment(column.key)
-                  const width = getColumnWidth(column.key)
                   
                   return (
                     <td 
                       key={`${entry.id}-${column.key}`} 
-                      className={cn("px-3 py-3 align-middle", alignment)}
+                      className="px-3 py-3 align-middle"
                     >
-                      {getCellValue(entry, column.key)}
+                      <div className={alignment}>
+                        {getCellValue(entry, column.key)}
+                      </div>
                     </td>
                   )
                 })}

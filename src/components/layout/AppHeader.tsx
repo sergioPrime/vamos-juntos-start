@@ -2,7 +2,9 @@ import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Plus, FileText, Calculator, User, MoreHorizontal, LogOut, Moon, Sun, Zap, Shield, Settings, Lock, Link2, Camera, DollarSign, UserCog } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { UserPhotoDialog } from "@/components/UserPhotoDialog"
+import { supabase } from "@/integrations/supabase/client"
 import { AlertNotificationBell } from "@/components/inventory/AlertNotificationBell"
 import { OverdueNotifications } from "@/components/appointments/OverdueNotifications"
 import {
@@ -36,6 +38,25 @@ export function AppHeader() {
   const { theme, toggleTheme } = useTheme()
   const { isSuperAdmin } = useSuperAdmin()
   const { role } = useRoleCheck()
+  const [photoDialogOpen, setPhotoDialogOpen] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  
+  useEffect(() => {
+    if (user?.id) {
+      const fetchAvatar = async () => {
+        const { data } = await supabase
+          .from('profiles')
+          .select('avatar_url')
+          .eq('id', user.id)
+          .single()
+        
+        if (data?.avatar_url) {
+          setAvatarUrl(data.avatar_url)
+        }
+      }
+      fetchAvatar()
+    }
+  }, [user?.id])
   
   const getInitials = (email: string) => {
     return email.split('@')[0].substring(0, 2).toUpperCase()
@@ -151,6 +172,7 @@ export function AppHeader() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
                 <Avatar className="h-8 w-8">
+                  {avatarUrl && <img src={avatarUrl} alt="Avatar" className="object-cover" />}
                   <AvatarFallback className="text-xs font-semibold bg-primary text-primary-foreground">
                     {getInitials(user?.email || '')}
                   </AvatarFallback>
@@ -160,6 +182,7 @@ export function AppHeader() {
             <DropdownMenuContent align="end" className="w-72">
               <div className="flex flex-col items-center gap-2 p-4">
                 <Avatar className="h-16 w-16">
+                  {avatarUrl && <img src={avatarUrl} alt="Avatar" className="object-cover" />}
                   <AvatarFallback className="text-lg font-semibold bg-primary text-primary-foreground">
                     {getInitials(user?.email || '')}
                   </AvatarFallback>
@@ -175,7 +198,7 @@ export function AppHeader() {
               
               <DropdownMenuSeparator />
               
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setPhotoDialogOpen(true)}>
                 <Camera className="h-4 w-4 mr-2" />
                 Foto Usuário
               </DropdownMenuItem>
@@ -268,6 +291,7 @@ export function AppHeader() {
             <DropdownMenuContent align="end" className="w-72">
               <div className="flex flex-col items-center gap-2 p-4">
                 <Avatar className="h-16 w-16">
+                  {avatarUrl && <img src={avatarUrl} alt="Avatar" className="object-cover" />}
                   <AvatarFallback className="text-lg font-semibold bg-primary text-primary-foreground">
                     {getInitials(user?.email || '')}
                   </AvatarFallback>
@@ -298,7 +322,7 @@ export function AppHeader() {
               
               <DropdownMenuSeparator />
               
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setPhotoDialogOpen(true)}>
                 <Camera className="h-4 w-4 mr-2" />
                 Foto Usuário
               </DropdownMenuItem>
@@ -361,6 +385,13 @@ export function AppHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        
+        <UserPhotoDialog 
+          open={photoDialogOpen} 
+          onOpenChange={setPhotoDialogOpen}
+          avatarUrl={avatarUrl}
+          onPhotoUpdate={setAvatarUrl}
+        />
       </header>
     </TooltipProvider>
   )

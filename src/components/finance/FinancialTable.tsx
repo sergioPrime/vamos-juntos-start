@@ -384,19 +384,16 @@ export function FinancialTable({
                 return (
                   <TableHead 
                     key={column.key} 
-                    className={cn(
-                      "font-semibold px-3 text-xs",
-                      alignment
-                    )}
+                    className="font-semibold px-3 text-xs"
                   >
                     {column.sortable ? (
                       <Button
                         variant="ghost"
                         size="sm"
                         className={cn(
-                          "h-auto p-0 font-semibold hover:bg-transparent -ml-3 pl-3 text-xs w-full",
-                          alignment === 'text-right' ? 'justify-end' : 
-                          alignment === 'text-center' ? 'justify-center' : 'justify-start'
+                          "h-auto p-0 font-semibold hover:bg-transparent text-xs w-full",
+                          alignment === 'text-right' ? 'justify-end pr-3' : 
+                          alignment === 'text-center' ? 'justify-center' : 'justify-start pl-0'
                         )}
                         onClick={() => handleSort(column.key as keyof FinancialEntry)}
                       >
@@ -404,7 +401,10 @@ export function FinancialTable({
                         {getSortIcon(column.key)}
                       </Button>
                     ) : (
-                      <div className={cn("w-full", alignment)}>
+                      <div className={cn("w-full flex", 
+                        alignment === 'text-right' ? 'justify-end' : 
+                        alignment === 'text-center' ? 'justify-center' : 'justify-start'
+                      )}>
                         <span>{column.label}</span>
                       </div>
                     )}

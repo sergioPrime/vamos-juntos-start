@@ -371,27 +371,12 @@ export function FinancialTable({
 
   return (
     <div className="w-full overflow-x-auto border rounded-lg">
-      <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
+      <table className="w-full" style={{ tableLayout: 'auto' }}>
         <colgroup>
           <col style={{ width: '50px' }} />
-          {visibleColumns.map((column) => {
-            const widthMap: Record<string, string> = {
-              'status': '140px',
-              'entry_code': '100px',
-              'person_name': '200px',
-              'bank_account': '180px',
-              'created_at': '120px',
-              'due_date': '130px',
-              'settled_at': '120px',
-              'amount': '140px',
-              'balance': '140px',
-              'chart_of_account': '180px',
-              'cost_center': '150px',
-              'payment_method': '150px',
-              'description': '250px'
-            }
-            return <col key={column.key} style={{ width: widthMap[column.key] || '150px' }} />
-          })}
+          {visibleColumns.map((column) => (
+            <col key={column.key} />
+          ))}
           <col style={{ width: '100px' }} />
         </colgroup>
 
@@ -409,19 +394,20 @@ export function FinancialTable({
             {/* Data Columns */}
             {visibleColumns.map((column) => {
               const alignment = getColumnAlignment(column.key)
+              const width = getColumnWidth(column.key)
               
               return (
                 <th 
                   key={column.key} 
-                  className={cn("px-3 py-3 border-b", alignment)}
+                  className={cn("px-3 py-3 border-b whitespace-nowrap", alignment, width)}
                 >
                   {column.sortable ? (
                     <button
                       onClick={() => handleSort(column.key as keyof FinancialEntry)}
                       className={cn(
-                        "flex items-center gap-1 font-semibold text-xs hover:text-primary transition-colors w-full",
-                        alignment === 'text-right' && 'justify-end',
-                        alignment === 'text-center' && 'justify-center',
+                        "flex items-center gap-1 font-semibold text-xs hover:text-primary transition-colors",
+                        alignment === 'text-right' && 'justify-end w-full',
+                        alignment === 'text-center' && 'justify-center w-full',
                         alignment === 'text-left' && 'justify-start'
                       )}
                     >
@@ -467,15 +453,14 @@ export function FinancialTable({
                 {/* Data Cells */}
                 {visibleColumns.map((column) => {
                   const alignment = getColumnAlignment(column.key)
+                  const width = getColumnWidth(column.key)
                   
                   return (
                     <td 
                       key={`${entry.id}-${column.key}`} 
-                      className={cn("px-3 py-3 align-middle", alignment)}
+                      className={cn("px-3 py-3 align-middle whitespace-nowrap", alignment, width)}
                     >
-                      <div className={cn("w-full", alignment)}>
-                        {getCellValue(entry, column.key)}
-                      </div>
+                      {getCellValue(entry, column.key)}
                     </td>
                   )
                 })}

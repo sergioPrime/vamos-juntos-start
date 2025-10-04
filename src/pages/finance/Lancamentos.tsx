@@ -134,8 +134,11 @@ export default function Lancamentos() {
 
   // Listen for edit entry events from listing tab
   useEffect(() => {
-    const handleSwitchToEditTab = (event: any) => {
+    const handleSwitchToEditTab = async (event: any) => {
       const entry = event.detail.entry;
+      
+      console.log("Editing entry:", entry);
+      
       setEditingEntry(entry);
       
       // Pre-fill form with entry data
@@ -148,8 +151,8 @@ export default function Lancamentos() {
         amount: entry.amount?.toString() || '',
         payment_method_id: entry.payment_method_id || '',
         bank_account_id: entry.bank_account_id || '',
-        competence_date: new Date(entry.competence_date),
-        due_date: new Date(entry.due_date),
+        competence_date: entry.competence_date ? new Date(entry.competence_date) : new Date(),
+        due_date: entry.due_date ? new Date(entry.due_date) : new Date(),
         is_settled: entry.is_settled || false,
         settled_at: entry.settled_at ? new Date(entry.settled_at) : undefined,
         settled_payment_method_id: entry.settled_payment_method_id || '',

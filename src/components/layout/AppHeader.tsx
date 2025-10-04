@@ -6,6 +6,7 @@ import { useState, useEffect } from "react"
 import { UserPhotoDialog } from "@/components/UserPhotoDialog"
 import { UserDataDialog } from "@/components/UserDataDialog"
 import { UserCommissionDialog } from "@/components/UserCommissionDialog"
+import { UserPasswordDialog } from "@/components/UserPasswordDialog"
 import { supabase } from "@/integrations/supabase/client"
 import { AlertNotificationBell } from "@/components/inventory/AlertNotificationBell"
 import { OverdueNotifications } from "@/components/appointments/OverdueNotifications"
@@ -43,6 +44,7 @@ export function AppHeader() {
   const [photoDialogOpen, setPhotoDialogOpen] = useState(false)
   const [dataDialogOpen, setDataDialogOpen] = useState(false)
   const [commissionDialogOpen, setCommissionDialogOpen] = useState(false)
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   
   useEffect(() => {
@@ -217,7 +219,7 @@ export function AppHeader() {
                 Alterar meus Dados
               </DropdownMenuItem>
               
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setPasswordDialogOpen(true)}>
                 <Lock className="h-4 w-4 mr-2" />
                 Alterar Senha
               </DropdownMenuItem>
@@ -341,7 +343,7 @@ export function AppHeader() {
                 Alterar meus Dados
               </DropdownMenuItem>
               
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setPasswordDialogOpen(true)}>
                 <Lock className="h-4 w-4 mr-2" />
                 Alterar Senha
               </DropdownMenuItem>
@@ -402,10 +404,14 @@ export function AppHeader() {
           onOpenChange={setDataDialogOpen}
         />
         
-        <UserCommissionDialog
-          open={commissionDialogOpen}
-          onOpenChange={setCommissionDialogOpen}
-        />
+      <UserCommissionDialog
+        open={commissionDialogOpen}
+        onOpenChange={setCommissionDialogOpen}
+      />
+      <UserPasswordDialog
+        open={passwordDialogOpen}
+        onOpenChange={setPasswordDialogOpen}
+      />
       </header>
     </TooltipProvider>
   )

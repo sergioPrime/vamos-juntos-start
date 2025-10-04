@@ -58,6 +58,14 @@ interface FinancialEntry {
   bank_account_name?: string
   origin_type?: string
   document_number?: string
+  // Dados relacionados
+  companies?: { name: string }
+  customers?: { name: string }
+  suppliers?: { name: string }
+  chart_of_accounts?: { account_code: string; account_name: string }
+  cost_centers?: { code: string; name: string }
+  payment_methods?: { name: string }
+  bank_accounts?: { bank_name: string; account_number: string }
 }
 
 interface FinancialTableProps {
@@ -221,7 +229,7 @@ export function FinancialTable({
         const statusInfo = getStatusInfo(entry)
         const StatusIcon = statusInfo.icon
         return (
-          <div className="flex items-center justify-center gap-1.5 w-full">
+          <div className="flex items-center justify-center gap-1.5">
             <StatusIcon className={`h-3.5 w-3.5 ${statusInfo.color}`} />
             <Badge variant={statusInfo.variant} className="text-[10px] px-1.5 py-0.5">
               {statusInfo.label}
@@ -237,9 +245,14 @@ export function FinancialTable({
         )
       
       case 'person_name':
+        // Buscar nome do relacionamento correto
+        const personName = entry.person_type === 'customer' 
+          ? entry.customers?.name 
+          : entry.suppliers?.name
+        
         return (
-          <div className="flex flex-col w-full">
-            <span className="font-medium text-xs">{entry.person_name || '-'}</span>
+          <div className="flex flex-col">
+            <span className="font-medium text-xs">{personName || '-'}</span>
             <span className="text-[10px] text-muted-foreground">
               {entry.person_type === 'customer' ? 'Cliente' : 'Fornecedor'}
             </span>
@@ -247,7 +260,8 @@ export function FinancialTable({
         )
       
       case 'bank_account':
-        return <span className="text-xs">{entry.bank_account_name || '-'}</span>
+        const bankName = entry.bank_accounts?.bank_name 
+        return <span className="text-xs">{bankName || '-'}</span>
       
       case 'created_at':
         return <span className="text-xs">{formatDate(entry.created_at)}</span>
@@ -269,7 +283,7 @@ export function FinancialTable({
       case 'amount':
         return (
           <span className={cn(
-            "font-semibold text-xs block w-full",
+            "font-semibold text-xs",
             entry.entry_type === 'receivable' ? "text-green-600" : "text-red-600"
           )}>
             {formatCurrency(entry.amount)}
@@ -280,7 +294,7 @@ export function FinancialTable({
         const balance = entry.is_settled ? 0 : entry.amount
         return (
           <span className={cn(
-            "font-medium text-xs block w-full",
+            "font-medium text-xs",
             balance > 0 && "text-orange-600"
           )}>
             {formatCurrency(balance)}
@@ -288,27 +302,31 @@ export function FinancialTable({
         )
       
       case 'chart_of_account':
-        return <span className="text-xs">{entry.chart_of_account_name || '-'}</span>
+        const accountName = entry.chart_of_accounts?.account_name
+        return <span className="text-xs">{accountName || '-'}</span>
       
       case 'cost_center':
-        return entry.cost_center_name ? (
-          <span className="text-xs">{entry.cost_center_name}</span>
+        const costCenterName = entry.cost_centers?.name
+        return costCenterName ? (
+          <span className="text-xs">{costCenterName}</span>
         ) : (
-          <span className="text-muted-foreground text-xs">Centro de Custo removido</span>
+          <span className="text-muted-foreground text-xs">-</span>
         )
       
       case 'payment_method':
-        return <span className="text-xs">{entry.payment_method_name || '-'}</span>
+        const paymentMethodName = entry.payment_methods?.name
+        return <span className="text-xs">{paymentMethodName || '-'}</span>
       
       case 'description':
         return (
-          <span className="text-xs truncate block w-full" title={entry.description}>
+          <span className="text-xs truncate block" title={entry.description}>
             {entry.description || '-'}
           </span>
         )
       
       default:
         const value = entry[columnKey as keyof FinancialEntry]
+        if (typeof value === 'object') return <span className="text-xs">-</span>
         return <span className="text-xs">{value || '-'}</span>
     }
   }

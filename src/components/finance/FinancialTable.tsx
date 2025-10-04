@@ -221,7 +221,7 @@ export function FinancialTable({
         const statusInfo = getStatusInfo(entry)
         const StatusIcon = statusInfo.icon
         return (
-          <div className="flex items-center justify-center gap-1.5">
+          <div className="flex items-center justify-center gap-1.5 w-full">
             <StatusIcon className={`h-3.5 w-3.5 ${statusInfo.color}`} />
             <Badge variant={statusInfo.variant} className="text-[10px] px-1.5 py-0.5">
               {statusInfo.label}
@@ -231,14 +231,14 @@ export function FinancialTable({
       
       case 'entry_code':
         return (
-          <div className="font-mono text-xs">
+          <span className="font-mono text-xs">
             {entry.entry_code ? `#${entry.entry_code}` : '-'}
-          </div>
+          </span>
         )
       
       case 'person_name':
         return (
-          <div className="flex flex-col">
+          <div className="flex flex-col w-full">
             <span className="font-medium text-xs">{entry.person_name || '-'}</span>
             <span className="text-[10px] text-muted-foreground">
               {entry.person_type === 'customer' ? 'Cliente' : 'Fornecedor'}
@@ -269,7 +269,7 @@ export function FinancialTable({
       case 'amount':
         return (
           <span className={cn(
-            "font-semibold text-xs",
+            "font-semibold text-xs block w-full",
             entry.entry_type === 'receivable' ? "text-green-600" : "text-red-600"
           )}>
             {formatCurrency(entry.amount)}
@@ -280,7 +280,7 @@ export function FinancialTable({
         const balance = entry.is_settled ? 0 : entry.amount
         return (
           <span className={cn(
-            "font-medium text-xs",
+            "font-medium text-xs block w-full",
             balance > 0 && "text-orange-600"
           )}>
             {formatCurrency(balance)}
@@ -302,7 +302,7 @@ export function FinancialTable({
       
       case 'description':
         return (
-          <span className="text-xs truncate block" title={entry.description}>
+          <span className="text-xs truncate block w-full" title={entry.description}>
             {entry.description || '-'}
           </span>
         )
@@ -453,9 +453,11 @@ export function FinancialTable({
                   return (
                     <td 
                       key={`${entry.id}-${column.key}`} 
-                      className={cn("px-3 py-3", alignment)}
+                      className={cn("px-3 py-3 align-middle", alignment)}
                     >
-                      {getCellValue(entry, column.key)}
+                      <div className={cn("w-full", alignment)}>
+                        {getCellValue(entry, column.key)}
+                      </div>
                     </td>
                   )
                 })}

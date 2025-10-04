@@ -1944,7 +1944,12 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          comissao_pdv_percentual: number | null
+          comissao_pedidos_percentual: number | null
+          comissao_por_produto_pdv: boolean | null
+          comissao_por_produto_pedidos: boolean | null
           created_at: string
+          dia_vencimento_comissoes_pdv: number | null
           email: string | null
           first_name: string | null
           id: string
@@ -1955,7 +1960,12 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          comissao_pdv_percentual?: number | null
+          comissao_pedidos_percentual?: number | null
+          comissao_por_produto_pdv?: boolean | null
+          comissao_por_produto_pedidos?: boolean | null
           created_at?: string
+          dia_vencimento_comissoes_pdv?: number | null
           email?: string | null
           first_name?: string | null
           id: string
@@ -1966,7 +1976,12 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          comissao_pdv_percentual?: number | null
+          comissao_pedidos_percentual?: number | null
+          comissao_por_produto_pdv?: boolean | null
+          comissao_por_produto_pedidos?: boolean | null
           created_at?: string
+          dia_vencimento_comissoes_pdv?: number | null
           email?: string | null
           first_name?: string | null
           id?: string

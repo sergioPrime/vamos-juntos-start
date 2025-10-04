@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { UserPhotoDialog } from "@/components/UserPhotoDialog"
 import { UserDataDialog } from "@/components/UserDataDialog"
+import { UserCommissionDialog } from "@/components/UserCommissionDialog"
 import { supabase } from "@/integrations/supabase/client"
 import { AlertNotificationBell } from "@/components/inventory/AlertNotificationBell"
 import { OverdueNotifications } from "@/components/appointments/OverdueNotifications"
@@ -41,6 +42,7 @@ export function AppHeader() {
   const { role } = useRoleCheck()
   const [photoDialogOpen, setPhotoDialogOpen] = useState(false)
   const [dataDialogOpen, setDataDialogOpen] = useState(false)
+  const [commissionDialogOpen, setCommissionDialogOpen] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   
   useEffect(() => {
@@ -205,7 +207,7 @@ export function AppHeader() {
                 Foto Usuário
               </DropdownMenuItem>
               
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCommissionDialogOpen(true)}>
                 <DollarSign className="h-4 w-4 mr-2" />
                 Configurações de Comissões
               </DropdownMenuItem>
@@ -329,7 +331,7 @@ export function AppHeader() {
                 Foto Usuário
               </DropdownMenuItem>
               
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCommissionDialogOpen(true)}>
                 <DollarSign className="h-4 w-4 mr-2" />
                 Configurações de Comissões
               </DropdownMenuItem>
@@ -398,6 +400,11 @@ export function AppHeader() {
         <UserDataDialog
           open={dataDialogOpen}
           onOpenChange={setDataDialogOpen}
+        />
+        
+        <UserCommissionDialog
+          open={commissionDialogOpen}
+          onOpenChange={setCommissionDialogOpen}
         />
       </header>
     </TooltipProvider>

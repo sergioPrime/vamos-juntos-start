@@ -352,166 +352,177 @@ export function FinancialTable({
   }
 
   return (
-    <div className="relative w-full overflow-x-auto">
-      <div className="min-w-full inline-block align-middle">
-        <div className="overflow-hidden">
-          <table className="min-w-full divide-y divide-border">
-            {/* Header */}
-            <thead className="bg-muted/50">
-              <tr>
-                {/* Checkbox Column */}
-                <th className="px-3 py-3 w-[50px]">
-                  <div className="flex items-center justify-center">
-                    <Checkbox
-                      checked={selectedEntries.length === entries.length}
-                      onCheckedChange={handleSelectAll}
-                      aria-label="Selecionar todos"
-                    />
-                  </div>
+    <div className="w-full overflow-x-auto border rounded-lg">
+      <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
+        <colgroup>
+          <col style={{ width: '50px' }} />
+          {visibleColumns.map((column) => {
+            const widthMap: Record<string, string> = {
+              'status': '140px',
+              'entry_code': '100px',
+              'person_name': '200px',
+              'bank_account': '180px',
+              'created_at': '120px',
+              'due_date': '130px',
+              'settled_at': '120px',
+              'amount': '140px',
+              'balance': '140px',
+              'chart_of_account': '180px',
+              'cost_center': '150px',
+              'payment_method': '150px',
+              'description': '250px'
+            }
+            return <col key={column.key} style={{ width: widthMap[column.key] || '150px' }} />
+          })}
+          <col style={{ width: '100px' }} />
+        </colgroup>
+
+        <thead className="bg-muted/50 sticky top-0 z-10">
+          <tr>
+            {/* Checkbox Column */}
+            <th className="px-3 py-3 text-center border-b">
+              <Checkbox
+                checked={selectedEntries.length === entries.length}
+                onCheckedChange={handleSelectAll}
+                aria-label="Selecionar todos"
+              />
+            </th>
+            
+            {/* Data Columns */}
+            {visibleColumns.map((column) => {
+              const alignment = getColumnAlignment(column.key)
+              
+              return (
+                <th 
+                  key={column.key} 
+                  className={cn("px-3 py-3 border-b", alignment)}
+                >
+                  {column.sortable ? (
+                    <button
+                      onClick={() => handleSort(column.key as keyof FinancialEntry)}
+                      className={cn(
+                        "flex items-center gap-1 font-semibold text-xs hover:text-primary transition-colors w-full",
+                        alignment === 'text-right' && 'justify-end',
+                        alignment === 'text-center' && 'justify-center',
+                        alignment === 'text-left' && 'justify-start'
+                      )}
+                    >
+                      <span>{column.label}</span>
+                      {getSortIcon(column.key)}
+                    </button>
+                  ) : (
+                    <div className={cn("font-semibold text-xs", alignment)}>
+                      {column.label}
+                    </div>
+                  )}
                 </th>
+              )
+            })}
+            
+            {/* Actions Column */}
+            <th className="px-3 py-3 text-center border-b">
+              <div className="font-semibold text-xs">Ações</div>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody className="bg-background">
+          <StaggeredList delay={50}>
+            {sortedEntries.map((entry) => (
+              <tr
+                key={entry.id}
+                className={cn(
+                  "border-b transition-colors hover:bg-muted/50",
+                  selectedEntries.includes(entry.id) && "bg-muted/30",
+                  animationsEnabled && "hover:scale-[1.001] transition-transform duration-150"
+                )}
+              >
+                {/* Checkbox Cell */}
+                <td className="px-3 py-3 text-center">
+                  <Checkbox
+                    checked={selectedEntries.includes(entry.id)}
+                    onCheckedChange={(checked) => handleSelectEntry(entry.id, checked as boolean)}
+                    aria-label={`Selecionar lançamento ${entry.id}`}
+                  />
+                </td>
                 
-                {/* Data Columns */}
+                {/* Data Cells */}
                 {visibleColumns.map((column) => {
                   const alignment = getColumnAlignment(column.key)
-                  const width = getColumnWidth(column.key)
                   
                   return (
-                    <th 
-                      key={column.key} 
-                      className={cn("px-3 py-3", width)}
+                    <td 
+                      key={`${entry.id}-${column.key}`} 
+                      className={cn("px-3 py-3", alignment)}
                     >
-                      {column.sortable ? (
-                        <button
-                          onClick={() => handleSort(column.key as keyof FinancialEntry)}
-                          className={cn(
-                            "flex items-center gap-1 font-semibold text-xs hover:text-primary transition-colors w-full",
-                            alignment === 'text-right' && 'justify-end',
-                            alignment === 'text-center' && 'justify-center',
-                            alignment === 'text-left' && 'justify-start'
-                          )}
-                        >
-                          <span>{column.label}</span>
-                          {getSortIcon(column.key)}
-                        </button>
-                      ) : (
-                        <div className={cn("font-semibold text-xs w-full", alignment)}>
-                          {column.label}
-                        </div>
-                      )}
-                    </th>
+                      {getCellValue(entry, column.key)}
+                    </td>
                   )
                 })}
                 
-                {/* Actions Column */}
-                <th className="px-3 py-3 w-[100px]">
-                  <div className="font-semibold text-xs text-center">Ações</div>
-                </th>
-              </tr>
-            </thead>
+                {/* Actions Cell */}
+                <td className="px-3 py-3">
+                  <div className="flex items-center justify-center gap-1">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onEdit(entry)}
+                            className="h-7 w-7 p-0 hover:bg-blue-100 hover:text-blue-600"
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Editar lançamento</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
 
-            {/* Body */}
-            <tbody className="divide-y divide-border bg-background">
-              <StaggeredList delay={50}>
-                {sortedEntries.map((entry) => (
-                  <tr
-                    key={entry.id}
-                    className={cn(
-                      "transition-colors hover:bg-muted/50",
-                      selectedEntries.includes(entry.id) && "bg-muted/30",
-                      animationsEnabled && "hover:scale-[1.001] transition-transform duration-150"
-                    )}
-                  >
-                    {/* Checkbox Cell */}
-                    <td className="px-3 py-3">
-                      <div className="flex items-center justify-center">
-                        <Checkbox
-                          checked={selectedEntries.includes(entry.id)}
-                          onCheckedChange={(checked) => handleSelectEntry(entry.id, checked as boolean)}
-                          aria-label={`Selecionar lançamento ${entry.id}`}
-                        />
-                      </div>
-                    </td>
-                    
-                    {/* Data Cells */}
-                    {visibleColumns.map((column) => {
-                      const alignment = getColumnAlignment(column.key)
-                      const width = getColumnWidth(column.key)
-                      
-                      return (
-                        <td 
-                          key={`${entry.id}-${column.key}`} 
-                          className={cn("px-3 py-3", width, alignment)}
-                        >
-                          {getCellValue(entry, column.key)}
-                        </td>
-                      )
-                    })}
-                    
-                    {/* Actions Cell */}
-                    <td className="px-3 py-3">
-                      <div className="flex items-center justify-center gap-1">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
+                    <AlertDialog>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <AlertDialogTrigger asChild>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => onEdit(entry)}
-                                className="h-7 w-7 p-0 hover:bg-blue-100 hover:text-blue-600"
+                                className="h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600"
                               >
-                                <Edit className="h-3 w-3" />
+                                <Trash2 className="h-3 w-3" />
                               </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Editar lançamento</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                            </AlertDialogTrigger>
+                          </TooltipTrigger>
+                          <TooltipContent>Excluir lançamento</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
 
-                        <AlertDialog>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <AlertDialogTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                              </TooltipTrigger>
-                              <TooltipContent>Excluir lançamento</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Tem certeza que deseja excluir este lançamento? 
-                                Esta ação não pode ser desfeita.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => onDelete(entry.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Excluir
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </StaggeredList>
-            </tbody>
-          </table>
-        </div>
-      </div>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Tem certeza que deseja excluir este lançamento? 
+                            Esta ação não pode ser desfeita.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => onDelete(entry.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </StaggeredList>
+        </tbody>
+      </table>
     </div>
   )
 }

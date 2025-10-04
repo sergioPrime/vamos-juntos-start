@@ -34,7 +34,7 @@ export function UserDataDialog({ open, onOpenChange }: UserDataDialogProps) {
   const [fullName, setFullName] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
   const [pessoaId, setPessoaId] = useState<string | null>(null)
-  const [pessoaNome, setPessoaNome] = useState<string>('BsonNull')
+  const [pessoaNome, setPessoaNome] = useState<string>('Selecione um vendedor')
   const [vendedores, setVendedores] = useState<Pessoa[]>([])
   const [showPessoaList, setShowPessoaList] = useState(false)
 
@@ -81,7 +81,7 @@ export function UserDataDialog({ open, onOpenChange }: UserDataDialogProps) {
           .from('pessoas')
           .select('id, nome_fantasia')
           .eq('org_id', orgData.org_id)
-          .eq('rotulo', 'vendedor')
+          .contains('rotulos', ['vendedor'])
           .order('nome_fantasia')
         
         if (vendedoresData) {

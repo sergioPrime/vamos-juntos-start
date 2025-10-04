@@ -1,15 +1,15 @@
 import { useState, useEffect, useMemo } from "react"
-import { RefreshCcw, Download, Filter, Plus } from "lucide-react"
+import { RefreshCcw, Download, Filter, Plus, Search, SlidersHorizontal, MoreVertical } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { useFinancialEntries } from "@/hooks/useFinancialEntries"
 import { useOrganization } from "@/hooks/useOrganization"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 
 import { FinancialFilters } from "./FinancialFilters"
-import { FinancialSummaryCards } from "./FinancialSummaryCards"
 import { FinancialSummaryHeader } from "./FinancialSummaryHeader"
 import { FinancialTable } from "./FinancialTable"
 import { ColumnManager, ColumnConfig } from "./ColumnManager"
@@ -51,44 +51,48 @@ const DEFAULT_FILTERS: FilterValues = {
 const DEFAULT_COLUMNS: ColumnConfig[] = [
   { key: 'status', label: 'Situação', visible: true, sortable: true, required: true },
   { key: 'entry_code', label: 'Código', visible: true, sortable: true },
+  { key: 'company_name', label: 'Empresa', visible: true, sortable: true },
+  { key: 'due_date', label: 'Vencimento', visible: true, sortable: true, required: true },
+  { key: 'entry_type', label: 'Tipo', visible: true, sortable: true },
+  { key: 'amount', label: 'Previsto', visible: true, sortable: true, required: true },
+  { key: 'settled_amount', label: 'Realizado', visible: true, sortable: true },
+  { key: 'balance', label: 'Saldo', visible: true, sortable: true },
   { key: 'person_name', label: 'Cliente/Fornecedor', visible: true, sortable: true, required: true },
+  { key: 'chart_of_account', label: 'Plano de Conta', visible: true, sortable: true },
+  { key: 'cost_center', label: 'Centro Custo', visible: false, sortable: true },
+  { key: 'payment_method', label: 'Forma Pagamento', visible: false, sortable: true },
+  { key: 'description', label: 'Descrição', visible: false, sortable: false },
   { key: 'bank_account', label: 'Banco/Conta', visible: false, sortable: true },
   { key: 'created_at', label: 'Data Lançamento', visible: false, sortable: true },
-  { key: 'due_date', label: 'Data Vencimento', visible: true, sortable: true, required: true },
-  { key: 'settled_at', label: 'Data Quitação', visible: false, sortable: true },
-  { key: 'amount', label: 'Valor Previsto', visible: true, sortable: true, required: true },
-  { key: 'balance', label: 'Saldo', visible: true, sortable: true },
-  { key: 'chart_of_account', label: 'Plano de Contas', visible: false, sortable: true },
-  { key: 'cost_center', label: 'Centro de Custo', visible: true, sortable: true },
-  { key: 'payment_method', label: 'Forma Pagamento', visible: false, sortable: true },
-  { key: 'description', label: 'Descrição', visible: true, sortable: false, required: true }
+  { key: 'settled_at', label: 'Data Quitação', visible: false, sortable: true }
 ]
 
 export function FinancialListingTab() {
+  const { entries, loading: entriesLoading, loadEntries } = useFinancialEntries()
   const organization = useOrganization()
   const { toast } = useToast()
-  const { entries, loading: entriesLoading, loadEntries } = useFinancialEntries()
-  
-  // Use persistent filters
-  const { filters, updateFilters, clearFilters } = usePersistentFilters<FilterValues>({
-    key: 'financial-listing-filters',
-    defaultFilters: DEFAULT_FILTERS,
-    useSessionStorage: false
-  })
   
   const [columns, setColumns] = useState<ColumnConfig[]>(DEFAULT_COLUMNS)
   const [selectedEntries, setSelectedEntries] = useState<string[]>([])
+  const [searchQuery, setSearchQuery] = useState("")
   const [filtersLoading, setFiltersLoading] = useState(false)
   
-  // Data for dropdowns and filters
   const [customers, setCustomers] = useState<any[]>([])
   const [suppliers, setSuppliers] = useState<any[]>([])
   const [chartOfAccounts, setChartOfAccounts] = useState<any[]>([])
   const [costCenters, setCostCenters] = useState<any[]>([])
   const [paymentMethods, setPaymentMethods] = useState<any[]>([])
   const [bankAccounts, setBankAccounts] = useState<any[]>([])
+  
+  const {
+    filters,
+    updateFilters,
+    clearFilters
+  } = usePersistentFilters<FilterValues>({
+    key: 'financial-listing-filters',
+    defaultFilters: DEFAULT_FILTERS
+  })
 
-  // Load supporting data
   useEffect(() => {
     if (organization?.currentOrg?.id) {
       loadSupportingData()
@@ -213,12 +217,6 @@ export function FinancialListingTab() {
           case "overdue":
             if (entry.is_settled || new Date(entry.due_date) >= new Date()) return false
             break
-          case "conciliated":
-            // TODO: Add conciliation logic when available
-            break
-          case "not_conciliated":
-            // TODO: Add conciliation logic when available
-            break
         }
       }
 
@@ -261,46 +259,8 @@ export function FinancialListingTab() {
     return result
   }, [entries, filters])
 
-  // Calculate summary data for both old and new summary components
-  const summaryData = useMemo(() => {
-    const payables = filteredEntries.filter(e => e.entry_type === 'payable')
-    const receivables = filteredEntries.filter(e => e.entry_type === 'receivable')
-
-    const payablePlanned = payables.reduce((sum, e) => sum + e.amount, 0)
-    const payableRealized = payables.filter(e => e.is_settled).reduce((sum, e) => sum + e.amount, 0)
-    const payableUnpaid = payables.filter(e => !e.is_settled).reduce((sum, e) => sum + e.amount, 0)
-    
-    const receivablePlanned = receivables.reduce((sum, e) => sum + e.amount, 0)
-    const receivableRealized = receivables.filter(e => e.is_settled).reduce((sum, e) => sum + e.amount, 0)
-    const receivableUnpaid = receivables.filter(e => !e.is_settled).reduce((sum, e) => sum + e.amount, 0)
-
-    return {
-      payables: {
-        planned: payablePlanned,
-        realized: payableRealized,
-        forecasted: payablePlanned,
-        unpaid: payableUnpaid
-      },
-      receivables: {
-        planned: receivablePlanned,
-        realized: receivableRealized,
-        forecasted: receivablePlanned,
-        unpaid: receivableUnpaid
-      },
-      balance: receivableRealized - payableRealized
-    }
-  }, [filteredEntries])
-
   const handleApplyFilters = () => {
-    console.log("🎯 [LISTING DEBUG] handleApplyFilters called with filters:", {
-      dateFilterType: filters.dateFilterType,
-      periodType: filters.periodType,
-      startDate: filters.startDate?.toISOString(),
-      endDate: filters.endDate?.toISOString()
-    })
-    
     setFiltersLoading(true)
-    // Simulate filter loading
     setTimeout(() => {
       setFiltersLoading(false)
     }, 500)
@@ -312,7 +272,6 @@ export function FinancialListingTab() {
   }
 
   const handleEdit = (entry: any) => {
-    // Set the active tab to "dados" to edit the entry
     const event = new CustomEvent('switch-to-dados-tab', { 
       detail: { entry } 
     });
@@ -344,18 +303,9 @@ export function FinancialListingTab() {
   }
 
   const handleExport = () => {
-    // TODO: Implement export functionality
     toast({
       title: "Exportação",
       description: "Funcionalidade de exportação será implementada",
-    })
-  }
-
-  const handleSaveColumnPreferences = () => {
-    // TODO: Save to user preferences
-    toast({
-      title: "Preferências Salvas",
-      description: "Suas preferências de colunas foram salvas",
     })
   }
 
@@ -364,35 +314,41 @@ export function FinancialListingTab() {
   return (
     <PageTransition direction="left">
       <div className="space-y-6">
-        {/* Filters Section */}
-        <FinancialFilters
-          filters={filters}
-          onFiltersChange={updateFilters}
-          onApplyFilters={handleApplyFilters}
-          onClearFilters={handleClearFilters}
-          customers={customers}
-          suppliers={suppliers}
-          chartOfAccounts={chartOfAccounts}
-          costCenters={costCenters}
-          paymentMethods={paymentMethods}
-          bankAccounts={bankAccounts}
-          loading={isLoading}
-        />
+        {/* Header com busca e ações */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 flex-1 max-w-md">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Pesquisar por Cód./Desc"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button variant="outline" className="gap-2">
+              <SlidersHorizontal className="h-4 w-4" />
+              Busca Avançada
+            </Button>
+            
+            <Button variant="outline" className="gap-2">
+              <MoreVertical className="h-4 w-4" />
+              Mais Ações
+            </Button>
+            
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              NOVO
+            </Button>
+          </div>
+        </div>
 
-        {/* New Summary Header */}
+        {/* Cards de Resumo */}
         <LoadingWrapper loading={isLoading} type="card">
-          <FinancialSummaryHeader 
-            payables={{
-              forecasted: summaryData.payables.forecasted,
-              realized: summaryData.payables.realized,
-              unpaid: summaryData.payables.unpaid
-            }}
-            receivables={{
-              forecasted: summaryData.receivables.forecasted,
-              realized: summaryData.receivables.realized,
-              unpaid: summaryData.receivables.unpaid
-            }}
-          />
+          <FinancialSummaryHeader entries={filteredEntries} />
         </LoadingWrapper>
 
         {/* Table Section */}
@@ -436,7 +392,6 @@ export function FinancialListingTab() {
                 <ColumnManager
                   columns={columns}
                   onColumnsChange={setColumns}
-                  onSavePreferences={handleSaveColumnPreferences}
                 />
               </div>
             </div>

@@ -195,20 +195,23 @@ export function FinancialTable({
 
   const getColumnWidth = (columnKey: string): string => {
     switch (columnKey) {
-      case 'status': return '140px'
-      case 'entry_code': return '100px'
-      case 'person_name': return '220px'
-      case 'bank_account': return '180px'
-      case 'created_at': return '140px'
-      case 'due_date': return '140px'
-      case 'settled_at': return '140px'
-      case 'amount': return '140px'
-      case 'balance': return '140px'
-      case 'chart_of_account': return '200px'
-      case 'cost_center': return '160px'
-      case 'payment_method': return '180px'
-      case 'description': return '250px'
-      default: return '150px'
+      case 'status': return '120px'
+      case 'entry_code': return '80px'
+      case 'company_name': return '140px'
+      case 'due_date': return '120px'
+      case 'entry_type': return '90px'
+      case 'amount': return '120px'
+      case 'settled_amount': return '120px'
+      case 'balance': return '120px'
+      case 'person_name': return '180px'
+      case 'chart_of_account': return '160px'
+      case 'cost_center': return '140px'
+      case 'payment_method': return '140px'
+      case 'description': return '200px'
+      case 'bank_account': return '140px'
+      case 'created_at': return '130px'
+      case 'settled_at': return '130px'
+      default: return '120px'
     }
   }
 
@@ -228,25 +231,31 @@ export function FinancialTable({
     switch (columnKey) {
       case 'status':
         const statusInfo = getStatusInfo(entry)
-        const StatusIcon = statusInfo.icon
         return (
-          <div className="flex items-center justify-center gap-1.5">
-            <StatusIcon className={`h-3.5 w-3.5 ${statusInfo.color}`} />
-            <Badge variant={statusInfo.variant} className="text-[10px] px-1.5 py-0.5">
-              {statusInfo.label}
-            </Badge>
-          </div>
+          <Badge variant={statusInfo.variant} className="text-xs font-medium">
+            {statusInfo.label}
+          </Badge>
         )
       
       case 'entry_code':
         return (
-          <span className="font-mono text-xs">
-            {entry.entry_code ? `#${entry.entry_code}` : '-'}
+          <span className="text-xs font-medium">
+            {entry.entry_code || '-'}
+          </span>
+        )
+      
+      case 'company_name':
+        const companyName = entry.companies?.name || '-'
+        return <span className="text-xs">{companyName}</span>
+      
+      case 'entry_type':
+        return (
+          <span className="text-xs">
+            {entry.entry_type === 'receivable' ? 'Receita' : 'Despesa'}
           </span>
         )
       
       case 'person_name':
-        // Buscar nome do relacionamento correto baseado no person_type
         let personName = '-'
         
         if (entry.person_type === 'customer' && entry.customers?.name) {
@@ -255,26 +264,7 @@ export function FinancialTable({
           personName = entry.suppliers.name
         }
         
-        // Log para debug
-        if (!personName || personName === '-') {
-          console.log('⚠️ Person data missing:', { 
-            entry_id: entry.id,
-            person_type: entry.person_type, 
-            person_id: entry.person_id,
-            customers: entry.customers,
-            suppliers: entry.suppliers,
-            personName 
-          })
-        }
-        
-        return (
-          <div className="flex flex-col min-w-0">
-            <span className="font-medium text-xs truncate">{personName}</span>
-            <span className="text-[10px] text-muted-foreground">
-              {entry.person_type === 'customer' ? 'Cliente' : 'Fornecedor'}
-            </span>
-          </div>
-        )
+        return <span className="text-xs">{personName}</span>
       
       case 'bank_account':
         const bankName = entry.bank_accounts?.bank_name 
@@ -287,7 +277,7 @@ export function FinancialTable({
         const isOverdue = new Date(entry.due_date) < new Date() && !entry.is_settled
         return (
           <span className={cn(
-            "font-medium text-xs",
+            "text-xs font-medium",
             isOverdue && "text-red-600"
           )}>
             {formatDate(entry.due_date)}
@@ -300,10 +290,22 @@ export function FinancialTable({
       case 'amount':
         return (
           <span className={cn(
-            "font-semibold text-xs",
+            "text-xs font-semibold",
             entry.entry_type === 'receivable' ? "text-green-600" : "text-red-600"
           )}>
             {formatCurrency(entry.amount)}
+          </span>
+        )
+      
+      case 'settled_amount':
+        const settledAmount = entry.is_settled ? entry.amount : 0
+        return (
+          <span className={cn(
+            "text-xs font-semibold",
+            settledAmount > 0 && entry.entry_type === 'receivable' ? "text-green-600" : 
+            settledAmount > 0 && entry.entry_type === 'payable' ? "text-red-600" : ""
+          )}>
+            {formatCurrency(settledAmount)}
           </span>
         )
       
@@ -311,8 +313,9 @@ export function FinancialTable({
         const balance = entry.is_settled ? 0 : entry.amount
         return (
           <span className={cn(
-            "font-medium text-xs",
-            balance > 0 && "text-orange-600"
+            "text-xs font-semibold",
+            balance > 0 && entry.entry_type === 'receivable' ? "text-green-600" :
+            balance > 0 && entry.entry_type === 'payable' ? "text-red-600" : ""
           )}>
             {formatCurrency(balance)}
           </span>
@@ -324,11 +327,7 @@ export function FinancialTable({
       
       case 'cost_center':
         const costCenterName = entry.cost_centers?.name
-        return costCenterName ? (
-          <span className="text-xs">{costCenterName}</span>
-        ) : (
-          <span className="text-muted-foreground text-xs">-</span>
-        )
+        return <span className="text-xs">{costCenterName || '-'}</span>
       
       case 'payment_method':
         const paymentMethodName = entry.payment_methods?.name

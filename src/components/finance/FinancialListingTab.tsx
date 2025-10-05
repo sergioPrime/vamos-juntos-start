@@ -49,15 +49,15 @@ const DEFAULT_FILTERS: FilterValues = {
 }
 
 const DEFAULT_COLUMNS: ColumnConfig[] = [
-  { key: 'status', label: 'Situação', visible: true, sortable: true, required: true },
+  { key: 'status', label: 'Situação', visible: true, sortable: true },
   { key: 'entry_code', label: 'Código', visible: true, sortable: true },
   { key: 'company_name', label: 'Empresa', visible: true, sortable: true },
-  { key: 'due_date', label: 'Vencimento', visible: true, sortable: true, required: true },
+  { key: 'due_date', label: 'Vencimento', visible: true, sortable: true },
   { key: 'entry_type', label: 'Tipo', visible: true, sortable: true },
-  { key: 'amount', label: 'Previsto', visible: true, sortable: true, required: true },
+  { key: 'amount', label: 'Previsto', visible: true, sortable: true },
   { key: 'settled_amount', label: 'Realizado', visible: true, sortable: true },
   { key: 'balance', label: 'Saldo', visible: true, sortable: true },
-  { key: 'person_name', label: 'Cliente/Fornecedor', visible: true, sortable: true, required: true },
+  { key: 'person_name', label: 'Cliente/Fornecedor', visible: true, sortable: true },
   { key: 'chart_of_account', label: 'Plano de Conta', visible: true, sortable: true },
   { key: 'cost_center', label: 'Centro Custo', visible: false, sortable: true },
   { key: 'payment_method', label: 'Forma Pagamento', visible: false, sortable: true },

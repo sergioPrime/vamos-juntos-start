@@ -47,7 +47,7 @@ export function ColumnManager({ columns, onColumnsChange, onSavePreferences }: C
   const handleHideAll = () => {
     const updatedColumns = columns.map(col => ({ 
       ...col, 
-      visible: col.required ? true : false 
+      visible: false
     }))
     onColumnsChange(updatedColumns)
   }
@@ -55,7 +55,7 @@ export function ColumnManager({ columns, onColumnsChange, onSavePreferences }: C
   const handleResetToDefault = () => {
     const defaultColumns = columns.map(col => ({
       ...col,
-      visible: col.required || ['status', 'person_name', 'amount', 'due_date', 'description'].includes(col.key)
+      visible: ['status', 'entry_code', 'company_name', 'due_date', 'entry_type', 'amount', 'settled_amount', 'balance', 'person_name', 'chart_of_account'].includes(col.key)
     }))
     onColumnsChange(defaultColumns)
   }
@@ -137,7 +137,7 @@ export function ColumnManager({ columns, onColumnsChange, onSavePreferences }: C
               {columns.map((column, index) => (
                 <div
                   key={column.key}
-                  draggable={!column.required}
+                  draggable={true}
                   onDragStart={() => handleDragStart(index)}
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDragEnd={handleDragEnd}
@@ -145,19 +145,15 @@ export function ColumnManager({ columns, onColumnsChange, onSavePreferences }: C
                     "flex items-center gap-2 p-2 rounded-md border transition-all duration-150",
                     "hover:bg-muted/50 cursor-pointer",
                     draggedItem === index && "opacity-50",
-                    column.required && "bg-muted/20",
                     animationsEnabled && "hover:scale-[1.02]"
                   )}
                 >
-                  {!column.required && (
-                    <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
-                  )}
+                  <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
                   
                   <Checkbox
                     id={`column-${column.key}`}
                     checked={column.visible}
                     onCheckedChange={() => handleToggleColumn(column.key)}
-                    disabled={column.required}
                     className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                   />
                   
@@ -165,14 +161,10 @@ export function ColumnManager({ columns, onColumnsChange, onSavePreferences }: C
                     htmlFor={`column-${column.key}`}
                     className={cn(
                       "flex-1 text-sm cursor-pointer",
-                      column.required && "text-muted-foreground font-medium",
-                      !column.visible && !column.required && "text-muted-foreground"
+                      !column.visible && "text-muted-foreground"
                     )}
                   >
                     {column.label}
-                    {column.required && (
-                      <span className="text-xs text-primary ml-1">(obrigatória)</span>
-                    )}
                   </Label>
 
                   {column.visible && (

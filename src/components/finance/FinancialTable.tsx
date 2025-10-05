@@ -195,29 +195,30 @@ export function FinancialTable({
 
   const getColumnWidth = (columnKey: string): string => {
     switch (columnKey) {
-      case 'status': return '120px'
-      case 'entry_code': return '80px'
-      case 'company_name': return '140px'
-      case 'due_date': return '120px'
-      case 'entry_type': return '90px'
-      case 'amount': return '120px'
-      case 'settled_amount': return '120px'
-      case 'balance': return '120px'
-      case 'person_name': return '180px'
-      case 'chart_of_account': return '160px'
-      case 'cost_center': return '140px'
-      case 'payment_method': return '140px'
-      case 'description': return '200px'
-      case 'bank_account': return '140px'
-      case 'created_at': return '130px'
-      case 'settled_at': return '130px'
-      default: return '120px'
+      case 'status': return '140px'
+      case 'entry_code': return '90px'
+      case 'company_name': return '160px'
+      case 'due_date': return '130px'
+      case 'entry_type': return '100px'
+      case 'amount': return '130px'
+      case 'settled_amount': return '130px'
+      case 'balance': return '130px'
+      case 'person_name': return '200px'
+      case 'chart_of_account': return '180px'
+      case 'cost_center': return '150px'
+      case 'payment_method': return '160px'
+      case 'description': return '220px'
+      case 'bank_account': return '150px'
+      case 'created_at': return '140px'
+      case 'settled_at': return '140px'
+      default: return '130px'
     }
   }
 
   const getColumnAlignment = (columnKey: string): string => {
     switch (columnKey) {
       case 'amount':
+      case 'settled_amount':
       case 'balance':
         return 'text-right'
       case 'status':
@@ -232,25 +233,27 @@ export function FinancialTable({
       case 'status':
         const statusInfo = getStatusInfo(entry)
         return (
-          <Badge variant={statusInfo.variant} className="text-xs font-medium">
-            {statusInfo.label}
-          </Badge>
+          <div className="flex items-center justify-center">
+            <Badge variant={statusInfo.variant} className="text-xs font-medium whitespace-nowrap">
+              {statusInfo.label}
+            </Badge>
+          </div>
         )
       
       case 'entry_code':
         return (
-          <span className="text-xs font-medium">
+          <span className="font-medium">
             {entry.entry_code || '-'}
           </span>
         )
       
       case 'company_name':
         const companyName = entry.companies?.name || '-'
-        return <span className="text-xs">{companyName}</span>
+        return <span className="truncate block">{companyName}</span>
       
       case 'entry_type':
         return (
-          <span className="text-xs">
+          <span>
             {entry.entry_type === 'receivable' ? 'Receita' : 'Despesa'}
           </span>
         )
@@ -264,20 +267,20 @@ export function FinancialTable({
           personName = entry.suppliers.name
         }
         
-        return <span className="text-xs">{personName}</span>
+        return <span className="truncate block">{personName}</span>
       
       case 'bank_account':
         const bankName = entry.bank_accounts?.bank_name 
-        return <span className="text-xs">{bankName || '-'}</span>
+        return <span className="truncate block">{bankName || '-'}</span>
       
       case 'created_at':
-        return <span className="text-xs">{formatDate(entry.created_at)}</span>
+        return <span>{formatDate(entry.created_at)}</span>
       
       case 'due_date':
         const isOverdue = new Date(entry.due_date) < new Date() && !entry.is_settled
         return (
           <span className={cn(
-            "text-xs font-medium",
+            "font-medium",
             isOverdue && "text-red-600"
           )}>
             {formatDate(entry.due_date)}
@@ -285,12 +288,12 @@ export function FinancialTable({
         )
       
       case 'settled_at':
-        return <span className="text-xs">{entry.settled_at ? formatDate(entry.settled_at) : '-'}</span>
+        return <span>{entry.settled_at ? formatDate(entry.settled_at) : '-'}</span>
       
       case 'amount':
         return (
           <span className={cn(
-            "text-xs font-semibold",
+            "font-semibold whitespace-nowrap",
             entry.entry_type === 'receivable' ? "text-green-600" : "text-red-600"
           )}>
             {formatCurrency(entry.amount)}
@@ -301,7 +304,7 @@ export function FinancialTable({
         const settledAmount = entry.is_settled ? entry.amount : 0
         return (
           <span className={cn(
-            "text-xs font-semibold",
+            "font-semibold whitespace-nowrap",
             settledAmount > 0 && entry.entry_type === 'receivable' ? "text-green-600" : 
             settledAmount > 0 && entry.entry_type === 'payable' ? "text-red-600" : ""
           )}>
@@ -313,7 +316,7 @@ export function FinancialTable({
         const balance = entry.is_settled ? 0 : entry.amount
         return (
           <span className={cn(
-            "text-xs font-semibold",
+            "font-semibold whitespace-nowrap",
             balance > 0 && entry.entry_type === 'receivable' ? "text-green-600" :
             balance > 0 && entry.entry_type === 'payable' ? "text-red-600" : ""
           )}>
@@ -323,27 +326,27 @@ export function FinancialTable({
       
       case 'chart_of_account':
         const accountName = entry.chart_of_accounts?.account_name
-        return <span className="text-xs">{accountName || '-'}</span>
+        return <span className="truncate block">{accountName || '-'}</span>
       
       case 'cost_center':
         const costCenterName = entry.cost_centers?.name
-        return <span className="text-xs">{costCenterName || '-'}</span>
+        return <span className="truncate block">{costCenterName || '-'}</span>
       
       case 'payment_method':
         const paymentMethodName = entry.payment_methods?.name
-        return <span className="text-xs">{paymentMethodName || '-'}</span>
+        return <span className="truncate block">{paymentMethodName || '-'}</span>
       
       case 'description':
         return (
-          <span className="text-xs truncate block" title={entry.description}>
+          <span className="truncate block" title={entry.description}>
             {entry.description || '-'}
           </span>
         )
       
       default:
         const value = entry[columnKey as keyof FinancialEntry]
-        if (typeof value === 'object') return <span className="text-xs">-</span>
-        return <span className="text-xs">{value || '-'}</span>
+        if (typeof value === 'object') return <span>-</span>
+        return <span className="truncate block">{value || '-'}</span>
     }
   }
 
@@ -387,14 +390,13 @@ export function FinancialTable({
 
   return (
     <div className="w-full overflow-x-auto border rounded-lg">
-      <table className="w-full border-collapse">
+      <table className="w-full" style={{ tableLayout: 'fixed', borderCollapse: 'collapse' }}>
         <colgroup>
-          <col style={{ width: '50px', minWidth: '50px' }} />
-          {visibleColumns.map((column) => {
-            const width = getColumnWidth(column.key)
-            return <col key={column.key} style={{ width, minWidth: width }} />
-          })}
-          <col style={{ width: '120px', minWidth: '120px' }} />
+          <col style={{ width: '50px' }} />
+          {visibleColumns.map((column) => (
+            <col key={column.key} style={{ width: getColumnWidth(column.key) }} />
+          ))}
+          <col style={{ width: '100px' }} />
         </colgroup>
 
         <thead className="bg-muted/50 sticky top-0 z-10">
@@ -415,23 +417,23 @@ export function FinancialTable({
               return (
                 <th 
                   key={column.key} 
-                  className="px-3 py-3 border-b"
+                  className={cn("px-2 py-3 border-b text-xs font-semibold", alignment)}
                 >
                   {column.sortable ? (
                     <button
                       onClick={() => handleSort(column.key as keyof FinancialEntry)}
                       className={cn(
-                        "flex items-center gap-1 font-semibold text-xs hover:text-primary transition-colors whitespace-nowrap",
-                        alignment === 'text-right' && 'justify-end w-full',
-                        alignment === 'text-center' && 'justify-center w-full',
+                        "flex items-center gap-1 w-full hover:text-primary transition-colors",
+                        alignment === 'text-right' && 'justify-end',
+                        alignment === 'text-center' && 'justify-center',
                         alignment === 'text-left' && 'justify-start'
                       )}
                     >
-                      <span>{column.label}</span>
+                      <span className="truncate">{column.label}</span>
                       {getSortIcon(column.key)}
                     </button>
                   ) : (
-                    <div className={cn("font-semibold text-xs whitespace-nowrap", alignment)}>
+                    <div className="truncate">
                       {column.label}
                     </div>
                   )}
@@ -440,8 +442,8 @@ export function FinancialTable({
             })}
             
             {/* Actions Column */}
-            <th className="px-3 py-3 text-center border-b">
-              <div className="font-semibold text-xs">Ações</div>
+            <th className="px-2 py-3 text-center border-b text-xs font-semibold">
+              Ações
             </th>
           </tr>
         </thead>
@@ -473,11 +475,9 @@ export function FinancialTable({
                   return (
                     <td 
                       key={`${entry.id}-${column.key}`} 
-                      className="px-3 py-3 align-middle"
+                      className={cn("px-2 py-3 text-xs align-middle border-b", alignment)}
                     >
-                      <div className={alignment}>
-                        {getCellValue(entry, column.key)}
-                      </div>
+                      {getCellValue(entry, column.key)}
                     </td>
                   )
                 })}

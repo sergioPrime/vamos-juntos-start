@@ -389,20 +389,21 @@ export function FinancialTable({
   }
 
   return (
-    <div className="w-full overflow-x-auto border rounded-lg">
-      <table className="w-full" style={{ tableLayout: 'fixed', borderCollapse: 'collapse' }}>
-        <colgroup>
-          <col style={{ width: '50px' }} />
-          {visibleColumns.map((column) => (
-            <col key={column.key} style={{ width: getColumnWidth(column.key) }} />
-          ))}
-          <col style={{ width: '100px' }} />
-        </colgroup>
+    <div className="w-full border rounded-lg">
+      <div className="overflow-x-auto">
+        <table className="w-full" style={{ tableLayout: 'fixed', borderCollapse: 'collapse' }}>
+          <colgroup>
+            <col style={{ width: '50px' }} />
+            {visibleColumns.map((column) => (
+              <col key={column.key} style={{ width: getColumnWidth(column.key) }} />
+            ))}
+            <col style={{ width: '100px' }} />
+          </colgroup>
 
         <thead className="bg-muted/50 sticky top-0 z-10">
           <tr>
             {/* Checkbox Column */}
-            <th className="px-3 py-3 text-center border-b">
+            <th className="px-2 py-3 text-center border-b">
               <Checkbox
                 checked={selectedEntries.length === entries.length}
                 onCheckedChange={handleSelectAll}
@@ -460,7 +461,7 @@ export function FinancialTable({
                 )}
               >
                 {/* Checkbox Cell */}
-                <td className="px-3 py-3 text-center">
+                <td className="px-2 py-3 text-center border-b">
                   <Checkbox
                     checked={selectedEntries.includes(entry.id)}
                     onCheckedChange={(checked) => handleSelectEntry(entry.id, checked as boolean)}
@@ -483,7 +484,7 @@ export function FinancialTable({
                 })}
                 
                 {/* Actions Cell */}
-                <td className="px-3 py-3">
+                <td className="px-2 py-3 border-b">
                   <div className="flex items-center justify-center gap-1">
                     <TooltipProvider>
                       <Tooltip>
@@ -545,6 +546,7 @@ export function FinancialTable({
           </StaggeredList>
         </tbody>
       </table>
+      </div>
     </div>
   )
 }

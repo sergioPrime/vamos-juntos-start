@@ -391,13 +391,13 @@ export function FinancialTable({
   return (
     <div className="w-full overflow-hidden border rounded-lg">
       <div className="w-full overflow-x-auto">
-        <table className="w-full border-collapse">
+        <table className="w-full" style={{ tableLayout: 'fixed', minWidth: '100%' }}>
           <colgroup>
-            <col className="w-[50px]" />
+            <col style={{ width: '50px' }} />
             {visibleColumns.map((column) => (
               <col key={column.key} style={{ width: getColumnWidth(column.key) }} />
             ))}
-            <col className="w-[100px]" />
+            <col style={{ width: '100px' }} />
           </colgroup>
 
         <thead className="bg-muted/50 sticky top-0 z-10">

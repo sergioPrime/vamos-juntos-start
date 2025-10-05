@@ -389,26 +389,28 @@ export function FinancialTable({
   }
 
   return (
-    <div className="w-full border rounded-lg">
-      <div className="overflow-x-auto">
-        <table className="w-full" style={{ tableLayout: 'fixed', borderCollapse: 'collapse' }}>
+    <div className="w-full overflow-hidden border rounded-lg">
+      <div className="w-full overflow-x-auto">
+        <table className="w-full border-collapse">
           <colgroup>
-            <col style={{ width: '50px' }} />
+            <col className="w-[50px]" />
             {visibleColumns.map((column) => (
               <col key={column.key} style={{ width: getColumnWidth(column.key) }} />
             ))}
-            <col style={{ width: '100px' }} />
+            <col className="w-[100px]" />
           </colgroup>
 
         <thead className="bg-muted/50 sticky top-0 z-10">
-          <tr>
+          <tr className="border-b">
             {/* Checkbox Column */}
-            <th className="px-2 py-3 text-center border-b">
-              <Checkbox
-                checked={selectedEntries.length === entries.length}
-                onCheckedChange={handleSelectAll}
-                aria-label="Selecionar todos"
-              />
+            <th className="h-12 px-4 text-center align-middle font-medium">
+              <div className="flex items-center justify-center">
+                <Checkbox
+                  checked={selectedEntries.length === entries.length}
+                  onCheckedChange={handleSelectAll}
+                  aria-label="Selecionar todos"
+                />
+              </div>
             </th>
             
             {/* Data Columns */}
@@ -418,7 +420,7 @@ export function FinancialTable({
               return (
                 <th 
                   key={column.key} 
-                  className={cn("px-2 py-3 border-b text-xs font-semibold", alignment)}
+                  className={cn("h-12 px-4 align-middle font-medium text-xs", alignment)}
                 >
                   {column.sortable ? (
                     <button
@@ -434,7 +436,11 @@ export function FinancialTable({
                       {getSortIcon(column.key)}
                     </button>
                   ) : (
-                    <div className="truncate">
+                    <div className={cn(
+                      "truncate",
+                      alignment === 'text-center' && 'text-center',
+                      alignment === 'text-right' && 'text-right'
+                    )}>
                       {column.label}
                     </div>
                   )}
@@ -443,7 +449,7 @@ export function FinancialTable({
             })}
             
             {/* Actions Column */}
-            <th className="px-2 py-3 text-center border-b text-xs font-semibold">
+            <th className="h-12 px-4 text-center align-middle font-medium text-xs">
               Ações
             </th>
           </tr>
@@ -461,12 +467,14 @@ export function FinancialTable({
                 )}
               >
                 {/* Checkbox Cell */}
-                <td className="px-2 py-3 text-center border-b">
-                  <Checkbox
-                    checked={selectedEntries.includes(entry.id)}
-                    onCheckedChange={(checked) => handleSelectEntry(entry.id, checked as boolean)}
-                    aria-label={`Selecionar lançamento ${entry.id}`}
-                  />
+                <td className="p-4 text-center align-middle">
+                  <div className="flex items-center justify-center">
+                    <Checkbox
+                      checked={selectedEntries.includes(entry.id)}
+                      onCheckedChange={(checked) => handleSelectEntry(entry.id, checked as boolean)}
+                      aria-label={`Selecionar lançamento ${entry.id}`}
+                    />
+                  </div>
                 </td>
                 
                 {/* Data Cells */}
@@ -476,7 +484,7 @@ export function FinancialTable({
                   return (
                     <td 
                       key={`${entry.id}-${column.key}`} 
-                      className={cn("px-2 py-3 text-xs align-middle border-b", alignment)}
+                      className={cn("p-4 align-middle text-xs", alignment)}
                     >
                       {getCellValue(entry, column.key)}
                     </td>
@@ -484,7 +492,7 @@ export function FinancialTable({
                 })}
                 
                 {/* Actions Cell */}
-                <td className="px-2 py-3 border-b">
+                <td className="p-4 align-middle">
                   <div className="flex items-center justify-center gap-1">
                     <TooltipProvider>
                       <Tooltip>

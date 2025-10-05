@@ -32,7 +32,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { StaggeredList } from "@/components/animations/StaggeredList"
 import { LoadingWrapper } from "@/components/animations/LoadingWrapper"
 import { useAnimation } from "@/contexts/AnimationContext"
 import { cn } from "@/lib/utils"
@@ -456,25 +455,21 @@ export function FinancialTable({
         </thead>
 
         <tbody className="bg-background">
-          <StaggeredList delay={50}>
             {sortedEntries.map((entry) => (
               <tr
                 key={entry.id}
                 className={cn(
                   "border-b transition-colors hover:bg-muted/50",
-                  selectedEntries.includes(entry.id) && "bg-muted/30",
-                  animationsEnabled && "hover:scale-[1.001] transition-transform duration-150"
+                  selectedEntries.includes(entry.id) && "bg-muted/30"
                 )}
               >
                 {/* Checkbox Cell */}
                 <td className="p-4 text-center align-middle">
-                  <div className="flex items-center justify-center">
-                    <Checkbox
-                      checked={selectedEntries.includes(entry.id)}
-                      onCheckedChange={(checked) => handleSelectEntry(entry.id, checked as boolean)}
-                      aria-label={`Selecionar lançamento ${entry.id}`}
-                    />
-                  </div>
+                  <Checkbox
+                    checked={selectedEntries.includes(entry.id)}
+                    onCheckedChange={(checked) => handleSelectEntry(entry.id, checked as boolean)}
+                    aria-label={`Selecionar lançamento ${entry.id}`}
+                  />
                 </td>
                 
                 {/* Data Cells */}
@@ -551,8 +546,7 @@ export function FinancialTable({
                 </td>
               </tr>
             ))}
-          </StaggeredList>
-        </tbody>
+          </tbody>
       </table>
       </div>
     </div>

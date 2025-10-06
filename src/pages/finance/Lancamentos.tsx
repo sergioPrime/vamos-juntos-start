@@ -14,6 +14,7 @@ import { useBankAccounts } from "@/hooks/useBankAccounts"
 import { useCostCenters } from "@/hooks/useCostCenters"
 import { useAsyncSearch } from "@/hooks/useAsyncSearch"
 import { FinancialListingTab } from "@/components/finance/FinancialListingTab"
+import { FinancialPaymentsTab } from "@/components/finance/FinancialPaymentsTab"
 import { usePermissionGuard } from "@/hooks/usePermissionGuard"
 
 import { Button } from "@/components/ui/button"
@@ -104,6 +105,7 @@ export default function Lancamentos() {
   const [amountDisplayValue, setAmountDisplayValue] = useState("")
   const [activeTab, setActiveTab] = useState("listagem")
   const [editingEntry, setEditingEntry] = useState<any>(null)
+  const [selectedEntriesForPayment, setSelectedEntriesForPayment] = useState<string[]>([])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -401,7 +403,9 @@ export default function Lancamentos() {
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="dados">Dados</TabsTrigger>
           <TabsTrigger value="listagem">Listagem</TabsTrigger>
-          <TabsTrigger value="pagamentos" disabled>Pagamentos</TabsTrigger>
+          <TabsTrigger value="pagamentos" disabled={selectedEntriesForPayment.length === 0}>
+            Pagamentos
+          </TabsTrigger>
           <TabsTrigger value="arquivos" disabled>Arquivos</TabsTrigger>
           <TabsTrigger value="historico" disabled>Histórico</TabsTrigger>
         </TabsList>
@@ -1040,7 +1044,27 @@ export default function Lancamentos() {
         </TabsContent>
 
         <TabsContent value="listagem" className="space-y-6">
-          <FinancialListingTab />
+          <FinancialListingTab 
+            onEntriesSelected={(entryIds) => {
+              setSelectedEntriesForPayment(entryIds)
+              if (entryIds.length > 0) {
+                if (entryIds.length > 1) {
+                  toast({
+                    title: "Atenção",
+                    description: "Apenas o primeiro lançamento selecionado será usado na aba Pagamentos",
+                    variant: "default",
+                  })
+                }
+                setActiveTab("pagamentos")
+              }
+            }}
+          />
+        </TabsContent>
+
+        <TabsContent value="pagamentos" className="space-y-6">
+          <FinancialPaymentsTab 
+            selectedEntryId={selectedEntriesForPayment.length > 0 ? selectedEntriesForPayment[0] : null}
+          />
         </TabsContent>
       </Tabs>
     </div>

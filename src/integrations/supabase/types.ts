@@ -986,6 +986,93 @@ export type Database = {
           },
         ]
       }
+      financial_entry_payments: {
+        Row: {
+          bank_account_id: string | null
+          created_at: string
+          created_by: string
+          data_pagamento: string
+          documento: string | null
+          entry_id: string
+          id: string
+          is_conciliated: boolean
+          juros: number
+          multa: number
+          org_id: string
+          payment_method_id: string | null
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          bank_account_id?: string | null
+          created_at?: string
+          created_by: string
+          data_pagamento: string
+          documento?: string | null
+          entry_id: string
+          id?: string
+          is_conciliated?: boolean
+          juros?: number
+          multa?: number
+          org_id: string
+          payment_method_id?: string | null
+          updated_at?: string
+          valor?: number
+        }
+        Update: {
+          bank_account_id?: string | null
+          created_at?: string
+          created_by?: string
+          data_pagamento?: string
+          documento?: string | null
+          entry_id?: string
+          id?: string
+          is_conciliated?: boolean
+          juros?: number
+          multa?: number
+          org_id?: string
+          payment_method_id?: string | null
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_entry_payments_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_entry_payments_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "financial_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_entry_payments_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "financial_entries_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_entry_payments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_entry_payments_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_transactions: {
         Row: {
           amount: number

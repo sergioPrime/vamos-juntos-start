@@ -67,7 +67,7 @@ const DEFAULT_COLUMNS: ColumnConfig[] = [
   { key: 'settled_at', label: 'Data Quitação', visible: false, sortable: true }
 ]
 
-export function FinancialListingTab() {
+export function FinancialListingTab({ onEntriesSelected }: { onEntriesSelected?: (entryIds: string[]) => void }) {
   const { entries, loading: entriesLoading, loadEntries } = useFinancialEntries()
   const organization = useOrganization()
   const { toast } = useToast()
@@ -271,6 +271,21 @@ export function FinancialListingTab() {
     setSelectedEntries([])
   }
 
+  const handleSelectEntry = (entryId: string, isSelected: boolean) => {
+    setSelectedEntries(prev => {
+      const updated = isSelected 
+        ? [...prev, entryId]
+        : prev.filter(id => id !== entryId)
+      
+      // Notify parent component about selection change
+      if (onEntriesSelected) {
+        onEntriesSelected(updated)
+      }
+      
+      return updated
+    })
+  }
+
   const handleEdit = (entry: any) => {
     const event = new CustomEvent('switch-to-dados-tab', { 
       detail: { entry } 
@@ -404,7 +419,12 @@ export function FinancialListingTab() {
               onEdit={handleEdit}
               onDelete={handleDelete}
               selectedEntries={selectedEntries}
-              onSelectionChange={setSelectedEntries}
+              onSelectionChange={(ids) => {
+                setSelectedEntries(ids)
+                if (onEntriesSelected) {
+                  onEntriesSelected(ids)
+                }
+              }}
             />
           </CardContent>
         </Card>

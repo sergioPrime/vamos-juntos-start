@@ -123,7 +123,7 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
         .from("payment_methods")
         .select("id, name")
         .eq("org_id", organization.currentOrg.id)
-        .eq("is_active", true)
+        .eq("active", true)
 
       if (methodsResponse.error) throw methodsResponse.error
       setPaymentMethods(methodsResponse.data || [])

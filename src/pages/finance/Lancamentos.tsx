@@ -1047,16 +1047,6 @@ export default function Lancamentos() {
           <FinancialListingTab 
             onEntriesSelected={(entryIds) => {
               setSelectedEntriesForPayment(entryIds)
-              if (entryIds.length > 0) {
-                if (entryIds.length > 1) {
-                  toast({
-                    title: "Atenção",
-                    description: "Apenas o primeiro lançamento selecionado será usado na aba Pagamentos",
-                    variant: "default",
-                  })
-                }
-                setActiveTab("pagamentos")
-              }
             }}
           />
         </TabsContent>

@@ -4,7 +4,7 @@ import './index.css'
 import { ThemeProvider } from './hooks/useTheme'
 
 createRoot(document.getElementById("root")!).render(
-  <ThemeProvider defaultTheme="light" storageKey="vamos-juntos-theme">
+  <ThemeProvider defaultTheme="dark" storageKey="vamos-juntos-theme">
     <App />
   </ThemeProvider>
 );

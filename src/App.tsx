@@ -77,7 +77,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="light" storageKey="vamos-juntos-theme">
+    <ThemeProvider defaultTheme="dark" storageKey="vamos-juntos-theme">
       <AuthProvider>
         <OrganizationProvider>
           <SubscriptionProvider>

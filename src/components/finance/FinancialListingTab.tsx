@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { FinancialFilters } from "./FinancialFilters"
 import { FinancialSummaryHeader } from "./FinancialSummaryHeader"
 import { FinancialTable } from "./FinancialTable"
+import { FinancialActionsBar } from "./FinancialActionsBar"
 import { ColumnManager, ColumnConfig } from "./ColumnManager"
 import { LoadingWrapper } from "@/components/animations/LoadingWrapper"
 import { PageTransition } from "@/components/layout/PageTransition"
@@ -324,6 +325,71 @@ export function FinancialListingTab({ onEntriesSelected }: { onEntriesSelected?:
     })
   }
 
+  const handleBulkDelete = async (entryIds: string[]) => {
+    try {
+      const { error } = await supabase
+        .from('financial_entries')
+        .delete()
+        .in('id', entryIds);
+
+      if (error) throw error;
+
+      toast({
+        title: "Lançamentos Excluídos",
+        description: `${entryIds.length} lançamento(s) excluído(s) com sucesso`,
+      })
+      loadEntries()
+    } catch (error) {
+      console.error('Error deleting entries:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir lançamentos",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleBulkSettle = async (entryIds: string[]) => {
+    try {
+      const { error } = await supabase
+        .from('financial_entries')
+        .update({
+          is_settled: true,
+          settled_at: new Date().toISOString(),
+        })
+        .in('id', entryIds);
+
+      if (error) throw error;
+
+      toast({
+        title: "Lançamentos Quitados",
+        description: `${entryIds.length} lançamento(s) quitado(s) com sucesso`,
+      })
+      loadEntries()
+    } catch (error) {
+      console.error('Error settling entries:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao quitar lançamentos",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleGenerateBoleto = (entryIds: string[]) => {
+    toast({
+      title: "Gerar Boleto",
+      description: "Funcionalidade de geração de boleto será implementada",
+    })
+  }
+
+  const handleGenerateCarne = (entryIds: string[]) => {
+    toast({
+      title: "Gerar Carnê",
+      description: "Funcionalidade de geração de carnê será implementada",
+    })
+  }
+
   const isLoading = entriesLoading || filtersLoading
 
   return (
@@ -365,6 +431,18 @@ export function FinancialListingTab({ onEntriesSelected }: { onEntriesSelected?:
         <LoadingWrapper loading={isLoading} type="card">
           <FinancialSummaryHeader entries={filteredEntries} />
         </LoadingWrapper>
+
+        {/* Barra de Ações Rápidas */}
+        <FinancialActionsBar
+          selectedEntries={selectedEntries}
+          entries={filteredEntries}
+          onClearSelection={() => setSelectedEntries([])}
+          onEdit={handleEdit}
+          onDelete={handleBulkDelete}
+          onSettle={handleBulkSettle}
+          onGenerateBoleto={handleGenerateBoleto}
+          onGenerateCarne={handleGenerateCarne}
+        />
 
         {/* Table Section */}
         <Card>

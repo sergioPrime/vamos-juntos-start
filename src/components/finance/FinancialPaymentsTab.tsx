@@ -18,7 +18,6 @@ import { Switch } from "@/components/ui/switch"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Badge } from "@/components/ui/badge"
-import { WhatsAppButton } from "@/components/erp/WhatsAppButton"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -97,7 +96,6 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
 
   useEffect(() => {
     if (quitarLancamento && entryData) {
-      // Pre-fill form with entry amount when switch is turned on
       const valorFormatado = formatCurrencyInput((entryData.amount * 100).toString())
       setValorDisplay(valorFormatado)
       form.setValue("valor", entryData.amount.toString())
@@ -110,35 +108,35 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
     try {
       setLoading(true)
 
-      // Load entry data
-      const { data: entryData, error: entryError } = await supabase
+      // @ts-ignore - Avoiding deep type instantiation error
+      const entryResponse: any = await supabase
         .from("financial_entries")
         .select("*")
         .eq("id", selectedEntryId)
-        .single()
+        .maybeSingle()
 
-      if (entryError) throw entryError
-      setEntryData(entryData)
+      if (entryResponse.error) throw entryResponse.error
+      setEntryData(entryResponse.data)
 
-      // Load payment methods
-      const { data: pmData, error: pmError } = await supabase
+      // @ts-ignore - Avoiding deep type instantiation error
+      const methodsResponse: any = await supabase
         .from("payment_methods")
         .select("id, name")
         .eq("org_id", organization.currentOrg.id)
         .eq("is_active", true)
 
-      if (pmError) throw pmError
-      setPaymentMethods(pmData || [])
+      if (methodsResponse.error) throw methodsResponse.error
+      setPaymentMethods(methodsResponse.data || [])
 
-      // Load bank accounts
-      const { data: baData, error: baError } = await supabase
+      // @ts-ignore - Avoiding deep type instantiation error
+      const accountsResponse: any = await supabase
         .from("bank_accounts")
         .select("id, bank_name, account_number")
         .eq("org_id", organization.currentOrg.id)
         .eq("is_active", true)
 
-      if (baError) throw baError
-      setBankAccounts(baData || [])
+      if (accountsResponse.error) throw accountsResponse.error
+      setBankAccounts(accountsResponse.data || [])
 
     } catch (error) {
       console.error("Error loading data:", error)
@@ -156,51 +154,53 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
     if (!selectedEntryId) return
 
     try {
-      const response = await supabase
+      // @ts-ignore - Avoiding deep type instantiation error
+      const paymentsResponse: any = await supabase
         .from("financial_entry_payments")
         .select("*")
         .eq("entry_id", selectedEntryId)
         .order("data_pagamento", { ascending: false })
 
-      if (response.error) throw response.error
+      if (paymentsResponse.error) throw paymentsResponse.error
 
-      // Load related data separately
-      const paymentsWithData = await Promise.all((response.data || []).map(async (payment) => {
+      const paymentsWithData = await Promise.all((paymentsResponse.data || []).map(async (payment: any) => {
         let paymentMethodName
         let bankAccountName
 
         if (payment.payment_method_id) {
-          const pmRes = await supabase
+          // @ts-ignore - Avoiding deep type instantiation error
+          const pmResponse: any = await supabase
             .from("payment_methods")
             .select("name")
             .eq("id", payment.payment_method_id)
-            .single()
-          paymentMethodName = pmRes.data?.name
+            .maybeSingle()
+          paymentMethodName = pmResponse.data?.name
         }
 
         if (payment.bank_account_id) {
-          const baRes = await supabase
+          // @ts-ignore - Avoiding deep type instantiation error
+          const baResponse: any = await supabase
             .from("bank_accounts")
             .select("bank_name, account_number")
             .eq("id", payment.bank_account_id)
-            .single()
-          bankAccountName = baRes.data ? `${baRes.data.bank_name} - ${baRes.data.account_number}` : undefined
+            .maybeSingle()
+          bankAccountName = baResponse.data ? `${baResponse.data.bank_name} - ${baResponse.data.account_number}` : undefined
         }
 
         return { ...payment, paymentMethodName, bankAccountName }
       }))
 
-      const formattedPayments = paymentsWithData.map((payment) => ({
+      const formattedPayments = paymentsWithData.map((payment: any) => ({
         id: payment.id,
         valor: payment.valor || 0,
         multa: payment.multa || 0,
         juros: payment.juros || 0,
         data_pagamento: payment.data_pagamento,
-        payment_method_id: payment.payment_method_id || undefined,
+        payment_method_id: payment.payment_method_id,
         payment_method_name: payment.paymentMethodName,
-        bank_account_id: payment.bank_account_id || undefined,
+        bank_account_id: payment.bank_account_id,
         bank_account_name: payment.bankAccountName,
-        documento: payment.documento || undefined,
+        documento: payment.documento,
         total: (payment.valor || 0) + (payment.multa || 0) + (payment.juros || 0),
         is_conciliated: payment.is_conciliated || false,
       }))
@@ -266,7 +266,7 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
     if (!organization?.currentOrg?.id || !selectedEntryId) return
 
     try {
-      const { data: userData } = await supabase.auth.getUser()
+      const { data: { user } } = await supabase.auth.getUser()
       
       const paymentData = {
         entry_id: selectedEntryId,
@@ -279,7 +279,7 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
         bank_account_id: values.bank_account_id || null,
         documento: values.documento || null,
         is_conciliated: false,
-        created_by: userData.user?.id,
+        created_by: user?.id,
       }
 
       if (editingPayment) {
@@ -307,10 +307,8 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
         })
       }
 
-      // Check if entry is fully paid and update status
       await checkAndUpdateEntryStatus()
 
-      // Reset form
       form.reset({
         valor: "",
         multa: "0",
@@ -339,19 +337,18 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
     if (!selectedEntryId || !entryData) return
 
     try {
-      // Get all payments for this entry
-      const response = await supabase
+      // @ts-ignore - Avoiding deep type instantiation error
+      const paymentsResponse: any = await supabase
         .from("financial_entry_payments")
         .select("valor, multa, juros")
         .eq("entry_id", selectedEntryId)
 
-      if (response.error) throw response.error
+      if (paymentsResponse.error) throw paymentsResponse.error
 
-      const totalPaid = (response.data || []).reduce((sum: number, payment) => {
+      const totalPaid = (paymentsResponse.data || []).reduce((sum: number, payment: any) => {
         return sum + (payment.valor || 0) + (payment.multa || 0) + (payment.juros || 0)
       }, 0)
 
-      // If total paid >= entry amount, mark as settled
       if (totalPaid >= entryData.amount) {
         await supabase
           .from("financial_entries")
@@ -421,7 +418,6 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
   }
 
   const handlePrint = (payment: Payment) => {
-    // Implement print functionality
     toast({
       title: "Imprimir",
       description: "Funcionalidade de impressão em desenvolvimento",
@@ -463,7 +459,6 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Switch para Quitar Lançamento */}
           <div className="flex items-center space-x-3">
             <Switch
               checked={quitarLancamento}
@@ -478,12 +473,10 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
             </label>
           </div>
 
-          {/* Formulário de Quitação */}
           {quitarLancamento && (
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {/* Valor */}
                   <FormField
                     control={form.control}
                     name="valor"
@@ -502,7 +495,6 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
                     )}
                   />
 
-                  {/* Multa */}
                   <FormField
                     control={form.control}
                     name="multa"
@@ -521,7 +513,6 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
                     )}
                   />
 
-                  {/* Juros */}
                   <FormField
                     control={form.control}
                     name="juros"
@@ -540,7 +531,6 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
                     )}
                   />
 
-                  {/* Data */}
                   <FormField
                     control={form.control}
                     name="data_pagamento"
@@ -583,7 +573,6 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {/* Forma de Pagamento */}
                   <FormField
                     control={form.control}
                     name="payment_method_id"
@@ -609,7 +598,6 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
                     )}
                   />
 
-                  {/* Conta Bancária */}
                   <FormField
                     control={form.control}
                     name="bank_account_id"
@@ -635,7 +623,6 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
                     )}
                   />
 
-                  {/* Documento */}
                   <FormField
                     control={form.control}
                     name="documento"
@@ -677,7 +664,6 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
         </CardContent>
       </Card>
 
-      {/* Listagem de Pagamentos */}
       <Card>
         <CardHeader>
           <CardTitle>Pagamentos Relacionados ao Lançamento</CardTitle>
@@ -763,7 +749,6 @@ export function FinancialPaymentsTab({ selectedEntryId }: FinancialPaymentsTabPr
         </CardContent>
       </Card>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

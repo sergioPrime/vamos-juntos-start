@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { RefreshCcw, Download, Search, Filter } from "lucide-react"
+import { RefreshCcw, Download, Search, Filter, ChevronLeft, ChevronRight } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { useOrganization } from "@/hooks/useOrganization"
 import { useToast } from "@/hooks/use-toast"
@@ -63,6 +63,11 @@ export default function Boletos() {
   const [searchTerm, setSearchTerm] = useState("")
   const [columns, setColumns] = useState<ColumnConfig[]>(defaultColumns)
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  
+  // ✅ Paginação
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize] = useState(20)
+  const [totalPages, setTotalPages] = useState(1)
 
   useEffect(() => {
     if (organization?.currentOrg?.id) {
@@ -76,17 +81,25 @@ export default function Boletos() {
     try {
       setLoading(true)
       
-      // Load financial entries that are receivables (boletos)
-      const { data, error } = await supabase
+      // ✅ Busca com paginação
+      const from = (currentPage - 1) * pageSize
+      const to = from + pageSize - 1
+      
+      const { data, error, count } = await supabase
         .from("financial_entries")
-        .select("*")
+        .select("*", { count: 'exact' })
         .eq("org_id", organization.currentOrg.id)
         .eq("entry_type", "receivable")
         .order("due_date", { ascending: false })
+        .range(from, to)
 
       if (error) throw error
 
       setEntries((data || []) as any)
+      
+      // Calcular total de páginas
+      const total = count || 0
+      setTotalPages(Math.ceil(total / pageSize))
     } catch (error) {
       console.error("Error loading boletos:", error)
       toast({
@@ -292,6 +305,35 @@ export default function Boletos() {
             onDelete={(entryId) => handleDelete([entryId])}
             loading={loading}
           />
+          
+          {/* ✅ Paginação */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t">
+              <div className="text-sm text-muted-foreground">
+                Página {currentPage} de {totalPages}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Anterior
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Próxima
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

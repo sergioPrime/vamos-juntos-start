@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { useOrganization } from "./useOrganization"
+import { useAuth } from "./useAuth"
 import { useToast } from "@/hooks/use-toast"
+import { validateCreateEntry } from "@/schemas/financialEntries"
+import { z } from "zod"
 
 export interface FinancialEntry {
   id: string
@@ -70,6 +73,7 @@ export interface CreateFinancialEntryDataRequired {
 
 export function useFinancialEntries() {
   const organization = useOrganization()
+  const { user } = useAuth()
   const { toast } = useToast()
   const [entries, setEntries] = useState<FinancialEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -85,8 +89,6 @@ export function useFinancialEntries() {
 
     try {
       setLoading(true)
-      
-      console.log("Loading financial entries for org:", organization.currentOrg.id)
       
       // Primeira query: buscar lançamentos sem joins problemáticos
       const { data, error } = await supabase
@@ -177,7 +179,6 @@ export function useFinancialEntries() {
         }
       })
 
-      console.log("Loaded and enriched financial entries:", enrichedData)
       setEntries(enrichedData as any)
     } catch (error) {
       console.error("Error loading financial entries:", error)
@@ -193,6 +194,15 @@ export function useFinancialEntries() {
 
   const createEntry = async (data: CreateFinancialEntryDataRequired): Promise<boolean> => {
     if (!organization?.currentOrg?.id) return false
+
+    if (!user?.id) {
+      toast({
+        title: "Erro",
+        description: "Usuário não autenticado",
+        variant: "destructive",
+      })
+      return false
+    }
 
     // Validate required fields
     if (!data.chart_of_account_id) {
@@ -214,17 +224,33 @@ export function useFinancialEntries() {
     }
 
     try {
-      const entryData = {
-        ...data,
+      // Prepare data for validation
+      const dataToValidate = {
         org_id: organization.currentOrg.id,
-        person_type: data.entry_type === "receivable" ? "customer" : "supplier",
+        company_id: data.company_id,
+        person_id: data.person_id,
+        person_type: data.entry_type === "receivable" ? ("customer" as const) : ("supplier" as const),
+        entry_type: data.entry_type,
+        chart_of_account_id: data.chart_of_account_id,
+        cost_center_id: data.cost_center_id,
+        amount: data.amount,
         competence_date: data.competence_date || data.due_date,
-        created_by: organization.currentOrg.id, // TODO: Replace with actual user ID
+        due_date: data.due_date,
+        description: data.description,
+        origin_type: data.origin_type,
+        origin_id: data.origin_id,
+        payment_method_id: data.payment_method_id,
+        bank_account_id: data.bank_account_id,
+        created_by: user.id,
+        is_settled: false,
       }
+
+      // Validate data using Zod schema
+      const validatedData = validateCreateEntry(dataToValidate)
 
       const { error } = await supabase
         .from("financial_entries")
-        .insert([entryData])
+        .insert([validatedData as any])
 
       if (error) throw error
 
@@ -235,12 +261,19 @@ export function useFinancialEntries() {
       })
       return true
     } catch (error) {
-      console.error("Error creating financial entry:", error)
-      toast({
-        title: "Erro",
-        description: "Erro ao criar lançamento financeiro",
-        variant: "destructive",
-      })
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Dados inválidos",
+          description: error.errors[0].message,
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "Erro",
+          description: "Erro ao criar lançamento financeiro",
+          variant: "destructive",
+        })
+      }
       return false
     }
   }

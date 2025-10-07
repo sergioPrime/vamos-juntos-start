@@ -1,6 +1,17 @@
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
+// Sanitize HTML to prevent XSS attacks
+function sanitizeHTML(value: any): string {
+  if (value === null || value === undefined) return ''
+  if (typeof value === 'number') return value.toString()
+  
+  const str = String(value)
+  const div = document.createElement('div')
+  div.textContent = str
+  return div.innerHTML
+}
+
 interface ExportData {
   headers: string[]
   rows: any[][]
@@ -71,7 +82,7 @@ export async function exportToExcel(data: ExportData): Promise<void> {
                   if (typeof cell === 'number') {
                     return `<td class="currency">${cell.toLocaleString('pt-BR', { minimumFractionDigits: 2, style: 'currency', currency: 'BRL' })}</td>`
                   }
-                  return `<td>${cell || ''}</td>`
+                  return `<td>${sanitizeHTML(cell)}</td>`
                 }).join('')}
               </tr>
             `).join('')}
@@ -172,7 +183,7 @@ export async function exportToPDF(data: ExportData): Promise<void> {
                   if (typeof cell === 'number') {
                     return `<td class="currency">${cell.toLocaleString('pt-BR', { minimumFractionDigits: 2, style: 'currency', currency: 'BRL' })}</td>`
                   }
-                  return `<td>${cell || ''}</td>`
+                  return `<td>${sanitizeHTML(cell)}</td>`
                 }).join('')}
               </tr>
             `).join('')}

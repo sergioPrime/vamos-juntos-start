@@ -72,7 +72,11 @@ export function useBankIntegration() {
 
       setIntegrations(configs)
     } catch (error) {
-      console.error('Erro ao carregar integrações:', error)
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar integrações bancárias",
+        variant: "destructive",
+      })
     } finally {
       setLoading(false)
     }

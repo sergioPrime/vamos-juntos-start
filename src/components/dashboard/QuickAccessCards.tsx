@@ -109,7 +109,7 @@ export function QuickAccessCards() {
       title: "Renovar Licença",
       description: "Gerenciar assinatura",
       icon: <CreditCard className="h-6 w-6" />,
-      route: "/renovar-licenca",
+      route: "/settings/renovar-licenca",
       color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
     }
   ]

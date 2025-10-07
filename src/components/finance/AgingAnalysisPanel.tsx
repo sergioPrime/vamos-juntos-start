@@ -112,21 +112,27 @@ export function AgingAnalysisPanel() {
             </div>
 
             {/* Gráfico de barras */}
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="range" tick={{ fontSize: 12 }} />
-                  <YAxis tickFormatter={(value) => formatCurrency(value)} tick={{ fontSize: 12 }} />
-                  <ChartTooltip content={<ChartTooltipContent />} formatter={(value: any) => formatCurrency(Number(value))} />
-                  <Bar dataKey="amount" name="Valor" radius={[8, 8, 0, 0]}>
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={getColorByRange(entry.range)} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <ChartContainer
+              config={{
+                amount: {
+                  label: "Valor",
+                  color: "hsl(var(--primary))",
+                },
+              }}
+              className="h-64"
+            >
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="range" tick={{ fontSize: 12 }} />
+                <YAxis tickFormatter={(value) => formatCurrency(value)} tick={{ fontSize: 12 }} />
+                <ChartTooltip content={<ChartTooltipContent formatter={(value: any) => formatCurrency(Number(value))} />} />
+                <Bar dataKey="amount" name="Valor" radius={[8, 8, 0, 0]}>
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={getColorByRange(entry.range)} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ChartContainer>
 
             {/* Tabela detalhada */}
             <div>

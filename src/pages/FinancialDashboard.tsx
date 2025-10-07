@@ -13,6 +13,10 @@ import { supabase } from "@/integrations/supabase/client"
 import { useOrganization } from "@/hooks/useOrganization"
 import { formatCurrency, useCountUp } from "@/hooks/useCountUp"
 import { useFinancialData } from "@/hooks/useFinancialData"
+import { BankReconciliation } from "@/components/finance/BankReconciliation"
+import { CashFlowProjectionChart } from "@/components/finance/CashFlowProjectionChart"
+import { FinancialAlertsPanel } from "@/components/finance/FinancialAlertsPanel"
+import { exportToCSV, exportToExcel, exportToPDF } from "@/utils/financialExport"
 
 export default function FinancialDashboard() {
   const navigate = useNavigate()
@@ -89,11 +93,43 @@ export default function FinancialDashboard() {
     }
   }
 
-  const exportDashboard = (format: 'csv' | 'pdf') => {
-    toast({
-      title: "Exportação",
-      description: `Dashboard exportado em ${format.toUpperCase()}`,
-    })
+  const exportDashboard = async (format: 'csv' | 'excel' | 'pdf') => {
+    const exportData = {
+      title: 'Dashboard Financeiro',
+      subtitle: `Período: Últimos ${selectedPeriod} dias - Gerado em ${new Date().toLocaleString('pt-BR')}`,
+      headers: ['Métrica', 'Valor'],
+      rows: [
+        ['Saldo Total', metrics.totalBalance],
+        ['Receita Mensal', metrics.monthlyRevenue],
+        ['Despesas Mensais', metrics.monthlyExpenses],
+        ['A Receber', metrics.pendingReceivables],
+        ['Em Atraso', metrics.overdueAmount],
+        ['Total de Clientes', metrics.totalCustomers],
+        ['Total de Faturas', metrics.totalInvoices],
+        ['Total de Produtos', metrics.totalProducts]
+      ]
+    }
+
+    try {
+      if (format === 'csv') {
+        await exportToCSV(exportData)
+      } else if (format === 'excel') {
+        await exportToExcel(exportData)
+      } else {
+        await exportToPDF(exportData)
+      }
+      
+      toast({
+        title: "Sucesso",
+        description: `Dashboard exportado em ${format.toUpperCase()}`,
+      })
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao exportar dashboard",
+        variant: "destructive"
+      })
+    }
   }
 
   const chartConfig = {
@@ -191,6 +227,11 @@ export default function FinancialDashboard() {
             CSV
           </Button>
           
+          <Button onClick={() => exportDashboard('excel')} variant="outline">
+            <Download className="h-4 w-4 mr-2" />
+            Excel
+          </Button>
+          
           <Button onClick={() => exportDashboard('pdf')} variant="outline">
             <Download className="h-4 w-4 mr-2" />
             PDF
@@ -245,9 +286,9 @@ export default function FinancialDashboard() {
         <TabsList>
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="cashflow">Fluxo de Caixa</TabsTrigger>
-          <TabsTrigger value="categories">Por Categoria</TabsTrigger>
-          <TabsTrigger value="comparison">Comparativo</TabsTrigger>
-          <TabsTrigger value="projection">Projeções</TabsTrigger>
+          <TabsTrigger value="projection">Projeção</TabsTrigger>
+          <TabsTrigger value="reconciliation">Conciliação</TabsTrigger>
+          <TabsTrigger value="alerts">Alertas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -358,61 +399,16 @@ export default function FinancialDashboard() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="comparison" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Dados Históricos</CardTitle>
-              <CardDescription>Informações baseadas em dados reais do sistema</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">
-                  Os dados históricos serão exibidos conforme mais transações forem registradas no sistema.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="projection" className="space-y-4">
+          <CashFlowProjectionChart daysAhead={90} />
         </TabsContent>
 
-        <TabsContent value="projection" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informações Financeiras</CardTitle>
-              <CardDescription>Dados reais baseados nas informações do sistema</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="text-center p-4 border rounded-lg">
-                  <div className="text-2xl font-bold text-primary">
-                    {formatCurrency(metrics.totalBalance)}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Saldo Total</div>
-                </div>
-                <div className="text-center p-4 border rounded-lg">
-                  <div className="text-2xl font-bold text-primary">
-                    {formatCurrency(metrics.monthlyRevenue)}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Receita Mensal</div>
-                </div>
-                <div className="text-center p-4 border rounded-lg">
-                  <div className="text-2xl font-bold text-primary">
-                    {formatCurrency(metrics.pendingReceivables)}
-                  </div>
-                  <div className="text-sm text-muted-foreground">A Receber</div>
-                </div>
-              </div>
-              
-              <div className="mt-6 p-4 bg-muted/30 rounded-lg">
-                <h4 className="font-semibold mb-2">Resumo Financeiro</h4>
-                <ul className="space-y-1 text-sm text-muted-foreground">
-                  <li>• Total de clientes: {metrics.totalCustomers}</li>
-                  <li>• Total de faturas: {metrics.totalInvoices}</li>
-                  <li>• Total de produtos: {metrics.totalProducts}</li>
-                  <li>• Valores em atraso: {formatCurrency(metrics.overdueAmount)}</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="reconciliation" className="space-y-4">
+          <BankReconciliation />
+        </TabsContent>
+
+        <TabsContent value="alerts" className="space-y-4">
+          <FinancialAlertsPanel />
         </TabsContent>
       </Tabs>
     </div>

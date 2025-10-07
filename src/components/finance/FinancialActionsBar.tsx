@@ -1,5 +1,7 @@
 import { BookOpen, FileText, CheckCircle, Edit, Trash2, X, MoreHorizontal, DollarSign, Users, Download, Printer } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { exportToCSV, exportToExcel, exportToPDF } from "@/utils/financialExport"
+import { useToast } from "@/hooks/use-toast"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,6 +45,39 @@ export function FinancialActionsBar({
 }: FinancialActionsBarProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showSettleDialog, setShowSettleDialog] = useState(false)
+  const { toast } = useToast()
+
+  const handleExport = async (format: 'csv' | 'excel' | 'pdf') => {
+    const exportData = {
+      title: 'Lançamentos Financeiros',
+      subtitle: `${selectedEntries.length} lançamento(s) selecionado(s)`,
+      headers: ['Descrição', 'Tipo', 'Valor', 'Vencimento', 'Status'],
+      rows: selectedEntriesData.map(entry => [
+        entry.description || 'Sem descrição',
+        entry.entry_type === 'receivable' ? 'A Receber' : 'A Pagar',
+        Number(entry.amount),
+        new Date(entry.due_date).toLocaleDateString('pt-BR'),
+        entry.is_settled ? 'Liquidado' : 'Pendente'
+      ])
+    }
+
+    try {
+      if (format === 'csv') await exportToCSV(exportData)
+      else if (format === 'excel') await exportToExcel(exportData)
+      else await exportToPDF(exportData)
+      
+      toast({
+        title: 'Sucesso',
+        description: `${selectedEntries.length} lançamento(s) exportado(s) em ${format.toUpperCase()}`
+      })
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Erro ao exportar lançamentos',
+        variant: 'destructive'
+      })
+    }
+  }
 
   if (selectedEntries.length === 0) return null
 
@@ -172,13 +207,13 @@ export function FinancialActionsBar({
                     <DropdownMenuSeparator />
                   </>
                 )}
-                <DropdownMenuItem className="gap-2">
+                <DropdownMenuItem onClick={() => handleExport('excel')} className="gap-2">
                   <Download className="h-4 w-4" />
-                  Exportar Selecionados
+                  Exportar Excel
                 </DropdownMenuItem>
-                <DropdownMenuItem className="gap-2">
+                <DropdownMenuItem onClick={() => handleExport('pdf')} className="gap-2">
                   <Printer className="h-4 w-4" />
-                  Imprimir Comprovantes
+                  Exportar PDF
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

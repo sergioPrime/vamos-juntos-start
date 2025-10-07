@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { Search, Plus, Minus, ShoppingCart, CreditCard } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
 import PDVHeader from "@/components/pdv/PDVHeader"
 import { usePermissionGuard } from "@/hooks/usePermissionGuard"
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 
 interface Product {
   id: string
@@ -59,6 +60,9 @@ const PDV = () => {
   const [selectedCompany, setSelectedCompany] = useState("")
   const [selectedTerminal, setSelectedTerminal] = useState("pdv01")
   const [selectedPriceTable, setSelectedPriceTable] = useState("")
+  
+  // Ref for search input
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     console.log('PDV useEffect - currentOrg:', currentOrg, 'orgLoading:', orgLoading)
@@ -253,6 +257,41 @@ const PDV = () => {
 
   const cartTotal = cart.reduce((sum, item) => sum + item.total, 0)
   const cartQuantity = cart.reduce((sum, item) => sum + item.quantity, 0)
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    {
+      key: 'f1',
+      action: () => searchInputRef.current?.focus(),
+      description: 'Consultar Produtos'
+    },
+    {
+      key: 'f2',
+      action: () => {
+        setSearchTerm("")
+        searchInputRef.current?.focus()
+      },
+      description: 'Nova Busca'
+    },
+    {
+      key: 'f8',
+      action: () => {
+        if (cart.length > 0) {
+          setIsPaymentDialogOpen(true)
+        }
+      },
+      description: 'Finalizar Venda'
+    },
+    {
+      key: 'escape',
+      action: () => {
+        setSearchTerm("")
+        setIsPaymentDialogOpen(false)
+      },
+      description: 'Cancelar/Limpar',
+      preventDefault: false
+    }
+  ])
 
   const processSale = async () => {
     if (cart.length === 0) {
@@ -456,6 +495,7 @@ const PDV = () => {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
+                ref={searchInputRef}
                 placeholder="Buscar Produto..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -686,6 +726,34 @@ const PDV = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
+      </div>
+      
+      {/* Keyboard Shortcuts Footer */}
+      <div className="fixed bottom-0 left-0 right-0 bg-muted/80 backdrop-blur-sm border-t border-border">
+        <div className="container mx-auto px-6 py-2">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-background border border-border rounded font-mono font-semibold">F1</kbd>
+              <span>Consultar Produtos</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-background border border-border rounded font-mono font-semibold">F2</kbd>
+              <span>Nova Busca</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-background border border-border rounded font-mono font-semibold">F8</kbd>
+              <span>Finalizar Venda</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-background border border-border rounded font-mono font-semibold">ESC</kbd>
+              <span>Cancelar/Limpar</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-background border border-border rounded font-mono font-semibold">Enter</kbd>
+              <span>Adicionar Produto</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

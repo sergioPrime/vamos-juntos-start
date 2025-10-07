@@ -16,6 +16,9 @@ import { useFinancialData } from "@/hooks/useFinancialData"
 import { BankReconciliation } from "@/components/finance/BankReconciliation"
 import { CashFlowProjectionChart } from "@/components/finance/CashFlowProjectionChart"
 import { FinancialAlertsPanel } from "@/components/finance/FinancialAlertsPanel"
+import { AgingAnalysisPanel } from "@/components/finance/AgingAnalysisPanel"
+import { ExecutiveDashboard } from "@/components/finance/ExecutiveDashboard"
+import { FinancialAuditLog } from "@/components/finance/FinancialAuditLog"
 import { exportToCSV, exportToExcel, exportToPDF } from "@/utils/financialExport"
 
 export default function FinancialDashboard() {
@@ -282,14 +285,21 @@ export default function FinancialDashboard() {
       </div>
 
       {/* Charts */}
-      <Tabs defaultValue="overview" className="space-y-4">
+      <Tabs defaultValue="executive" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="executive">Dashboard Executivo</TabsTrigger>
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="cashflow">Fluxo de Caixa</TabsTrigger>
           <TabsTrigger value="projection">Projeção</TabsTrigger>
+          <TabsTrigger value="aging">Aging</TabsTrigger>
           <TabsTrigger value="reconciliation">Conciliação</TabsTrigger>
           <TabsTrigger value="alerts">Alertas</TabsTrigger>
+          <TabsTrigger value="audit">Auditoria</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="executive" className="space-y-4">
+          <ExecutiveDashboard />
+        </TabsContent>
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
@@ -403,12 +413,20 @@ export default function FinancialDashboard() {
           <CashFlowProjectionChart daysAhead={90} />
         </TabsContent>
 
+        <TabsContent value="aging" className="space-y-4">
+          <AgingAnalysisPanel />
+        </TabsContent>
+
         <TabsContent value="reconciliation" className="space-y-4">
           <BankReconciliation />
         </TabsContent>
 
         <TabsContent value="alerts" className="space-y-4">
           <FinancialAlertsPanel />
+        </TabsContent>
+
+        <TabsContent value="audit" className="space-y-4">
+          <FinancialAuditLog />
         </TabsContent>
       </Tabs>
     </div>

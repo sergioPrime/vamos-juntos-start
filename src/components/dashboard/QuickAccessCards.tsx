@@ -81,7 +81,7 @@ export function QuickAccessCards() {
       title: "Pessoas",
       description: "Clientes e fornecedores",
       icon: <Users className="h-6 w-6" />,
-      route: "/pessoas",
+      route: "/cadastros/pessoas",
       color: "bg-pink-500/10 text-pink-600 dark:text-pink-400"
     },
     {

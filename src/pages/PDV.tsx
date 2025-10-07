@@ -60,6 +60,12 @@ interface PaymentMethod {
   type: string
 }
 
+interface PaymentSplit {
+  id: string
+  paymentMethodId: string
+  amount: number
+}
+
 const PDV = () => {
   usePermissionGuard('vendas', 'read')
   const { user } = useAuth()
@@ -310,10 +316,12 @@ const PDV = () => {
       : item.discount
     return sum + itemDiscount
   }, 0)
+  const subtotalBeforeDiscounts = cartSubtotal
   const globalDiscountAmount = globalDiscountType === 'percentage'
     ? (cartSubtotal - cartItemsDiscount) * globalDiscount / 100
     : globalDiscount
   const cartTotal = cartSubtotal - cartItemsDiscount - globalDiscountAmount
+  const finalTotal = cartTotal
   const cartQuantity = cart.reduce((sum, item) => sum + item.quantity, 0)
 
   // Suspended sales management
@@ -481,20 +489,11 @@ const PDV = () => {
     }
   ])
 
-  const processSale = async () => {
+  const processSale = async (payments: PaymentSplit[], receivedAmount: number) => {
     if (cart.length === 0) {
       toast({
         title: "Carrinho vazio",
         description: "Adicione produtos ao carrinho antes de finalizar a venda.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    if (!selectedPaymentMethod) {
-      toast({
-        title: "Forma de pagamento obrigatória",
-        description: "Selecione uma forma de pagamento.",
         variant: "destructive",
       })
       return
@@ -530,6 +529,14 @@ const PDV = () => {
       // Generate order number
       const orderNumber = `PDV-${Date.now()}`
       
+      // Create payment methods string
+      const paymentMethodsStr = payments
+        .map(p => {
+          const method = paymentMethods.find(pm => pm.id === p.paymentMethodId)
+          return `${method?.name}: ${p.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`
+        })
+        .join(', ')
+
       // Create order
       const { data: order, error: orderError } = await supabase
         .from('orders')
@@ -539,11 +546,12 @@ const PDV = () => {
           order_number: orderNumber,
           status: 'completed',
           order_type: 'sale',
-          subtotal: cartTotal,
-          total_amount: cartTotal,
+          subtotal: subtotalBeforeDiscounts,
+          total_amount: finalTotal,
           payment_status: 'paid',
-          payment_method: paymentMethods.find(pm => pm.id === selectedPaymentMethod)?.name,
-          completed_at: new Date().toISOString()
+          payment_method: paymentMethodsStr,
+          completed_at: new Date().toISOString(),
+          customer_id: selectedCustomer?.id
         })
         .select()
         .single()
@@ -589,7 +597,7 @@ const PDV = () => {
       await supabase
         .from('caixa_sessoes')
         .update({
-          valor_atual: caixaAberto.valor_atual + cartTotal
+          valor_atual: caixaAberto.valor_atual + finalTotal
         })
         .eq('id', caixaAberto.id)
 
@@ -600,7 +608,7 @@ const PDV = () => {
           org_id: currentOrg?.id,
           sessao_id: caixaAberto.id,
           tipo: 'venda',
-          valor: cartTotal,
+          valor: finalTotal,
           descricao: `Venda PDV - ${orderNumber}`,
           reference_id: order.id,
           reference_type: 'order',
@@ -952,8 +960,7 @@ const PDV = () => {
         totalAmount={cartTotal}
         paymentMethods={paymentMethods}
         onConfirm={(payments, receivedAmount) => {
-          // TODO: Implement payment processing with multiple methods
-          processSale()
+          processSale(payments, receivedAmount)
         }}
       />
 

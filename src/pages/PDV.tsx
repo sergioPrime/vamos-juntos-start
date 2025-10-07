@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, Plus, Minus, ShoppingCart, CreditCard } from "lucide-react"
+import { Search, Plus, Minus, ShoppingCart, CreditCard, X, Barcode, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,6 +15,7 @@ import { useOrganization } from "@/hooks/useOrganization"
 import PDVHeader from "@/components/pdv/PDVHeader"
 import { usePermissionGuard } from "@/hooks/usePermissionGuard"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
+import { cn } from "@/lib/utils"
 
 interface Product {
   id: string
@@ -54,6 +55,9 @@ const PDV = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("")
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [addingToCart, setAddingToCart] = useState<string | null>(null)
+  const [barcodeBuffer, setBarcodeBuffer] = useState("")
+  const [lastKeyTime, setLastKeyTime] = useState(0)
   
   // PDV Header states
   const [selectedSeller, setSelectedSeller] = useState(user?.id || "")
@@ -222,6 +226,16 @@ const PDV = () => {
     } else {
       setCart([...cart, { ...product, quantity: 1, total: product.unit_price }])
     }
+    
+    // Visual feedback
+    setAddingToCart(product.id)
+    setTimeout(() => setAddingToCart(null), 500)
+    
+    toast({
+      title: "✓ Produto adicionado",
+      description: product.name,
+      duration: 2000,
+    })
   }
 
   const updateQuantity = (productId: string, newQuantity: number) => {
@@ -257,6 +271,47 @@ const PDV = () => {
 
   const cartTotal = cart.reduce((sum, item) => sum + item.total, 0)
   const cartQuantity = cart.reduce((sum, item) => sum + item.quantity, 0)
+
+  // Barcode scanner detection
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      const currentTime = new Date().getTime()
+      
+      // Detect rapid typing (barcode scanner)
+      if (currentTime - lastKeyTime < 50) {
+        if (e.key === 'Enter') {
+          // Barcode complete
+          if (barcodeBuffer.length > 5) {
+            const product = products.find(p => 
+              p.barcode === barcodeBuffer || 
+              p.sku === barcodeBuffer
+            )
+            if (product) {
+              addToCart(product)
+              setSearchTerm("")
+            } else {
+              toast({
+                title: "Produto não encontrado",
+                description: `Código: ${barcodeBuffer}`,
+                variant: "destructive",
+              })
+            }
+          }
+          setBarcodeBuffer("")
+        } else if (e.key.length === 1) {
+          setBarcodeBuffer(prev => prev + e.key)
+        }
+      } else {
+        // Normal typing - reset buffer
+        setBarcodeBuffer(e.key.length === 1 ? e.key : "")
+      }
+      
+      setLastKeyTime(currentTime)
+    }
+    
+    document.addEventListener('keypress', handleKeyPress)
+    return () => document.removeEventListener('keypress', handleKeyPress)
+  }, [barcodeBuffer, lastKeyTime, products])
 
   // Keyboard shortcuts
   useKeyboardShortcuts([
@@ -493,13 +548,15 @@ const PDV = () => {
         <div className="flex-1 flex flex-col relative">
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+              <Barcode className="absolute right-3 top-3 h-5 w-5 text-primary animate-pulse" />
               <Input
                 ref={searchInputRef}
-                placeholder="Buscar Produto..."
+                placeholder="Buscar produto ou passe o código de barras..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 pr-10 h-12 text-base"
+                autoFocus
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && filteredProducts.length > 0) {
                     addToCart(filteredProducts[0])
@@ -511,124 +568,142 @@ const PDV = () => {
                 }}
               />
             </div>
-            <Button variant="outline" className="bg-green-600 text-white hover:bg-green-700">
-              Add. Item
-            </Button>
-            <Button variant="outline" className="bg-green-600 text-white hover:bg-green-700">
-              Buscar Orçamento
-            </Button>
           </div>
 
           {/* Product suggestions dropdown */}
           {searchTerm.length >= 2 && (
-            <div className="absolute top-16 left-0 right-0 z-50 bg-background border rounded-md shadow-lg max-h-80 overflow-auto">
+            <div className="absolute top-14 left-0 right-0 z-50 bg-background border-2 border-primary/20 rounded-lg shadow-2xl max-h-96 overflow-auto animate-fade-in">
               {filteredProducts.length > 0 ? (
                 <>
-                   <div className="bg-gray-100 dark:bg-gray-800 px-3 py-2 text-xs font-medium text-muted-foreground border-b">
-                     Produtos encontrados ({Math.min(filteredProducts.length, 20)})
+                   <div className="bg-primary/5 sticky top-0 px-4 py-3 text-sm font-semibold text-foreground border-b flex items-center justify-between">
+                     <span>Produtos encontrados</span>
+                     <Badge variant="secondary">{Math.min(filteredProducts.length, 20)}</Badge>
                    </div>
-                   {filteredProducts.map(product => (
+                   {filteredProducts.map((product, index) => (
                      <div
                        key={product.id}
-                       className="p-2 hover:bg-accent cursor-pointer border-b last:border-b-0 transition-colors"
+                       className={cn(
+                         "p-4 hover:bg-primary/10 cursor-pointer border-b last:border-b-0 transition-all duration-200",
+                         addingToCart === product.id && "bg-green-100 dark:bg-green-900/20 scale-[0.98]",
+                         index === 0 && "bg-accent/50"
+                       )}
                        onClick={() => {
                          addToCart(product)
                          setSearchTerm("")
                        }}
                      >
-                       <div className="flex items-center justify-between gap-2">
-                         <div className="flex items-center gap-2 flex-1 min-w-0">
-                           <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded">
-                             {product.sku || 'N/A'}
-                           </span>
-                           <span className="text-xs font-medium truncate">
-                             {product.name}
-                           </span>
+                       <div className="flex items-center justify-between gap-4">
+                         <div className="flex items-center gap-3 flex-1 min-w-0">
+                           <div className="flex flex-col gap-1">
+                             <div className="flex items-center gap-2">
+                               <Badge variant="outline" className="text-xs font-mono">
+                                 {product.sku || product.barcode || 'N/A'}
+                               </Badge>
+                               {index === 0 && (
+                                 <Badge className="text-xs bg-primary">Enter para adicionar</Badge>
+                               )}
+                             </div>
+                             <span className="text-sm font-semibold truncate">
+                               {product.name}
+                             </span>
+                           </div>
                          </div>
-                         <div className="flex items-center gap-2 text-xs">
-                           <span className="font-bold text-green-600">
-                             R$ {product.unit_price.toFixed(2)}
-                           </span>
-                           <span className="text-muted-foreground">
-                             Estoque: {product.stock_quantity}
-                           </span>
+                         <div className="flex items-center gap-4">
+                           <div className="text-right">
+                             <div className="text-lg font-bold text-primary">
+                               R$ {product.unit_price.toFixed(2)}
+                             </div>
+                             <div className="text-xs text-muted-foreground">
+                               Estoque: {product.stock_quantity} {product.unit}
+                             </div>
+                           </div>
+                           <Plus className="h-5 w-5 text-primary" />
                          </div>
                        </div>
                      </div>
                    ))}
                 </>
               ) : (
-                <div className="p-4 text-center text-muted-foreground">
-                  <div className="text-sm">Nenhum produto encontrado</div>
-                  <div className="text-xs mt-1">Tente buscar por código ou nome do produto</div>
+                <div className="p-8 text-center">
+                  <Search className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+                  <div className="text-sm font-medium text-muted-foreground">Nenhum produto encontrado</div>
+                  <div className="text-xs text-muted-foreground mt-1">Tente buscar por código, nome ou código de barras</div>
                 </div>
               )}
             </div>
           )}
 
           {/* Sales Table */}
-          <div className="flex-1 border rounded-lg overflow-hidden">
-            <div className="bg-gray-900 text-white">
-              <div className="grid grid-cols-12 gap-4 p-3 font-medium text-sm">
-                <div className="col-span-6">Nome do Produto</div>
+          <div className="flex-1 border-2 rounded-xl overflow-hidden shadow-lg">
+            <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
+              <div className="grid grid-cols-12 gap-4 p-4 font-semibold text-sm">
+                <div className="col-span-6">Produto</div>
                 <div className="col-span-2 text-center">Quantidade</div>
-                <div className="col-span-2 text-center">Valor Un. (R$)</div>
-                <div className="col-span-2 text-center">Valor Total (R$)</div>
+                <div className="col-span-2 text-center">Valor Un.</div>
+                <div className="col-span-2 text-center">Total</div>
               </div>
             </div>
             
-            <div className="bg-background overflow-auto max-h-96">
+            <div className="bg-background overflow-auto max-h-[400px]">
               {cart.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center p-8 text-center text-muted-foreground">
-                  <div>
-                    <ShoppingCart className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>Nenhum produto adicionado</p>
-                    <p className="text-sm">Digite o nome do produto para buscar</p>
+                <div className="flex-1 flex items-center justify-center p-12 text-center">
+                  <div className="animate-fade-in">
+                    <ShoppingCart className="h-16 w-16 mx-auto mb-4 text-muted-foreground/30" />
+                    <p className="text-lg font-medium text-muted-foreground">Carrinho vazio</p>
+                    <p className="text-sm text-muted-foreground/60 mt-2">
+                      Busque produtos ou passe o código de barras
+                    </p>
                   </div>
                 </div>
               ) : (
-                cart.map(item => (
-                  <div key={item.id} className="grid grid-cols-12 gap-4 p-3 border-b hover:bg-accent/50">
-                    <div className="col-span-6 flex items-center gap-2">
+                cart.map((item, index) => (
+                  <div 
+                    key={item.id} 
+                    className="grid grid-cols-12 gap-4 p-4 border-b hover:bg-accent/50 transition-all duration-200 animate-fade-in group"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <div className="col-span-6 flex items-center gap-3">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => removeFromCart(item.id)}
-                        className="text-red-500 hover:text-red-700 p-1 h-6 w-6"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10 p-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
-                        ✕
+                        <X className="h-4 w-4" />
                       </Button>
-                      <div className="min-w-0">
-                        <div className="font-medium text-sm truncate">{item.name}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {item.sku}
+                      <div className="min-w-0 flex-1">
+                        <div className="font-semibold text-sm truncate">{item.name}</div>
+                        <div className="text-xs text-muted-foreground flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs font-mono">
+                            {item.sku || item.barcode}
+                          </Badge>
                         </div>
                       </div>
                     </div>
-                    <div className="col-span-2 flex items-center justify-center gap-1">
+                    <div className="col-span-2 flex items-center justify-center gap-2">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="h-6 w-6 p-0"
+                        className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
                       >
-                        <Minus className="h-3 w-3" />
+                        <Minus className="h-4 w-4" />
                       </Button>
-                      <span className="w-8 text-center text-sm">{item.quantity}</span>
+                      <span className="w-10 text-center font-bold text-base">{item.quantity}</span>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="h-6 w-6 p-0"
+                        className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary hover:border-primary"
                       >
-                        <Plus className="h-3 w-3" />
+                        <Plus className="h-4 w-4" />
                       </Button>
                     </div>
                     <div className="col-span-2 text-center flex items-center justify-center">
-                      <span className="text-sm">{item.unit_price.toFixed(2)}</span>
+                      <span className="text-sm font-medium">R$ {item.unit_price.toFixed(2)}</span>
                     </div>
                     <div className="col-span-2 text-center flex items-center justify-center">
-                      <span className="text-sm font-medium">{item.total.toFixed(2)}</span>
+                      <span className="text-base font-bold text-primary">R$ {item.total.toFixed(2)}</span>
                     </div>
                   </div>
                 ))
@@ -649,80 +724,101 @@ const PDV = () => {
 
         {/* Summary Section */}
         <div className="w-full lg:w-96">
-          <Card className="h-full flex flex-col">
-            <CardContent className="flex-1 flex flex-col p-4">
-              <div className="pt-4 border-t">
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <div className="text-sm text-muted-foreground mb-2">Quantidade Total Items:</div>
-                    <div className="text-2xl font-bold">{cartQuantity.toLocaleString()}</div>
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="text-sm text-muted-foreground mb-2">Total:</div>
-                    <div className="text-3xl font-bold text-primary">
-                      R$ {cartTotal.toFixed(2).replace('.', ',')}
-                    </div>
-                  </div>
-                  
-                  {cart.length > 0 && (
-                    <Button variant="ghost" size="sm" onClick={clearCart} className="w-full">
-                      Limpar Carrinho
-                    </Button>
-                  )}
-                  
-                  <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button className="w-full" size="lg" disabled={cart.length === 0}>
-                        <CreditCard className="mr-2 h-4 w-4" />
-                        Finalizar Venda
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Finalizar Venda</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <label className="text-sm font-medium">Forma de Pagamento</label>
-                          <Select value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione a forma de pagamento" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {paymentMethods.map(method => (
-                                <SelectItem key={method.id} value={method.id}>
-                                  {method.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        
-                        <Separator />
-                        
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <span>Subtotal:</span>
-                            <span>R$ {cartTotal.toFixed(2)}</span>
-                          </div>
-                          <div className="flex justify-between font-bold text-lg">
-                            <span>Total:</span>
-                            <span className="text-primary">R$ {cartTotal.toFixed(2)}</span>
-                          </div>
-                        </div>
-                        
-                        <Button 
-                          className="w-full" 
-                          onClick={processSale}
-                          disabled={!selectedPaymentMethod}
-                        >
-                          Confirmar Venda
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+          <Card className="h-full flex flex-col border-2 shadow-xl">
+            <CardHeader className="bg-gradient-to-br from-primary/5 to-primary/10 border-b">
+              <CardTitle className="text-center text-xl">Resumo da Venda</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 flex flex-col p-6 space-y-6">
+              {/* Items Count */}
+              <div className="text-center p-4 bg-accent/50 rounded-lg">
+                <div className="text-sm font-medium text-muted-foreground mb-1">Itens no Carrinho</div>
+                <div className="text-4xl font-bold text-foreground">{cartQuantity}</div>
+              </div>
+              
+              {/* Total Amount */}
+              <div className="text-center p-6 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border-2 border-primary/20">
+                <div className="text-sm font-semibold text-muted-foreground mb-2">TOTAL A PAGAR</div>
+                <div className="text-5xl font-bold text-primary animate-scale-in">
+                  R$ {cartTotal.toFixed(2).replace('.', ',')}
                 </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="space-y-3 mt-auto">
+                {cart.length > 0 && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={clearCart} 
+                    className="w-full hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    Limpar Carrinho
+                  </Button>
+                )}
+                
+                <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      className="w-full h-14 text-lg font-semibold" 
+                      size="lg" 
+                      disabled={cart.length === 0}
+                    >
+                      <CreditCard className="mr-2 h-5 w-5" />
+                      Finalizar Venda (F8)
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl">Finalizar Venda</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-6">
+                      {/* Summary in dialog */}
+                      <div className="bg-accent/50 p-4 rounded-lg space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Itens:</span>
+                          <span className="font-semibold">{cartQuantity}</span>
+                        </div>
+                        <Separator />
+                        <div className="flex justify-between">
+                          <span className="font-semibold">Total:</span>
+                          <span className="text-2xl font-bold text-primary">
+                            R$ {cartTotal.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {/* Payment Method */}
+                      <div>
+                        <label className="text-sm font-semibold mb-2 block">Forma de Pagamento *</label>
+                        <Select value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod}>
+                          <SelectTrigger className="h-12">
+                            <SelectValue placeholder="Selecione a forma de pagamento" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {paymentMethods.map(method => (
+                              <SelectItem key={method.id} value={method.id}>
+                                <div className="flex items-center gap-2">
+                                  <CreditCard className="h-4 w-4" />
+                                  {method.name}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <Button 
+                        className="w-full h-12 text-base font-semibold" 
+                        onClick={processSale}
+                        disabled={!selectedPaymentMethod}
+                      >
+                        <Check className="mr-2 h-5 w-5" />
+                        Confirmar Venda
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardContent>
           </Card>

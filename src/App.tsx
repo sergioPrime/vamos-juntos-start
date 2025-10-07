@@ -285,12 +285,60 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/inventory/entry" element={<StockEntryPage />} />
-          <Route path="/inventory/exit" element={<StockExitPage />} />
-          <Route path="/inventory/transfer" element={<StockTransferPage />} />
-          <Route path="/inventory/returns" element={<ReturnsPage />} />
-          <Route path="/inventory/advanced-reports" element={<InventoryReportsPage />} />
-          <Route path="/inventory/alerts" element={<InventoryAlertsPage />} />
+          <Route path="/inventory/entry" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <StockEntryPage />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/inventory/exit" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <StockExitPage />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/inventory/transfer" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <StockTransferPage />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/inventory/returns" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <ReturnsPage />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/inventory/advanced-reports" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <InventoryReportsPage />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/inventory/alerts" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <InventoryAlertsPage />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
           <Route path="/quotes" element={
             <ProtectedRoute>
               <AppLayout>

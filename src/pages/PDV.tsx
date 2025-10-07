@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, Plus, Minus, ShoppingCart, CreditCard, X, Barcode, Check } from "lucide-react"
+import { Search, Plus, Minus, ShoppingCart, CreditCard, X, Barcode, Check, Pause, TrendingDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,6 +13,9 @@ import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
 import PDVHeader from "@/components/pdv/PDVHeader"
+import { CustomerSelector } from "@/components/pdv/CustomerSelector"
+import { PaymentDialog } from "@/components/pdv/PaymentDialog"
+import { DiscountDialog } from "@/components/pdv/DiscountDialog"
 import { usePermissionGuard } from "@/hooks/usePermissionGuard"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { cn } from "@/lib/utils"
@@ -28,9 +31,27 @@ interface Product {
   unit: string
 }
 
+interface Customer {
+  id: string
+  name: string
+  document?: string
+  phone?: string
+  email?: string
+}
+
 interface CartItem extends Product {
   quantity: number
   total: number
+  discount: number
+  discountType: 'percentage' | 'value'
+}
+
+interface SuspendedSale {
+  id: string
+  cart: CartItem[]
+  customer: Customer | null
+  total: number
+  timestamp: string
 }
 
 interface PaymentMethod {
@@ -58,6 +79,16 @@ const PDV = () => {
   const [addingToCart, setAddingToCart] = useState<string | null>(null)
   const [barcodeBuffer, setBarcodeBuffer] = useState("")
   const [lastKeyTime, setLastKeyTime] = useState(0)
+  
+  // New features states
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+  const [globalDiscount, setGlobalDiscount] = useState(0)
+  const [globalDiscountType, setGlobalDiscountType] = useState<'percentage' | 'value'>('percentage')
+  const [isDiscountDialogOpen, setIsDiscountDialogOpen] = useState(false)
+  const [isItemDiscountDialogOpen, setIsItemDiscountDialogOpen] = useState(false)
+  const [selectedItemForDiscount, setSelectedItemForDiscount] = useState<string | null>(null)
+  const [suspendedSales, setSuspendedSales] = useState<SuspendedSale[]>([])
+  const [showSuspendedSales, setShowSuspendedSales] = useState(false)
   
   // PDV Header states
   const [selectedSeller, setSelectedSeller] = useState(user?.id || "")
@@ -224,7 +255,7 @@ const PDV = () => {
           : item
       ))
     } else {
-      setCart([...cart, { ...product, quantity: 1, total: product.unit_price }])
+      setCart([...cart, { ...product, quantity: 1, total: product.unit_price, discount: 0, discountType: 'percentage' }])
     }
     
     // Visual feedback
@@ -267,10 +298,92 @@ const PDV = () => {
 
   const clearCart = () => {
     setCart([])
+    setSelectedCustomer(null)
+    setGlobalDiscount(0)
   }
 
-  const cartTotal = cart.reduce((sum, item) => sum + item.total, 0)
+  // Calculate totals with discounts
+  const cartSubtotal = cart.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0)
+  const cartItemsDiscount = cart.reduce((sum, item) => {
+    const itemDiscount = item.discountType === 'percentage'
+      ? (item.quantity * item.unit_price * item.discount) / 100
+      : item.discount
+    return sum + itemDiscount
+  }, 0)
+  const globalDiscountAmount = globalDiscountType === 'percentage'
+    ? (cartSubtotal - cartItemsDiscount) * globalDiscount / 100
+    : globalDiscount
+  const cartTotal = cartSubtotal - cartItemsDiscount - globalDiscountAmount
   const cartQuantity = cart.reduce((sum, item) => sum + item.quantity, 0)
+
+  // Suspended sales management
+  const suspendSale = () => {
+    if (cart.length === 0) {
+      toast({
+        title: "Carrinho vazio",
+        description: "Não há itens para suspender.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const suspended: SuspendedSale = {
+      id: Date.now().toString(),
+      cart: [...cart],
+      customer: selectedCustomer,
+      total: cartTotal,
+      timestamp: new Date().toISOString()
+    }
+
+    setSuspendedSales([...suspendedSales, suspended])
+    clearCart()
+    
+    toast({
+      title: "Venda suspensa",
+      description: "A venda foi salva e pode ser recuperada depois.",
+    })
+  }
+
+  const recoverSale = (sale: SuspendedSale) => {
+    setCart(sale.cart)
+    setSelectedCustomer(sale.customer)
+    setSuspendedSales(suspendedSales.filter(s => s.id !== sale.id))
+    setShowSuspendedSales(false)
+    
+    toast({
+      title: "Venda recuperada",
+      description: "A venda foi restaurada no carrinho.",
+    })
+  }
+
+  const applyItemDiscount = (discountValue: number, isPercentage: boolean) => {
+    if (!selectedItemForDiscount) return
+
+    setCart(cart.map(item =>
+      item.id === selectedItemForDiscount
+        ? { 
+            ...item, 
+            discount: discountValue,
+            discountType: isPercentage ? 'percentage' : 'value'
+          }
+        : item
+    ))
+
+    toast({
+      title: "Desconto aplicado",
+      description: "O desconto foi aplicado ao item.",
+    })
+  }
+
+  const applyGlobalDiscount = (discountValue: number, isPercentage: boolean) => {
+    setGlobalDiscount(discountValue)
+    setGlobalDiscountType(isPercentage ? 'percentage' : 'value')
+
+    toast({
+      title: "Desconto geral aplicado",
+      description: "O desconto foi aplicado ao total da venda.",
+    })
+  }
 
   // Barcode scanner detection
   useEffect(() => {
@@ -329,6 +442,15 @@ const PDV = () => {
       description: 'Nova Busca'
     },
     {
+      key: 'f5',
+      action: () => {
+        if (cart.length > 0) {
+          setIsDiscountDialogOpen(true)
+        }
+      },
+      description: 'Desconto Geral'
+    },
+    {
       key: 'f8',
       action: () => {
         if (cart.length > 0) {
@@ -338,10 +460,21 @@ const PDV = () => {
       description: 'Finalizar Venda'
     },
     {
+      key: 'f9',
+      action: () => suspendSale(),
+      description: 'Suspender Venda'
+    },
+    {
+      key: 'f12',
+      action: () => setShowSuspendedSales(!showSuspendedSales),
+      description: 'Vendas Suspensas'
+    },
+    {
       key: 'escape',
       action: () => {
         setSearchTerm("")
         setIsPaymentDialogOpen(false)
+        setIsDiscountDialogOpen(false)
       },
       description: 'Cancelar/Limpar',
       preventDefault: false
@@ -713,12 +846,10 @@ const PDV = () => {
 
           {/* Customer Search */}
           <div className="mt-4">
-            <div className="relative">
-              <Input
-                placeholder="Buscar Cliente por Nome ou CPF/CNPJ..."
-                className="bg-gray-800 text-white placeholder:text-gray-400"
-              />
-            </div>
+            <CustomerSelector
+              selectedCustomer={selectedCustomer}
+              onCustomerChange={setSelectedCustomer}
+            />
           </div>
         </div>
 
@@ -735,6 +866,26 @@ const PDV = () => {
                 <div className="text-4xl font-bold text-foreground">{cartQuantity}</div>
               </div>
               
+              {/* Detailed Totals */}
+              <div className="space-y-3 p-4 bg-accent/30 rounded-lg">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Subtotal:</span>
+                  <span className="font-medium">R$ {cartSubtotal.toFixed(2)}</span>
+                </div>
+                {cartItemsDiscount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Desc. Itens:</span>
+                    <span className="font-medium text-orange-600">- R$ {cartItemsDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+                {globalDiscountAmount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Desc. Geral:</span>
+                    <span className="font-medium text-orange-600">- R$ {globalDiscountAmount.toFixed(2)}</span>
+                  </div>
+                )}
+              </div>
+              
               {/* Total Amount */}
               <div className="text-center p-6 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border-2 border-primary/20">
                 <div className="text-sm font-semibold text-muted-foreground mb-2">TOTAL A PAGAR</div>
@@ -746,108 +897,118 @@ const PDV = () => {
               {/* Action Buttons */}
               <div className="space-y-3 mt-auto">
                 {cart.length > 0 && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={clearCart} 
-                    className="w-full hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
-                  >
-                    <X className="mr-2 h-4 w-4" />
-                    Limpar Carrinho
-                  </Button>
-                )}
-                
-                <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button 
-                      className="w-full h-14 text-lg font-semibold" 
-                      size="lg" 
-                      disabled={cart.length === 0}
-                    >
-                      <CreditCard className="mr-2 h-5 w-5" />
-                      Finalizar Venda (F8)
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle className="text-2xl">Finalizar Venda</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-6">
-                      {/* Summary in dialog */}
-                      <div className="bg-accent/50 p-4 rounded-lg space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Itens:</span>
-                          <span className="font-semibold">{cartQuantity}</span>
-                        </div>
-                        <Separator />
-                        <div className="flex justify-between">
-                          <span className="font-semibold">Total:</span>
-                          <span className="text-2xl font-bold text-primary">
-                            R$ {cartTotal.toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {/* Payment Method */}
-                      <div>
-                        <label className="text-sm font-semibold mb-2 block">Forma de Pagamento *</label>
-                        <Select value={selectedPaymentMethod} onValueChange={setSelectedPaymentMethod}>
-                          <SelectTrigger className="h-12">
-                            <SelectValue placeholder="Selecione a forma de pagamento" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {paymentMethods.map(method => (
-                              <SelectItem key={method.id} value={method.id}>
-                                <div className="flex items-center gap-2">
-                                  <CreditCard className="h-4 w-4" />
-                                  {method.name}
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
+                  <>
+                    <div className="grid grid-cols-2 gap-2">
                       <Button 
-                        className="w-full h-12 text-base font-semibold" 
-                        onClick={processSale}
-                        disabled={!selectedPaymentMethod}
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setIsDiscountDialogOpen(true)}
+                        className="gap-2"
                       >
-                        <Check className="mr-2 h-5 w-5" />
-                        Confirmar Venda
+                        <TrendingDown className="h-4 w-4" />
+                        Desconto (F5)
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={suspendSale}
+                        className="gap-2"
+                      >
+                        <Pause className="h-4 w-4" />
+                        Suspender (F9)
                       </Button>
                     </div>
-                  </DialogContent>
-                </Dialog>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={clearCart} 
+                      className="w-full hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
+                    >
+                      <X className="mr-2 h-4 w-4" />
+                      Limpar Carrinho
+                    </Button>
+                  </>
+                )}
+                
+                <Button 
+                  className="w-full h-14 text-lg font-semibold" 
+                  size="lg" 
+                  disabled={cart.length === 0}
+                  onClick={() => setIsPaymentDialogOpen(true)}
+                >
+                  <CreditCard className="mr-2 h-5 w-5" />
+                  Finalizar Venda (F8)
+                </Button>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
       
+      {/* Dialogs */}
+      <PaymentDialog
+        open={isPaymentDialogOpen}
+        onOpenChange={setIsPaymentDialogOpen}
+        totalAmount={cartTotal}
+        paymentMethods={paymentMethods}
+        onConfirm={(payments, receivedAmount) => {
+          // TODO: Implement payment processing with multiple methods
+          processSale()
+        }}
+      />
+
+      <DiscountDialog
+        open={isDiscountDialogOpen}
+        onOpenChange={setIsDiscountDialogOpen}
+        currentValue={cartSubtotal - cartItemsDiscount}
+        onApply={applyGlobalDiscount}
+        title="Desconto Geral"
+      />
+
+      <DiscountDialog
+        open={isItemDiscountDialogOpen}
+        onOpenChange={setIsItemDiscountDialogOpen}
+        currentValue={
+          selectedItemForDiscount 
+            ? (cart.find(i => i.id === selectedItemForDiscount)?.quantity || 0) * 
+              (cart.find(i => i.id === selectedItemForDiscount)?.unit_price || 0)
+            : 0
+        }
+        onApply={applyItemDiscount}
+        title="Desconto no Item"
+      />
+
       {/* Keyboard Shortcuts Footer */}
       <div className="fixed bottom-0 left-0 right-0 bg-muted/80 backdrop-blur-sm border-t border-border">
         <div className="container mx-auto px-6 py-2">
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <kbd className="px-2 py-1 bg-background border border-border rounded font-mono font-semibold">F1</kbd>
-              <span>Consultar Produtos</span>
+              <span>Produtos</span>
             </div>
             <div className="flex items-center gap-2">
               <kbd className="px-2 py-1 bg-background border border-border rounded font-mono font-semibold">F2</kbd>
               <span>Nova Busca</span>
             </div>
             <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-background border border-border rounded font-mono font-semibold">F3</kbd>
+              <span>Cliente</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-background border border-border rounded font-mono font-semibold">F5</kbd>
+              <span>Desconto</span>
+            </div>
+            <div className="flex items-center gap-2">
               <kbd className="px-2 py-1 bg-background border border-border rounded font-mono font-semibold">F8</kbd>
-              <span>Finalizar Venda</span>
+              <span>Finalizar</span>
             </div>
             <div className="flex items-center gap-2">
-              <kbd className="px-2 py-1 bg-background border border-border rounded font-mono font-semibold">ESC</kbd>
-              <span>Cancelar/Limpar</span>
+              <kbd className="px-2 py-1 bg-background border border-border rounded font-mono font-semibold">F9</kbd>
+              <span>Suspender</span>
             </div>
             <div className="flex items-center gap-2">
-              <kbd className="px-2 py-1 bg-background border border-border rounded font-mono font-semibold">Enter</kbd>
-              <span>Adicionar Produto</span>
+              <kbd className="px-2 py-1 bg-background border border-border rounded font-mono font-semibold">F12</kbd>
+              <span>Vendas Suspensas</span>
             </div>
           </div>
         </div>

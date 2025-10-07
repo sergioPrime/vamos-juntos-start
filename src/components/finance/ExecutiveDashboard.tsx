@@ -177,41 +177,55 @@ export function ExecutiveDashboard() {
           <CardDescription>Receitas, despesas e lucro mensal</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis tickFormatter={(value) => formatCurrency(value)} />
-                <ChartTooltip content={<ChartTooltipContent />} formatter={(value: any) => formatCurrency(Number(value))} />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="revenue" 
-                  stroke="hsl(var(--primary))" 
-                  strokeWidth={2}
-                  name="Receita"
-                  dot={{ r: 4 }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="expenses" 
-                  stroke="hsl(var(--destructive))" 
-                  strokeWidth={2}
-                  name="Despesas"
-                  dot={{ r: 4 }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="profit" 
-                  stroke="hsl(var(--secondary))" 
-                  strokeWidth={2}
-                  name="Lucro"
-                  dot={{ r: 4 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <ChartContainer
+            config={{
+              revenue: {
+                label: "Receita",
+                color: "hsl(var(--primary))",
+              },
+              expenses: {
+                label: "Despesas",
+                color: "hsl(var(--destructive))",
+              },
+              profit: {
+                label: "Lucro",
+                color: "hsl(var(--secondary))",
+              },
+            }}
+            className="h-80"
+          >
+            <LineChart data={monthlyData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis tickFormatter={(value) => formatCurrency(value)} />
+              <ChartTooltip content={<ChartTooltipContent formatter={(value: any) => formatCurrency(Number(value))} />} />
+              <Legend />
+              <Line 
+                type="monotone" 
+                dataKey="revenue" 
+                stroke="hsl(var(--primary))" 
+                strokeWidth={2}
+                name="Receita"
+                dot={{ r: 4 }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="expenses" 
+                stroke="hsl(var(--destructive))" 
+                strokeWidth={2}
+                name="Despesas"
+                dot={{ r: 4 }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="profit" 
+                stroke="hsl(var(--secondary))" 
+                strokeWidth={2}
+                name="Lucro"
+                dot={{ r: 4 }}
+              />
+            </LineChart>
+          </ChartContainer>
         </CardContent>
       </Card>
     </div>

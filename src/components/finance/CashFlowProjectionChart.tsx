@@ -94,7 +94,6 @@ export function CashFlowProjectionChart({ daysAhead = 90 }: CashFlowProjectionCh
         </div>
 
         <ChartContainer config={chartConfig} className="h-96">
-          <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
@@ -141,7 +140,6 @@ export function CashFlowProjectionChart({ daysAhead = 90 }: CashFlowProjectionCh
                 name="Saídas"
               />
             </AreaChart>
-          </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
     </Card>

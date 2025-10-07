@@ -17,6 +17,7 @@ import { SuperAdminRoute } from "./components/auth/SuperAdminRoute";
 
 import Dashboard from "./pages/Dashboard";
 import Lancamentos from "./pages/finance/Lancamentos";
+import Boletos from "./pages/finance/Boletos";
 import FinancialReports from "./pages/finance/FinancialReports";
 import FinancialDashboard from "./pages/FinancialDashboard";
 import Charges from "./pages/Charges";
@@ -124,6 +125,15 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <Lancamentos />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/finance/boletos" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Boletos />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

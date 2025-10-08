@@ -20,33 +20,59 @@ import { usePersistentFilters } from "@/hooks/usePersistentFilters"
 import { validateDateFilter, logDateFilterSummary } from "@/utils/dateFilterValidation"
 
 interface FilterValues {
+  // Text search fields
+  searchText?: string
+  documentNumber?: string
+  boletoNumber?: string
+  description?: string
+  
+  // Dropdown fields
+  personId: string
+  chartOfAccountId: string
+  paymentMethodId: string
+  companyId: string
+  bankAccountId: string
+  grupo: string
+  costCenterId: string
+  entryType: string
+  status: string
+  
+  // Value fields
+  minAmount: string
+  maxAmount: string
+  
+  // Date fields
   periodType?: string
   dateFilterType: string
   startDate?: Date
   endDate?: Date
-  status: string
-  personId: string
-  chartOfAccountId: string
-  costCenterId: string
-  paymentMethodId: string
-  bankAccountId: string
-  entryType: string
-  minAmount: string
-  maxAmount: string
 }
 
 const DEFAULT_FILTERS: FilterValues = {
-  periodType: undefined,
-  dateFilterType: "none",
-  status: "all",
+  // Text search
+  searchText: "",
+  documentNumber: "",
+  boletoNumber: "",
+  description: "",
+  
+  // Dropdowns
   personId: "",
   chartOfAccountId: "all",
-  costCenterId: "all",
   paymentMethodId: "all",
+  companyId: "all",
   bankAccountId: "all",
+  grupo: "all",
+  costCenterId: "all",
   entryType: "all",
+  status: "all",
+  
+  // Values
   minAmount: "",
-  maxAmount: ""
+  maxAmount: "",
+  
+  // Dates
+  periodType: undefined,
+  dateFilterType: "none"
 }
 
 const DEFAULT_COLUMNS: ColumnConfig[] = [
@@ -84,6 +110,7 @@ export function FinancialListingTab({ onEntriesSelected }: { onEntriesSelected?:
   const [costCenters, setCostCenters] = useState<any[]>([])
   const [paymentMethods, setPaymentMethods] = useState<any[]>([])
   const [bankAccounts, setBankAccounts] = useState<any[]>([])
+  const [companies, setCompanies] = useState<any[]>([])
   
   const {
     filters,
@@ -110,7 +137,8 @@ export function FinancialListingTab({ onEntriesSelected }: { onEntriesSelected?:
         chartResponse,
         costCentersResponse,
         paymentMethodsResponse,
-        bankAccountsResponse
+        bankAccountsResponse,
+        companiesResponse
       ] = await Promise.all([
         supabase
           .from("customers")
@@ -144,6 +172,12 @@ export function FinancialListingTab({ onEntriesSelected }: { onEntriesSelected?:
           .from("bank_accounts")
           .select("*")
           .eq("org_id", organization.currentOrg.id)
+          .eq("is_active", true),
+          
+        supabase
+          .from("companies")
+          .select("*")
+          .eq("org_id", organization.currentOrg.id)
           .eq("is_active", true)
       ])
 
@@ -153,6 +187,7 @@ export function FinancialListingTab({ onEntriesSelected }: { onEntriesSelected?:
       setCostCenters(costCentersResponse.data || [])
       setPaymentMethods(paymentMethodsResponse.data || [])
       setBankAccounts(bankAccountsResponse.data || [])
+      setCompanies(companiesResponse.data || [])
     } catch (error) {
       console.error("Error loading supporting data:", error)
       toast({
@@ -410,10 +445,20 @@ export function FinancialListingTab({ onEntriesSelected }: { onEntriesSelected?:
           </div>
           
           <div className="flex items-center gap-2">
-            <Button variant="outline" className="gap-2">
-              <SlidersHorizontal className="h-4 w-4" />
-              Busca Avançada
-            </Button>
+            <FinancialFilters
+              filters={filters}
+              onFiltersChange={updateFilters}
+              onApplyFilters={handleApplyFilters}
+              onClearFilters={handleClearFilters}
+              customers={customers}
+              suppliers={suppliers}
+              chartOfAccounts={chartOfAccounts}
+              costCenters={costCenters}
+              paymentMethods={paymentMethods}
+              bankAccounts={bankAccounts}
+              companies={companies}
+              loading={filtersLoading}
+            />
             
             <Button variant="outline" className="gap-2">
               <MoreVertical className="h-4 w-4" />

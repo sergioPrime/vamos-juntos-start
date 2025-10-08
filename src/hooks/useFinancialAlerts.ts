@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useOrganization } from './useOrganization'
-import { useToast } from './use-toast'
 import { addDays, isBefore, isAfter } from 'date-fns'
 
 export interface FinancialAlert {
@@ -18,7 +17,6 @@ export interface FinancialAlert {
 
 export function useFinancialAlerts() {
   const { currentOrg } = useOrganization()
-  const { toast } = useToast()
   const [alerts, setAlerts] = useState<FinancialAlert[]>([])
   const [loading, setLoading] = useState(false)
 
@@ -192,21 +190,13 @@ export function useFinancialAlerts() {
 
       setAlerts(allAlerts)
 
-      // Mostrar toast para alertas críticos
-      const criticalAlerts = allAlerts.filter(a => a.severity === 'critical')
-      if (criticalAlerts.length > 0) {
-        toast({
-          title: 'Atenção!',
-          description: `${criticalAlerts.length} alerta(s) crítico(s) detectado(s)`,
-          variant: 'destructive'
-        })
-      }
+      // Toast notification for critical alerts removed as per user request
     } catch (error) {
       console.error('Erro ao verificar alertas:', error)
     } finally {
       setLoading(false)
     }
-  }, [currentOrg?.id, checkDueSoonAlerts, checkOverdueAlerts, checkLowBalanceAlerts, checkHighExpenseAlerts, toast])
+  }, [currentOrg?.id, checkDueSoonAlerts, checkOverdueAlerts, checkLowBalanceAlerts, checkHighExpenseAlerts])
 
   useEffect(() => {
     if (currentOrg?.id) {

@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from './useAuth'
 import { useOrganization } from './useOrganization'
-import { useToast } from './use-toast'
 
 export interface BusinessAlert {
   id: string
@@ -21,7 +20,6 @@ export interface BusinessAlert {
 export function useBusinessAlerts() {
   const { user } = useAuth()
   const { currentOrg } = useOrganization()
-  const { toast } = useToast()
   
   const [alerts, setAlerts] = useState<BusinessAlert[]>([])
   const [loading, setLoading] = useState(false)
@@ -449,15 +447,7 @@ export function useBusinessAlerts() {
 
       setAlerts(allAlerts)
 
-      // Show toast for critical alerts
-      const criticalAlerts = allAlerts.filter(alert => alert.severity === 'critical')
-      criticalAlerts.forEach(alert => {
-        toast({
-          title: alert.title,
-          description: alert.description,
-          variant: "destructive",
-        })
-      })
+      // Toast notifications for critical alerts removed as per user request
 
       return allAlerts
     } catch (error) {
@@ -465,7 +455,7 @@ export function useBusinessAlerts() {
     } finally {
       setLoading(false)
     }
-  }, [currentOrg?.id, checkOverdueReceivables, checkOverduePayables, checkLowBalance, checkBudgetExceeded, checkRejectedNFSe, checkPendingOrders, checkInactiveCustomers, checkStagnantProducts, checkIntegrationFailures, toast])
+  }, [currentOrg?.id, checkOverdueReceivables, checkOverduePayables, checkLowBalance, checkBudgetExceeded, checkRejectedNFSe, checkPendingOrders, checkInactiveCustomers, checkStagnantProducts, checkIntegrationFailures])
 
   // Auto-check alerts on mount and periodically
   useEffect(() => {

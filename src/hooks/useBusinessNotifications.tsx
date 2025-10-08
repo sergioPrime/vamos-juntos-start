@@ -2,7 +2,6 @@ import { useCallback, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useOrganization } from './useOrganization'
 import { useAuth } from './useAuth'
-import { useToast } from './use-toast'
 import { useStockValidation } from './useStockValidation'
 
 export interface BusinessNotification {
@@ -19,33 +18,21 @@ export interface BusinessNotification {
 export function useBusinessNotifications() {
   const { currentOrg } = useOrganization()
   const { user } = useAuth()
-  const { toast } = useToast()
   const { checkLowStock } = useStockValidation()
 
-  // Check for low stock and notify
+  // Check for low stock (toast removed)
   const checkAndNotifyLowStock = useCallback(async () => {
     if (!currentOrg?.id) return
 
     try {
       const lowStockProducts = await checkLowStock()
-      
-      if (lowStockProducts.length > 0) {
-        const message = lowStockProducts.length === 1 
-          ? `Produto ${lowStockProducts[0].name} está com estoque baixo`
-          : `${lowStockProducts.length} produtos estão com estoque baixo`
-
-        toast({
-          title: "Alerta de Estoque",
-          description: message,
-          variant: "destructive",
-        })
-      }
+      // Toast notification removed as per user request
     } catch (error) {
       console.error('Error checking low stock notifications:', error)
     }
-  }, [currentOrg?.id, checkLowStock, toast])
+  }, [currentOrg?.id, checkLowStock])
 
-  // Check for payments due soon
+  // Check for payments due soon (toasts removed)
   const checkPaymentsDue = useCallback(async () => {
     if (!currentOrg?.id) return
 
@@ -64,68 +51,31 @@ export function useBusinessNotifications() {
 
       if (error) throw error
 
-      if (dueSoon && dueSoon.length > 0) {
-        const overdue = dueSoon.filter(item => new Date(item.due_date) < new Date())
-        const upcoming = dueSoon.filter(item => new Date(item.due_date) >= new Date())
-
-        if (overdue.length > 0) {
-          toast({
-            title: "Contas em Atraso",
-            description: `${overdue.length} conta(s) em atraso`,
-            variant: "destructive",
-          })
-        }
-
-        if (upcoming.length > 0) {
-          toast({
-            title: "Contas Vencendo",
-            description: `${upcoming.length} conta(s) vencendo em até 3 dias`,
-            variant: "default",
-          })
-        }
-      }
+      // Toast notifications removed as per user request
     } catch (error) {
       console.error('Error checking payments due:', error)
     }
-  }, [currentOrg?.id, toast])
+  }, [currentOrg?.id])
 
-  // Notify order completion
+  // Notify order completion (toast removed)
   const notifyOrderCompletion = useCallback((orderNumber: string, amount: number) => {
-    toast({
-      title: "Pedido Finalizado",
-      description: `Pedido ${orderNumber} finalizado com sucesso! Valor: R$ ${amount.toFixed(2)}`,
-      variant: "default",
-    })
-  }, [toast])
+    // Toast notification removed as per user request
+  }, [])
 
-  // Notify purchase receipt
+  // Notify purchase receipt (toast removed)
   const notifyPurchaseReceipt = useCallback((purchaseNumber: string, amount: number) => {
-    toast({
-      title: "Compra Recebida",
-      description: `Compra ${purchaseNumber} recebida! Valor: R$ ${amount.toFixed(2)}`,
-      variant: "default",
-    })
-  }, [toast])
+    // Toast notification removed as per user request
+  }, [])
 
-  // Notify stock movement
+  // Notify stock movement (toast removed)
   const notifyStockMovement = useCallback((productName: string, quantity: number, type: string) => {
-    const typeLabel = type === 'in' ? 'Entrada' : type === 'out' ? 'Saída' : 'Ajuste'
-    toast({
-      title: "Movimento de Estoque",
-      description: `${typeLabel}: ${Math.abs(quantity)} unidades de ${productName}`,
-      variant: "default",
-    })
-  }, [toast])
+    // Toast notification removed as per user request
+  }, [])
 
-  // Notify financial transaction
+  // Notify financial transaction (toast removed)
   const notifyFinancialTransaction = useCallback((description: string, amount: number, type: string) => {
-    const typeLabel = type === 'inflow' ? 'Entrada' : 'Saída'
-    toast({
-      title: `${typeLabel} Financeira`,
-      description: `${description}: R$ ${amount.toFixed(2)}`,
-      variant: type === 'inflow' ? "default" : "destructive",
-    })
-  }, [toast])
+    // Toast notification removed as per user request
+  }, [])
 
   // Run periodic checks (called manually or on intervals)
   const runPeriodicChecks = useCallback(async () => {

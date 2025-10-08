@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Clock, Calendar, Volume2, Plus } from 'lucide-react';
+import { Clock, Calendar, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -41,36 +41,7 @@ export function OverdueNotifications() {
     refreshCheck(); // Refresh to update the list
   };
 
-  const testNotificationSound = async () => {
-    try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      
-      // Resume audio context if suspended
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-      }
-      
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-
-      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-      oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
-      oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
-
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.3);
-      
-      console.log('Test notification sound played successfully');
-    } catch (error) {
-      console.warn('Failed to play test sound:', error);
-    }
-  };
+  // Notification sound test removed as per user request
 
   return (
     <>
@@ -184,15 +155,6 @@ export function OverdueNotifications() {
                   onClick={handleViewAllAppointments}
                 >
                   Ver todas as notificações
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="w-full flex items-center gap-2"
-                  onClick={testNotificationSound}
-                >
-                  <Volume2 className="h-4 w-4" />
-                  Testar som
                 </Button>
               </div>
             </>

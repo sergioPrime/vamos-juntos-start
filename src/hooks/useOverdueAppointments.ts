@@ -11,37 +11,7 @@ export const useOverdueAppointments = () => {
   const [lastCheck, setLastCheck] = useState<Date>(new Date());
   const [notifiedAppointments, setNotifiedAppointments] = useState<Set<string>>(new Set());
 
-  const playNotificationSound = useCallback(async () => {
-    try {
-      // Create a simple notification sound using Web Audio API
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      
-      // Resume audio context if suspended
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-      }
-      
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-
-      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-      oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
-      oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
-
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.3);
-      
-      console.log('Notification sound played successfully');
-    } catch (error) {
-      console.warn('Failed to play notification sound:', error);
-    }
-  }, []);
+  // Notification sound removed as per user request
 
   const checkOverdueAppointments = useCallback(() => {
     if (!appointments || appointments.length === 0) return;
@@ -81,10 +51,8 @@ export const useOverdueAppointments = () => {
       return prev;
     });
 
-    // Play sound and mark as notified for newly overdue appointments
+    // Mark as notified for newly overdue appointments (sound removed)
     if (newlyOverdue.length > 0) {
-      console.log('Playing notification sound for newly overdue appointments:', newlyOverdue);
-      playNotificationSound();
       setNotifiedAppointments(prev => {
         const newSet = new Set(prev);
         newlyOverdue.forEach(id => newSet.add(id));
@@ -93,7 +61,7 @@ export const useOverdueAppointments = () => {
     }
 
     setLastCheck(now);
-  }, [appointments, playNotificationSound, notifiedAppointments]);
+  }, [appointments, notifiedAppointments]);
 
   // Initial check and setup interval
   useEffect(() => {

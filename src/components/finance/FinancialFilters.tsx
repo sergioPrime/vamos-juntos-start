@@ -59,8 +59,6 @@ export function FinancialFilters({
   bankAccounts,
   loading = false
 }: FinancialFiltersProps) {
-  const { animationsEnabled } = useAnimation()
-  const [isExpanded, setIsExpanded] = useState(false)
   const [personSearchOpen, setPersonSearchOpen] = useState(false)
   const [personSearchValue, setPersonSearchValue] = useState("")
 
@@ -105,21 +103,13 @@ export function FinancialFilters({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Filter className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">Filtros Avançados</CardTitle>
+            <CardTitle className="text-lg">Busca Avançada</CardTitle>
             {activeFiltersCount > 0 && (
               <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
                 {activeFiltersCount}
               </span>
             )}
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="text-muted-foreground"
-          >
-            {isExpanded ? "Menos Filtros" : "Mais Filtros"}
-          </Button>
         </div>
       </CardHeader>
 
@@ -209,13 +199,8 @@ export function FinancialFilters({
           </div>
         </div>
 
-        {/* Filtros expandidos */}
-        {isExpanded && (
-          <div className={cn(
-            "space-y-4 border-t pt-4",
-            animationsEnabled && "animate-fade-in"
-          )}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Segunda linha - Filtros de pessoa, conta e centro de custo */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-4">
               {/* Cliente/Fornecedor */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Cliente/Fornecedor</Label>
@@ -310,7 +295,8 @@ export function FinancialFilters({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Terceira linha - Forma de pagamento e conta bancária */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Forma de Pagamento */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Forma de Pagamento</Label>
@@ -346,11 +332,10 @@ export function FinancialFilters({
                   </SelectContent>
                 </Select>
               </div>
-
             </div>
 
-            {/* Filtro por Valor */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Quarta linha - Filtro por Valor */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Valor Mínimo</Label>
                 <Input
@@ -372,8 +357,6 @@ export function FinancialFilters({
                 />
               </div>
             </div>
-          </div>
-        )}
 
         {/* Botões de Ação */}
         <div className="flex justify-between pt-4 border-t">

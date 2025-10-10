@@ -280,15 +280,15 @@ export function useInventoryAlerts() {
 
       setAlerts(allAlerts)
 
-      // Show toast notifications for critical alerts
-      const criticalAlerts = allAlerts.filter(alert => alert.severity === 'critical')
-      criticalAlerts.forEach(alert => {
-        toast({
-          title: alert.title,
-          description: alert.description,
-          variant: "destructive",
-        })
-      })
+      // Toast notifications disabled as per user request
+      // const criticalAlerts = allAlerts.filter(alert => alert.severity === 'critical')
+      // criticalAlerts.forEach(alert => {
+      //   toast({
+      //     title: alert.title,
+      //     description: alert.description,
+      //     variant: "destructive",
+      //   })
+      // })
 
       return allAlerts
     } catch (error) {
@@ -303,16 +303,16 @@ export function useInventoryAlerts() {
     }
   }, [currentOrg?.id, checkLowStockAlerts, checkNearExpiryAlerts, checkHighTurnoverAlerts, checkInventoryVarianceAlerts, toast])
 
-  // Auto-check alerts on mount and periodically
-  useEffect(() => {
-    if (currentOrg?.id) {
-      checkAllAlerts()
-      
-      // Check alerts every 5 minutes
-      const interval = setInterval(checkAllAlerts, 5 * 60 * 1000)
-      return () => clearInterval(interval)
-    }
-  }, [currentOrg?.id, checkAllAlerts])
+  // Auto-check alerts disabled as per user request
+  // useEffect(() => {
+  //   if (currentOrg?.id) {
+  //     checkAllAlerts()
+  //     
+  //     // Check alerts every 5 minutes
+  //     const interval = setInterval(checkAllAlerts, 5 * 60 * 1000)
+  //     return () => clearInterval(interval)
+  //   }
+  // }, [currentOrg?.id, checkAllAlerts])
 
   const resolveAlert = useCallback((alertId: string) => {
     setAlerts(prev => prev.map(alert => 

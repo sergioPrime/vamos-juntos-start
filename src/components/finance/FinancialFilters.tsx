@@ -11,8 +11,8 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { ChevronsUpDown, Check } from "lucide-react"
+import { ComboboxAsync } from "@/components/ui/combobox-async"
+import { useAsyncSearch } from "@/hooks/useAsyncSearch"
 
 interface FilterValues {
   // Text search fields
@@ -75,8 +75,7 @@ export function FinancialFilters({
   trigger
 }: FinancialFiltersProps) {
   const [open, setOpen] = useState(false)
-  const [personSearchOpen, setPersonSearchOpen] = useState(false)
-  const [personSearchValue, setPersonSearchValue] = useState("")
+  const asyncSearch = useAsyncSearch()
 
   const updateFilter = (key: keyof FilterValues, value: any) => {
     onFiltersChange({ ...filters, [key]: value })
@@ -84,7 +83,6 @@ export function FinancialFilters({
 
   const clearAllFilters = () => {
     onClearFilters()
-    setPersonSearchValue("")
   }
 
   const handleApplyFilters = () => {
@@ -92,14 +90,13 @@ export function FinancialFilters({
     setOpen(false)
   }
 
-  const allPersons = [
-    ...customers.map(c => ({ ...c, type: 'customer' })),
-    ...suppliers.map(s => ({ ...s, type: 'supplier' }))
-  ]
-
-  const filteredPersons = allPersons.filter(person =>
-    person.name?.toLowerCase().includes(personSearchValue.toLowerCase())
-  )
+  const searchPessoasAll = async (query: string) => {
+    const [clientes, fornecedores] = await Promise.all([
+      asyncSearch.searchPessoas(query, 'cliente'),
+      asyncSearch.searchPessoas(query, 'fornecedor')
+    ])
+    return [...clientes, ...fornecedores]
+  }
 
   const getActiveFiltersCount = () => {
     let count = 0
@@ -188,92 +185,38 @@ export function FinancialFilters({
                 
                 <div className="space-y-2">
                   <Label className="text-sm">Cliente / Fornecedor</Label>
-                  <Popover open={personSearchOpen} onOpenChange={setPersonSearchOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={personSearchOpen}
-                        className="w-full justify-between bg-background"
-                      >
-                        {filters.personId
-                          ? allPersons.find(person => person.id === filters.personId)?.name
-                          : "Selecionar..."}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full p-0 bg-background border z-50">
-                      <Command>
-                        <CommandInput 
-                          placeholder="Buscar pessoa..." 
-                          value={personSearchValue}
-                          onValueChange={setPersonSearchValue}
-                        />
-                        <CommandList>
-                          <CommandEmpty>Nenhuma pessoa encontrada.</CommandEmpty>
-                          <CommandGroup>
-                            {filteredPersons.map((person) => (
-                              <CommandItem
-                                key={person.id}
-                                value={person.name}
-                                onSelect={() => {
-                                  updateFilter("personId", person.id === filters.personId ? "" : person.id)
-                                  setPersonSearchOpen(false)
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    filters.personId === person.id ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
-                                <div className="flex flex-col">
-                                  <span>{person.name}</span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {person.type === 'customer' ? 'Cliente' : 'Fornecedor'}
-                                  </span>
-                                </div>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                  <ComboboxAsync
+                    value={filters.personId}
+                    onValueChange={(value) => updateFilter("personId", value)}
+                    searchFunction={searchPessoasAll}
+                    placeholder="Selecionar..."
+                    emptyText="Nenhuma pessoa encontrada"
+                    className="bg-background"
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm">Plano de Conta</Label>
-                  <Select value={filters.chartOfAccountId} onValueChange={(value) => updateFilter("chartOfAccountId", value)}>
-                    <SelectTrigger className="bg-background">
-                      <SelectValue placeholder="Todas" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border z-50">
-                      <SelectItem value="all">Todas as contas</SelectItem>
-                      {chartOfAccounts.map((account) => (
-                        <SelectItem key={account.id} value={account.id}>
-                          {account.account_code} - {account.account_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <ComboboxAsync
+                    value={filters.chartOfAccountId === "all" ? "" : filters.chartOfAccountId}
+                    onValueChange={(value) => updateFilter("chartOfAccountId", value || "all")}
+                    searchFunction={asyncSearch.searchChartOfAccounts}
+                    placeholder="Todas as contas"
+                    emptyText="Nenhuma conta encontrada"
+                    className="bg-background"
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm">Forma de Pagamento</Label>
-                  <Select value={filters.paymentMethodId} onValueChange={(value) => updateFilter("paymentMethodId", value)}>
-                    <SelectTrigger className="bg-background">
-                      <SelectValue placeholder="Todas" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border z-50">
-                      <SelectItem value="all">Todas as formas</SelectItem>
-                      {paymentMethods.map((method) => (
-                        <SelectItem key={method.id} value={method.id}>
-                          {method.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <ComboboxAsync
+                    value={filters.paymentMethodId === "all" ? "" : filters.paymentMethodId}
+                    onValueChange={(value) => updateFilter("paymentMethodId", value || "all")}
+                    searchFunction={asyncSearch.searchPaymentMethods}
+                    placeholder="Todas as formas"
+                    emptyText="Nenhuma forma de pagamento encontrada"
+                    className="bg-background"
+                  />
                 </div>
               </div>
             </div>
@@ -284,36 +227,26 @@ export function FinancialFilters({
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label className="text-sm">Empresa</Label>
-                  <Select value={filters.companyId} onValueChange={(value) => updateFilter("companyId", value)}>
-                    <SelectTrigger className="bg-background">
-                      <SelectValue placeholder="Todas" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border z-50">
-                      <SelectItem value="all">Todas as empresas</SelectItem>
-                      {companies.map((company) => (
-                        <SelectItem key={company.id} value={company.id}>
-                          {company.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <ComboboxAsync
+                    value={filters.companyId === "all" ? "" : filters.companyId}
+                    onValueChange={(value) => updateFilter("companyId", value || "all")}
+                    searchFunction={asyncSearch.searchCompanies}
+                    placeholder="Todas as empresas"
+                    emptyText="Nenhuma empresa encontrada"
+                    className="bg-background"
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm">Conta Bancária</Label>
-                  <Select value={filters.bankAccountId} onValueChange={(value) => updateFilter("bankAccountId", value)}>
-                    <SelectTrigger className="bg-background">
-                      <SelectValue placeholder="Todas" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border z-50">
-                      <SelectItem value="all">Todas as contas</SelectItem>
-                      {bankAccounts.map((account) => (
-                        <SelectItem key={account.id} value={account.id}>
-                          {account.bank_name} - {account.account_number}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <ComboboxAsync
+                    value={filters.bankAccountId === "all" ? "" : filters.bankAccountId}
+                    onValueChange={(value) => updateFilter("bankAccountId", value || "all")}
+                    searchFunction={asyncSearch.searchBankAccounts}
+                    placeholder="Todas as contas"
+                    emptyText="Nenhuma conta bancária encontrada"
+                    className="bg-background"
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -330,19 +263,14 @@ export function FinancialFilters({
 
                 <div className="space-y-2">
                   <Label className="text-sm">Centro de Custo</Label>
-                  <Select value={filters.costCenterId} onValueChange={(value) => updateFilter("costCenterId", value)}>
-                    <SelectTrigger className="bg-background">
-                      <SelectValue placeholder="Todos" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border z-50">
-                      <SelectItem value="all">Todos os centros</SelectItem>
-                      {costCenters.map((center) => (
-                        <SelectItem key={center.id} value={center.id}>
-                          {center.code} - {center.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <ComboboxAsync
+                    value={filters.costCenterId === "all" ? "" : filters.costCenterId}
+                    onValueChange={(value) => updateFilter("costCenterId", value || "all")}
+                    searchFunction={asyncSearch.searchCostCenters}
+                    placeholder="Todos os centros"
+                    emptyText="Nenhum centro de custo encontrado"
+                    className="bg-background"
+                  />
                 </div>
               </div>
             </div>

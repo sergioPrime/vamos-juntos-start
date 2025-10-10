@@ -352,7 +352,7 @@ export function FinancialFilters({
                   <SelectTrigger className="bg-background">
                     <SelectValue placeholder="Selecionar período" />
                   </SelectTrigger>
-                  <SelectContent className="bg-background border z-50">
+                  <SelectContent className="bg-popover border z-[100]" position="popper" sideOffset={5}>
                     {periodOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
@@ -379,7 +379,7 @@ export function FinancialFilters({
                           {filters.startDate ? format(filters.startDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 bg-background border z-50" align="start">
+                      <PopoverContent className="w-auto p-0 bg-popover border z-[100]" align="start" sideOffset={5}>
                         <Calendar
                           mode="single"
                           selected={filters.startDate}
@@ -406,7 +406,7 @@ export function FinancialFilters({
                           {filters.endDate ? format(filters.endDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 bg-background border z-50" align="start">
+                      <PopoverContent className="w-auto p-0 bg-popover border z-[100]" align="start" sideOffset={5}>
                         <Calendar
                           mode="single"
                           selected={filters.endDate}
@@ -429,7 +429,7 @@ export function FinancialFilters({
                   <SelectTrigger className="bg-background">
                     <SelectValue placeholder="Tipo de data" />
                   </SelectTrigger>
-                  <SelectContent className="bg-background border z-50">
+                  <SelectContent className="bg-popover border z-[100]" position="popper" sideOffset={5}>
                     {dateFilterTypeOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}

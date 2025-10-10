@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Plus, FileText, Calculator, User, MoreHorizontal, LogOut, Moon, Sun, Zap, Shield, Settings, Lock, Link2, Camera, DollarSign, UserCog } from "lucide-react"
+import { Plus, FileText, User, MoreHorizontal, LogOut, Moon, Sun, Zap, Shield, Settings, Lock, Link2, Camera, DollarSign, UserCog } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { UserPhotoDialog } from "@/components/UserPhotoDialog"
@@ -147,21 +147,6 @@ export function AppHeader() {
             </TooltipTrigger>
             <TooltipContent>
               <p>Emitir NFS-e</p>
-            </TooltipContent>
-          </Tooltip>
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="outline"
-                onClick={() => navigate("/quotes")}
-                size="icon"
-              >
-                <Calculator className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Orçamento</p>
             </TooltipContent>
           </Tooltip>
           
@@ -320,10 +305,6 @@ export function AppHeader() {
               <DropdownMenuItem onClick={() => navigate("/nfse")}>
                 <FileText className="h-4 w-4 mr-2" />
                 Emitir NFS-e
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/quotes")}>
-                <Calculator className="h-4 w-4 mr-2" />
-                Orçamento
               </DropdownMenuItem>
               
               <DropdownMenuSeparator />

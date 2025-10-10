@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Plus, FileText, User, MoreHorizontal, LogOut, Moon, Sun, Zap, Shield, Settings, Lock, Link2, Camera, DollarSign, UserCog } from "lucide-react"
+import { Plus, User, MoreHorizontal, LogOut, Moon, Sun, Zap, Shield, Settings, Lock, Link2, Camera, DollarSign, UserCog } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { UserPhotoDialog } from "@/components/UserPhotoDialog"
@@ -132,21 +132,6 @@ export function AppHeader() {
             </TooltipTrigger>
             <TooltipContent>
               <p>PDV</p>
-            </TooltipContent>
-          </Tooltip>
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="outline"
-                onClick={() => navigate("/nfse")}
-                size="icon"
-              >
-                <FileText className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Emitir NFS-e</p>
             </TooltipContent>
           </Tooltip>
           
@@ -301,10 +286,6 @@ export function AppHeader() {
               <DropdownMenuItem onClick={() => navigate("/pdv")}>
                 <Zap className="h-4 w-4 mr-2" />
                 PDV
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/nfse")}>
-                <FileText className="h-4 w-4 mr-2" />
-                Emitir NFS-e
               </DropdownMenuItem>
               
               <DropdownMenuSeparator />

@@ -757,7 +757,7 @@ const PDV = () => {
         }}
       />
       
-      <div className="page-container container mx-auto p-6">
+      <div className="page-container container mx-auto p-6 pb-24">
         <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-12rem)]">
         {/* Products Section */}
         <div className="flex-1 flex flex-col relative">
@@ -1060,7 +1060,7 @@ const PDV = () => {
       />
 
       {/* Keyboard Shortcuts Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-muted/80 backdrop-blur-sm border-t border-border z-40">
+      <div className="fixed bottom-0 left-0 right-0 bg-muted/80 backdrop-blur-sm border-t border-border z-10">
         <div className="container mx-auto px-6 py-3">
           <div className="max-w-[50%] grid grid-cols-4 gap-x-3 gap-y-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">

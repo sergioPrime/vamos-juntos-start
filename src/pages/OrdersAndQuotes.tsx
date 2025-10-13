@@ -243,31 +243,11 @@ const OrdersAndQuotes = () => {
           <div className="fixed inset-0 z-50 flex items-start justify-center pt-4 bg-black/50">
             <div className="bg-card border rounded-lg shadow-2xl w-[56rem] mx-4 max-h-[90vh] overflow-y-auto">
               <div className="p-6">
-                {/* First Row */}
-                <div className="grid grid-cols-8 gap-4 mb-4">
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
-                    <FileText className="h-6 w-6 mb-2 text-foreground" />
-                    <span className="text-xs text-center text-foreground">NF-e</span>
-                  </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
-                    <FileText className="h-6 w-6 mb-2 text-foreground" />
-                    <span className="text-xs text-center text-foreground">NFCe/CFe</span>
-                  </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
-                    <FileText className="h-6 w-6 mb-2 text-foreground" />
-                    <span className="text-xs text-center text-foreground">NFS-e</span>
-                  </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
-                    <FileText className="h-6 w-6 mb-2 text-foreground" />
-                    <span className="text-xs text-center text-foreground">CT-e</span>
-                  </button>
+                {/* Action Buttons */}
+                <div className="grid grid-cols-8 gap-4 mb-6">
                   <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
                     <Printer className="h-6 w-6 mb-2 text-foreground" />
                     <span className="text-xs text-center text-foreground">Imprimir</span>
-                  </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
-                    <Printer className="h-6 w-6 mb-2 text-foreground" />
-                    <span className="text-xs text-center text-foreground">Impressão Direta</span>
                   </button>
                   <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
                     <Copy className="h-6 w-6 mb-2 text-foreground" />
@@ -277,73 +257,21 @@ const OrdersAndQuotes = () => {
                     <Edit className="h-6 w-6 mb-2 text-foreground" />
                     <span className="text-xs text-center text-foreground">Editar</span>
                   </button>
-                </div>
-
-                {/* Second Row */}
-                <div className="grid grid-cols-8 gap-4 mb-4">
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
-                    <Mail className="h-6 w-6 mb-2 text-foreground" />
-                    <span className="text-xs text-center text-foreground">Enviar por E-mail</span>
-                  </button>
                   <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
                     <Download className="h-6 w-6 mb-2 text-foreground" />
                     <span className="text-xs text-center text-foreground">Baixar</span>
-                  </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
-                    <AlertCircle className="h-6 w-6 mb-2 text-foreground" />
-                    <span className="text-xs text-center text-foreground">Observações</span>
                   </button>
                   <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
                     <CheckCircle className="h-6 w-6 mb-2 text-foreground" />
                     <span className="text-xs text-center text-foreground">Aprovar</span>
                   </button>
                   <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
-                    <CheckCircle className="h-6 w-6 mb-2 text-foreground" />
-                    <span className="text-xs text-center text-foreground">Faturamento Parcial</span>
-                  </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
                     <Package className="h-6 w-6 mb-2 text-foreground" />
                     <span className="text-xs text-center text-foreground">Devolver Produtos</span>
                   </button>
                   <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
-                    <Truck className="h-6 w-6 mb-2 text-foreground" />
-                    <span className="text-xs text-center text-foreground">Gerar Ordem de Expedição</span>
-                  </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
-                    <Eye className="h-6 w-6 mb-2 text-foreground" />
-                    <span className="text-xs text-center text-foreground">Ver Ordens de Expedição</span>
-                  </button>
-                </div>
-
-                {/* Third Row */}
-                <div className="grid grid-cols-8 gap-4 mb-6">
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
-                    <Printer className="h-6 w-6 mb-2 text-foreground" />
-                    <span className="text-xs text-center text-foreground">Imprimir Etiqueta de Expedição</span>
-                  </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
                     <DollarSign className="h-6 w-6 mb-2 text-foreground" />
-                    <span className="text-xs text-center text-foreground">Gerar Boleto(s)</span>
-                  </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
-                    <Mail className="h-6 w-6 mb-2 text-foreground" />
-                    <span className="text-xs text-center text-foreground">Enviar Boleto(s) ao Cliente</span>
-                  </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
-                    <CheckCircle className="h-6 w-6 mb-2 text-foreground" />
-                    <span className="text-xs text-center text-foreground">Faturar Pedidos em Lote</span>
-                  </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
-                    <Package className="h-6 w-6 mb-2 text-foreground" />
-                    <span className="text-xs text-center text-foreground">Gerar Ordens de Produção Individual</span>
-                  </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
-                    <Package className="h-6 w-6 mb-2 text-foreground" />
-                    <span className="text-xs text-center text-foreground">Gerar Ordens de Produção Agrupado por Venda</span>
-                  </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
-                    <Package className="h-6 w-6 mb-2 text-foreground" />
-                    <span className="text-xs text-center text-foreground">Gerar Ordens de Produção Agrupado por Produto</span>
+                    <span className="text-xs text-center text-foreground">Gerar Boleto</span>
                   </button>
                   <button 
                     className="flex flex-col items-center justify-center p-3 hover:bg-destructive/10 rounded-lg transition-colors"

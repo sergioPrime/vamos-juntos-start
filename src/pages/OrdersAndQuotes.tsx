@@ -240,111 +240,111 @@ const OrdersAndQuotes = () => {
 
         {/* Quick Actions Menu - Shown when items are selected */}
         {selectedItems.size > 0 && (
-          <div className="bg-white border rounded-lg shadow-xl p-6 mb-4">
+          <div className="bg-card border rounded-lg shadow-xl p-6 mb-4">
             {/* First Row */}
             <div className="grid grid-cols-8 gap-4 mb-4">
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <FileText className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">NF-e</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <FileText className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">NF-e</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <FileText className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">NFCe/CFe</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <FileText className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">NFCe/CFe</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <FileText className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">NFS-e</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <FileText className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">NFS-e</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <FileText className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">CT-e</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <FileText className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">CT-e</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <Printer className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Imprimir</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <Printer className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Imprimir</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <Printer className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Impressão Direta</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <Printer className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Impressão Direta</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <Copy className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Duplicar</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <Copy className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Duplicar</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <Edit className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Editar</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <Edit className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Editar</span>
               </button>
             </div>
 
             {/* Second Row */}
             <div className="grid grid-cols-8 gap-4 mb-4">
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <Mail className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Enviar por E-mail</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <Mail className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Enviar por E-mail</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <Download className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Baixar</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <Download className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Baixar</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <AlertCircle className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Observações</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <AlertCircle className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Observações</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <CheckCircle className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Aprovar</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <CheckCircle className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Aprovar</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <CheckCircle className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Faturamento Parcial</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <CheckCircle className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Faturamento Parcial</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <Package className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Devolver Produtos</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <Package className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Devolver Produtos</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <Truck className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Gerar Ordem de Expedição</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <Truck className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Gerar Ordem de Expedição</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <Eye className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Ver Ordens de Expedição</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <Eye className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Ver Ordens de Expedição</span>
               </button>
             </div>
 
             {/* Third Row */}
             <div className="grid grid-cols-8 gap-4 mb-6">
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <Printer className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Imprimir Etiqueta de Expedição</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <Printer className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Imprimir Etiqueta de Expedição</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <DollarSign className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Gerar Boleto(s)</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <DollarSign className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Gerar Boleto(s)</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <Mail className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Enviar Boleto(s) ao Cliente</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <Mail className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Enviar Boleto(s) ao Cliente</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <CheckCircle className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Faturar Pedidos em Lote</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <CheckCircle className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Faturar Pedidos em Lote</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <Package className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Gerar Ordens de Produção Individual</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <Package className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Gerar Ordens de Produção Individual</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <Package className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Gerar Ordens de Produção Agrupado por Venda</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <Package className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Gerar Ordens de Produção Agrupado por Venda</span>
               </button>
-              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
-                <Package className="h-6 w-6 mb-2" />
-                <span className="text-xs text-center">Gerar Ordens de Produção Agrupado por Produto</span>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                <Package className="h-6 w-6 mb-2 text-foreground" />
+                <span className="text-xs text-center text-foreground">Gerar Ordens de Produção Agrupado por Produto</span>
               </button>
               <button 
-                className="flex flex-col items-center justify-center p-3 hover:bg-red-50 rounded-lg transition-colors"
+                className="flex flex-col items-center justify-center p-3 hover:bg-destructive/10 rounded-lg transition-colors"
                 onClick={() => {
                   toast({
                     title: "Função em desenvolvimento",
@@ -352,19 +352,19 @@ const OrdersAndQuotes = () => {
                   })
                 }}
               >
-                <Trash2 className="h-6 w-6 mb-2 text-red-600" />
-                <span className="text-xs text-center text-red-600">Excluir</span>
+                <Trash2 className="h-6 w-6 mb-2 text-destructive" />
+                <span className="text-xs text-center text-destructive">Excluir</span>
               </button>
             </div>
 
             {/* Cancel Selection */}
-            <div className="flex justify-center pt-4 border-t">
+            <div className="flex justify-center pt-4 border-t border-border">
               <button 
-                className="flex items-center gap-2 p-3 hover:bg-muted/50 rounded-lg transition-colors"
+                className="flex items-center gap-2 p-3 hover:bg-accent rounded-lg transition-colors"
                 onClick={() => setSelectedItems(new Set())}
               >
-                <X className="h-5 w-5" />
-                <span className="text-sm font-medium">Cancelar Seleção</span>
+                <X className="h-5 w-5 text-foreground" />
+                <span className="text-sm font-medium text-foreground">Cancelar Seleção</span>
               </button>
             </div>
           </div>

@@ -241,7 +241,7 @@ const OrdersAndQuotes = () => {
         {/* Quick Actions Modal - Shown when items are selected */}
         {selectedItems.size > 0 && (
           <div className="fixed inset-0 z-50 flex items-start justify-center pt-4 bg-black/50">
-            <div className="bg-card border rounded-lg shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="bg-card border rounded-lg shadow-2xl w-[56rem] mx-4 max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 {/* First Row */}
                 <div className="grid grid-cols-8 gap-4 mb-4">

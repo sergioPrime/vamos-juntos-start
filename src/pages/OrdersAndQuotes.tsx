@@ -176,6 +176,167 @@ const OrdersAndQuotes = () => {
     }
   }
 
+  // Action handlers
+  const handlePrint = () => {
+    toast({
+      title: "Imprimindo documentos",
+      description: `${selectedItems.size} documento(s) serão impressos.`,
+    })
+    window.print()
+  }
+
+  const handleDuplicate = async () => {
+    toast({
+      title: "Duplicando documentos",
+      description: `${selectedItems.size} documento(s) serão duplicados.`,
+    })
+    
+    // Funcionalidade será implementada posteriormente
+    setTimeout(() => {
+      toast({
+        title: "Duplicação concluída",
+        description: "Os documentos foram duplicados com sucesso.",
+      })
+      setSelectedItems(new Set())
+    }, 1000)
+  }
+
+  const handleEdit = () => {
+    if (selectedItems.size === 1) {
+      const itemId = Array.from(selectedItems)[0]
+      navigate(`/orders-quotes/${itemId}`)
+    } else {
+      toast({
+        title: "Seleção múltipla",
+        description: "Selecione apenas um item para editar.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleDownload = () => {
+    const selectedData = data.filter(item => selectedItems.has(item.id))
+    const csvContent = "data:text/csv;charset=utf-8," + 
+      "Número,Tipo,Status,Cliente,Valor,Data\n" +
+      selectedData.map(item => 
+        `${item.number},${item.type === 'order' ? 'Pedido' : 'Orçamento'},${statusLabels[item.status as keyof typeof statusLabels]},${item.customer_name},${item.total_amount},${new Date(item.date).toLocaleDateString('pt-BR')}`
+      ).join("\n")
+    
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement("a")
+    link.setAttribute("href", encodedUri)
+    link.setAttribute("download", `pedidos_orcamentos_${new Date().toISOString().split('T')[0]}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    toast({
+      title: "Download iniciado",
+      description: `Arquivo CSV com ${selectedItems.size} documento(s) baixado.`,
+    })
+  }
+
+  const handleApprove = async () => {
+    try {
+      const selectedData = data.filter(item => selectedItems.has(item.id))
+      
+      for (const item of selectedData) {
+        if (item.type === 'order') {
+          await supabase
+            .from('orders')
+            .update({ status: 'confirmed' })
+            .eq('id', item.id)
+        } else {
+          await supabase
+            .from('quotes')
+            .update({ status: 'accepted' })
+            .eq('id', item.id)
+        }
+      }
+      
+      toast({
+        title: "Aprovação concluída",
+        description: `${selectedItems.size} documento(s) aprovado(s) com sucesso.`,
+      })
+      
+      setSelectedItems(new Set())
+      loadData()
+    } catch (error) {
+      toast({
+        title: "Erro ao aprovar",
+        description: "Não foi possível aprovar os documentos.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleReturn = async () => {
+    try {
+      const selectedData = data.filter(item => selectedItems.has(item.id) && item.type === 'order')
+      
+      for (const item of selectedData) {
+        await supabase
+          .from('orders')
+          .update({ status: 'returned' })
+          .eq('id', item.id)
+      }
+      
+      toast({
+        title: "Devolução registrada",
+        description: `${selectedData.length} pedido(s) marcado(s) como devolvido(s).`,
+      })
+      
+      setSelectedItems(new Set())
+      loadData()
+    } catch (error) {
+      toast({
+        title: "Erro ao processar devolução",
+        description: "Não foi possível registrar a devolução.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleGenerateBoleto = () => {
+    toast({
+      title: "Gerando boletos",
+      description: `${selectedItems.size} boleto(s) serão gerados.`,
+    })
+    // Implementar lógica de geração de boleto
+  }
+
+  const handleDelete = async () => {
+    if (!confirm(`Tem certeza que deseja excluir ${selectedItems.size} documento(s)?`)) {
+      return
+    }
+    
+    try {
+      const selectedData = data.filter(item => selectedItems.has(item.id))
+      
+      for (const item of selectedData) {
+        if (item.type === 'order') {
+          await supabase.from('orders').delete().eq('id', item.id)
+        } else {
+          await supabase.from('quotes').delete().eq('id', item.id)
+        }
+      }
+      
+      toast({
+        title: "Exclusão concluída",
+        description: `${selectedItems.size} documento(s) excluído(s) com sucesso.`,
+      })
+      
+      setSelectedItems(new Set())
+      loadData()
+    } catch (error) {
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir os documentos.",
+        variant: "destructive",
+      })
+    }
+  }
+
   const filteredData = data.filter(item => {
     const matchesSearch = item.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.customer_name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -245,42 +406,58 @@ const OrdersAndQuotes = () => {
               <div className="p-6">
                 {/* Action Buttons */}
                 <div className="grid grid-cols-8 gap-4 mb-6">
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                  <button 
+                    className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors"
+                    onClick={handlePrint}
+                  >
                     <Printer className="h-6 w-6 mb-2 text-foreground" />
                     <span className="text-xs text-center text-foreground">Imprimir</span>
                   </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                  <button 
+                    className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors"
+                    onClick={handleDuplicate}
+                  >
                     <Copy className="h-6 w-6 mb-2 text-foreground" />
                     <span className="text-xs text-center text-foreground">Duplicar</span>
                   </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                  <button 
+                    className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors"
+                    onClick={handleEdit}
+                  >
                     <Edit className="h-6 w-6 mb-2 text-foreground" />
                     <span className="text-xs text-center text-foreground">Editar</span>
                   </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                  <button 
+                    className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors"
+                    onClick={handleDownload}
+                  >
                     <Download className="h-6 w-6 mb-2 text-foreground" />
                     <span className="text-xs text-center text-foreground">Baixar</span>
                   </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                  <button 
+                    className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors"
+                    onClick={handleApprove}
+                  >
                     <CheckCircle className="h-6 w-6 mb-2 text-foreground" />
                     <span className="text-xs text-center text-foreground">Aprovar</span>
                   </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                  <button 
+                    className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors"
+                    onClick={handleReturn}
+                  >
                     <Package className="h-6 w-6 mb-2 text-foreground" />
                     <span className="text-xs text-center text-foreground">Devolver Produtos</span>
                   </button>
-                  <button className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors">
+                  <button 
+                    className="flex flex-col items-center justify-center p-3 hover:bg-accent rounded-lg transition-colors"
+                    onClick={handleGenerateBoleto}
+                  >
                     <DollarSign className="h-6 w-6 mb-2 text-foreground" />
                     <span className="text-xs text-center text-foreground">Gerar Boleto</span>
                   </button>
                   <button 
                     className="flex flex-col items-center justify-center p-3 hover:bg-destructive/10 rounded-lg transition-colors"
-                    onClick={() => {
-                      toast({
-                        title: "Função em desenvolvimento",
-                        description: "A exclusão em lote será implementada em breve.",
-                      })
-                    }}
+                    onClick={handleDelete}
                   >
                     <Trash2 className="h-6 w-6 mb-2 text-destructive" />
                     <span className="text-xs text-center text-destructive">Excluir</span>

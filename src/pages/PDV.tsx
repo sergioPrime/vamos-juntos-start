@@ -1062,7 +1062,7 @@ const PDV = () => {
       {/* Keyboard Shortcuts Footer */}
       <div className="fixed bottom-0 left-0 right-0 bg-muted/80 backdrop-blur-sm border-t border-border z-40">
         <div className="container mx-auto px-6 py-3">
-          <div className="grid grid-cols-4 gap-x-6 gap-y-2 text-xs text-muted-foreground">
+          <div className="max-w-[50%] grid grid-cols-4 gap-x-3 gap-y-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <kbd className="px-2 py-1 bg-background border border-border rounded font-mono font-semibold">F1</kbd>
               <span>Produtos</span>

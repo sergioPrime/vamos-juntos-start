@@ -1013,7 +1013,7 @@ const PDV = () => {
                 )}
                 
                 <Button 
-                  className="w-full h-14 text-lg font-semibold" 
+                  className="w-full h-14 text-lg font-semibold relative z-50" 
                   size="lg" 
                   disabled={cart.length === 0}
                   onClick={() => setIsPaymentDialogOpen(true)}
@@ -1060,7 +1060,7 @@ const PDV = () => {
       />
 
       {/* Keyboard Shortcuts Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-muted/80 backdrop-blur-sm border-t border-border">
+      <div className="fixed bottom-0 left-0 right-0 bg-muted/80 backdrop-blur-sm border-t border-border z-40">
         <div className="container mx-auto px-6 py-2">
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">

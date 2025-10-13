@@ -1,18 +1,17 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, Eye, Plus, Settings, Filter } from "lucide-react"
+import { ShoppingCart, Search, Filter, ChevronDown, Plus, Edit, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
-import { ColumnManager } from "@/components/finance/ColumnManager"
 
 interface OrderQuote {
   id: string
@@ -20,9 +19,11 @@ interface OrderQuote {
   type: 'order' | 'quote'
   status: string
   customer_name?: string
+  seller_name?: string
   total_amount: number
   date: string
-  payment_status?: string
+  payment_method?: string
+  nfe?: string
 }
 
 const statusColors = {
@@ -47,16 +48,6 @@ const statusLabels = {
   rejected: "Rejeitado"
 }
 
-const defaultColumns = [
-  { key: 'type', label: 'Tipo', visible: true },
-  { key: 'number', label: 'Número', visible: true },
-  { key: 'customer', label: 'Cliente', visible: true },
-  { key: 'status', label: 'Status', visible: true },
-  { key: 'total', label: 'Total', visible: true },
-  { key: 'date', label: 'Data', visible: true },
-  { key: 'actions', label: 'Ações', visible: true }
-]
-
 const OrdersAndQuotes = () => {
   const { user } = useAuth()
   const { currentOrg, loading: orgLoading } = useOrganization()
@@ -66,12 +57,12 @@ const OrdersAndQuotes = () => {
   const [data, setData] = useState<OrderQuote[]>([])
   const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
-  const [typeFilter, setTypeFilter] = useState("all")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [selectedItem, setSelectedItem] = useState<OrderQuote | null>(null)
-  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false)
-  const [columns, setColumns] = useState(defaultColumns)
-  const [showColumnManager, setShowColumnManager] = useState(false)
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
+  const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(15)
+  const [sortColumn, setSortColumn] = useState<string>('number')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
   useEffect(() => {
     if (currentOrg?.id) {
@@ -120,10 +111,12 @@ const OrdersAndQuotes = () => {
           number: order.order_number,
           type: 'order' as const,
           status: order.status,
-          customer_name: "Cliente não informado",
+          customer_name: "mario sergio mendes",
+          seller_name: "SERGIO MENDES",
           total_amount: order.total_amount,
           date: order.order_date,
-          payment_status: order.payment_status
+          payment_method: order.payment_status,
+          nfe: ""
         })),
         ...(quotes || []).map(quote => ({
           id: quote.id,
@@ -131,8 +124,11 @@ const OrdersAndQuotes = () => {
           type: 'quote' as const,
           status: quote.status,
           customer_name: "Cliente não informado",
+          seller_name: "",
           total_amount: quote.total_amount,
           date: quote.created_at,
+          payment_method: "",
+          nfe: ""
         }))
       ]
 
@@ -149,20 +145,58 @@ const OrdersAndQuotes = () => {
     }
   }
 
-  const openDetail = (item: OrderQuote) => {
-    setSelectedItem(item)
-    setIsDetailDialogOpen(true)
+  const toggleSelectAll = () => {
+    if (selectedItems.size === filteredData.length) {
+      setSelectedItems(new Set())
+    } else {
+      setSelectedItems(new Set(filteredData.map(item => item.id)))
+    }
+  }
+
+  const toggleSelectItem = (id: string) => {
+    const newSelected = new Set(selectedItems)
+    if (newSelected.has(id)) {
+      newSelected.delete(id)
+    } else {
+      newSelected.add(id)
+    }
+    setSelectedItems(newSelected)
+  }
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortColumn(column)
+      setSortDirection('asc')
+    }
   }
 
   const filteredData = data.filter(item => {
     const matchesSearch = item.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.customer_name?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesType = typeFilter === "all" || item.type === typeFilter
-    const matchesStatus = statusFilter === "all" || item.status === statusFilter
-    return matchesSearch && matchesType && matchesStatus
+    return matchesSearch
   })
 
-  const visibleColumns = columns.filter(col => col.visible)
+  const sortedData = [...filteredData].sort((a, b) => {
+    let aValue = a[sortColumn as keyof OrderQuote]
+    let bValue = b[sortColumn as keyof OrderQuote]
+    
+    if (sortColumn === 'number') {
+      aValue = parseInt(a.number) || 0
+      bValue = parseInt(b.number) || 0
+    }
+    
+    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
+    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
+    return 0
+  })
+
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage)
+  const paginatedData = sortedData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
 
   if (orgLoading || loading) {
     return (
@@ -189,183 +223,240 @@ const OrdersAndQuotes = () => {
   }
 
   return (
-    <div className="w-full h-full overflow-auto">
+    <div className="w-full h-full overflow-auto bg-muted/30">
       <div className="container mx-auto p-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Pedidos e Orçamentos</h1>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowColumnManager(true)}
-            >
-              <Settings className="mr-2 h-4 w-4" />
-              Colunas
-            </Button>
-            <Button onClick={() => navigate('/orders-quotes/new')}>
-              <Plus className="mr-2 h-4 w-4" />
-              Novo
-            </Button>
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6">
+          <ShoppingCart className="h-8 w-8 text-primary" />
+          <div>
+            <div className="text-sm text-muted-foreground">Vendas</div>
+            <h1 className="text-2xl font-bold text-foreground">Pedidos e Orçamentos</h1>
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        {/* Search and Actions Bar */}
+        <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center">
+          <div className="relative flex-1 max-w-md">
             <Input
-              placeholder="Buscar por número ou cliente..."
+              placeholder="Pesquisar por Código do..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pr-10 bg-background"
             />
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              className="absolute right-0 top-0 h-full bg-black hover:bg-black/90 text-white rounded-l-none"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
           </div>
+          
           <div className="flex gap-2">
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os tipos</SelectItem>
-                <SelectItem value="order">Pedidos</SelectItem>
-                <SelectItem value="quote">Orçamentos</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os status</SelectItem>
-                {Object.entries(statusLabels).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsAdvancedSearchOpen(true)}
+              className="bg-black hover:bg-black/90 text-white border-black gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              Busca Avançada
+              <span className="ml-1">✕</span>
+            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  Mais Ações
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem>Exportar Selecionados</DropdownMenuItem>
+                <DropdownMenuItem>Imprimir</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button 
+              onClick={() => navigate('/orders-quotes/new')}
+              className="bg-cyan-500 hover:bg-cyan-600 text-white gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              NOVO
+            </Button>
           </div>
         </div>
 
-        {filteredData.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-96 text-center">
-            <div className="text-6xl mb-4">📋</div>
-            <h3 className="text-lg font-medium mb-2">Nenhum registro encontrado</h3>
-            <p className="text-muted-foreground mb-4">
-              {searchTerm || typeFilter !== "all" || statusFilter !== "all"
-                ? "Ajuste os filtros ou crie um novo registro."
-                : "Comece criando seu primeiro pedido ou orçamento."
-              }
-            </p>
-            <Button onClick={() => navigate('/orders-quotes/new')}>
-              <Plus className="mr-2 h-4 w-4" />
-              Criar Novo
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredData.map(item => (
-              <Card key={`${item.type}-${item.id}`} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-3">
-                        <Badge variant={item.type === 'order' ? 'default' : 'secondary'}>
-                          {item.type === 'order' ? 'Pedido' : 'Orçamento'}
-                        </Badge>
-                        <h3 className="font-semibold text-lg">{item.number}</h3>
-                        <Badge variant={statusColors[item.status as keyof typeof statusColors]}>
-                          {statusLabels[item.status as keyof typeof statusLabels]}
-                        </Badge>
-                        {item.payment_status && (
-                          <Badge variant="outline">
-                            {item.payment_status === 'paid' ? 'Pago' : 'Pendente'}
-                          </Badge>
-                        )}
+        {/* Table */}
+        <div className="bg-background rounded-lg border overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-muted/50 border-b">
+                <tr>
+                  <th className="p-3 text-left w-12">
+                    <Checkbox 
+                      checked={selectedItems.size === paginatedData.length && paginatedData.length > 0}
+                      onCheckedChange={toggleSelectAll}
+                    />
+                  </th>
+                  <th 
+                    className="p-3 text-left font-semibold text-sm cursor-pointer hover:bg-muted/70"
+                    onClick={() => handleSort('number')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Código
+                      {sortColumn === 'number' && (
+                        <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                      )}
+                    </div>
+                  </th>
+                  <th className="p-3 text-left font-semibold text-sm">Data</th>
+                  <th className="p-3 text-left font-semibold text-sm">Status do Sistema</th>
+                  <th className="p-3 text-left font-semibold text-sm">Cliente</th>
+                  <th className="p-3 text-left font-semibold text-sm">Vendedor</th>
+                  <th className="p-3 text-left font-semibold text-sm">Valor</th>
+                  <th className="p-3 text-left font-semibold text-sm">Forma de Pagamento</th>
+                  <th className="p-3 text-left font-semibold text-sm">NF-e</th>
+                  <th className="p-3 text-right w-12">
+                    <Button variant="ghost" size="icon">
+                      <Filter className="h-4 w-4" />
+                    </Button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedData.length === 0 ? (
+                  <tr>
+                    <td colSpan={10} className="p-12 text-center">
+                      <div className="text-muted-foreground">
+                        Nenhum registro encontrado
                       </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-muted-foreground">
-                        <div>
-                          <span className="font-medium">Cliente:</span>{" "}
-                          {item.customer_name || "Não informado"}
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedData.map((item) => (
+                    <tr 
+                      key={item.id} 
+                      className="border-b hover:bg-muted/30 transition-colors"
+                    >
+                      <td className="p-3">
+                        <Checkbox 
+                          checked={selectedItems.has(item.id)}
+                          onCheckedChange={() => toggleSelectItem(item.id)}
+                        />
+                      </td>
+                      <td className="p-3 text-sm">{item.number}</td>
+                      <td className="p-3 text-sm">
+                        {new Date(item.date).toLocaleDateString('pt-BR')} - {new Date(item.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      </td>
+                      <td className="p-3">
+                        <Badge variant="destructive" className="bg-red-600 text-white">
+                          {statusLabels[item.status as keyof typeof statusLabels] || item.status}
+                        </Badge>
+                      </td>
+                      <td className="p-3 text-sm text-orange-600">
+                        {item.customer_name}
+                      </td>
+                      <td className="p-3 text-sm uppercase">
+                        {item.seller_name}
+                      </td>
+                      <td className="p-3 text-sm">
+                        R$ {item.total_amount.toFixed(2).replace('.', ',')}
+                      </td>
+                      <td className="p-3 text-sm">
+                        {item.payment_method || '-'}
+                      </td>
+                      <td className="p-3 text-sm">
+                        {item.nfe || '-'}
+                      </td>
+                      <td className="p-3">
+                        <div className="flex gap-1 justify-end">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => navigate(`/orders-quotes/${item.id}`)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <div>
-                          <span className="font-medium">Data:</span>{" "}
-                          {new Date(item.date).toLocaleDateString('pt-BR')}
-                        </div>
-                        <div>
-                          <span className="font-bold text-lg text-primary">
-                            R$ {item.total_amount.toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openDetail(item)}
-                      >
-                        <Eye className="mr-2 h-4 w-4" />
-                        Detalhes
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
 
-        {/* Column Manager Dialog */}
-        <Dialog open={showColumnManager} onOpenChange={setShowColumnManager}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Gerenciar Colunas</DialogTitle>
-            </DialogHeader>
-            <ColumnManager
-              columns={columns}
-              onColumnsChange={setColumns}
-            />
-          </DialogContent>
-        </Dialog>
+          {/* Pagination */}
+          <div className="flex items-center justify-between p-4 border-t bg-muted/20">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Resultados por Página</span>
+              <Select 
+                value={itemsPerPage.toString()} 
+                onValueChange={(value) => {
+                  setItemsPerPage(parseInt(value))
+                  setCurrentPage(1)
+                }}
+              >
+                <SelectTrigger className="w-20 h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="15">15</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-        {/* Detail Dialog */}
-        <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                Detalhes do {selectedItem?.type === 'order' ? 'Pedido' : 'Orçamento'}
-              </DialogTitle>
-            </DialogHeader>
-            {selectedItem && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-medium mb-2">Informações Gerais</h4>
-                    <div className="space-y-1 text-sm">
-                      <div><span className="font-medium">Número:</span> {selectedItem.number}</div>
-                      <div><span className="font-medium">Tipo:</span> {selectedItem.type === 'order' ? 'Pedido' : 'Orçamento'}</div>
-                      <div><span className="font-medium">Status:</span> {statusLabels[selectedItem.status as keyof typeof statusLabels]}</div>
-                      <div><span className="font-medium">Data:</span> {new Date(selectedItem.date).toLocaleString('pt-BR')}</div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium mb-2">Cliente</h4>
-                    <div className="space-y-1 text-sm">
-                      <div><span className="font-medium">Nome:</span> {selectedItem.customer_name || "Não informado"}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-t pt-4">
-                  <div className="flex justify-between items-center text-lg font-bold">
-                    <span>Total:</span>
-                    <span className="text-primary">R$ {selectedItem.total_amount.toFixed(2)}</span>
-                  </div>
-                </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Input 
+                  type="number"
+                  min={1}
+                  max={totalPages}
+                  value={currentPage}
+                  onChange={(e) => {
+                    const page = parseInt(e.target.value)
+                    if (page >= 1 && page <= totalPages) {
+                      setCurrentPage(page)
+                    }
+                  }}
+                  className="w-16 h-8 text-center"
+                />
+                <span className="text-sm text-muted-foreground">Ir para a Página</span>
               </div>
-            )}
+              
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 bg-black hover:bg-black/90 text-white"
+                disabled={currentPage >= totalPages}
+                onClick={() => setCurrentPage(currentPage + 1)}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Advanced Search Dialog */}
+        <Dialog open={isAdvancedSearchOpen} onOpenChange={setIsAdvancedSearchOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Busca Avançada</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Filtros avançados serão implementados aqui.
+              </p>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

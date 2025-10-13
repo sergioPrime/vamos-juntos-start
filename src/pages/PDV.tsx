@@ -243,13 +243,23 @@ const PDV = () => {
   }, [products, debouncedSearchTerm])
 
   const addToCart = (product: Product) => {
+    // Verificar se o produto tem estoque disponível
+    if (product.stock_quantity <= 0) {
+      toast({
+        title: "Estoque insuficiente",
+        description: `Não foi possível inserir o produto "${product.name}" pois está com estoque insuficiente.`,
+        variant: "destructive",
+      })
+      return
+    }
+
     const existingItem = cart.find(item => item.id === product.id)
     
     if (existingItem) {
       if (existingItem.quantity >= product.stock_quantity) {
         toast({
           title: "Estoque insuficiente",
-          description: `Apenas ${product.stock_quantity} unidades disponíveis.`,
+          description: `Não foi possível adicionar mais unidades. Apenas ${product.stock_quantity} unidades disponíveis.`,
           variant: "destructive",
         })
         return

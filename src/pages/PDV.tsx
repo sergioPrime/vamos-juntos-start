@@ -625,9 +625,73 @@ const PDV = () => {
           created_by: user?.id
         })
 
+      // Criar lançamento financeiro (receita já liquidada)
+      // Se não houver cliente selecionado, buscar ou criar um cliente "CONSUMIDOR"
+      let customerId = selectedCustomer?.id
+      
+      if (!customerId) {
+        // Buscar cliente padrão "CONSUMIDOR"
+        const { data: consumidorCliente, error: consumidorError } = await supabase
+          .from('customers')
+          .select('id')
+          .eq('org_id', currentOrg?.id)
+          .eq('name', 'CONSUMIDOR')
+          .maybeSingle()
+
+        if (consumidorCliente) {
+          customerId = consumidorCliente.id
+        } else {
+          // Criar cliente "CONSUMIDOR" se não existir
+          const { data: novoConsumidor, error: createConsumidorError } = await supabase
+            .from('customers')
+            .insert({
+              org_id: currentOrg?.id,
+              name: 'CONSUMIDOR',
+              owner_id: user?.id
+            })
+            .select('id')
+            .single()
+
+          if (!createConsumidorError && novoConsumidor) {
+            customerId = novoConsumidor.id
+          }
+        }
+      }
+
+      // Criar lançamento financeiro
+      if (customerId) {
+        // Obter o primeiro método de pagamento usado
+        const firstPaymentMethodId = payments[0]?.paymentMethodId
+
+        const { error: financialError } = await supabase
+          .from('financial_entries')
+          .insert({
+            org_id: currentOrg?.id,
+            person_id: customerId,
+            person_type: 'customer',
+            entry_type: 'receivable',
+            amount: finalTotal,
+            description: `Venda PDV - ${orderNumber}`,
+            due_date: new Date().toISOString().split('T')[0],
+            competence_date: new Date().toISOString().split('T')[0],
+            is_settled: true,
+            settled_at: new Date().toISOString(),
+            payment_method_id: firstPaymentMethodId,
+            settled_payment_method_id: firstPaymentMethodId,
+            origin_type: 'order',
+            origin_id: order.id,
+            created_by: user?.id
+          })
+
+        if (financialError) {
+          console.error('Error creating financial entry:', financialError)
+          // Não interrompe o fluxo se houver erro no lançamento financeiro
+        }
+      }
+
       toast({
         title: "Venda finalizada com sucesso!",
-        description: `Pedido ${orderNumber} criado.`,
+        description: `Pedido ${orderNumber} criado e lançamento financeiro registrado.`,
       })
 
       // Clear cart and close dialog

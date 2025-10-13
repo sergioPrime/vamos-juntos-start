@@ -3193,7 +3193,15 @@ export type Database = {
           projection_date: string
         }[]
       }
+      generate_next_caixa_number: {
+        Args: { p_org_id: string }
+        Returns: number
+      }
       generate_next_entry_code: {
+        Args: { p_org_id: string }
+        Returns: number
+      }
+      generate_next_order_number: {
         Args: { p_org_id: string }
         Returns: number
       }
@@ -3203,7 +3211,11 @@ export type Database = {
       }
       generate_next_purchase_number: {
         Args: { p_org_id: string }
-        Returns: string
+        Returns: number
+      }
+      generate_next_quote_number: {
+        Args: { p_org_id: string }
+        Returns: number
       }
       has_children: {
         Args: { item_id: string; table_name: string }

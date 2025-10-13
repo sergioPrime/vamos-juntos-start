@@ -240,139 +240,132 @@ const OrdersAndQuotes = () => {
 
         {/* Quick Actions Menu - Shown when items are selected */}
         {selectedItems.size > 0 && (
-          <div className="bg-white border rounded-lg shadow-lg p-4 mb-4">
-            <div className="space-y-3">
-              {/* First Row */}
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <FileText className="h-4 w-4" />
-                  NF-e
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <FileText className="h-4 w-4" />
-                  NFCe/CFe
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <FileText className="h-4 w-4" />
-                  NFS-e
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <FileText className="h-4 w-4" />
-                  CT-e
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Printer className="h-4 w-4" />
-                  Imprimir
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Printer className="h-4 w-4" />
-                  Impressão Direta
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Copy className="h-4 w-4" />
-                  Duplicar
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Edit className="h-4 w-4" />
-                  Editar
-                </Button>
-              </div>
+          <div className="bg-white border rounded-lg shadow-xl p-6 mb-4">
+            {/* First Row */}
+            <div className="grid grid-cols-8 gap-4 mb-4">
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <FileText className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">NF-e</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <FileText className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">NFCe/CFe</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <FileText className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">NFS-e</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <FileText className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">CT-e</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <Printer className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Imprimir</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <Printer className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Impressão Direta</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <Copy className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Duplicar</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <Edit className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Editar</span>
+              </button>
+            </div>
 
-              {/* Second Row */}
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Mail className="h-4 w-4" />
-                  Enviar por E-mail
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Download className="h-4 w-4" />
-                  Baixar
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <AlertCircle className="h-4 w-4" />
-                  Observações
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  Aprovar
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  Faturamento Parcial
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Package className="h-4 w-4" />
-                  Devolver Produtos
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Truck className="h-4 w-4" />
-                  Gerar Ordem de Expedição
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Eye className="h-4 w-4" />
-                  Ver Itens de Expedição
-                </Button>
-              </div>
+            {/* Second Row */}
+            <div className="grid grid-cols-8 gap-4 mb-4">
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <Mail className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Enviar por E-mail</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <Download className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Baixar</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <AlertCircle className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Observações</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <CheckCircle className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Aprovar</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <CheckCircle className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Faturamento Parcial</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <Package className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Devolver Produtos</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <Truck className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Gerar Ordem de Expedição</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <Eye className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Ver Ordens de Expedição</span>
+              </button>
+            </div>
 
-              {/* Third Row */}
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Printer className="h-4 w-4" />
-                  Imprimir Etiqueta de Expedição
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  Gerar Boleto(s)
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Mail className="h-4 w-4" />
-                  Enviar Boleto(s) ao Cliente
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  Faturar Pedidos em Lote
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Package className="h-4 w-4" />
-                  Gerar Ordens de Produção Individual
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Package className="h-4 w-4" />
-                  Gerar Ordens de Produção Agrupado por Venda
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Package className="h-4 w-4" />
-                  Gerar Ordens de Produção Agrupado por Produto
-                </Button>
-                <Button 
-                  variant="destructive" 
-                  size="sm" 
-                  className="gap-2"
-                  onClick={() => {
-                    // Handle delete
-                    toast({
-                      title: "Função em desenvolvimento",
-                      description: "A exclusão em lote será implementada em breve.",
-                    })
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Excluir
-                </Button>
-              </div>
+            {/* Third Row */}
+            <div className="grid grid-cols-8 gap-4 mb-6">
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <Printer className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Imprimir Etiqueta de Expedição</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <DollarSign className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Gerar Boleto(s)</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <Mail className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Enviar Boleto(s) ao Cliente</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <CheckCircle className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Faturar Pedidos em Lote</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <Package className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Gerar Ordens de Produção Individual</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <Package className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Gerar Ordens de Produção Agrupado por Venda</span>
+              </button>
+              <button className="flex flex-col items-center justify-center p-3 hover:bg-muted/50 rounded-lg transition-colors">
+                <Package className="h-6 w-6 mb-2" />
+                <span className="text-xs text-center">Gerar Ordens de Produção Agrupado por Produto</span>
+              </button>
+              <button 
+                className="flex flex-col items-center justify-center p-3 hover:bg-red-50 rounded-lg transition-colors"
+                onClick={() => {
+                  toast({
+                    title: "Função em desenvolvimento",
+                    description: "A exclusão em lote será implementada em breve.",
+                  })
+                }}
+              >
+                <Trash2 className="h-6 w-6 mb-2 text-red-600" />
+                <span className="text-xs text-center text-red-600">Excluir</span>
+              </button>
+            </div>
 
-              {/* Cancel Selection */}
-              <div className="flex justify-center pt-2 border-t">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="gap-2"
-                  onClick={() => setSelectedItems(new Set())}
-                >
-                  <X className="h-4 w-4" />
-                  Cancelar Seleção
-                </Button>
-              </div>
+            {/* Cancel Selection */}
+            <div className="flex justify-center pt-4 border-t">
+              <button 
+                className="flex items-center gap-2 p-3 hover:bg-muted/50 rounded-lg transition-colors"
+                onClick={() => setSelectedItems(new Set())}
+              >
+                <X className="h-5 w-5" />
+                <span className="text-sm font-medium">Cancelar Seleção</span>
+              </button>
             </div>
           </div>
         )}

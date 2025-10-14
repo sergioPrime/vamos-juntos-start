@@ -176,124 +176,119 @@ export const AbrirCaixaDialog = ({ open, onOpenChange, onSuccess }: AbrirCaixaDi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl bg-white dark:bg-gray-950">
-        <DialogHeader className="border-b pb-4">
-          <DialogTitle className="text-xl font-normal">Abertura de Caixa</DialogTitle>
-        </DialogHeader>
-        
-        {/* Header Section */}
-        <div className="grid grid-cols-2 gap-6 py-4 bg-gray-50 dark:bg-gray-900 px-6 -mx-6">
-          <div>
-            <Label htmlFor="caixa" className="text-sm font-medium mb-2 block">Caixa</Label>
-            <Input
-              id="caixa"
-              value={user?.email || ""}
-              disabled
-              className="bg-white dark:bg-gray-800"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="empresa" className="text-sm font-medium mb-2 block">Empresa</Label>
-            <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-              <SelectTrigger className="bg-white dark:bg-gray-800">
-                <SelectValue placeholder="Selecione a empresa" />
-              </SelectTrigger>
-              <SelectContent>
-                {companies.map((company) => (
-                  <SelectItem key={company.id} value={company.id}>
-                    {company.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Add Initial Balance Button */}
-        <div className="flex justify-end mt-2">
-          <Button
-            onClick={adicionarSaldoInicial}
-            className="bg-[#5cb85c] hover:bg-[#4cae4c] text-white"
-            style={{ fontSize: '14px' }}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Adicionar saldo inicial
-          </Button>
-        </div>
-
-        {/* List of Initial Balances */}
-        <div className="space-y-3 min-h-[200px]">
-          {saldosIniciais.map((saldo) => (
-            <div 
-              key={saldo.id}
-              className="bg-[#5cb85c] text-white rounded px-4 py-3 flex items-center justify-between"
-            >
-              <div className="flex items-center gap-3">
-                <Banknote className="w-6 h-6" />
-                <span className="text-lg font-medium">{saldo.tipo}</span>
-              </div>
-              <div className="flex items-center gap-4">
-                <span className="text-lg font-medium">
-                  {saldo.valor.toFixed(2).replace('.', ',')}
-                </span>
-                <button
-                  onClick={() => removerSaldo(saldo.id)}
-                  className="w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
-
-          {/* Input field for adding money */}
-          <div className="flex gap-2 items-end">
-            <div className="flex-1">
-              <Label htmlFor="valor-dinheiro" className="text-sm mb-2 block">
-                Valor em Dinheiro
+      <DialogContent className="max-w-[950px] bg-white dark:bg-gray-950 p-0 gap-0">
+        {/* Header Section with Caixa and Empresa */}
+        <div className="bg-[#f5f5f5] dark:bg-gray-900 px-6 py-4">
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <Label 
+                htmlFor="caixa" 
+                className="text-black dark:text-gray-200 mb-2 block"
+                style={{ fontSize: '13px', fontWeight: 600 }}
+              >
+                Caixa
               </Label>
               <Input
-                id="valor-dinheiro"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0,00"
-                value={valorDinheiro}
-                onChange={(e) => setValorDinheiro(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    adicionarSaldoInicial()
-                  }
-                }}
-                className="text-base"
+                id="caixa"
+                value={user?.email || ""}
+                disabled
+                className="bg-white dark:bg-gray-800 border-gray-300 h-10"
+                style={{ fontSize: '13px' }}
               />
             </div>
+            
+            <div>
+              <Label 
+                htmlFor="empresa" 
+                className="text-black dark:text-gray-200 mb-2 block"
+                style={{ fontSize: '13px', fontWeight: 600 }}
+              >
+                Empresa
+              </Label>
+              <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 h-10" style={{ fontSize: '13px' }}>
+                  <SelectValue placeholder="Selecione a empresa" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id} style={{ fontSize: '13px' }}>
+                      {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Add Initial Balance Button */}
+          <div className="flex justify-end mt-4">
+            <Button
+              onClick={adicionarSaldoInicial}
+              className="bg-[#5cb85c] hover:bg-[#4cae4c] text-white border-0 shadow-sm"
+              style={{ fontSize: '13px', padding: '8px 20px', height: 'auto' }}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar saldo inicial
+            </Button>
+          </div>
+        </div>
+
+        {/* Content Area */}
+        <div className="px-6 py-6 bg-white dark:bg-gray-950">
+          {/* List of Initial Balances */}
+          <div className="space-y-3 min-h-[220px]">
+            {saldosIniciais.map((saldo) => (
+              <div 
+                key={saldo.id}
+                className="bg-[#5cb85c] text-white rounded-sm flex items-center justify-between"
+                style={{ padding: '14px 20px' }}
+              >
+                <div className="flex items-center gap-4">
+                  <Banknote className="w-7 h-7" strokeWidth={1.5} />
+                  <span style={{ fontSize: '18px', fontWeight: 500 }}>
+                    {saldo.tipo}
+                  </span>
+                </div>
+                <div className="flex items-center gap-6">
+                  <span style={{ fontSize: '16px', fontWeight: 500 }}>
+                    {saldo.valor.toFixed(2).replace('.', ',')}
+                  </span>
+                  <button
+                    onClick={() => removerSaldo(saldo.id)}
+                    className="w-7 h-7 rounded-full bg-[#d9534f] hover:bg-[#c9302c] flex items-center justify-center transition-colors"
+                  >
+                    <X className="w-4 h-4" strokeWidth={2.5} />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Total Value Footer */}
-        <div className="bg-black text-white py-6 -mx-6 -mb-6 px-6 rounded-b-lg">
-          <div className="text-center text-xl">
-            Valor total de Abertura: <span className="font-bold">R$ {calcularTotal().toFixed(2).replace('.', ',')}</span>
-          </div>
+        <div 
+          className="bg-black text-white flex items-center justify-center"
+          style={{ padding: '22px 0' }}
+        >
+          <span style={{ fontSize: '20px', fontWeight: 400 }}>
+            Valor total de Abertura: <span style={{ fontWeight: 700 }}>R$ {calcularTotal().toFixed(2).replace('.', ',')}</span>
+          </span>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3 mt-6">
+        <div className="px-6 py-6 bg-white dark:bg-gray-950 flex gap-4">
           <Button
             onClick={handleVoltar}
-            variant="outline"
-            className="flex-1 bg-[#d9534f] hover:bg-[#c9302c] text-white border-none"
-            style={{ fontSize: '15px', padding: '12px 24px' }}
+            className="flex-1 bg-[#d9534f] hover:bg-[#c9302c] text-white border-0 shadow-sm rounded"
+            style={{ fontSize: '14px', padding: '11px 24px', height: 'auto', fontWeight: 500 }}
           >
             Voltar
           </Button>
           <Button
             onClick={handleSalvarEIrAoPDV}
             disabled={loading || saldosIniciais.length === 0}
-            className="flex-1 bg-[#5cb85c] hover:bg-[#4cae4c] text-white"
-            style={{ fontSize: '15px', padding: '12px 24px' }}
+            className="flex-1 bg-[#5cb85c] hover:bg-[#4cae4c] text-white border-0 shadow-sm rounded disabled:opacity-50"
+            style={{ fontSize: '14px', padding: '11px 24px', height: 'auto', fontWeight: 500 }}
           >
             {loading ? "Salvando..." : "Salvar e ir ao PDV"}
           </Button>

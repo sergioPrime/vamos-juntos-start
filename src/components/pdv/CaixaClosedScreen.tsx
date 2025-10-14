@@ -1,4 +1,4 @@
-import { AlertCircle, DollarSign } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface CaixaClosedScreenProps {
@@ -7,11 +7,12 @@ interface CaixaClosedScreenProps {
 
 export const CaixaClosedScreen = ({ onOpenCaixa }: CaixaClosedScreenProps) => {
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-200px)] bg-white">
-      <div className="text-center max-w-lg px-6">
-        <div className="mb-8 flex justify-center">
+    <div className="flex items-center justify-center min-h-[calc(100vh-160px)] bg-white dark:bg-gray-950">
+      <div className="text-center max-w-2xl px-6">
+        {/* Icon container */}
+        <div className="mb-10 flex justify-center">
           <div className="relative">
-            <div className="w-48 h-48 flex items-center justify-center">
+            <div className="w-56 h-56 flex items-center justify-center">
               {/* Cash register icon */}
               <svg 
                 viewBox="0 0 200 200" 
@@ -19,42 +20,58 @@ export const CaixaClosedScreen = ({ onOpenCaixa }: CaixaClosedScreenProps) => {
                 style={{ fill: "#20b5d5" }}
               >
                 {/* Base */}
-                <rect x="30" y="120" width="140" height="50" rx="5" />
+                <rect x="25" y="115" width="150" height="55" rx="6" />
                 {/* Drawer */}
-                <rect x="40" y="130" width="120" height="30" rx="3" fill="#fff" stroke="#20b5d5" strokeWidth="2" />
+                <rect x="35" y="125" width="130" height="35" rx="4" fill="#fff" stroke="#20b5d5" strokeWidth="3" />
+                {/* Drawer handle */}
+                <rect x="90" y="138" width="20" height="8" rx="2" fill="#20b5d5" />
                 {/* Display */}
-                <rect x="70" y="70" width="60" height="40" rx="3" />
+                <rect x="65" y="65" width="70" height="45" rx="4" />
+                {/* Display screen */}
+                <rect x="70" y="70" width="60" height="25" rx="2" fill="#fff" opacity="0.3" />
                 {/* Paper roll */}
-                <rect x="45" y="75" width="20" height="35" rx="2" />
-                <path d="M 45 85 Q 35 85 35 95 Q 35 105 45 105" fill="#fff" />
-                {/* Buttons */}
+                <rect x="40" y="72" width="22" height="38" rx="3" />
+                <path d="M 40 82 Q 28 82 28 92 Q 28 102 40 102" fill="#fff" />
+                {/* Buttons grid */}
                 <g fill="#fff">
-                  <circle cx="90" cy="100" r="3" />
-                  <circle cx="100" cy="100" r="3" />
-                  <circle cx="110" cy="100" r="3" />
-                  <circle cx="90" cy="110" r="3" />
-                  <circle cx="100" cy="110" r="3" />
-                  <circle cx="110" cy="110" r="3" />
+                  <circle cx="85" cy="95" r="3.5" />
+                  <circle cx="95" cy="95" r="3.5" />
+                  <circle cx="105" cy="95" r="3.5" />
+                  <circle cx="115" cy="95" r="3.5" />
+                  <circle cx="85" cy="105" r="3.5" />
+                  <circle cx="95" cy="105" r="3.5" />
+                  <circle cx="105" cy="105" r="3.5" />
+                  <circle cx="115" cy="105" r="3.5" />
                 </g>
               </svg>
               
               {/* Alert badge */}
-              <div className="absolute -top-2 -right-2 w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
-                <AlertCircle className="w-10 h-10 text-white" strokeWidth={2.5} />
+              <div className="absolute -top-3 -right-3 w-[72px] h-[72px] bg-[#d9534f] rounded-full flex items-center justify-center shadow-xl">
+                <AlertCircle className="w-11 h-11 text-white" strokeWidth={2.8} />
               </div>
             </div>
           </div>
         </div>
 
-        <h1 className="text-2xl font-normal text-gray-900 mb-8 leading-relaxed">
+        {/* Message */}
+        <h1 
+          className="text-gray-800 dark:text-gray-200 mb-12 leading-[1.6]"
+          style={{ fontSize: '26px', fontWeight: 400, letterSpacing: '0.01em' }}
+        >
           Seu caixa não está aberto, é necessário abrir o<br />
           caixa para poder realizar vendas pelo PDV.
         </h1>
 
+        {/* Button */}
         <Button
           onClick={onOpenCaixa}
-          size="lg"
-          className="bg-[#5cb85c] hover:bg-[#4cae4c] text-white px-8 py-6 text-base font-medium rounded-md"
+          className="bg-[#5cb85c] hover:bg-[#4cae4c] text-white font-medium rounded shadow-sm transition-colors"
+          style={{ 
+            fontSize: '16px', 
+            padding: '14px 36px',
+            height: 'auto',
+            minWidth: '180px'
+          }}
         >
           Abrir meu caixa
         </Button>

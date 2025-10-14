@@ -10,15 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 
 interface Company {
   id: string;
@@ -179,28 +170,19 @@ export default function WarehouseForm() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#f5f5f5" }}>
-      <div className="p-6">
+    <div className="min-h-screen bg-[#e8e8e8]">
+      <div className="px-6 py-4">
         {/* Header */}
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg" style={{ backgroundColor: "#26b9d6" }}>
-              <Users className="h-6 w-6 text-white" />
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-start gap-3">
+            <div className="p-2.5 rounded" style={{ backgroundColor: "#20b5d5" }}>
+              <Users className="h-7 w-7 text-white" />
             </div>
-            <div>
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink className="text-xs text-muted-foreground">Cadastro</BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage className="text-lg font-semibold">
-                      {isEditing ? "Edição de Depósito" : "Cadastro de Depósito"}
-                    </BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
+            <div className="flex flex-col">
+              <p className="text-[10px] text-gray-600 mb-0.5">Cadastro &gt;</p>
+              <h1 className="text-[22px] font-normal text-gray-900">
+                Cadastro de Depósito
+              </h1>
             </div>
           </div>
 
@@ -208,15 +190,13 @@ export default function WarehouseForm() {
             <Button
               onClick={handleSubmit}
               disabled={saveMutation.isPending}
-              className="h-9 px-4 text-xs font-semibold"
-              style={{ backgroundColor: "#26b9d6" }}
+              className="h-10 px-5 text-sm font-medium bg-[#20b5d5] hover:bg-[#1a9ab8] text-white"
             >
               Salvar
             </Button>
             <Button
               onClick={() => navigate("/cadastros/depositos")}
-              variant="outline"
-              className="h-9 px-4 text-xs font-semibold bg-gray-800 text-white hover:bg-gray-900"
+              className="h-10 px-5 text-sm font-medium bg-black hover:bg-gray-800 text-white"
             >
               Voltar
             </Button>
@@ -224,57 +204,58 @@ export default function WarehouseForm() {
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-lg border p-6">
-          <Tabs defaultValue="dados" className="w-full">
-            <TabsList className="mb-6">
-              <TabsTrigger value="dados" className="text-xs">
-                Dados
-              </TabsTrigger>
-            </TabsList>
+        <div className="bg-white rounded border border-gray-200">
+          {/* Tab Header */}
+          <div className="border-b border-gray-200 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <span className="text-[13px] font-semibold text-gray-900">Dados</span>
+              <svg className="h-3 w-3 text-[#20b5d5]" viewBox="0 0 12 12" fill="currentColor">
+                <path d="M6 1L6 11M1 6L11 6" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+            </div>
+          </div>
 
-            <TabsContent value="dados">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="text-xs font-semibold">
-                      Nome do depósito <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      maxLength={100}
-                      placeholder="Digite o nome do depósito"
-                      className="text-xs"
-                      required
-                    />
-                  </div>
+          {/* Form Content */}
+          <form onSubmit={handleSubmit} className="p-6">
+            <div className="grid grid-cols-2 gap-8">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-[13px] font-semibold text-gray-900">
+                  Nome do depósito <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  maxLength={100}
+                  placeholder=""
+                  className="text-sm h-10 border-gray-300"
+                  required
+                />
+              </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="company" className="text-xs font-semibold">
-                      Empresa <span className="text-red-500">*</span>
-                    </Label>
-                    <Select
-                      value={formData.company_id}
-                      onValueChange={(value) => setFormData({ ...formData, company_id: value })}
-                      required
-                    >
-                      <SelectTrigger id="company" className="text-xs">
-                        <SelectValue placeholder="Selecione a empresa" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {companies.map((company) => (
-                          <SelectItem key={company.id} value={company.id} className="text-xs">
-                            {company.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </form>
-            </TabsContent>
-          </Tabs>
+              <div className="space-y-2">
+                <Label htmlFor="company" className="text-[13px] font-semibold text-gray-900">
+                  Empresa <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={formData.company_id}
+                  onValueChange={(value) => setFormData({ ...formData, company_id: value })}
+                  required
+                >
+                  <SelectTrigger id="company" className="text-sm h-10 border-gray-300">
+                    <SelectValue placeholder="" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map((company) => (
+                      <SelectItem key={company.id} value={company.id} className="text-sm">
+                        {company.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>

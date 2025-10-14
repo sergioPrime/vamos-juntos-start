@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
 import { toast } from "@/hooks/use-toast";
-import { Warehouse, Package, Search, Pencil, Trash2 } from "lucide-react";
+import { Warehouse, Search, Pencil, Trash2, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -19,16 +19,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 
-interface Warehouse {
+interface WarehouseData {
   id: string;
   name: string;
   company_id: string;
@@ -44,7 +36,7 @@ export default function Warehouses() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedWarehouses, setSelectedWarehouses] = useState<string[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [warehouseToDelete, setWarehouseToDelete] = useState<Warehouse | null>(null);
+  const [warehouseToDelete, setWarehouseToDelete] = useState<WarehouseData | null>(null);
 
   const { data: warehouses = [], isLoading } = useQuery({
     queryKey: ["warehouses", currentOrg?.id, searchTerm],
@@ -72,7 +64,7 @@ export default function Warehouses() {
       const { data, error } = await query;
 
       if (error) throw error;
-      return data as Warehouse[];
+      return data as WarehouseData[];
     },
     enabled: !!currentOrg?.id,
   });
@@ -104,7 +96,7 @@ export default function Warehouses() {
     },
   });
 
-  const handleDelete = (warehouse: Warehouse) => {
+  const handleDelete = (warehouse: WarehouseData) => {
     setWarehouseToDelete(warehouse);
     setDeleteDialogOpen(true);
   };
@@ -130,134 +122,116 @@ export default function Warehouses() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#f5f5f5" }}>
-      <div className="p-6">
+    <div className="min-h-screen bg-[#e8e8e8]">
+      <div className="px-6 py-4">
         {/* Header */}
-        <div className="mb-4 flex items-center gap-3">
-          <div className="p-2 rounded-lg" style={{ backgroundColor: "#26b9d6" }}>
-            <Warehouse className="h-6 w-6 text-white" />
+        <div className="mb-6 flex items-start gap-3">
+          <div className="p-2.5 rounded" style={{ backgroundColor: "#20b5d5" }}>
+            <Warehouse className="h-7 w-7 text-white" />
           </div>
-          <div>
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink className="text-xs text-muted-foreground">Estoque</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage className="text-lg font-semibold">Depósitos</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+          <div className="flex flex-col">
+            <p className="text-[10px] text-gray-600 mb-0.5">Estoque &gt;</p>
+            <h1 className="text-[22px] font-normal text-gray-900">Depósitos</h1>
           </div>
         </div>
 
         {/* Search and Actions Bar */}
         <div className="mb-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 flex-1 max-w-md">
+          <div className="flex items-center gap-2">
             <Input
               placeholder="Pesquisar por Nome"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-white text-xs h-9"
+              className="bg-white text-sm h-10 w-[280px] border-gray-300"
             />
             <Button
               size="sm"
-              className="h-9 px-3 text-xs"
-              style={{ backgroundColor: "#0c5c7a" }}
+              className="h-10 w-10 p-0 bg-black hover:bg-gray-800"
             >
-              <Search className="h-3.5 w-3.5" />
+              <Search className="h-4 w-4 text-white" />
             </Button>
           </div>
 
           <Button
             onClick={() => navigate("/cadastros/depositos/novo")}
-            className="h-9 px-4 text-xs font-semibold"
-            style={{ backgroundColor: "#26b9d6" }}
+            className="h-10 px-5 text-sm font-medium bg-[#20b5d5] hover:bg-[#1a9ab8] text-white"
           >
             + NOVO
           </Button>
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-lg border">
+        <div className="bg-white rounded border border-gray-200">
           <Table>
             <TableHeader>
-              <TableRow className="bg-gray-50">
-                <TableHead className="w-12 py-2.5 px-3">
+              <TableRow className="bg-[#f5f5f5] hover:bg-[#f5f5f5] border-b border-gray-200">
+                <TableHead className="w-12 h-11 px-4">
                   <Checkbox
                     checked={selectedWarehouses.length === warehouses.length && warehouses.length > 0}
                     onCheckedChange={toggleSelectAll}
                   />
                 </TableHead>
-                <TableHead className="py-2.5 px-3 text-xs font-semibold text-gray-700">
+                <TableHead className="h-11 px-4 text-[13px] font-semibold text-gray-700">
                   Nome ↓
                 </TableHead>
-                <TableHead className="py-2.5 px-3 text-xs font-semibold text-gray-700">
+                <TableHead className="h-11 px-4 text-[13px] font-semibold text-gray-700">
                   Empresa
                 </TableHead>
-                <TableHead className="w-24 py-2.5 px-3 text-xs font-semibold text-gray-700 text-right">
-                  Ações
+                <TableHead className="w-20 h-11 px-4 text-right">
+                  <Filter className="h-4 w-4 text-gray-600 ml-auto" />
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-xs text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center py-12 text-sm text-gray-500">
                     Carregando...
                   </TableCell>
                 </TableRow>
               ) : warehouses.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8">
-                    <div className="flex flex-col items-center gap-2">
-                      <Package className="h-8 w-8 text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">Nenhum depósito encontrado</p>
-                      <Button
-                        onClick={() => navigate("/cadastros/depositos/novo")}
-                        variant="outline"
-                        size="sm"
-                        className="mt-2 text-xs"
-                      >
-                        Criar Depósito
-                      </Button>
-                    </div>
+                  <TableCell colSpan={4} className="text-center py-12">
+                    <p className="text-sm text-gray-500 mb-3">Nenhum depósito encontrado</p>
+                    <Button
+                      onClick={() => navigate("/cadastros/depositos/novo")}
+                      variant="outline"
+                      size="sm"
+                      className="text-sm"
+                    >
+                      Criar Depósito
+                    </Button>
                   </TableCell>
                 </TableRow>
               ) : (
                 warehouses.map((warehouse) => (
-                  <TableRow key={warehouse.id} className="hover:bg-gray-50">
-                    <TableCell className="py-2.5 px-3">
+                  <TableRow key={warehouse.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <TableCell className="h-12 px-4">
                       <Checkbox
                         checked={selectedWarehouses.includes(warehouse.id)}
                         onCheckedChange={() => toggleSelect(warehouse.id)}
                       />
                     </TableCell>
-                    <TableCell className="py-2.5 px-3 text-xs">
+                    <TableCell className="h-12 px-4 text-[13px] text-[#5e4db2] font-medium">
                       {warehouse.name}
                     </TableCell>
-                    <TableCell className="py-2.5 px-3 text-xs">
+                    <TableCell className="h-12 px-4 text-[13px] text-gray-700">
                       {warehouse.companies?.name || "-"}
                     </TableCell>
-                    <TableCell className="py-2.5 px-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                    <TableCell className="h-12 px-4">
+                      <div className="flex items-center justify-end gap-3">
+                        <button
                           onClick={() => navigate(`/cadastros/depositos/editar/${warehouse.id}`)}
-                          className="h-7 w-7 p-0"
+                          className="text-gray-600 hover:text-gray-900"
                         >
-                          <Pencil className="h-3.5 w-3.5 text-blue-600" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
                           onClick={() => handleDelete(warehouse)}
-                          className="h-7 w-7 p-0"
+                          className="text-gray-600 hover:text-red-600"
                         >
-                          <Trash2 className="h-3.5 w-3.5 text-red-600" />
-                        </Button>
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
                     </TableCell>
                   </TableRow>

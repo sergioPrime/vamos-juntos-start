@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Plus, Search, Edit, Trash2, Package, ArrowLeft, Save } from "lucide-react"
+import { Plus, Search, Edit, Trash2, Package, ArrowLeft, Save, ChevronDown, Check, Circle, Filter, MoreVertical } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,6 +17,9 @@ import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
 import { usePermissionGuard } from "@/hooks/usePermissionGuard"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Checkbox } from "@/components/ui/checkbox"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 interface Product {
   id: string
@@ -99,6 +102,8 @@ const Products = () => {
   const [categories, setCategories] = useState<string[]>([])
   const [showForm, setShowForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false)
   
   // Form state
   const [formData, setFormData] = useState({
@@ -827,128 +832,183 @@ const Products = () => {
     )
   }
 
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedProducts(filteredProducts.map(p => p.id))
+    } else {
+      setSelectedProducts([])
+    }
+  }
+
+  const handleSelectProduct = (productId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedProducts([...selectedProducts, productId])
+    } else {
+      setSelectedProducts(selectedProducts.filter(id => id !== productId))
+    }
+  }
+
+  const getSupplierName = (supplierId?: string) => {
+    if (!supplierId) return ""
+    const supplier = suppliers.find(s => s.id === supplierId)
+    return supplier?.name || ""
+  }
+
   return (
-    <div className="page-container w-full h-full flex flex-col">
-      {/* Fixed header with buttons */}
-      <div className="flex justify-between items-center p-6 border-b bg-background">
-        <h1 className="text-3xl font-bold">Produtos</h1>
-        <Button onClick={() => openForm()}>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Produto
-        </Button>
+    <div className="page-container w-full h-full flex flex-col bg-muted/30">
+      {/* Header */}
+      <div className="flex items-center gap-2 p-4 bg-background border-b">
+        <Package className="h-6 w-6 text-primary" />
+        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+          <span>Estoque</span>
+          <ChevronDown className="h-4 w-4 rotate-[-90deg]" />
+          <span className="text-foreground font-medium">Produtos</span>
+        </div>
+      </div>
+
+      {/* Action Bar */}
+      <div className="flex items-center justify-between gap-4 p-4 bg-background border-b">
+        <div className="flex items-center gap-2 flex-1">
+          <div className="relative flex-1 max-w-md">
+            <Input
+              placeholder="Pesquisar por Código/Nome"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pr-10"
+            />
+            <Button 
+              size="sm" 
+              className="absolute right-0 top-0 h-full rounded-l-none bg-foreground hover:bg-foreground/90"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
+          <Button 
+            variant="default" 
+            className="bg-[hsl(199,89%,28%)] hover:bg-[hsl(199,89%,25%)]"
+            onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
+          >
+            <Filter className="mr-2 h-4 w-4" />
+            Busca Avançada
+          </Button>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <ChevronDown className="mr-2 h-4 w-4" />
+                Mais Ações
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>Exportar Selecionados</DropdownMenuItem>
+              <DropdownMenuItem>Importar Produtos</DropdownMenuItem>
+              <DropdownMenuItem>Atualizar Preços</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          <Button 
+            className="bg-[hsl(188,85%,43%)] hover:bg-[hsl(188,85%,40%)]"
+            onClick={() => openForm()}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            NOVO
+          </Button>
+        </div>
       </div>
 
       {/* Main content */}
-      <div className="flex-1 p-6 overflow-auto">
-        {/* Search and filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar produtos..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Todas as categorias" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas as categorias</SelectItem>
-              {categories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <div className="flex-1 p-4 overflow-auto">
+        <div className="bg-background rounded-lg border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[40px]">
+                  <Checkbox 
+                    checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
+                    onCheckedChange={handleSelectAll}
+                  />
+                </TableHead>
+                <TableHead className="w-[40px]">
+                  <ChevronDown className="h-4 w-4" />
+                </TableHead>
+                <TableHead className="w-[60px]">Tipo</TableHead>
+                <TableHead>Código Sistema</TableHead>
+                <TableHead>Código</TableHead>
+                <TableHead>Nome</TableHead>
+                <TableHead className="text-center">Visível Vendas</TableHead>
+                <TableHead>Marca</TableHead>
+                <TableHead>Modelo</TableHead>
+                <TableHead>Fornecedor</TableHead>
+                <TableHead className="w-[80px] text-right">
+                  <Filter className="h-4 w-4 ml-auto" />
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredProducts.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={11} className="text-center py-12">
+                    <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                      {searchTerm ? "Nenhum produto encontrado" : "Nenhum produto cadastrado"}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {searchTerm ? "Tente alterar os filtros de busca" : "Comece criando seu primeiro produto"}
+                    </p>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredProducts.map((product) => (
+                  <TableRow key={product.id}>
+                    <TableCell>
+                      <Checkbox 
+                        checked={selectedProducts.includes(product.id)}
+                        onCheckedChange={(checked) => handleSelectProduct(product.id, checked as boolean)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </TableCell>
+                    <TableCell>
+                      <Circle className="h-5 w-5 text-muted-foreground" />
+                    </TableCell>
+                    <TableCell className="font-mono text-sm">{product.system_code || "-"}</TableCell>
+                    <TableCell className="font-mono text-sm">{product.sku || "-"}</TableCell>
+                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell className="text-center">
+                      {!product.hide_in_sales && (
+                        <Check className="h-5 w-5 text-green-600 mx-auto" />
+                      )}
+                    </TableCell>
+                    <TableCell>{product.brand || "-"}</TableCell>
+                    <TableCell>{product.model || "-"}</TableCell>
+                    <TableCell>{getSupplierName(product.supplier_id)}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openForm(product)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(product)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </div>
-
-        {/* Products grid */}
-        {filteredProducts.length === 0 ? (
-          <div className="text-center py-8">
-            <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium text-muted-foreground mb-2">
-              {searchTerm || selectedCategory !== "all"
-                ? "Nenhum produto encontrado"
-                : "Nenhum produto cadastrado"}
-            </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              {searchTerm || selectedCategory !== "all"
-                ? "Tente alterar os filtros de busca"
-                : "Comece criando seu primeiro produto"}
-            </p>
-            {!searchTerm && selectedCategory === "all" && (
-              <Button onClick={() => openForm()}>
-                <Plus className="mr-2 h-4 w-4" />
-                Criar Produto
-              </Button>
-            )}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
-              <Card key={product.id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg line-clamp-2">{product.name}</CardTitle>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openForm(product)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(product)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <p className="text-sm font-medium text-primary">SKU: {product.sku}</p>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Preço:</span>
-                      <span className="font-medium">
-                        R$ {product.unit_price.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Estoque:</span>
-                      <span className={`font-medium ${
-                        product.stock_quantity <= (product.min_stock_level || 0)
-                          ? 'text-destructive'
-                          : 'text-foreground'
-                      }`}>
-                        {product.stock_quantity} {product.unit}
-                      </span>
-                    </div>
-                    <div className="flex gap-1 flex-wrap">
-                      {product.category && (
-                        <Badge variant="outline" className="text-xs">
-                          {product.category}
-                        </Badge>
-                      )}
-                      {!product.active && (
-                        <Badge variant="destructive" className="text-xs">
-                          Inativo
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   )

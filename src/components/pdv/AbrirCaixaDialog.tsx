@@ -221,11 +221,36 @@ export const AbrirCaixaDialog = ({ open, onOpenChange, onSuccess }: AbrirCaixaDi
           </div>
 
           {/* Add Initial Balance Button */}
-          <div className="flex justify-end mt-4">
+          <div className="flex items-end gap-3 mt-4">
+            <div className="flex-1">
+              <Label 
+                htmlFor="valor-dinheiro" 
+                className="text-black dark:text-gray-200 mb-2 block"
+                style={{ fontSize: '13px', fontWeight: 600 }}
+              >
+                Valor em Dinheiro
+              </Label>
+              <Input
+                id="valor-dinheiro"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="0,00"
+                value={valorDinheiro}
+                onChange={(e) => setValorDinheiro(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    adicionarSaldoInicial()
+                  }
+                }}
+                className="bg-white dark:bg-gray-800 border-gray-300 h-10"
+                style={{ fontSize: '13px' }}
+              />
+            </div>
             <Button
               onClick={adicionarSaldoInicial}
               className="bg-[#5cb85c] hover:bg-[#4cae4c] text-white border-0 shadow-sm"
-              style={{ fontSize: '13px', padding: '8px 20px', height: 'auto' }}
+              style={{ fontSize: '13px', padding: '8px 20px', height: '40px' }}
             >
               <Plus className="w-4 h-4 mr-2" />
               Adicionar saldo inicial
@@ -236,7 +261,7 @@ export const AbrirCaixaDialog = ({ open, onOpenChange, onSuccess }: AbrirCaixaDi
         {/* Content Area */}
         <div className="px-6 py-6 bg-white dark:bg-gray-950">
           {/* List of Initial Balances */}
-          <div className="space-y-3 min-h-[220px]">
+          <div className="space-y-3 min-h-[180px]">
             {saldosIniciais.map((saldo) => (
               <div 
                 key={saldo.id}

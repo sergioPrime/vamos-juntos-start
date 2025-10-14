@@ -855,40 +855,41 @@ const Products = () => {
   }
 
   return (
-    <div className="page-container w-full h-full flex flex-col bg-muted/30">
+    <div className="page-container w-full h-full flex flex-col bg-[#f5f5f5]">
       {/* Header */}
-      <div className="flex items-center gap-2 p-4 bg-background border-b">
-        <Package className="h-6 w-6 text-primary" />
+      <div className="flex items-center gap-2 px-6 py-3 bg-background border-b">
+        <Package className="h-5 w-5 text-[hsl(188,85%,43%)]" />
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
-          <span>Estoque</span>
-          <ChevronDown className="h-4 w-4 rotate-[-90deg]" />
-          <span className="text-foreground font-medium">Produtos</span>
+          <span className="text-muted-foreground">Estoque</span>
+          <ChevronDown className="h-3 w-3 rotate-[-90deg]" />
+          <span className="text-foreground font-medium text-base">Produtos</span>
         </div>
       </div>
 
       {/* Action Bar */}
-      <div className="flex items-center justify-between gap-4 p-4 bg-background border-b">
+      <div className="flex items-center justify-between gap-3 px-6 py-3 bg-background border-b">
         <div className="flex items-center gap-2 flex-1">
-          <div className="relative flex-1 max-w-md">
+          <div className="relative w-[280px]">
             <Input
               placeholder="Pesquisar por Código/Nome"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pr-10"
+              className="h-9 text-sm pr-10 border-border"
             />
             <Button 
               size="sm" 
-              className="absolute right-0 top-0 h-full rounded-l-none bg-foreground hover:bg-foreground/90"
+              className="absolute right-0 top-0 h-9 px-3 rounded-l-none bg-[#1a1a1a] hover:bg-[#2a2a2a] text-white"
             >
               <Search className="h-4 w-4" />
             </Button>
           </div>
           <Button 
             variant="default" 
-            className="bg-[hsl(199,89%,28%)] hover:bg-[hsl(199,89%,25%)]"
+            size="sm"
+            className="h-9 bg-[#0c5c7a] hover:bg-[#094a62] text-white text-sm px-4"
             onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
           >
-            <Filter className="mr-2 h-4 w-4" />
+            <Filter className="mr-2 h-3.5 w-3.5" />
             Busca Avançada
           </Button>
         </div>
@@ -896,8 +897,8 @@ const Products = () => {
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                <ChevronDown className="mr-2 h-4 w-4" />
+              <Button variant="outline" size="sm" className="h-9 text-sm">
+                <ChevronDown className="mr-2 h-3.5 w-3.5" />
                 Mais Ações
               </Button>
             </DropdownMenuTrigger>
@@ -909,7 +910,8 @@ const Products = () => {
           </DropdownMenu>
           
           <Button 
-            className="bg-[hsl(188,85%,43%)] hover:bg-[hsl(188,85%,40%)]"
+            size="sm"
+            className="h-9 bg-[#26b9d6] hover:bg-[#1fa3bd] text-white text-sm font-medium px-4"
             onClick={() => openForm()}
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -919,39 +921,43 @@ const Products = () => {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 p-4 overflow-auto">
-        <div className="bg-background rounded-lg border">
+      <div className="flex-1 px-6 py-4 overflow-auto">
+        <div className="bg-white rounded border border-border shadow-sm">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="w-[40px]">
+              <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
+                <TableHead className="w-[40px] h-10 px-3">
                   <Checkbox 
                     checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
                     onCheckedChange={handleSelectAll}
+                    className="border-gray-400"
                   />
                 </TableHead>
-                <TableHead className="w-[40px]">
-                  <ChevronDown className="h-4 w-4" />
+                <TableHead className="w-[40px] h-10 px-2">
+                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                 </TableHead>
-                <TableHead className="w-[60px]">Tipo</TableHead>
-                <TableHead>Código Sistema</TableHead>
-                <TableHead>Código</TableHead>
-                <TableHead>Nome</TableHead>
-                <TableHead className="text-center">Visível Vendas</TableHead>
-                <TableHead>Marca</TableHead>
-                <TableHead>Modelo</TableHead>
-                <TableHead>Fornecedor</TableHead>
-                <TableHead className="w-[80px] text-right">
-                  <Filter className="h-4 w-4 ml-auto" />
+                <TableHead className="w-[60px] h-10 px-3 text-xs font-medium text-foreground">Tipo</TableHead>
+                <TableHead className="w-[140px] h-10 px-3 text-xs font-medium text-foreground">
+                  Código Sistema
+                  <ChevronDown className="inline h-3 w-3 ml-1" />
+                </TableHead>
+                <TableHead className="w-[120px] h-10 px-3 text-xs font-medium text-foreground">Código</TableHead>
+                <TableHead className="h-10 px-3 text-xs font-medium text-foreground">Nome</TableHead>
+                <TableHead className="w-[120px] h-10 px-3 text-xs font-medium text-foreground text-center">Visível Vendas</TableHead>
+                <TableHead className="w-[120px] h-10 px-3 text-xs font-medium text-foreground">Marca</TableHead>
+                <TableHead className="w-[120px] h-10 px-3 text-xs font-medium text-foreground">Modelo</TableHead>
+                <TableHead className="w-[140px] h-10 px-3 text-xs font-medium text-foreground">Fornecedor</TableHead>
+                <TableHead className="w-[60px] h-10 px-2 text-right">
+                  <Filter className="h-3.5 w-3.5 ml-auto text-muted-foreground" />
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="text-center py-12">
+                  <TableCell colSpan={11} className="text-center py-16">
                     <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                    <h3 className="text-base font-medium text-muted-foreground mb-2">
                       {searchTerm ? "Nenhum produto encontrado" : "Nenhum produto cadastrado"}
                     </h3>
                     <p className="text-sm text-muted-foreground mb-4">
@@ -961,45 +967,48 @@ const Products = () => {
                 </TableRow>
               ) : (
                 filteredProducts.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell>
+                  <TableRow key={product.id} className="hover:bg-[#fafafa]">
+                    <TableCell className="px-3 py-2.5">
                       <Checkbox 
                         checked={selectedProducts.includes(product.id)}
                         onCheckedChange={(checked) => handleSelectProduct(product.id, checked as boolean)}
+                        className="border-gray-400"
                       />
                     </TableCell>
-                    <TableCell>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    <TableCell className="px-2 py-2.5">
+                      <ChevronDown className="h-3.5 w-3.5 text-[#26b9d6]" />
                     </TableCell>
-                    <TableCell>
-                      <Circle className="h-5 w-5 text-muted-foreground" />
+                    <TableCell className="px-3 py-2.5">
+                      <Circle className="h-4 w-4 text-gray-400" />
                     </TableCell>
-                    <TableCell className="font-mono text-sm">{product.system_code || "-"}</TableCell>
-                    <TableCell className="font-mono text-sm">{product.sku || "-"}</TableCell>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell className="text-center">
+                    <TableCell className="px-3 py-2.5 text-xs text-foreground">{product.system_code || "-"}</TableCell>
+                    <TableCell className="px-3 py-2.5 text-xs text-[#26b9d6] font-medium">{product.sku || "-"}</TableCell>
+                    <TableCell className="px-3 py-2.5 text-xs text-foreground">{product.name}</TableCell>
+                    <TableCell className="px-3 py-2.5 text-center">
                       {!product.hide_in_sales && (
-                        <Check className="h-5 w-5 text-green-600 mx-auto" />
+                        <Check className="h-4 w-4 text-green-600 mx-auto" />
                       )}
                     </TableCell>
-                    <TableCell>{product.brand || "-"}</TableCell>
-                    <TableCell>{product.model || "-"}</TableCell>
-                    <TableCell>{getSupplierName(product.supplier_id)}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-end gap-1">
+                    <TableCell className="px-3 py-2.5 text-xs text-foreground">{product.brand || ""}</TableCell>
+                    <TableCell className="px-3 py-2.5 text-xs text-foreground">{product.model || ""}</TableCell>
+                    <TableCell className="px-3 py-2.5 text-xs text-foreground">{getSupplierName(product.supplier_id)}</TableCell>
+                    <TableCell className="px-2 py-2.5">
+                      <div className="flex items-center justify-end gap-0.5">
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="h-7 w-7 hover:bg-gray-100"
                           onClick={() => openForm(product)}
                         >
-                          <Edit className="h-4 w-4" />
+                          <Edit className="h-3.5 w-3.5 text-gray-600" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="h-7 w-7 hover:bg-gray-100"
                           onClick={() => handleDelete(product)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5 text-gray-600" />
                         </Button>
                       </div>
                     </TableCell>

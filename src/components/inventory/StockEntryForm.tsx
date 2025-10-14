@@ -149,14 +149,10 @@ export const StockEntryForm = ({ onSuccess }: StockEntryFormProps) => {
         .from('stock_movements')
         .insert({
           product_id: formData.product_id,
-          warehouse_id: formData.warehouse_id,
           movement_type: 'in',
           quantity: formData.quantity,
-          lot_id: formData.lot_number || null,
-          expiration_date: formData.expiration_date || null,
           reference_type: formData.entry_type,
-          reference_id: formData.reference_document || null,
-          notes: `${getEntryTypeLabel(formData.entry_type)} - ${formData.notes}`,
+          notes: `${getEntryTypeLabel(formData.entry_type)}${formData.notes ? ' - ' + formData.notes : ''}${formData.supplier_info ? ' (Fornecedor: ' + formData.supplier_info + ')' : ''}`,
           org_id: currentOrg?.id,
           created_by: user?.id,
         })

@@ -72,6 +72,8 @@ import SalesCategories from "./pages/cadastros/SalesCategories";
 import SalesCategoriesForm from "./pages/cadastros/SalesCategoriesForm";
 import PriceTables from "./pages/cadastros/PriceTables";
 import PriceTablesForm from "./pages/cadastros/PriceTablesForm";
+import Warehouses from "./pages/cadastros/Warehouses";
+import WarehouseForm from "./pages/cadastros/WarehouseForm";
 import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
@@ -578,6 +580,33 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <PriceTablesForm />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/depositos" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Warehouses />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/depositos/novo" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <WarehouseForm />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/depositos/editar/:id" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <WarehouseForm />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

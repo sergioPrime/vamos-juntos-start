@@ -55,6 +55,7 @@ const inventoryItems = [
 const cadastrosItems = [
   { title: "Pessoas", url: "/cadastros/pessoas", icon: Users },
   { title: "Produtos", url: "/products", icon: Package },
+  { title: "Depósitos", url: "/cadastros/depositos", icon: Package },
   { title: "Tipo de Compromisso", url: "/cadastros/tipos-compromisso", icon: Settings },
     { title: "Categorias de Vendas", url: "/cadastros/categorias-vendas", icon: ShoppingCart },
     { title: "Tabela de Preços", url: "/cadastros/tabela-precos", icon: Table },

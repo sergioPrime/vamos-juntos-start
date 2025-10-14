@@ -3019,6 +3019,7 @@ export type Database = {
       }
       warehouses: {
         Row: {
+          company_id: string | null
           created_at: string
           created_by: string
           description: string | null
@@ -3030,6 +3031,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string | null
           created_at?: string
           created_by: string
           description?: string | null
@@ -3041,6 +3043,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string | null
           created_at?: string
           created_by?: string
           description?: string | null
@@ -3051,7 +3054,15 @@ export type Database = {
           org_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "warehouses_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

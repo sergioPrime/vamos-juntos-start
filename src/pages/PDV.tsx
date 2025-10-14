@@ -16,6 +16,8 @@ import PDVHeader from "@/components/pdv/PDVHeader"
 import { CustomerSelector } from "@/components/pdv/CustomerSelector"
 import { PaymentDialog } from "@/components/pdv/PaymentDialog"
 import { DiscountDialog } from "@/components/pdv/DiscountDialog"
+import { AbrirCaixaDialog } from "@/components/pdv/AbrirCaixaDialog"
+import { CaixaClosedScreen } from "@/components/pdv/CaixaClosedScreen"
 import { usePermissionGuard } from "@/hooks/usePermissionGuard"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { cn } from "@/lib/utils"
@@ -86,6 +88,11 @@ const PDV = () => {
   const [barcodeBuffer, setBarcodeBuffer] = useState("")
   const [lastKeyTime, setLastKeyTime] = useState(0)
   
+  // Cash register states
+  const [caixaAberto, setCaixaAberto] = useState<boolean | null>(null)
+  const [isAbrirCaixaDialogOpen, setIsAbrirCaixaDialogOpen] = useState(false)
+  const [loadingCaixa, setLoadingCaixa] = useState(true)
+  
   // New features states
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [globalDiscount, setGlobalDiscount] = useState(0)
@@ -104,6 +111,36 @@ const PDV = () => {
   
   // Ref for search input
   const searchInputRef = useRef<HTMLInputElement>(null)
+
+  // Check if cash register is open
+  useEffect(() => {
+    const checkCaixaStatus = async () => {
+      if (!currentOrg?.id || !user?.id) return
+      
+      setLoadingCaixa(true)
+      try {
+        const { data, error } = await supabase
+          .from('caixa_sessoes')
+          .select('id, status')
+          .eq('org_id', currentOrg.id)
+          .eq('usuario_abertura', user.id)
+          .eq('status', 'aberto')
+          .order('abertura_em', { ascending: false })
+          .limit(1)
+
+        if (error) throw error
+        
+        setCaixaAberto(data && data.length > 0)
+      } catch (error) {
+        console.error('Error checking cash register status:', error)
+        setCaixaAberto(false)
+      } finally {
+        setLoadingCaixa(false)
+      }
+    }
+
+    checkCaixaStatus()
+  }, [currentOrg, user])
 
   useEffect(() => {
     console.log('PDV useEffect - currentOrg:', currentOrg, 'orgLoading:', orgLoading)
@@ -713,10 +750,10 @@ const PDV = () => {
   }
 
   // Show loading if organization is still loading or if products are loading
-  if (orgLoading || loading) {
+  if (orgLoading || loading || loadingCaixa) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="text-lg">Carregando produtos...</div>
+        <div className="text-lg">Carregando...</div>
       </div>
     )
   }
@@ -735,6 +772,34 @@ const PDV = () => {
           </Button>
         </div>
       </div>
+    )
+  }
+
+  // Show cash register closed screen if not open
+  if (caixaAberto === false) {
+    return (
+      <>
+        <PDVHeader
+          selectedSeller={selectedSeller}
+          selectedCompany={selectedCompany}
+          selectedTerminal={selectedTerminal}
+          selectedPriceTable={selectedPriceTable}
+          onSellerChange={setSelectedSeller}
+          onCompanyChange={setSelectedCompany}
+          onTerminalChange={setSelectedTerminal}
+          onPriceTableChange={setSelectedPriceTable}
+        />
+        
+        <CaixaClosedScreen 
+          onOpenCaixa={() => setIsAbrirCaixaDialogOpen(true)} 
+        />
+
+        <AbrirCaixaDialog
+          open={isAbrirCaixaDialogOpen}
+          onOpenChange={setIsAbrirCaixaDialogOpen}
+          onSuccess={() => setCaixaAberto(true)}
+        />
+      </>
     )
   }
 

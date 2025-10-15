@@ -227,20 +227,20 @@ export const PaymentDialog = ({
   if (step === 'select') {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-auto">
-          <div className="space-y-6 p-4">
+        <DialogContent className="max-w-[1100px] max-h-[90vh] bg-white dark:bg-gray-900">
+          <div className="relative p-8">
             {/* Header */}
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold text-black dark:text-white">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-black dark:text-white mb-3" style={{ fontSize: '28px' }}>
                 Selecione a Forma de Pagamento
               </h2>
-              <p className="text-xl font-semibold text-gray-700 dark:text-gray-300">
+              <p className="text-xl font-semibold text-gray-700 dark:text-gray-300" style={{ fontSize: '20px' }}>
                 Valor da Venda: {totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </p>
             </div>
 
             {/* Payment Methods Grid */}
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-5 gap-4 mb-6">
               {paymentMethods.map((method) => {
                 const style = getPaymentMethodStyle(method.name)
                 const Icon = style.icon
@@ -249,16 +249,20 @@ export const PaymentDialog = ({
                   <button
                     key={method.id}
                     onClick={() => handleMethodSelect(method.id)}
-                    className="relative aspect-square rounded-lg p-4 flex flex-col items-center justify-center gap-2 transition-all hover:scale-105 hover:shadow-lg"
-                    style={{ backgroundColor: style.color }}
+                    className="relative rounded-lg p-5 flex flex-col items-center justify-center gap-3 transition-all hover:opacity-90 hover:shadow-xl"
+                    style={{ 
+                      backgroundColor: style.color,
+                      aspectRatio: '1',
+                      minHeight: '140px'
+                    }}
                   >
                     {style.shortcut && (
-                      <div className="absolute top-2 right-2 bg-white/20 px-2 py-1 rounded text-white text-xs font-bold">
+                      <div className="absolute top-3 right-3 bg-white/30 px-3 py-1 rounded text-white font-bold" style={{ fontSize: '14px' }}>
                         {style.shortcut}
                       </div>
                     )}
-                    <Icon className="w-12 h-12 text-white" strokeWidth={2} />
-                    <span className="text-white font-bold text-sm text-center">
+                    <Icon className="text-white" size={64} strokeWidth={2.5} />
+                    <span className="text-white font-bold text-center leading-tight" style={{ fontSize: '15px' }}>
                       {method.name}
                     </span>
                   </button>
@@ -266,29 +270,34 @@ export const PaymentDialog = ({
               })}
             </div>
 
-            {/* Navigation indicators on the right side */}
-            <div className="flex justify-end gap-2">
-              <div className="flex flex-col gap-2 text-right">
-                <div className="flex items-center gap-2 justify-end">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Nova Venda</span>
-                  <div className="w-4 h-4 rounded-full border-2 border-gray-400"></div>
+            {/* Navigation indicators on the right side - positioned absolutely */}
+            <div className="absolute right-8 top-1/2 -translate-y-1/2">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-500 dark:text-gray-400" style={{ fontSize: '13px' }}>Nova Venda</span>
+                  <div className="w-5 h-5 rounded-full border-2 border-gray-400"></div>
                 </div>
-                <div className="flex items-center gap-2 justify-end">
-                  <span className="text-sm font-semibold text-black dark:text-white">Forma de Pagamento</span>
-                  <div className="w-4 h-4 rounded-full bg-black dark:bg-white border-2 border-black dark:border-white"></div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-semibold text-black dark:text-white" style={{ fontSize: '13px' }}>Forma de Pagamento</span>
+                  <div className="w-5 h-5 rounded-full bg-black dark:bg-white border-2 border-black dark:border-white">
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-white dark:bg-black"></div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 justify-end">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Finalizar Venda</span>
-                  <div className="w-4 h-4 rounded-full border-2 border-gray-400"></div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-500 dark:text-gray-400" style={{ fontSize: '13px' }}>Finalizar Venda</span>
+                  <div className="w-5 h-5 rounded-full border-2 border-gray-400"></div>
                 </div>
               </div>
             </div>
 
             {/* Back Button */}
-            <div className="flex justify-start">
+            <div className="flex justify-start mt-8">
               <Button
                 onClick={() => onOpenChange(false)}
-                className="bg-[#d9534f] hover:bg-[#c9302c] text-white px-6 py-3 rounded-lg font-semibold"
+                className="bg-[#d9534f] hover:bg-[#c9302c] text-white border-0 shadow-sm rounded"
+                style={{ fontSize: '16px', fontWeight: 600, padding: '12px 32px' }}
               >
                 F12 - Voltar
               </Button>

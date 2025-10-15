@@ -1027,8 +1027,8 @@ const PDV = () => {
                 <div className="text-4xl font-bold text-foreground">{cartQuantity}</div>
               </div>
               
-              {/* Detailed Totals */}
-              <div className="space-y-3 p-4 bg-accent/30 rounded-lg">
+              {/* Detailed Totals and Total Amount - Combined */}
+              <div className="space-y-4 p-5 bg-accent/30 rounded-lg">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal:</span>
                   <span className="font-medium">R$ {cartSubtotal.toFixed(2)}</span>
@@ -1045,13 +1045,15 @@ const PDV = () => {
                     <span className="font-medium text-orange-600">- R$ {globalDiscountAmount.toFixed(2)}</span>
                   </div>
                 )}
-              </div>
-              
-              {/* Total Amount */}
-              <div className="text-center p-6 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border-2 border-primary/20">
-                <div className="text-sm font-semibold text-muted-foreground mb-2">TOTAL A PAGAR</div>
-                <div className="text-5xl font-bold text-primary animate-scale-in">
-                  R$ {cartTotal.toFixed(2).replace('.', ',')}
+                
+                <Separator className="my-3" />
+                
+                {/* Total Amount - Inside the box */}
+                <div className="text-center pt-2">
+                  <div className="text-sm font-semibold text-muted-foreground mb-2">TOTAL A PAGAR</div>
+                  <div className="text-5xl font-bold text-primary animate-scale-in">
+                    R$ {cartTotal.toFixed(2).replace('.', ',')}
+                  </div>
                 </div>
               </div>
               

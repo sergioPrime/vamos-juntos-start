@@ -20,7 +20,6 @@ import { AbrirCaixaDialog } from "@/components/pdv/AbrirCaixaDialog"
 import { CaixaClosedScreen } from "@/components/pdv/CaixaClosedScreen"
 import { usePermissionGuard } from "@/hooks/usePermissionGuard"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
-import { useSidebar } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 
 interface Product {
@@ -75,7 +74,6 @@ const PDV = () => {
   const { currentOrg, loading: orgLoading } = useOrganization()
   const { toast } = useToast()
   const navigate = useNavigate()
-  const { setOpen } = useSidebar()
   
   const [products, setProducts] = useState<Product[]>([])
   const [cart, setCart] = useState<CartItem[]>([])
@@ -113,11 +111,6 @@ const PDV = () => {
   
   // Ref for search input
   const searchInputRef = useRef<HTMLInputElement>(null)
-
-  // Hide sidebar on mount
-  useEffect(() => {
-    setOpen(false)
-  }, [setOpen])
 
   // Check if cash register is open
   useEffect(() => {
@@ -421,20 +414,34 @@ const PDV = () => {
   const applyItemDiscount = (discountValue: number, isPercentage: boolean) => {
     if (!selectedItemForDiscount) return
 
-    setCart(cart.map(item =>
-      item.id === selectedItemForDiscount
-        ? { 
-            ...item, 
-            discount: discountValue,
-            discountType: isPercentage ? 'percentage' : 'value'
-          }
-        : item
-    ))
+    setCart(cart.map(item => {
+      if (item.id === selectedItemForDiscount) {
+        const itemSubtotal = item.quantity * item.unit_price
+        let itemDiscount = 0
+        
+        if (isPercentage) {
+          itemDiscount = itemSubtotal * (discountValue / 100)
+        } else {
+          itemDiscount = discountValue
+        }
+        
+        return {
+          ...item,
+          discount: discountValue,
+          discountType: isPercentage ? 'percentage' : 'value',
+          total: itemSubtotal - itemDiscount
+        }
+      }
+      return item
+    }))
 
     toast({
       title: "Desconto aplicado",
       description: "O desconto foi aplicado ao item.",
     })
+    
+    setIsItemDiscountDialogOpen(false)
+    setSelectedItemForDiscount(null)
   }
 
   const applyGlobalDiscount = (discountValue: number, isPercentage: boolean) => {

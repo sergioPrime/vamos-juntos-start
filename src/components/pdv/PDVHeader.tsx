@@ -158,11 +158,14 @@ const PDVHeader = ({
     <div className="bg-background border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+          {/* Logo - Clicável para voltar ao Dashboard */}
           <div className="flex items-center space-x-4">
-            <div className="bg-primary text-primary-foreground rounded-lg p-2 font-bold text-lg">
-              PDV
-            </div>
+            <button 
+              onClick={() => navigate('/dashboard')}
+              className="bg-primary text-primary-foreground rounded-lg p-2 font-bold text-lg hover:bg-primary/90 transition-colors cursor-pointer"
+            >
+              PRIME
+            </button>
           </div>
 
           {/* Selectors */}

@@ -505,7 +505,7 @@ const Products = () => {
                   
                   <div className="space-y-2">
                     <Label htmlFor="sku" className="required flex items-center gap-2">
-                      <span>Código SKU</span>
+                      <span>Código do Produto</span>
                       <span className="text-destructive">*</span>
                     </Label>
                     <Input

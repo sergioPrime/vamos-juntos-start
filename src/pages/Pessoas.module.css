@@ -48,6 +48,24 @@
 }
 
 /* Barra de ações superior */
+.btnFeedback {
+  background-color: #007BFF;
+  color: #FFFFFF;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.btnFeedback:hover {
+  background-color: #0056b3;
+}
+
+/* Barra de ações superior */
 .actionsBar {
   display: flex;
   gap: 12px;

@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { X, Plus, User, Search, ArrowLeft, Save } from "lucide-react"
+import { X, Plus, User, Search, ArrowLeft, Save, MessageSquare } from "lucide-react"
 import { toast } from "sonner"
 import styles from "./Pessoas.module.css"
 import { PessoasListagem } from "@/components/pessoas/PessoasListagem"
@@ -291,6 +291,10 @@ export function Pessoas() {
       {/* Barra de ações */}
       <div className="flex justify-end items-center px-6 py-4 bg-white border-b" style={{ borderColor: '#EEEEEE' }}>
         <div className={styles.actionsBar}>
+          <button className={styles.btnFeedback}>
+            <MessageSquare className="inline-block mr-2 w-4 h-4" />
+            Enviar Feedback
+          </button>
           <button className={styles.btnSave} onClick={handleSave}>
             <Save className="inline-block mr-2 w-4 h-4" />
             Salvar

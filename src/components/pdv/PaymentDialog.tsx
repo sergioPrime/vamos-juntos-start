@@ -9,6 +9,16 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 
+// Interface para dados do cartão
+interface CardDetails {
+  selectedCard: string
+  amount: number
+  cvNsu: string
+  installments: number
+  acquirer: string
+  terminal: string
+}
+
 interface PaymentMethod {
   id: string
   name: string
@@ -130,6 +140,39 @@ const getPaymentMethodStyle = (name: string) => {
   }
 }
 
+// Bandeiras de cartão disponíveis
+const cardBrands = [
+  { id: 'visa', name: 'Visa' },
+  { id: 'mastercard', name: 'MasterCard' },
+  { id: 'amex', name: 'American Exp.' },
+  { id: 'sorocred', name: 'Sorocred' },
+  { id: 'diners', name: 'Diners Club' },
+  { id: 'elo', name: 'Elo' },
+  { id: 'hipercard', name: 'Hipercard' },
+  { id: 'aura', name: 'Aura' },
+  { id: 'cabal', name: 'Cabal' },
+  { id: 'alelo', name: 'Alelo' },
+  { id: 'banescard', name: 'Banes Card' },
+  { id: 'calcard', name: 'CalCard' },
+  { id: 'credz', name: 'Credz' },
+  { id: 'discover', name: 'Discover' },
+  { id: 'goodcard', name: 'Good Card' },
+  { id: 'greencard', name: 'Green Card' },
+  { id: 'hiper', name: 'Hiper' },
+  { id: 'jcb', name: 'JcB' },
+  { id: 'mais', name: 'Mais!' },
+  { id: 'maxvan', name: 'MaxVan' },
+  { id: 'policard', name: 'PoliCard' },
+  { id: 'redecompras', name: 'RedeCompras' },
+  { id: 'sodexo', name: 'Sodexo' },
+  { id: 'valecard', name: 'ValeCard' },
+  { id: 'verocheque', name: 'Verocheque' },
+  { id: 'vr', name: 'VR' },
+  { id: 'ticket', name: 'Ticket' },
+  { id: 'banrisul', name: 'Banrisul' },
+  { id: 'outros', name: 'Outros' }
+]
+
 export const PaymentDialog = ({
   open,
   onOpenChange,
@@ -142,6 +185,17 @@ export const PaymentDialog = ({
     { id: '1', paymentMethodId: '', amount: totalAmount }
   ])
   const [receivedAmount, setReceivedAmount] = useState(totalAmount)
+  const [selectedMethodType, setSelectedMethodType] = useState<string>('')
+  
+  // Estado para detalhes do cartão
+  const [cardDetails, setCardDetails] = useState<CardDetails>({
+    selectedCard: '',
+    amount: totalAmount,
+    cvNsu: '',
+    installments: 1,
+    acquirer: '',
+    terminal: ''
+  })
 
   useEffect(() => {
     if (open) {
@@ -149,6 +203,15 @@ export const PaymentDialog = ({
       setStep('select')
       setPayments([{ id: '1', paymentMethodId: '', amount: totalAmount }])
       setReceivedAmount(totalAmount)
+      setSelectedMethodType('')
+      setCardDetails({
+        selectedCard: '',
+        amount: totalAmount,
+        cvNsu: '',
+        installments: 1,
+        acquirer: '',
+        terminal: ''
+      })
     }
   }, [open, totalAmount])
 
@@ -181,7 +244,11 @@ export const PaymentDialog = ({
   }, [open, step, paymentMethods])
 
   const handleMethodSelect = (methodId: string) => {
+    const method = paymentMethods.find(pm => pm.id === methodId)
+    const methodType = method?.name.toLowerCase() || ''
+    
     setPayments([{ id: '1', paymentMethodId: methodId, amount: totalAmount }])
+    setSelectedMethodType(methodType)
     setStep('details')
   }
 
@@ -308,7 +375,194 @@ export const PaymentDialog = ({
     )
   }
 
-  // Renderizar tela de detalhes do pagamento
+  // Verificar se é cartão de crédito ou débito
+  const isCardPayment = selectedMethodType.includes('crédito') || selectedMethodType.includes('débito')
+
+  // Handler para seleção de bandeira
+  const handleCardBrandSelect = (brandId: string) => {
+    const brand = cardBrands.find(b => b.id === brandId)
+    setCardDetails({
+      ...cardDetails,
+      selectedCard: brandId,
+      acquirer: brandId === 'outros' ? '' : brand?.name || ''
+    })
+  }
+
+  // Handler para confirmar pagamento com cartão
+  const handleCardPaymentConfirm = () => {
+    if (cardDetails.selectedCard && cardDetails.amount > 0) {
+      onConfirm(payments, receivedAmount)
+    }
+  }
+
+  // Renderizar tela de detalhes do cartão
+  if (step === 'details' && isCardPayment) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-[1200px] max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-center">
+              {selectedMethodType.includes('crédito') ? 'Cartão de Crédito' : 'Cartão de Débito'}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6 p-4">
+            {/* Grid de Bandeiras */}
+            <div className="grid grid-cols-6 gap-3 max-md:grid-cols-3 max-sm:grid-cols-2">
+              {cardBrands.map((brand) => (
+                <button
+                  key={brand.id}
+                  onClick={() => handleCardBrandSelect(brand.id)}
+                  role="button"
+                  aria-pressed={cardDetails.selectedCard === brand.id}
+                  className={cn(
+                    "flex flex-col items-center justify-center p-4 rounded-lg border transition-all",
+                    "hover:shadow-md hover:border-blue-500",
+                    "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                    cardDetails.selectedCard === brand.id
+                      ? "bg-blue-50 dark:bg-blue-950/30 border-2 border-blue-500 shadow-lg ring-2 ring-blue-200"
+                      : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                  )}
+                  style={{ aspectRatio: '1', minHeight: '80px' }}
+                >
+                  <div className="w-12 h-12 mb-2 flex items-center justify-center">
+                    <CreditCard className={cn(
+                      "w-10 h-10",
+                      cardDetails.selectedCard === brand.id ? "text-blue-600" : "text-gray-600 dark:text-gray-400"
+                    )} />
+                  </div>
+                  <span className={cn(
+                    "text-xs font-medium text-center",
+                    cardDetails.selectedCard === brand.id ? "text-blue-700 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"
+                  )}>
+                    {brand.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            <Separator className="my-6" />
+
+            {/* Campos de Entrada */}
+            <div className="grid grid-cols-2 gap-6 mt-8">
+              {/* Coluna Esquerda */}
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="valor" className="text-sm font-medium">Valor</Label>
+                  <Input
+                    id="valor"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={cardDetails.amount}
+                    onChange={(e) => setCardDetails({ ...cardDetails, amount: parseFloat(e.target.value) || 0 })}
+                    className="mt-1 text-right font-mono text-lg"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="cvnsu" className="text-sm font-medium">CV / NSU</Label>
+                  <Input
+                    id="cvnsu"
+                    type="text"
+                    value={cardDetails.cvNsu}
+                    onChange={(e) => setCardDetails({ ...cardDetails, cvNsu: e.target.value })}
+                    placeholder="______"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="parcelas" className="text-sm font-medium">N° Parcelas</Label>
+                  <Input
+                    id="parcelas"
+                    type="number"
+                    min="1"
+                    value={cardDetails.installments}
+                    onChange={(e) => setCardDetails({ ...cardDetails, installments: Math.max(1, parseInt(e.target.value) || 1) })}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+
+              {/* Coluna Direita */}
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="credenciadora" className="text-sm font-medium">Credenciadora</Label>
+                  {cardDetails.selectedCard === 'outros' ? (
+                    <Input
+                      id="credenciadora"
+                      type="text"
+                      value={cardDetails.acquirer}
+                      onChange={(e) => setCardDetails({ ...cardDetails, acquirer: e.target.value })}
+                      placeholder="Digite a credenciadora"
+                      className="mt-1"
+                    />
+                  ) : (
+                    <Select
+                      value={cardDetails.acquirer}
+                      onValueChange={(value) => setCardDetails({ ...cardDetails, acquirer: value })}
+                    >
+                      <SelectTrigger id="credenciadora" className="mt-1">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cardDetails.selectedCard && (
+                          <SelectItem value={cardDetails.acquirer || cardDetails.selectedCard}>
+                            {cardDetails.acquirer || cardBrands.find(b => b.id === cardDetails.selectedCard)?.name}
+                          </SelectItem>
+                        )}
+                        <SelectItem value="cielo">Cielo</SelectItem>
+                        <SelectItem value="rede">Rede</SelectItem>
+                        <SelectItem value="stone">Stone</SelectItem>
+                        <SelectItem value="getnet">Getnet</SelectItem>
+                        <SelectItem value="pagseguro">PagSeguro</SelectItem>
+                        <SelectItem value="outros">Outros</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="terminal" className="text-sm font-medium">Terminal</Label>
+                  <Input
+                    id="terminal"
+                    type="text"
+                    value={cardDetails.terminal}
+                    onChange={(e) => setCardDetails({ ...cardDetails, terminal: e.target.value })}
+                    placeholder="_________"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Botão Salvar */}
+            <div className="flex justify-center mt-8">
+              <Button
+                onClick={handleCardPaymentConfirm}
+                disabled={!cardDetails.selectedCard || cardDetails.amount <= 0}
+                className="w-[200px] bg-green-600 hover:bg-green-700 text-white font-semibold text-base py-6"
+              >
+                F8 - Salvar
+              </Button>
+            </div>
+          </div>
+
+          <DialogFooter className="border-t pt-4">
+            <Button variant="outline" onClick={() => setStep('select')}>
+              Voltar
+            </Button>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancelar (ESC)
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
+  // Renderizar tela de detalhes do pagamento (outras formas)
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">

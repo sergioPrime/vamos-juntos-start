@@ -83,29 +83,27 @@ const OrdersAndQuotes = () => {
       // Load orders
       const { data: orders, error: ordersError } = await supabase
         .from('orders')
-        .select(`
-          id,
-          order_number,
-          status,
-          total_amount,
-          order_date,
-          payment_status
-        `)
+        .select('id, order_number, status, total_amount, order_date, payment_status, customer_id')
         .eq('org_id', currentOrg?.id)
+
+      if (ordersError) throw ordersError
+
+      // Load customer names for orders
+      const customerIds = orders?.map(o => o.customer_id).filter(Boolean) || []
+      const { data: pessoas } = await supabase
+        .from('pessoas')
+        .select('id, nome_fantasia')
+        .in('id', customerIds.length > 0 ? customerIds : ['00000000-0000-0000-0000-000000000000'])
+
+      // Create customer map
+      const customerMap = new Map(pessoas?.map(p => [p.id, p.nome_fantasia]) || [])
 
       // Load quotes
       const { data: quotes, error: quotesError } = await supabase
         .from('quotes')
-        .select(`
-          id,
-          number,
-          status,
-          total_amount,
-          created_at
-        `)
+        .select('id, number, status, total_amount, created_at')
         .eq('org_id', currentOrg?.id)
 
-      if (ordersError) throw ordersError
       if (quotesError) throw quotesError
 
       // Combine and format data
@@ -115,7 +113,7 @@ const OrdersAndQuotes = () => {
           number: order.order_number,
           type: 'order' as const,
           status: order.status,
-          customer_name: "mario sergio mendes",
+          customer_name: order.customer_id ? customerMap.get(order.customer_id) || "Cliente não informado" : "Cliente não informado",
           seller_name: "SERGIO MENDES",
           total_amount: order.total_amount,
           date: order.order_date,

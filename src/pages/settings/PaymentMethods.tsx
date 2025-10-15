@@ -51,7 +51,7 @@ const paymentTypeOptions = [
   { value: 'debit_card', label: 'Cartão de Débito' },
   { value: 'bank_transfer', label: 'Transferência Bancária' },
   { value: 'pix', label: 'PIX' },
-  { value: 'digital_wallet', label: 'Carteira Digital' },
+  { value: 'digital_wallet', label: 'PIX' },
   { value: 'voucher', label: 'Vale' },
   { value: 'other', label: 'Outros' },
 ]

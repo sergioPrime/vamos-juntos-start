@@ -399,16 +399,10 @@ export const PaymentDialog = ({
   if (step === 'details' && isCardPayment) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[1200px] max-h-[95vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-center">
-              {selectedMethodType.includes('crédito') ? 'Cartão de Crédito' : 'Cartão de Débito'}
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-6 p-4">
-            {/* Grid de Bandeiras */}
-            <div className="grid grid-cols-6 gap-3 max-md:grid-cols-3 max-sm:grid-cols-2">
+        <DialogContent className="max-w-[1100px] max-h-[95vh] overflow-y-auto bg-white dark:bg-gray-900 p-8">
+          <div className="space-y-8">
+            {/* Grid de Bandeiras - 6 colunas conforme imagem */}
+            <div className="grid grid-cols-7 gap-3 max-md:grid-cols-3 max-sm:grid-cols-2">
               {cardBrands.map((brand) => (
                 <button
                   key={brand.id}
@@ -416,39 +410,39 @@ export const PaymentDialog = ({
                   role="button"
                   aria-pressed={cardDetails.selectedCard === brand.id}
                   className={cn(
-                    "flex flex-col items-center justify-center p-4 rounded-lg border transition-all",
-                    "hover:shadow-md hover:border-blue-500",
-                    "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                    "flex flex-col items-center justify-center p-3 rounded-md border transition-all",
+                    "hover:shadow-sm hover:border-blue-400",
+                    "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1",
                     cardDetails.selectedCard === brand.id
-                      ? "bg-blue-50 dark:bg-blue-950/30 border-2 border-blue-500 shadow-lg ring-2 ring-blue-200"
-                      : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                      ? "bg-blue-50 dark:bg-blue-950/40 border-2 border-blue-500 shadow-md shadow-blue-200"
+                      : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                   )}
-                  style={{ aspectRatio: '1', minHeight: '80px' }}
+                  style={{ aspectRatio: '1.2', minHeight: '70px' }}
                 >
-                  <div className="w-12 h-12 mb-2 flex items-center justify-center">
-                    <CreditCard className={cn(
-                      "w-10 h-10",
-                      cardDetails.selectedCard === brand.id ? "text-blue-600" : "text-gray-600 dark:text-gray-400"
-                    )} />
+                  {/* Nome do cartão estilizado como logo */}
+                  <div className="flex items-center justify-center h-full">
+                    <span className={cn(
+                      "text-center font-bold leading-tight",
+                      brand.id === 'outros' ? 'text-[11px] px-2' : 'text-xs',
+                      cardDetails.selectedCard === brand.id 
+                        ? "text-blue-700 dark:text-blue-400" 
+                        : "text-gray-700 dark:text-gray-300"
+                    )}>
+                      {brand.name}
+                    </span>
                   </div>
-                  <span className={cn(
-                    "text-xs font-medium text-center",
-                    cardDetails.selectedCard === brand.id ? "text-blue-700 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"
-                  )}>
-                    {brand.name}
-                  </span>
                 </button>
               ))}
             </div>
 
-            <Separator className="my-6" />
-
-            {/* Campos de Entrada */}
-            <div className="grid grid-cols-2 gap-6 mt-8">
+            {/* Campos de Entrada - Margem superior de ~1cm (2.5rem) */}
+            <div className="grid grid-cols-2 gap-x-12 gap-y-5 mt-10 px-4">
               {/* Coluna Esquerda */}
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <Label htmlFor="valor" className="text-sm font-medium">Valor</Label>
+                  <Label htmlFor="valor" className="text-sm font-normal text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    Valor
+                  </Label>
                   <Input
                     id="valor"
                     type="number"
@@ -456,39 +450,45 @@ export const PaymentDialog = ({
                     min="0"
                     value={cardDetails.amount}
                     onChange={(e) => setCardDetails({ ...cardDetails, amount: parseFloat(e.target.value) || 0 })}
-                    className="mt-1 text-right font-mono text-lg"
+                    className="h-11 text-base border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="cvnsu" className="text-sm font-medium">CV / NSU</Label>
+                  <Label htmlFor="cvnsu" className="text-sm font-normal text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    CV / NSU
+                  </Label>
                   <Input
                     id="cvnsu"
                     type="text"
                     value={cardDetails.cvNsu}
                     onChange={(e) => setCardDetails({ ...cardDetails, cvNsu: e.target.value })}
                     placeholder="______"
-                    className="mt-1"
+                    className="h-11 text-base border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="parcelas" className="text-sm font-medium">N° Parcelas</Label>
+                  <Label htmlFor="parcelas" className="text-sm font-normal text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    N° Parcelas
+                  </Label>
                   <Input
                     id="parcelas"
                     type="number"
                     min="1"
                     value={cardDetails.installments}
                     onChange={(e) => setCardDetails({ ...cardDetails, installments: Math.max(1, parseInt(e.target.value) || 1) })}
-                    className="mt-1"
+                    className="h-11 text-base border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               {/* Coluna Direita */}
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <Label htmlFor="credenciadora" className="text-sm font-medium">Credenciadora</Label>
+                  <Label htmlFor="credenciadora" className="text-sm font-normal text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    Credenciadora
+                  </Label>
                   {cardDetails.selectedCard === 'outros' ? (
                     <Input
                       id="credenciadora"
@@ -496,20 +496,20 @@ export const PaymentDialog = ({
                       value={cardDetails.acquirer}
                       onChange={(e) => setCardDetails({ ...cardDetails, acquirer: e.target.value })}
                       placeholder="Digite a credenciadora"
-                      className="mt-1"
+                      className="h-11 text-base border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500"
                     />
                   ) : (
                     <Select
                       value={cardDetails.acquirer}
                       onValueChange={(value) => setCardDetails({ ...cardDetails, acquirer: value })}
                     >
-                      <SelectTrigger id="credenciadora" className="mt-1">
+                      <SelectTrigger id="credenciadora" className="h-11 text-base border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500">
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
-                      <SelectContent>
-                        {cardDetails.selectedCard && (
-                          <SelectItem value={cardDetails.acquirer || cardDetails.selectedCard}>
-                            {cardDetails.acquirer || cardBrands.find(b => b.id === cardDetails.selectedCard)?.name}
+                      <SelectContent className="bg-white dark:bg-gray-800 z-[9999]">
+                        {cardDetails.selectedCard && cardDetails.acquirer && (
+                          <SelectItem value={cardDetails.acquirer}>
+                            {cardDetails.acquirer}
                           </SelectItem>
                         )}
                         <SelectItem value="cielo">Cielo</SelectItem>
@@ -524,39 +524,50 @@ export const PaymentDialog = ({
                 </div>
 
                 <div>
-                  <Label htmlFor="terminal" className="text-sm font-medium">Terminal</Label>
+                  <Label htmlFor="terminal" className="text-sm font-normal text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    Terminal
+                  </Label>
                   <Input
                     id="terminal"
                     type="text"
                     value={cardDetails.terminal}
                     onChange={(e) => setCardDetails({ ...cardDetails, terminal: e.target.value })}
                     placeholder="_________"
-                    className="mt-1"
+                    className="h-11 text-base border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Botão Salvar */}
+            {/* Botão Salvar - Centralizado, margem superior 2rem */}
             <div className="flex justify-center mt-8">
               <Button
                 onClick={handleCardPaymentConfirm}
                 disabled={!cardDetails.selectedCard || cardDetails.amount <= 0}
-                className="w-[200px] bg-green-600 hover:bg-green-700 text-white font-semibold text-base py-6"
+                className="w-[200px] h-12 bg-[#5cb85c] hover:bg-[#4cae4c] text-white font-semibold text-base rounded-md shadow-sm"
               >
                 F8 - Salvar
               </Button>
             </div>
-          </div>
 
-          <DialogFooter className="border-t pt-4">
-            <Button variant="outline" onClick={() => setStep('select')}>
-              Voltar
-            </Button>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar (ESC)
-            </Button>
-          </DialogFooter>
+            {/* Botões de navegação */}
+            <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
+              <Button 
+                variant="outline" 
+                onClick={() => setStep('select')}
+                className="text-sm"
+              >
+                Voltar
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => onOpenChange(false)}
+                className="text-sm"
+              >
+                Cancelar (ESC)
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     )

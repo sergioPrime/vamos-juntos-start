@@ -3228,6 +3228,10 @@ export type Database = {
         Args: { p_org_id: string }
         Returns: number
       }
+      generate_next_system_code: {
+        Args: { p_org_id: string }
+        Returns: number
+      }
       has_children: {
         Args: { item_id: string; table_name: string }
         Returns: boolean

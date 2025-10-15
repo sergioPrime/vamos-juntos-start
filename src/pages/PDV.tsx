@@ -905,78 +905,69 @@ const PDV = () => {
           {/* Product suggestions dropdown */}
           {searchTerm.length >= 2 && (
             <div className="absolute top-14 left-0 right-0 z-50 bg-background border-2 border-primary/20 rounded-lg shadow-2xl max-h-96 overflow-auto animate-fade-in">
-              {filteredProducts.length > 0 ? (
-                <>
-                   <div className="bg-primary/5 sticky top-0 px-4 py-3 text-sm font-semibold text-foreground border-b flex items-center justify-between">
-                     <span>Produtos encontrados</span>
-                     <Badge variant="secondary">{Math.min(filteredProducts.length, 20)}</Badge>
-                   </div>
-                   {filteredProducts.map((product, index) => (
-                     <div
-                       key={product.id}
-                       className={cn(
-                         "p-4 hover:bg-primary/10 cursor-pointer border-b last:border-b-0 transition-all duration-200",
-                         addingToCart === product.id && "bg-green-100 dark:bg-green-900/20 scale-[0.98]",
-                         index === 0 && "bg-accent/50"
-                       )}
-                       onClick={() => {
-                         addToCart(product)
-                         setSearchTerm("")
-                       }}
-                     >
-                       <div className="flex items-center justify-between gap-4">
-                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                           <div className="flex flex-col gap-1">
-                             <div className="flex items-center gap-2">
-                               <Badge variant="outline" className="text-xs font-mono">
-                                 {product.sku || product.barcode || 'N/A'}
-                               </Badge>
-                               {index === 0 && (
-                                 <Badge className="text-xs bg-primary">Enter para adicionar</Badge>
-                               )}
-                             </div>
-                             <span className="text-sm font-semibold truncate">
-                               {product.name}
-                             </span>
-                           </div>
-                         </div>
-                         <div className="flex items-center gap-4">
-                           <div className="text-right">
-                             <div className="text-lg font-bold text-primary">
-                               R$ {product.unit_price.toFixed(2)}
-                             </div>
-                             <div className="text-xs text-muted-foreground">
-                               Estoque: {product.stock_quantity} {product.unit}
-                             </div>
-                           </div>
-                           <Plus className="h-5 w-5 text-primary" />
-                         </div>
-                       </div>
-                     </div>
-                   ))}
-                </>
-               ) : (
-                <div className="p-6">
-                  <div className="text-center mb-4">
-                    <Search className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
-                    <div className="text-sm font-medium text-muted-foreground">Nenhum produto encontrado</div>
-                    <div className="text-xs text-muted-foreground mt-1">Tente buscar por código, nome ou código de barras</div>
+              <div className="bg-primary/5 sticky top-0 px-4 py-3 text-sm font-semibold text-foreground border-b flex items-center justify-between">
+                <span>Produtos encontrados</span>
+                <Badge variant="secondary">{filteredProducts.length > 0 ? Math.min(filteredProducts.length, 20) : 0}</Badge>
+              </div>
+              
+              {filteredProducts.map((product, index) => (
+                <div
+                  key={product.id}
+                  className={cn(
+                    "p-4 hover:bg-primary/10 cursor-pointer border-b last:border-b-0 transition-all duration-200",
+                    addingToCart === product.id && "bg-green-100 dark:bg-green-900/20 scale-[0.98]",
+                    index === 0 && "bg-accent/50"
+                  )}
+                  onClick={() => {
+                    addToCart(product)
+                    setSearchTerm("")
+                  }}
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs font-mono">
+                            {product.sku || product.barcode || 'N/A'}
+                          </Badge>
+                          {index === 0 && (
+                            <Badge className="text-xs bg-primary">Enter para adicionar</Badge>
+                          )}
+                        </div>
+                        <span className="text-sm font-semibold truncate">
+                          {product.name}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-primary">
+                          R$ {product.unit_price.toFixed(2)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Estoque: {product.stock_quantity} {product.unit}
+                        </div>
+                      </div>
+                      <Plus className="h-5 w-5 text-primary" />
+                    </div>
                   </div>
-                  
-                  <div 
-                    className="flex items-center gap-3 p-4 bg-primary/10 hover:bg-primary/20 rounded-lg cursor-pointer transition-all border-2 border-primary/30"
-                    onClick={() => {
-                      setQuickProductInitialName(searchTerm)
-                      setIsQuickProductDialogOpen(true)
-                    }}
-                  >
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground">
-                      <Plus className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1 text-left">
-                      <div className="font-semibold text-sm text-foreground">Cadastrar Novo Produto</div>
-                      <div className="text-xs text-muted-foreground">Clique para cadastrar "{searchTerm}"</div>
-                    </div>
+                </div>
+              ))}
+              
+              {filteredProducts.length === 0 && (
+                <div 
+                  className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-950 hover:bg-green-100 dark:hover:bg-green-900 cursor-pointer transition-all border-b"
+                  onClick={() => {
+                    setQuickProductInitialName(searchTerm)
+                    setIsQuickProductDialogOpen(true)
+                  }}
+                >
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-white">
+                    <Plus className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <div className="font-semibold text-sm text-green-700 dark:text-green-400">Cadastrar Novo Produto</div>
+                    <div className="text-xs text-green-600 dark:text-green-500">Clique para cadastrar "{searchTerm}"</div>
                   </div>
                 </div>
               )}

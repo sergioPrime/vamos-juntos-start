@@ -449,7 +449,7 @@ const Products = () => {
               
               <TabsContent value="dados" className="space-y-6 mt-6">
                 {/* Primeira linha - Nome e SKU obrigatórios */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name" className="required">Nome do Produto</Label>
                     <Input
@@ -463,16 +463,27 @@ const Products = () => {
                   
                   <div className="space-y-2">
                     <Label htmlFor="sku" className="required flex items-center gap-2">
-                      <span>SKU (Código)</span>
+                      <span>Código SKU</span>
                       <span className="text-destructive">*</span>
                     </Label>
                     <Input
                       id="sku"
                       value={formData.sku}
                       onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value.toUpperCase() }))}
-                      placeholder="Código único do produto"
+                      placeholder="Código alfanumérico"
                       required
                       className="font-mono"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="system_code">Código do Sistema</Label>
+                    <Input
+                      id="system_code"
+                      value={formData.system_code || ''}
+                      disabled
+                      placeholder="Auto-gerado"
+                      className="font-mono bg-muted"
                     />
                   </div>
                   
@@ -552,22 +563,22 @@ const Products = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="system_code">Código do Sistema</Label>
-                    <Input
-                      id="system_code"
-                      value={formData.system_code}
-                      onChange={(e) => setFormData(prev => ({ ...prev, system_code: e.target.value }))}
-                      placeholder="Código automático"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
                     <Label htmlFor="supplier_code">Código do Fornecedor</Label>
                     <Input
                       id="supplier_code"
                       value={formData.supplier_code}
                       onChange={(e) => setFormData(prev => ({ ...prev, supplier_code: e.target.value }))}
                       placeholder="Digite o código"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Categoria</Label>
+                    <Input
+                      id="category"
+                      value={formData.category}
+                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                      placeholder="Digite a categoria"
                     />
                   </div>
                 </div>
@@ -937,11 +948,11 @@ const Products = () => {
                   <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                 </TableHead>
                 <TableHead className="w-[60px] h-10 px-3 text-xs font-medium text-foreground">Tipo</TableHead>
-                <TableHead className="w-[140px] h-10 px-3 text-xs font-medium text-foreground">
-                  Código Sistema
+                <TableHead className="w-[100px] h-10 px-3 text-xs font-medium text-foreground">
+                  Cód. Sistema
                   <ChevronDown className="inline h-3 w-3 ml-1" />
                 </TableHead>
-                <TableHead className="w-[120px] h-10 px-3 text-xs font-medium text-foreground">Código</TableHead>
+                <TableHead className="w-[120px] h-10 px-3 text-xs font-medium text-foreground">Código SKU</TableHead>
                 <TableHead className="h-10 px-3 text-xs font-medium text-foreground">Nome</TableHead>
                 <TableHead className="w-[120px] h-10 px-3 text-xs font-medium text-foreground text-center">Visível Vendas</TableHead>
                 <TableHead className="w-[120px] h-10 px-3 text-xs font-medium text-foreground">Marca</TableHead>

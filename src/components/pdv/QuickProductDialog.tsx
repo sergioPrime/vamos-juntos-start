@@ -60,7 +60,9 @@ export const QuickProductDialog = ({ open, onOpenChange, onSuccess, initialName 
           name: formData.name,
           sku: formData.sku || `SKU${Date.now()}`,
           unit_price: parseFloat(formData.unit_price),
+          cost_price: 0,
           stock_quantity: parseFloat(formData.stock_quantity) || 0,
+          min_stock_level: 0,
           unit: formData.unit,
           active: true
         }])

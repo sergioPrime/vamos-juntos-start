@@ -710,6 +710,29 @@ const PDV = () => {
 
       // Criar lançamento financeiro
       if (customerId) {
+        // Buscar empresa padrão ou primeira empresa da organização
+        const { data: defaultCompany } = await supabase
+          .from('companies')
+          .select('id')
+          .eq('org_id', currentOrg?.id)
+          .eq('is_default', true)
+          .maybeSingle()
+
+        let companyIdForEntry = defaultCompany?.id
+
+        if (!companyIdForEntry) {
+          // Se não houver empresa padrão, buscar a primeira empresa ativa
+          const { data: firstCompany } = await supabase
+            .from('companies')
+            .select('id')
+            .eq('org_id', currentOrg?.id)
+            .eq('is_active', true)
+            .limit(1)
+            .maybeSingle()
+
+          companyIdForEntry = firstCompany?.id
+        }
+
         // Obter o primeiro método de pagamento usado
         const firstPaymentMethodId = payments[0]?.paymentMethodId
 
@@ -717,6 +740,7 @@ const PDV = () => {
           .from('financial_entries')
           .insert({
             org_id: currentOrg?.id,
+            company_id: companyIdForEntry,
             person_id: customerId,
             person_type: 'customer',
             entry_type: 'receivable',

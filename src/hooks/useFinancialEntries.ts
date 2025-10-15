@@ -113,6 +113,10 @@ export function useFinancialEntries() {
       const costCenterIds = [...new Set(data.map(e => e.cost_center_id).filter(Boolean))]
       const paymentMethodIds = [...new Set(data.map(e => e.payment_method_id).filter(Boolean))]
       const bankAccountIds = [...new Set(data.map(e => e.bank_account_id).filter(Boolean))]
+      
+      // Separar IDs de pessoas por tipo
+      const customerIds = [...new Set(data.filter(e => e.person_type === 'customer').map(e => e.person_id).filter(Boolean))]
+      const supplierIds = [...new Set(data.filter(e => e.person_type === 'supplier').map(e => e.person_id).filter(Boolean))]
       const pessoaIds = [...new Set(data.map(e => e.person_id).filter(Boolean))]
 
       // Buscar todos os dados relacionados em paralelo
@@ -122,6 +126,8 @@ export function useFinancialEntries() {
         costCentersData,
         paymentMethodsData,
         bankAccountsData,
+        customersData,
+        suppliersData,
         pessoasData
       ] = await Promise.all([
         companyIds.length > 0
@@ -138,6 +144,12 @@ export function useFinancialEntries() {
           : Promise.resolve({ data: [] }),
         bankAccountIds.length > 0
           ? supabase.from('bank_accounts').select('id, bank_name, account_number, bank_code, agency, agency_digit, account_digit').in('id', bankAccountIds)
+          : Promise.resolve({ data: [] }),
+        customerIds.length > 0
+          ? supabase.from('customers').select('id, name').in('id', customerIds)
+          : Promise.resolve({ data: [] }),
+        supplierIds.length > 0
+          ? supabase.from('suppliers').select('id, name').in('id', supplierIds)
           : Promise.resolve({ data: [] }),
         pessoaIds.length > 0
           ? supabase.from('pessoas').select('id, nome_fantasia, razao_social, tipo_pessoa').in('id', pessoaIds)
@@ -160,13 +172,32 @@ export function useFinancialEntries() {
       const bankAccountsMap = new Map(
         bankAccountsData.data?.map(b => [b.id, b] as const) || []
       )
-      const pessoasMap = new Map(
-        pessoasData.data?.map(p => [p.id, { ...p, name: p.nome_fantasia || p.razao_social || 'Sem nome' }] as const) || []
+      
+      // Criar mapa combinado de clientes (customers table e pessoas table)
+      const customersMap = new Map(
+        customersData.data?.map(c => [c.id, { ...c, name: c.name }] as const) || []
       )
+      
+      // Criar mapa combinado de fornecedores (suppliers table e pessoas table)
+      const suppliersMap = new Map(
+        suppliersData.data?.map(s => [s.id, { ...s, name: s.name }] as const) || []
+      )
+      
+      // Adicionar pessoas ao mapa apropriado baseado no tipo
+      pessoasData.data?.forEach(p => {
+        const pessoaData = { ...p, name: p.nome_fantasia || p.razao_social || 'Sem nome' }
+        if (p.tipo_pessoa === 'cliente') {
+          customersMap.set(p.id, pessoaData)
+        } else if (p.tipo_pessoa === 'fornecedor') {
+          suppliersMap.set(p.id, pessoaData)
+        }
+      })
 
       // Enriquecer dados com todas as informações relacionadas
       const enrichedData = data.map(entry => {
-        const pessoa = entry.person_id ? pessoasMap.get(entry.person_id) : null
+        const customer = entry.person_type === 'customer' && entry.person_id ? customersMap.get(entry.person_id) : null
+        const supplier = entry.person_type === 'supplier' && entry.person_id ? suppliersMap.get(entry.person_id) : null
+        
         return {
           ...entry,
           companies: entry.company_id ? companiesMap.get(entry.company_id) : null,
@@ -174,8 +205,8 @@ export function useFinancialEntries() {
           cost_centers: entry.cost_center_id ? costCentersMap.get(entry.cost_center_id) : null,
           payment_methods: entry.payment_method_id ? paymentMethodsMap.get(entry.payment_method_id) : null,
           bank_accounts: entry.bank_account_id ? bankAccountsMap.get(entry.bank_account_id) : null,
-          customers: entry.person_type === 'customer' ? pessoa : null,
-          suppliers: entry.person_type === 'supplier' ? pessoa : null
+          customers: customer,
+          suppliers: supplier
         }
       })
 

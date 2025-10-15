@@ -294,11 +294,11 @@ export const PaymentDialog = ({
   if (step === 'select') {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[1100px] max-h-[90vh] bg-white dark:bg-gray-900">
-          <div className="relative p-6">
+        <DialogContent className="max-w-[1100px] max-h-[90vh] bg-white dark:bg-gray-900 p-0">
+          <div className="relative p-6 pt-4">
             {/* Header */}
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-black dark:text-white mb-2">
+            <div className="text-center mb-4">
+              <h2 className="text-2xl font-bold text-black dark:text-white mb-1.5">
                 Selecione a Forma de Pagamento
               </h2>
               <p className="text-base font-semibold text-gray-700 dark:text-gray-300">
@@ -307,7 +307,7 @@ export const PaymentDialog = ({
             </div>
 
             {/* Payment Methods Grid - Centralizado */}
-            <div className="flex justify-center mb-4">
+            <div className="flex justify-center mb-3">
               <div className="grid grid-cols-5 gap-3 max-w-[700px]">
                 {paymentMethods.map((method) => {
                   const style = getPaymentMethodStyle(method.name)
@@ -363,7 +363,7 @@ export const PaymentDialog = ({
             </div>
 
             {/* Back Button */}
-            <div className="flex justify-start mt-6">
+            <div className="flex justify-start mt-4">
               <Button
                 onClick={() => onOpenChange(false)}
                 className="bg-[#d9534f] hover:bg-[#c9302c] text-white border-0 shadow-sm rounded text-sm font-semibold px-6 py-2.5"

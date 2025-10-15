@@ -381,6 +381,48 @@ const Products = () => {
     }
   }
 
+  const handleBulkDelete = async () => {
+    if (selectedProducts.length === 0) {
+      toast({
+        title: "Nenhum produto selecionado",
+        description: "Selecione ao menos um produto para excluir.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const confirmMessage = selectedProducts.length === 1
+      ? "Tem certeza que deseja excluir o produto selecionado?"
+      : `Tem certeza que deseja excluir ${selectedProducts.length} produtos selecionados?`
+
+    if (!confirm(confirmMessage)) {
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .in('id', selectedProducts)
+
+      if (error) throw error
+
+      toast({
+        title: "Produtos excluídos",
+        description: `${selectedProducts.length} produto(s) excluído(s) com sucesso.`,
+      })
+
+      setSelectedProducts([])
+      loadProducts()
+    } catch (error) {
+      toast({
+        title: "Erro ao excluir produtos",
+        description: "Ocorreu um erro ao excluir os produtos.",
+        variant: "destructive",
+      })
+    }
+  }
+
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -911,12 +953,41 @@ const Products = () => {
               <Button variant="outline" size="sm" className="h-9 text-sm">
                 <ChevronDown className="mr-2 h-3.5 w-3.5" />
                 Mais Ações
+                {selectedProducts.length > 0 && (
+                  <Badge variant="secondary" className="ml-2">
+                    {selectedProducts.length}
+                  </Badge>
+                )}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>Exportar Selecionados</DropdownMenuItem>
-              <DropdownMenuItem>Importar Produtos</DropdownMenuItem>
-              <DropdownMenuItem>Atualizar Preços</DropdownMenuItem>
+              {selectedProducts.length > 0 && (
+                <>
+                  <DropdownMenuItem 
+                    className="text-destructive focus:text-destructive"
+                    onClick={handleBulkDelete}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Excluir Produtos Selecionados ({selectedProducts.length})
+                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled className="opacity-50">
+                    Exportar Selecionados
+                  </DropdownMenuItem>
+                </>
+              )}
+              {selectedProducts.length === 0 && (
+                <>
+                  <DropdownMenuItem disabled className="opacity-50">
+                    Exportar Selecionados
+                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled className="opacity-50">
+                    Importar Produtos
+                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled className="opacity-50">
+                    Atualizar Preços
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
           

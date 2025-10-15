@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Plus, Search, Edit, Trash2, Package, ArrowLeft, Save, ChevronDown, Check, Circle, Filter, MoreVertical } from "lucide-react"
+import { Plus, Search, Edit, Trash2, Package, ArrowLeft, Save, ChevronDown, Check, Circle, Filter, MoreVertical, BookOpen, MessageSquare } from "lucide-react"
+import styles from "./Products.module.css"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -460,42 +461,79 @@ const Products = () => {
 
   if (showForm) {
     return (
-      <div className="w-full h-full flex flex-col">
-        {/* Fixed header with buttons */}
-        <div className="flex justify-between items-center p-6 border-b bg-background">
-          <h1 className="text-3xl font-bold">
-            {editingProduct ? "Editar Produto" : "Novo Produto"}
+      <div className="w-full h-full flex flex-col bg-white">
+        {/* Fixed header with breadcrumb and title */}
+        <div className={styles.productHeader}>
+          <div className={styles.productBreadcrumb}>
+            <BookOpen className={styles.productBreadcrumbIcon} />
+            <span>Cadastros &gt;</span>
+          </div>
+          <h1 className={styles.productTitle}>
+            Produtos - {editingProduct ? editingProduct.name : "Novo Produto"}
           </h1>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setShowForm(false)}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar
-            </Button>
-            <Button onClick={handleSubmit}>
-              <Save className="mr-2 h-4 w-4" />
+        </div>
+
+        {/* Action buttons bar */}
+        <div className="flex justify-end items-center px-6 py-4 bg-white border-b" style={{ borderColor: '#EEEEEE' }}>
+          <div className={styles.actionsBar}>
+            <button className={styles.btnFeedback}>
+              <MessageSquare className="inline-block mr-2 w-4 h-4" />
+              Enviar Feedback
+            </button>
+            <button className={styles.btnMoreActions}>
+              <span>Mais Ações</span>
+              <ChevronDown className={styles.btnMoreActionsIcon} />
+            </button>
+            <button className={styles.btnSave} onClick={handleSubmit}>
+              <Save className="inline-block mr-2 w-4 h-4" />
               Salvar
-            </Button>
+            </button>
+            <button className={styles.btnBack} onClick={() => setShowForm(false)}>
+              <ArrowLeft className="inline-block mr-2 w-4 h-4" />
+              Voltar
+            </button>
           </div>
         </div>
 
         {/* Form content */}
-        <div className="flex-1 p-6 overflow-auto">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <Tabs defaultValue="dados" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="dados">Dados</TabsTrigger>
-                <TabsTrigger value="outros" disabled className="opacity-50">
-                  Outros (Em breve)
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="dados" className="space-y-6 mt-6">
-                {/* Primeira linha - Nome e SKU obrigatórios */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="required">Nome do Produto</Label>
-                    <Input
+        <div className="flex-1 overflow-auto" style={{ backgroundColor: '#FAFAFA' }}>
+          <div className="max-w-[1400px] mx-auto px-6 py-6">
+            <form onSubmit={handleSubmit}>
+              {/* Tabs customizadas */}
+              <div className="mb-6">
+                <div className="border-b" style={{ borderColor: '#EEEEEE' }}>
+                  <div className="flex">
+                    <button 
+                      type="button"
+                      className={`${styles.tabTrigger} ${styles.tabTriggerActive}`}
+                      style={{ marginRight: '2px' }}
+                    >
+                      Dados
+                    </button>
+                    <button 
+                      type="button"
+                      className={styles.tabTrigger}
+                      disabled
+                      style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                    >
+                      Outros (Em breve)
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Formulário */}
+              <div className={styles.formContainer}>
+                {/* Primeira linha - Nome, Tipo e Gênero */}
+                <div className={styles.formGrid}>
+                  <div>
+                    <label htmlFor="name" className={styles.formLabel}>
+                      Nome do Produto <span className={styles.requiredAsterisk}>*</span>
+                    </label>
+                    <input
                       id="name"
+                      type="text"
+                      className={styles.formInput}
                       value={formData.name}
                       onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                       placeholder="Digite o nome do produto"
@@ -503,52 +541,15 @@ const Products = () => {
                     />
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="sku" className="required flex items-center gap-2">
-                      <span>Código do Produto</span>
-                      <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      id="sku"
-                      value={formData.sku}
-                      onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value.toUpperCase() }))}
-                      placeholder="Código alfanumérico"
-                      required
-                      className="font-mono"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="system_code">Código do Sistema</Label>
-                    <Input
-                      id="system_code"
-                      value={formData.system_code || ''}
-                      disabled
-                      placeholder="Auto-gerado"
-                      className="font-mono bg-muted"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="brand">Marca</Label>
-                    <Input
-                      id="brand"
-                      value={formData.brand}
-                      onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
-                      placeholder="Digite a marca"
-                    />
-                  </div>
-                </div>
-
-                {/* Segunda linha - Tipo, Modelo e Validade */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="product_type" className="required">Tipo do Produto</Label>
+                  <div>
+                    <label htmlFor="product_type" className={styles.formLabel}>
+                      Tipo do Produto <span className={styles.requiredAsterisk}>*</span>
+                    </label>
                     <Select 
                       value={formData.product_type} 
                       onValueChange={(value) => setFormData(prev => ({ ...prev, product_type: value }))}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className={styles.formSelect}>
                         <SelectValue placeholder="Selecione o tipo" />
                       </SelectTrigger>
                       <SelectContent>
@@ -560,163 +561,16 @@ const Products = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="model">Modelo</Label>
-                    <Input
-                      id="model"
-                      value={formData.model}
-                      onChange={(e) => setFormData(prev => ({ ...prev, model: e.target.value }))}
-                      placeholder="Digite o modelo"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="validity_days">Validade (dias)</Label>
-                    <Input
-                      id="validity_days"
-                      type="number"
-                      value={formData.validity_days}
-                      onChange={(e) => setFormData(prev => ({ ...prev, validity_days: parseInt(e.target.value) || 0 }))}
-                      placeholder="0"
-                    />
-                  </div>
-                </div>
 
-                {/* Terceira linha */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="sale_unit">Produto é vendido por</Label>
-                    <Select 
-                      value={formData.sale_unit} 
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, sale_unit: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione a unidade" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SALE_UNITS.map((unit) => (
-                          <SelectItem key={unit.value} value={unit.value}>
-                            {unit.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="supplier_code">Código do Fornecedor</Label>
-                    <Input
-                      id="supplier_code"
-                      value={formData.supplier_code}
-                      onChange={(e) => setFormData(prev => ({ ...prev, supplier_code: e.target.value }))}
-                      placeholder="Digite o código"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Categoria</Label>
-                    <Input
-                      id="category"
-                      value={formData.category}
-                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                      placeholder="Digite a categoria"
-                    />
-                  </div>
-                </div>
-
-                {/* Quarta linha - Fornecedor e Gênero */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="supplier_id">Fornecedor Padrão</Label>
-                    <Select 
-                      value={formData.supplier_id} 
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, supplier_id: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o fornecedor" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {suppliers.map((supplier) => (
-                          <SelectItem key={supplier.id} value={supplier.id}>
-                            {supplier.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="product_genre">Gênero do Produto</Label>
+                  <div>
+                    <label htmlFor="product_genre" className={styles.formLabel}>
+                      Tipo/Gênero <span className={styles.requiredAsterisk}>*</span>
+                    </label>
                     <Select 
                       value={formData.product_genre} 
                       onValueChange={(value) => setFormData(prev => ({ ...prev, product_genre: value }))}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o gênero" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PRODUCT_GENRES.map((genre) => (
-                          <SelectItem key={genre.value} value={genre.value}>
-                            {genre.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Quarta linha - Fornecedor, Categoria e Descrição */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="supplier_id">Fornecedor Padrão</Label>
-                    <Select 
-                      value={formData.supplier_id} 
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, supplier_id: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o fornecedor" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {suppliers.map((supplier) => (
-                          <SelectItem key={supplier.id} value={supplier.id}>
-                            {supplier.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Categoria</Label>
-                    <Input
-                      id="category"
-                      value={formData.category}
-                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                      placeholder="Digite a categoria"
-                    />
-                  </div>
-                </div>
-
-                {/* Quinta linha - Descrição e Tipo/Gênero */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Descrição</Label>
-                    <Input
-                      id="description"
-                      value={formData.description}
-                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                      placeholder="Descrição do produto"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="product_genre" className="required">Tipo/Gênero</Label>
-                    <Select 
-                      value={formData.product_genre} 
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, product_genre: value }))}
-                    >
-                      <SelectTrigger>
+                      <SelectTrigger className={styles.formSelect}>
                         <SelectValue placeholder="Selecione o tipo/gênero" />
                       </SelectTrigger>
                       <SelectContent>
@@ -730,8 +584,154 @@ const Products = () => {
                   </div>
                 </div>
 
+                {/* Segunda linha - Código Sistema, Código Produto e Marca */}
+                <div className={styles.formGrid}>
+                  <div>
+                    <label htmlFor="system_code" className={styles.formLabel}>
+                      Código do Sistema
+                    </label>
+                    <input
+                      id="system_code"
+                      type="text"
+                      className={`${styles.formInput} ${styles.formInputDisabled}`}
+                      value={formData.system_code || ''}
+                      disabled
+                      placeholder="Auto-gerado"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="sku" className={styles.formLabel}>
+                      Código do Produto (SKU) <span className={styles.requiredAsterisk}>*</span>
+                    </label>
+                    <input
+                      id="sku"
+                      type="text"
+                      className={styles.formInput}
+                      value={formData.sku}
+                      onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value.toUpperCase() }))}
+                      placeholder="Código alfanumérico"
+                      required
+                      style={{ fontFamily: 'monospace' }}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="brand" className={styles.formLabel}>
+                      Marca
+                    </label>
+                    <input
+                      id="brand"
+                      type="text"
+                      className={styles.formInput}
+                      value={formData.brand}
+                      onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
+                      placeholder="Digite a marca"
+                    />
+                  </div>
+                </div>
+
+                {/* Terceira linha - Modelo, Validade e Vendido Por */}
+                <div className={styles.formGrid}>
+                  <div>
+                    <label htmlFor="model" className={styles.formLabel}>
+                      Modelo
+                    </label>
+                    <input
+                      id="model"
+                      type="text"
+                      className={styles.formInput}
+                      value={formData.model}
+                      onChange={(e) => setFormData(prev => ({ ...prev, model: e.target.value }))}
+                      placeholder="Digite o modelo"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="validity_days" className={styles.formLabel}>
+                      Validade (dias)
+                    </label>
+                    <input
+                      id="validity_days"
+                      type="number"
+                      className={styles.formInput}
+                      value={formData.validity_days}
+                      onChange={(e) => setFormData(prev => ({ ...prev, validity_days: parseInt(e.target.value) || 0 }))}
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="sale_unit" className={styles.formLabel}>
+                      Produto é vendido por
+                    </label>
+                    <Select 
+                      value={formData.sale_unit} 
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, sale_unit: value }))}
+                    >
+                      <SelectTrigger className={styles.formSelect}>
+                        <SelectValue placeholder="Selecione a unidade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SALE_UNITS.map((unit) => (
+                          <SelectItem key={unit.value} value={unit.value}>
+                            {unit.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Quarta linha - Código Fornecedor Padrão e Fornecedor Padrão */}
+                <div className={styles.formGrid2Col}>
+                  <div>
+                    <label htmlFor="supplier_code" className={styles.formLabel}>
+                      Código Fornecedor Padrão
+                    </label>
+                    <input
+                      id="supplier_code"
+                      type="text"
+                      className={`${styles.formInput} ${styles.formInputDisabled}`}
+                      value={formData.supplier_code}
+                      disabled
+                      placeholder=""
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="supplier_id" className={styles.formLabel}>
+                      Fornecedor Padrão
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <Select 
+                        value={formData.supplier_id} 
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, supplier_id: value }))}
+                      >
+                        <SelectTrigger className={styles.formSelect}>
+                          <SelectValue placeholder="Selecione o fornecedor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {suppliers.map((supplier) => (
+                            <SelectItem key={supplier.id} value={supplier.id}>
+                              {supplier.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <button 
+                        type="button" 
+                        className={styles.iconButton}
+                        title="Editar fornecedor"
+                      >
+                        <Edit className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Switches */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                   <div className="flex items-center space-x-2">
                     <Switch
                       id="inactive"
@@ -761,73 +761,75 @@ const Products = () => {
                 </div>
 
                 {/* Accordion para Custos e Precificação */}
-                <Accordion type="single" collapsible className="w-full border rounded-lg">
-                  <AccordionItem value="pricing">
-                    <AccordionTrigger className="px-4">Custos e Precificação</AccordionTrigger>
-                    <AccordionContent className="px-4 pb-4">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="cost_price">Preço de Custo</Label>
-                          <Input
-                            id="cost_price"
-                            type="number"
-                            step="0.01"
-                            value={formData.cost_price}
-                            onChange={(e) => setFormData(prev => ({ ...prev, cost_price: parseFloat(e.target.value) || 0 }))}
-                            placeholder="0.00"
-                          />
+                <div className="mt-6">
+                  <Accordion type="single" collapsible className="w-full border rounded-lg">
+                    <AccordionItem value="pricing">
+                      <AccordionTrigger className="px-4">Custos e Precificação</AccordionTrigger>
+                      <AccordionContent className="px-4 pb-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="space-y-2">
+                            <Label htmlFor="cost_price">Preço de Custo</Label>
+                            <Input
+                              id="cost_price"
+                              type="number"
+                              step="0.01"
+                              value={formData.cost_price}
+                              onChange={(e) => setFormData(prev => ({ ...prev, cost_price: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0.00"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="unit_price">Preço de Venda</Label>
+                            <Input
+                              id="unit_price"
+                              type="number"
+                              step="0.01"
+                              value={formData.unit_price}
+                              onChange={(e) => setFormData(prev => ({ ...prev, unit_price: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0.00"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="stock_quantity">Quantidade em Estoque</Label>
+                            <Input
+                              id="stock_quantity"
+                              type="number"
+                              value={formData.stock_quantity}
+                              onChange={(e) => setFormData(prev => ({ ...prev, stock_quantity: parseInt(e.target.value) || 0 }))}
+                              placeholder="0"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="min_stock_level">Estoque Mínimo</Label>
+                            <Input
+                              id="min_stock_level"
+                              type="number"
+                              value={formData.min_stock_level}
+                              onChange={(e) => setFormData(prev => ({ ...prev, min_stock_level: parseInt(e.target.value) || 0 }))}
+                              placeholder="0"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="unit">Unidade</Label>
+                            <Input
+                              id="unit"
+                              value={formData.unit}
+                              onChange={(e) => setFormData(prev => ({ ...prev, unit: e.target.value }))}
+                              placeholder="un"
+                            />
+                          </div>
                         </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="unit_price">Preço de Venda</Label>
-                          <Input
-                            id="unit_price"
-                            type="number"
-                            step="0.01"
-                            value={formData.unit_price}
-                            onChange={(e) => setFormData(prev => ({ ...prev, unit_price: parseFloat(e.target.value) || 0 }))}
-                            placeholder="0.00"
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="stock_quantity">Quantidade em Estoque</Label>
-                          <Input
-                            id="stock_quantity"
-                            type="number"
-                            value={formData.stock_quantity}
-                            onChange={(e) => setFormData(prev => ({ ...prev, stock_quantity: parseInt(e.target.value) || 0 }))}
-                            placeholder="0"
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="min_stock_level">Estoque Mínimo</Label>
-                          <Input
-                            id="min_stock_level"
-                            type="number"
-                            value={formData.min_stock_level}
-                            onChange={(e) => setFormData(prev => ({ ...prev, min_stock_level: parseInt(e.target.value) || 0 }))}
-                            placeholder="0"
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="unit">Unidade</Label>
-                          <Input
-                            id="unit"
-                            value={formData.unit}
-                            onChange={(e) => setFormData(prev => ({ ...prev, unit: e.target.value }))}
-                            placeholder="un"
-                          />
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </TabsContent>
-            </Tabs>
-          </form>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     )

@@ -1,0 +1,256 @@
+/* Estilos customizados para tela de cadastro de produtos */
+/* Baseado nas especificações da imagem de referência */
+
+/* Cabeçalho da tela */
+.productHeader {
+  background-color: #F5F5F5;
+  padding: 16px 20px;
+  border-bottom: 1px solid #EEEEEE;
+}
+
+.productBreadcrumb {
+  font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  color: #333333;
+  font-weight: 400;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.productBreadcrumbIcon {
+  color: #007BFF;
+  width: 20px;
+  height: 20px;
+}
+
+.productTitle {
+  font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 18px;
+  color: #333333;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* Barra de ações superior */
+.actionsBar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.btnFeedback {
+  background-color: #007BFF;
+  color: #FFFFFF;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.btnFeedback:hover {
+  background-color: #0056b3;
+}
+
+.btnMoreActions {
+  background-color: #FFFFFF;
+  color: #333333;
+  border: 1px solid #CCCCCC;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btnMoreActions:hover {
+  background-color: #F5F5F5;
+  border-color: #999999;
+}
+
+.btnMoreActionsIcon {
+  color: #666666;
+  width: 16px;
+  height: 16px;
+}
+
+.btnSave {
+  background-color: #00C853;
+  color: #FFFFFF;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.btnSave:hover {
+  background-color: #009624;
+}
+
+.btnBack {
+  background-color: #212121;
+  color: #FFFFFF;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.btnBack:hover {
+  background-color: #000000;
+}
+
+/* Tabs / Abas */
+.tabsList {
+  background-color: transparent;
+  border-bottom: 2px solid #EEEEEE;
+  padding: 0;
+}
+
+.tabTrigger {
+  background-color: #F5F5F5;
+  color: #666666;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.tabTrigger:hover {
+  background-color: #EEEEEE;
+}
+
+.tabTriggerActive {
+  background-color: #FFFFFF;
+  color: #007BFF;
+  border-bottom: 3px solid #007BFF;
+}
+
+/* Formulário */
+.formContainer {
+  background-color: #FFFFFF;
+  padding: 20px;
+  border: 1px solid #EEEEEE;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.formGrid2Col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* Labels */
+.formLabel {
+  color: #333333;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.requiredAsterisk {
+  color: #FF0000;
+  font-size: 13px;
+  margin-left: 2px;
+}
+
+/* Campos de input */
+.formInput,
+.formSelect {
+  background-color: #FFFFFF;
+  border: 1px solid #DDDDDD;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  height: 40px;
+  width: 100%;
+  transition: all 0.2s ease-in-out;
+}
+
+.formInput:hover,
+.formSelect:hover {
+  border-color: #BBBBBB;
+}
+
+.formInput:focus,
+.formSelect:focus {
+  outline: none;
+  border: 2px solid #007BFF;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  padding: 7px 11px; /* Ajuste para compensar a borda de 2px */
+}
+
+.formInputDisabled {
+  background-color: #F0F0F0;
+  color: #999999;
+  cursor: not-allowed;
+}
+
+/* Ícone de edição */
+.iconButton {
+  background-color: #212121;
+  color: #FFFFFF;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.iconButton:hover {
+  background-color: #000000;
+}
+
+/* Layout responsivo */
+@media (max-width: 1024px) {
+  .formGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .formGrid,
+  .formGrid2Col {
+    grid-template-columns: 1fr;
+  }
+}

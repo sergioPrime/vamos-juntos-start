@@ -292,6 +292,25 @@ export const PaymentDialog = ({
 
   // Renderizar tela de seleção
   if (step === 'select') {
+    // Filtrar apenas as formas de pagamento permitidas
+    const allowedPaymentMethods = paymentMethods.filter(method => {
+      const nameLower = method.name.toLowerCase()
+      return (
+        nameLower.includes('dinheiro') ||
+        nameLower.includes('cheque') ||
+        (nameLower.includes('crédito') && !nameLower.includes('loja') && !nameLower.includes('vale')) ||
+        nameLower.includes('débito') ||
+        (nameLower.includes('crédito') && nameLower.includes('loja')) ||
+        (nameLower.includes('vale') && nameLower.includes('alimentação')) ||
+        (nameLower.includes('vale') && nameLower.includes('refeição')) ||
+        (nameLower.includes('vale') && nameLower.includes('presente')) ||
+        nameLower.includes('pix') ||
+        (nameLower.includes('vale') && nameLower.includes('crédito')) ||
+        nameLower.includes('combustível') ||
+        nameLower.includes('outros')
+      )
+    })
+    
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-[1100px] max-h-[90vh] bg-white dark:bg-gray-900 p-0">
@@ -309,7 +328,7 @@ export const PaymentDialog = ({
             {/* Payment Methods Grid - Centralizado */}
             <div className="flex justify-center mb-3">
               <div className="grid grid-cols-5 gap-3 max-w-[700px]">
-                {paymentMethods.map((method) => {
+                {allowedPaymentMethods.map((method) => {
                   const style = getPaymentMethodStyle(method.name)
                   const Icon = style.icon
                   

@@ -9,8 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { X, Plus } from "lucide-react"
+import { X, Plus, User, Search, ArrowLeft, Save } from "lucide-react"
 import { toast } from "sonner"
+import styles from "./Pessoas.module.css"
 import { PessoasListagem } from "@/components/pessoas/PessoasListagem"
 import { usePessoas, type Pessoa } from "@/hooks/usePessoas"
 import { useOrganization } from "@/hooks/useOrganization"
@@ -273,272 +274,321 @@ export function Pessoas() {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-screen bg-background">
-      {/* Header fixo */}
-      <div className="border-b bg-card px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-sm font-medium text-primary">P</span>
-            </div>
-            <div>
-              <h1 className="text-xl font-semibold text-foreground">Pessoas - {formData.nomeFantasia || (editingPessoa ? "EDITAR PESSOA" : "NOVA PESSOA")}</h1>
-              <p className="text-sm text-muted-foreground">Cadastro</p>
-            </div>
-          </div>
+    <div className="w-full h-full flex flex-col bg-white">
+      {/* Header com breadcrumb */}
+      <div className={styles.pessoaHeader}>
+        <div className={styles.pessoaBreadcrumb}>
+          <span>Cadastro &gt;</span>
         </div>
-        
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleBack}>
-            Voltar
-          </Button>
-          <Button onClick={handleSave}>
+        <h1 className={styles.pessoaTitle}>
+          <div className={styles.pessoaIcon}>
+            <User className="w-4 h-4" />
+          </div>
+          Pessoas - {formData.nomeFantasia || (editingPessoa ? "Editar Pessoa" : "Nova Pessoa")}
+        </h1>
+      </div>
+
+      {/* Barra de ações */}
+      <div className="flex justify-end items-center px-6 py-4 bg-white border-b" style={{ borderColor: '#EEEEEE' }}>
+        <div className={styles.actionsBar}>
+          <button className={styles.btnSave} onClick={handleSave}>
+            <Save className="inline-block mr-2 w-4 h-4" />
             Salvar
-          </Button>
+          </button>
+          <button className={styles.btnBack} onClick={handleBack}>
+            <ArrowLeft className="inline-block mr-2 w-4 h-4" />
+            Voltar
+          </button>
         </div>
       </div>
 
       {/* Conteúdo principal */}
-      <div className="flex-1 overflow-auto">
-        <div className="p-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="listagem">Listagem</TabsTrigger>
-              <TabsTrigger value="dados">Dados</TabsTrigger>
-            </TabsList>
+      <div className="flex-1 overflow-auto" style={{ backgroundColor: '#FAFAFA' }}>
+        <div className="max-w-[1400px] mx-auto px-6 py-6">
+          {activeTab === "listagem" ? (
+            <PessoasListagem onEditPessoa={handleEditPessoa} />
+          ) : (
+            <>
+              {/* Tabs customizadas */}
+              <div className="mb-6">
+                <div className="border-b" style={{ borderColor: '#EEEEEE' }}>
+                <div className="flex">
+                  <button 
+                    type="button"
+                    className={`${styles.tabTrigger} ${styles.tabTriggerActive}`}
+                  >
+                    Dados
+                  </button>
+                </div>
+              </div>
+            </div>
 
-            <TabsContent value="listagem" className="mt-6">
-              <PessoasListagem onEditPessoa={handleEditPessoa} />
-            </TabsContent>
+            {/* Formulário */}
+            <div className={styles.formContainer}>
+              {/* Primeira linha - Nome Fantasia, Tipo de Pessoa e CPF */}
+              <div className={styles.formGrid}>
+                <div>
+                  <label htmlFor="nomeFantasia" className={styles.formLabel}>
+                    Nome Fantasia <span className={styles.requiredAsterisk}>*</span>
+                  </label>
+                  <input
+                    id="nomeFantasia"
+                    type="text"
+                    className={styles.formInput}
+                    value={formData.nomeFantasia}
+                    onChange={(e) => handleInputChange("nomeFantasia", e.target.value)}
+                    placeholder="Nome fantasia da pessoa"
+                  />
+                </div>
 
-            <TabsContent value="dados" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Dados Básicos</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {/* Nome Fantasia */}
-                    <div>
-                      <Label htmlFor="nomeFantasia" className="required">Nome Fantasia *</Label>
-                      <Input
-                        id="nomeFantasia"
-                        value={formData.nomeFantasia}
-                        onChange={(e) => handleInputChange("nomeFantasia", e.target.value)}
-                        placeholder="Nome fantasia da pessoa"
-                        className="mt-1"
-                      />
-                    </div>
+                <div>
+                  <label htmlFor="tipoPessoa" className={styles.formLabel}>
+                    Tipo de Pessoa <span className={styles.requiredAsterisk}>*</span>
+                  </label>
+                  <Select 
+                    value={formData.tipoPessoa} 
+                    onValueChange={(value) => handleInputChange("tipoPessoa", value)}
+                  >
+                    <SelectTrigger className={styles.formSelect}>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fisica">Pessoa Física</SelectItem>
+                      <SelectItem value="juridica">Pessoa Jurídica</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                    {/* Tipo de Pessoa */}
-                    <div>
-                      <Label htmlFor="tipoPessoa" className="required">Tipo de Pessoa *</Label>
-                      <Select value={formData.tipoPessoa} onValueChange={(value) => handleInputChange("tipoPessoa", value)}>
-                        <SelectTrigger className="mt-1">
-                          <SelectValue placeholder="Selecione o tipo" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="fisica">Pessoa Física</SelectItem>
-                          <SelectItem value="juridica">Pessoa Jurídica</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* CNPJ/CPF */}
-                    <div>
-                      <Label htmlFor="documento" className="required">{getDocumentLabel()} *</Label>
-                      <Input
-                        id="documento"
-                        value={formData.documento}
-                        onChange={(e) => handleInputChange("documento", e.target.value)}
-                        placeholder={getDocumentPlaceholder()}
-                        className="mt-1"
-                      />
-                    </div>
-
-                    {/* Razão Social */}
-                    <div>
-                      <Label htmlFor="razaoSocial">Razão Social</Label>
-                      <Input
-                        id="razaoSocial"
-                        value={formData.razaoSocial}
-                        onChange={(e) => handleInputChange("razaoSocial", e.target.value)}
-                        placeholder="Razão social"
-                        className="mt-1"
-                      />
-                    </div>
-
-                    {/* E-mail Geral */}
-                    <div>
-                      <Label htmlFor="emailGeral">E-mail Geral</Label>
-                      <Input
-                        id="emailGeral"
-                        type="email"
-                        value={formData.emailGeral}
-                        onChange={(e) => handleInputChange("emailGeral", e.target.value)}
-                        placeholder="email@exemplo.com"
-                        className="mt-1"
-                      />
-                    </div>
-
-                    {/* Telefone */}
-                    <div>
-                      <Label htmlFor="telefone">Telefone</Label>
-                      <Input
-                        id="telefone"
-                        value={formData.telefone}
-                        onChange={(e) => handleInputChange("telefone", e.target.value)}
-                        placeholder="(00) 0000-0000"
-                        className="mt-1"
-                      />
-                    </div>
-
-                    {/* Telefone Celular */}
-                    <div>
-                      <Label htmlFor="telefonecelular">Telefone Celular</Label>
-                      <Input
-                        id="telefonecelular"
-                        value={formData.telefonecelular}
-                        onChange={(e) => handleInputChange("telefonecelular", e.target.value)}
-                        placeholder="(00) 00000-0000"
-                        className="mt-1"
-                      />
-                    </div>
-
-                    {/* Vendedor Padrão */}
-                    <div>
-                      <Label htmlFor="vendedorPadrao">Vendedor Padrão</Label>
-                      <Input
-                        id="vendedorPadrao"
-                        value={formData.vendedorPadrao}
-                        onChange={(e) => handleInputChange("vendedorPadrao", e.target.value)}
-                        placeholder="Nome do vendedor"
-                        className="mt-1"
-                      />
-                    </div>
-
-                    {/* Transportadora Padrão */}
-                    <div>
-                      <Label htmlFor="transportadoraPadrao">Transportadora Padrão</Label>
-                      <Input
-                        id="transportadoraPadrao"
-                        value={formData.transportadoraPadrao}
-                        onChange={(e) => handleInputChange("transportadoraPadrao", e.target.value)}
-                        placeholder="Nome da transportadora"
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-
-                  {/* E-mails Secundários */}
-                  <div>
-                    <Label>E-mail Secundários</Label>
-                    <div className="mt-1 space-y-2">
-                      <div className="flex gap-2">
-                        <Input
-                          value={newEmailSecundario}
-                          onChange={(e) => setNewEmailSecundario(e.target.value)}
-                          onKeyPress={(e) => handleKeyPress(e, () => addEmailSecundario(newEmailSecundario))}
-                          placeholder="adicionar@email.com (pressione Enter para adicionar)"
-                          type="email"
-                        />
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          size="icon"
-                          onClick={() => addEmailSecundario(newEmailSecundario)}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {formData.emailsSecundarios.map((email, index) => (
-                          <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                            {email}
-                            <button
-                              onClick={() => removeEmailSecundario(index)}
-                              className="ml-1 hover:text-destructive"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* WhatsApp */}
-                  <div>
-                    <Label>WhatsApp</Label>
-                    <div className="mt-1 space-y-2">
-                      <div className="flex gap-2">
-                        <Input
-                          value={newWhatsapp}
-                          onChange={(e) => setNewWhatsapp(e.target.value)}
-                          onKeyPress={(e) => handleKeyPress(e, () => addWhatsapp(newWhatsapp))}
-                          placeholder="(00) 00000-0000 (pressione Enter para adicionar)"
-                        />
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          size="icon"
-                          onClick={() => addWhatsapp(newWhatsapp)}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {formData.whatsapps.map((whatsapp, index) => (
-                          <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                            {whatsapp}
-                            <button
-                              onClick={() => removeWhatsapp(index)}
-                              className="ml-1 hover:text-destructive"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bloquear notificações WhatsApp */}
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="bloquearNotificacoes"
-                      checked={formData.bloquearNotificacoesWhatsapp}
-                      onCheckedChange={(checked) => handleInputChange("bloquearNotificacoesWhatsapp", checked)}
+                <div>
+                  <label htmlFor="documento" className={styles.formLabel}>
+                    {getDocumentLabel()}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="documento"
+                      type="text"
+                      className={styles.formInput}
+                      value={formData.documento}
+                      onChange={(e) => handleInputChange("documento", e.target.value)}
+                      placeholder={getDocumentPlaceholder()}
                     />
-                    <Label htmlFor="bloquearNotificacoes">
-                      Bloquear notificações de cobrança por WhatsApp
-                    </Label>
+                    <button 
+                      type="button" 
+                      className={styles.searchButton}
+                      title="Buscar CPF/CNPJ"
+                    >
+                      <Search className="w-4 h-4" />
+                    </button>
                   </div>
+                </div>
+              </div>
 
-                  {/* Rótulos */}
-                  <div>
-                    <Label>Rótulo (Relação que esta pessoa terá com a empresa)</Label>
-                    <div className="mt-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                      {rotulosDisponiveis.map((rotulo) => (
-                        <div key={rotulo} className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            id={`rotulo-${rotulo}`}
-                            checked={formData.rotulos.includes(rotulo)}
-                            onChange={() => toggleRotulo(rotulo)}
-                            className="rounded border-gray-300 text-primary focus:ring-primary"
-                          />
-                          <Label htmlFor={`rotulo-${rotulo}`} className="text-sm">
-                            {rotulo}
-                          </Label>
-                        </div>
+              {/* Segunda linha - E-mail Geral, E-mails Secundários e Telefone */}
+              <div className={styles.formGrid}>
+                <div>
+                  <label htmlFor="emailGeral" className={styles.formLabel}>
+                    E-mail Geral
+                  </label>
+                  <input
+                    id="emailGeral"
+                    type="email"
+                    className={styles.formInput}
+                    value={formData.emailGeral}
+                    onChange={(e) => handleInputChange("emailGeral", e.target.value)}
+                    placeholder="email@exemplo.com"
+                  />
+                </div>
+
+                <div>
+                  <label className={styles.formLabel}>
+                    E-mail Secundários (Tecle enter para adicionar o e-mail)
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      className={styles.formInput}
+                      value={newEmailSecundario}
+                      onChange={(e) => setNewEmailSecundario(e.target.value)}
+                      onKeyPress={(e) => handleKeyPress(e, () => addEmailSecundario(newEmailSecundario))}
+                      placeholder="adicionar@email.com"
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="icon"
+                      onClick={() => addEmailSecundario(newEmailSecundario)}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {formData.emailsSecundarios.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {formData.emailsSecundarios.map((email, index) => (
+                        <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                          {email}
+                          <button
+                            onClick={() => removeEmailSecundario(index)}
+                            className="ml-1 hover:text-destructive"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
                       ))}
                     </div>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="telefone" className={styles.formLabel}>
+                    Telefone
+                  </label>
+                  <input
+                    id="telefone"
+                    type="text"
+                    className={styles.formInput}
+                    value={formData.telefone}
+                    onChange={(e) => handleInputChange("telefone", e.target.value)}
+                    placeholder="(00) 0000-0000"
+                  />
+                </div>
+              </div>
+
+              {/* Terceira linha - WhatsApp, Telefone Celular */}
+              <div className={styles.formGrid}>
+                <div>
+                  <label className={styles.formLabel}>
+                    Whatsapp (Tecle enter para adicionar o whatsapp)
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      className={styles.formInput}
+                      value={newWhatsapp}
+                      onChange={(e) => setNewWhatsapp(e.target.value)}
+                      onKeyPress={(e) => handleKeyPress(e, () => addWhatsapp(newWhatsapp))}
+                      placeholder="(00) 00000-0000"
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="icon"
+                      onClick={() => addWhatsapp(newWhatsapp)}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                  {formData.whatsapps.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {formData.whatsapps.map((whatsapp, index) => (
+                        <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                          {whatsapp}
+                          <button
+                            onClick={() => removeWhatsapp(index)}
+                            className="ml-1 hover:text-destructive"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="telefonecelular" className={styles.formLabel}>
+                    Telefone Celular
+                  </label>
+                  <input
+                    id="telefonecelular"
+                    type="text"
+                    className={styles.formInput}
+                    value={formData.telefonecelular}
+                    onChange={(e) => handleInputChange("telefonecelular", e.target.value)}
+                    placeholder="(00) 00000-0000"
+                  />
+                </div>
+              </div>
+
+              {/* Quarta linha - Vendedor Padrão e Transportadora Padrão */}
+              <div className={styles.formGrid2Col}>
+                <div>
+                  <label htmlFor="vendedorPadrao" className={styles.formLabel}>
+                    Vendedor Padrão
+                  </label>
+                  <input
+                    id="vendedorPadrao"
+                    type="text"
+                    className={styles.formInput}
+                    value={formData.vendedorPadrao}
+                    onChange={(e) => handleInputChange("vendedorPadrao", e.target.value)}
+                    placeholder="Nome do vendedor"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="transportadoraPadrao" className={styles.formLabel}>
+                    Transportadora Padrão
+                  </label>
+                  <input
+                    id="transportadoraPadrao"
+                    type="text"
+                    className={styles.formInput}
+                    value={formData.transportadoraPadrao}
+                    onChange={(e) => handleInputChange("transportadoraPadrao", e.target.value)}
+                    placeholder="Nome da transportadora"
+                  />
+                </div>
+              </div>
+
+              {/* Switch - Bloquear notificações WhatsApp */}
+              <div className={styles.switchContainer}>
+                <Switch
+                  id="bloquearNotificacoes"
+                  checked={formData.bloquearNotificacoesWhatsapp}
+                  onCheckedChange={(checked) => handleInputChange("bloquearNotificacoesWhatsapp", checked)}
+                />
+                <label htmlFor="bloquearNotificacoes" className={styles.switchLabel}>
+                  Bloquear notificações de cobrança por Whatsapp
+                </label>
+              </div>
+
+              {/* Switch - Cadastro Inativo */}
+              <div className={styles.switchContainer}>
+                <Switch
+                  id="cadastroInativo"
+                  checked={false}
+                  onCheckedChange={() => {}}
+                />
+                <label htmlFor="cadastroInativo" className={styles.switchLabel}>
+                  Cadastro Inativo
+                </label>
+              </div>
+
+              {/* Rótulos */}
+              <div className="mt-6">
+                <label className={styles.formLabel}>
+                  Rótulo (Relação que esta pessoa terá com a empresa)
+                </label>
+                <div className="mt-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                  {rotulosDisponiveis.map((rotulo) => (
+                    <div key={rotulo} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`rotulo-${rotulo}`}
+                        checked={formData.rotulos.includes(rotulo)}
+                        onChange={() => toggleRotulo(rotulo)}
+                        className="rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <Label htmlFor={`rotulo-${rotulo}`} className="text-sm">
+                        {rotulo}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -78,11 +78,8 @@ const OrdersQuotesForm = () => {
   }, [id])
 
   const generateNumber = () => {
-    const timestamp = Date.now().toString().slice(-6)
-    setFormData(prev => ({
-      ...prev,
-      number: `PO${timestamp}`
-    }))
+    // Não gerar número aqui - será gerado automaticamente pelo banco de dados
+    // através do trigger set_order_number que usa generate_next_order_number
   }
 
   const loadOrderQuote = async (orderQuoteId: string) => {

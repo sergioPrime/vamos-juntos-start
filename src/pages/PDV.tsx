@@ -587,9 +587,6 @@ const PDV = () => {
     }
 
     try {
-      // Generate order number
-      const orderNumber = `PDV-${Date.now()}`
-      
       // Create payment methods string
       const paymentMethodsStr = payments
         .map(p => {
@@ -598,13 +595,13 @@ const PDV = () => {
         })
         .join(', ')
 
-      // Create order
-      const { data: order, error: orderError } = await supabase
+      // Create order (order_number será gerado automaticamente pelo trigger)
+      const { data: orderData, error: orderError } = await supabase
         .from('orders')
-        .insert({
+        .insert([{
           org_id: currentOrg?.id,
           owner_id: user?.id,
-          order_number: orderNumber,
+          order_number: '', // Será gerado automaticamente pelo trigger set_order_number
           status: 'completed',
           order_type: 'sale',
           subtotal: subtotalBeforeDiscounts,
@@ -613,9 +610,11 @@ const PDV = () => {
           payment_method: paymentMethodsStr,
           completed_at: new Date().toISOString(),
           customer_id: selectedCustomer?.id
-        })
+        }])
         .select()
-        .single()
+      
+      if (orderError) throw orderError
+      const order = orderData[0]
 
       if (orderError) throw orderError
 
@@ -646,7 +645,7 @@ const PDV = () => {
             quantity: item.quantity,
             reference_type: 'order',
             reference_id: order.id,
-            notes: `Venda PDV - ${orderNumber}`,
+            notes: `Venda PDV - ${order.order_number}`,
             created_by: user?.id
           })
 
@@ -670,7 +669,7 @@ const PDV = () => {
           sessao_id: caixaAberto.id,
           tipo: 'venda',
           valor: finalTotal,
-          descricao: `Venda PDV - ${orderNumber}`,
+          descricao: `Venda PDV - ${order.order_number}`,
           reference_id: order.id,
           reference_type: 'order',
           created_by: user?.id
@@ -722,7 +721,7 @@ const PDV = () => {
             person_type: 'customer',
             entry_type: 'receivable',
             amount: finalTotal,
-            description: `Venda PDV - ${orderNumber}`,
+            description: `Venda PDV - ${order.order_number}`,
             due_date: new Date().toISOString().split('T')[0],
             competence_date: new Date().toISOString().split('T')[0],
             is_settled: true,
@@ -742,7 +741,7 @@ const PDV = () => {
 
       toast({
         title: "Venda finalizada com sucesso!",
-        description: `Pedido ${orderNumber} criado e lançamento financeiro registrado.`,
+        description: `Pedido ${order.order_number} criado e lançamento financeiro registrado.`,
       })
 
       // Clear cart and close dialog

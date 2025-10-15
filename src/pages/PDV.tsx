@@ -1084,7 +1084,7 @@ const PDV = () => {
                   onClick={() => setIsPaymentDialogOpen(true)}
                 >
                   <CreditCard className="mr-2 h-5 w-5" />
-                  Finalizar Venda (F8)
+                  Ir para Pagamento
                 </Button>
               </div>
             </CardContent>

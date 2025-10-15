@@ -190,11 +190,9 @@ const App = () => (
           } />
           <Route path="/pdv" element={
             <ProtectedRoute>
-              <AppLayout>
-                <PageTransition direction="left">
-                  <PDV />
-                </PageTransition>
-              </AppLayout>
+              <PageTransition direction="left">
+                <PDV />
+              </PageTransition>
             </ProtectedRoute>
           } />
           <Route path="/pdv/operacoes" element={

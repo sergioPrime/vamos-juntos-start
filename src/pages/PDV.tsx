@@ -18,6 +18,7 @@ import { PaymentDialog } from "@/components/pdv/PaymentDialog"
 import { DiscountDialog } from "@/components/pdv/DiscountDialog"
 import { AbrirCaixaDialog } from "@/components/pdv/AbrirCaixaDialog"
 import { CaixaClosedScreen } from "@/components/pdv/CaixaClosedScreen"
+import { QuickProductDialog } from "@/components/pdv/QuickProductDialog"
 import { usePermissionGuard } from "@/hooks/usePermissionGuard"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { cn } from "@/lib/utils"
@@ -111,6 +112,10 @@ const PDV = () => {
   
   // Ref for search input
   const searchInputRef = useRef<HTMLInputElement>(null)
+  
+  // Quick product dialog
+  const [isQuickProductDialogOpen, setIsQuickProductDialogOpen] = useState(false)
+  const [quickProductInitialName, setQuickProductInitialName] = useState("")
 
   // Check if cash register is open
   useEffect(() => {
@@ -836,6 +841,16 @@ const PDV = () => {
           onOpenChange={setIsAbrirCaixaDialogOpen}
           onSuccess={() => setCaixaAberto(true)}
         />
+        
+        <QuickProductDialog
+          open={isQuickProductDialogOpen}
+          onOpenChange={setIsQuickProductDialogOpen}
+          initialName={quickProductInitialName}
+          onSuccess={() => {
+            loadProducts()
+            setSearchTerm("")
+          }}
+        />
       </>
     )
   }
@@ -940,11 +955,29 @@ const PDV = () => {
                      </div>
                    ))}
                 </>
-              ) : (
-                <div className="p-8 text-center">
-                  <Search className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
-                  <div className="text-sm font-medium text-muted-foreground">Nenhum produto encontrado</div>
-                  <div className="text-xs text-muted-foreground mt-1">Tente buscar por código, nome ou código de barras</div>
+               ) : (
+                <div className="p-6">
+                  <div className="text-center mb-4">
+                    <Search className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+                    <div className="text-sm font-medium text-muted-foreground">Nenhum produto encontrado</div>
+                    <div className="text-xs text-muted-foreground mt-1">Tente buscar por código, nome ou código de barras</div>
+                  </div>
+                  
+                  <div 
+                    className="flex items-center gap-3 p-4 bg-primary/10 hover:bg-primary/20 rounded-lg cursor-pointer transition-all border-2 border-primary/30"
+                    onClick={() => {
+                      setQuickProductInitialName(searchTerm)
+                      setIsQuickProductDialogOpen(true)
+                    }}
+                  >
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground">
+                      <Plus className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div className="font-semibold text-sm text-foreground">Cadastrar Novo Produto</div>
+                      <div className="text-xs text-muted-foreground">Clique para cadastrar "{searchTerm}"</div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -1161,6 +1194,16 @@ const PDV = () => {
         }
         onApply={applyItemDiscount}
         title="Desconto no Item"
+      />
+
+      <QuickProductDialog
+        open={isQuickProductDialogOpen}
+        onOpenChange={setIsQuickProductDialogOpen}
+        initialName={quickProductInitialName}
+        onSuccess={() => {
+          loadProducts()
+          setSearchTerm("")
+        }}
       />
 
     </div>

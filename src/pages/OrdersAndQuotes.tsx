@@ -581,8 +581,8 @@ const OrdersAndQuotes = () => {
                     <tr 
                       key={item.id} 
                       className={`border-b transition-colors ${
-                        index % 2 === 0 ? 'bg-background' : 'bg-muted/10'
-                      } hover:bg-muted/30`}
+                        index % 2 === 0 ? 'bg-white dark:bg-background' : 'bg-gray-50 dark:bg-muted/30'
+                      } hover:bg-muted/40 dark:hover:bg-muted/50`}
                     >
                       <td className="p-3">
                         <Checkbox 

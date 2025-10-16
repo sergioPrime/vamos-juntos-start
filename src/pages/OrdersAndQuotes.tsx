@@ -533,34 +533,35 @@ const OrdersAndQuotes = () => {
         <div className="bg-background rounded-lg border overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-muted/50 border-b">
+              <thead className="bg-muted/30 border-b">
                 <tr>
                   <th className="p-3 text-left w-12">
                     <Checkbox 
                       checked={selectedItems.size === paginatedData.length && paginatedData.length > 0}
                       onCheckedChange={toggleSelectAll}
+                      className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
                   </th>
                   <th 
-                    className="p-3 text-left font-semibold text-sm cursor-pointer hover:bg-muted/70"
+                    className="p-3 text-left font-semibold text-sm cursor-pointer hover:bg-muted/50 text-foreground"
                     onClick={() => handleSort('number')}
                   >
                     <div className="flex items-center gap-1">
                       Código
                       {sortColumn === 'number' && (
-                        <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                        <span className="text-xs text-primary">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                       )}
                     </div>
                   </th>
-                  <th className="p-3 text-left font-semibold text-sm">Data</th>
-                  <th className="p-3 text-left font-semibold text-sm">Status do Sistema</th>
-                  <th className="p-3 text-left font-semibold text-sm">Cliente</th>
-                  <th className="p-3 text-left font-semibold text-sm">Vendedor</th>
-                  <th className="p-3 text-left font-semibold text-sm">Valor</th>
-                  <th className="p-3 text-left font-semibold text-sm">Forma de Pagamento</th>
-                  <th className="p-3 text-left font-semibold text-sm">NF-e</th>
+                  <th className="p-3 text-left font-semibold text-sm text-foreground">Data</th>
+                  <th className="p-3 text-left font-semibold text-sm text-foreground">Status do Sistema</th>
+                  <th className="p-3 text-left font-semibold text-sm text-foreground">Cliente</th>
+                  <th className="p-3 text-left font-semibold text-sm text-foreground">Vendedor</th>
+                  <th className="p-3 text-left font-semibold text-sm text-foreground">Valor</th>
+                  <th className="p-3 text-left font-semibold text-sm text-foreground">Forma de Pagamento</th>
+                  <th className="p-3 text-left font-semibold text-sm text-foreground">NF-e</th>
                   <th className="p-3 text-right w-12">
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" className="hover:bg-muted/50">
                       <Filter className="h-4 w-4" />
                     </Button>
                   </th>
@@ -569,17 +570,19 @@ const OrdersAndQuotes = () => {
               <tbody>
                 {paginatedData.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="p-12 text-center">
-                      <div className="text-muted-foreground">
+                    <td colSpan={10} className="p-12 text-center bg-background">
+                      <div className="text-muted-foreground font-medium">
                         Nenhum registro encontrado
                       </div>
                     </td>
                   </tr>
                 ) : (
-                  paginatedData.map((item) => (
+                  paginatedData.map((item, index) => (
                     <tr 
                       key={item.id} 
-                      className="border-b hover:bg-muted/30 transition-colors"
+                      className={`border-b transition-colors ${
+                        index % 2 === 0 ? 'bg-background' : 'bg-muted/10'
+                      } hover:bg-muted/30`}
                     >
                       <td className="p-3">
                         <Checkbox 
@@ -587,8 +590,8 @@ const OrdersAndQuotes = () => {
                           onCheckedChange={() => toggleSelectItem(item.id)}
                         />
                       </td>
-                      <td className="p-3 text-sm">{item.number}</td>
-                      <td className="p-3 text-sm">
+                      <td className="p-3 text-sm font-medium text-foreground">{item.number}</td>
+                      <td className="p-3 text-sm text-foreground">
                         {new Date(item.date).toLocaleDateString('pt-BR')} - {new Date(item.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </td>
                       <td className="p-3">
@@ -596,19 +599,19 @@ const OrdersAndQuotes = () => {
                           {statusLabels[item.status as keyof typeof statusLabels] || item.status}
                         </Badge>
                       </td>
-                      <td className="p-3 text-sm text-orange-600">
+                      <td className="p-3 text-sm text-orange-600 dark:text-orange-400 font-medium">
                         {item.customer_name}
                       </td>
-                      <td className="p-3 text-sm uppercase">
+                      <td className="p-3 text-sm uppercase text-foreground">
                         {item.seller_name}
                       </td>
-                      <td className="p-3 text-sm">
+                      <td className="p-3 text-sm font-semibold text-foreground">
                         R$ {item.total_amount.toFixed(2).replace('.', ',')}
                       </td>
-                      <td className="p-3 text-sm">
+                      <td className="p-3 text-sm text-foreground">
                         {item.payment_method || '-'}
                       </td>
-                      <td className="p-3 text-sm">
+                      <td className="p-3 text-sm text-foreground">
                         {item.nfe || '-'}
                       </td>
                       <td className="p-3">
@@ -616,6 +619,7 @@ const OrdersAndQuotes = () => {
                           <Button 
                             variant="ghost" 
                             size="icon"
+                            className="hover:bg-primary/10 hover:text-primary"
                             onClick={() => navigate(`/orders-quotes/${item.id}`)}
                           >
                             <Edit className="h-4 w-4" />
@@ -623,6 +627,7 @@ const OrdersAndQuotes = () => {
                           <Button 
                             variant="ghost" 
                             size="icon"
+                            className="hover:bg-destructive/10 hover:text-destructive"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>

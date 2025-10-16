@@ -3230,7 +3230,7 @@ export type Database = {
       }
       generate_next_system_code: {
         Args: { p_org_id: string }
-        Returns: number
+        Returns: string
       }
       has_children: {
         Args: { item_id: string; table_name: string }

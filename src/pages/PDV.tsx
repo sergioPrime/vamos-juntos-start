@@ -539,11 +539,6 @@ const PDV = () => {
       description: 'Suspender Venda'
     },
     {
-      key: 'f12',
-      action: () => setShowSuspendedSales(!showSuspendedSales),
-      description: 'Vendas Suspensas'
-    },
-    {
       key: 'escape',
       action: () => {
         setSearchTerm("")

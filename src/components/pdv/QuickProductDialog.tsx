@@ -41,10 +41,10 @@ export const QuickProductDialog = ({ open, onOpenChange, onSuccess, initialName 
       return
     }
 
-    if (!formData.name || !formData.unit_price) {
+    if (!formData.name || !formData.sku || !formData.unit_price) {
       toast({
         title: "Campos obrigatórios",
-        description: "Preencha nome e preço do produto",
+        description: "Preencha nome, código e preço do produto",
         variant: "destructive"
       })
       return
@@ -58,7 +58,7 @@ export const QuickProductDialog = ({ open, onOpenChange, onSuccess, initialName 
           org_id: currentOrg.id,
           owner_id: user.id,
           name: formData.name,
-          sku: formData.sku || `SKU${Date.now()}`,
+          sku: formData.sku,
           unit_price: parseFloat(formData.unit_price),
           cost_price: 0,
           stock_quantity: parseFloat(formData.stock_quantity) || 0,
@@ -117,12 +117,13 @@ export const QuickProductDialog = ({ open, onOpenChange, onSuccess, initialName 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="sku">Código/SKU</Label>
+            <Label htmlFor="sku">Código/SKU *</Label>
             <Input
               id="sku"
               value={formData.sku}
               onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-              placeholder="Código do produto (opcional)"
+              placeholder="Digite o código do produto"
+              required
             />
           </div>
 

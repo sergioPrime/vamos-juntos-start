@@ -10,7 +10,7 @@ export function useModulePermissions() {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { currentOrg } = useOrganization();
-  const { isAdmin, isSuperAdmin } = useRoleCheck();
+  const { isAdmin, isSuperAdmin, loading: roleLoading } = useRoleCheck();
 
   useEffect(() => {
     loadPermissions();
@@ -39,7 +39,7 @@ export function useModulePermissions() {
   };
 
   const hasPermission = (moduleKey: ModuleKey, permissionType: PermissionType): boolean => {
-    // Admins and superadmins have all permissions
+    // Admins and superadmins have all permissions - check immediately
     if (isAdmin || isSuperAdmin) {
       return true;
     }
@@ -68,7 +68,7 @@ export function useModulePermissions() {
 
   return {
     permissions,
-    loading,
+    loading: loading || roleLoading,
     hasPermission,
     canCreate,
     canRead,

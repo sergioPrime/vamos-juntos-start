@@ -9,9 +9,13 @@ export function usePermissionGuard(moduleKey: ModuleKey, requiredPermission: Per
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Wait for permissions to load completely
     if (loading) return;
 
-    if (!hasPermission(moduleKey, requiredPermission)) {
+    // Only check and redirect if we're sure the user doesn't have permission
+    const hasAccess = hasPermission(moduleKey, requiredPermission);
+    
+    if (!hasAccess) {
       toast({
         title: 'Acesso Negado',
         description: 'Você não tem permissão para acessar este recurso.',

@@ -248,7 +248,7 @@ export function FinancialTable({
       
       case 'company_name':
         const companyName = entry.companies?.name || '-'
-        return <span className="truncate block">{companyName}</span>
+        return <span className="truncate block text-foreground">{companyName}</span>
       
       case 'entry_type':
         return (
@@ -266,7 +266,7 @@ export function FinancialTable({
           personName = entry.suppliers.name
         }
         
-        return <span className="truncate block">{personName}</span>
+        return <span className="truncate block text-foreground font-medium">{personName}</span>
       
       case 'bank_account':
         const bankName = entry.bank_accounts?.bank_name 
@@ -337,7 +337,7 @@ export function FinancialTable({
       
       case 'description':
         return (
-          <span className="truncate block" title={entry.description}>
+          <span className="truncate block text-foreground" title={entry.description}>
             {entry.description || '-'}
           </span>
         )
@@ -455,12 +455,14 @@ export function FinancialTable({
         </thead>
 
         <tbody className="bg-background">
-            {sortedEntries.map((entry) => (
+            {sortedEntries.map((entry, index) => (
               <tr
                 key={entry.id}
                 className={cn(
-                  "border-b transition-colors hover:bg-muted/50",
-                  selectedEntries.includes(entry.id) && "bg-muted/30"
+                  "border-b transition-colors",
+                  index % 2 === 0 ? "bg-background" : "bg-muted/10",
+                  "hover:bg-muted/30",
+                  selectedEntries.includes(entry.id) && "bg-muted/40"
                 )}
               >
                 {/* Checkbox Cell */}
@@ -472,14 +474,14 @@ export function FinancialTable({
                   />
                 </td>
                 
-                {/* Data Cells */}
+                 {/* Data Cells */}
                 {visibleColumns.map((column) => {
                   const alignment = getColumnAlignment(column.key)
                   
                   return (
                     <td 
                       key={`${entry.id}-${column.key}`} 
-                      className={cn("p-4 align-middle text-xs", alignment)}
+                      className={cn("p-4 align-middle text-sm", alignment)}
                     >
                       {getCellValue(entry, column.key)}
                     </td>

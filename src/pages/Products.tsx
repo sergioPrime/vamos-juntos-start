@@ -21,6 +21,7 @@ import { usePermissionGuard } from "@/hooks/usePermissionGuard"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
 
 interface Product {
   id: string
@@ -954,31 +955,31 @@ const Products = () => {
 
       {/* Main content */}
       <div className="flex-1 px-6 py-4 overflow-auto">
-        <div className="bg-white rounded border border-border shadow-sm">
+        <div className="bg-background rounded border border-border shadow-sm">
           <Table>
             <TableHeader>
-              <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
+              <TableRow className="bg-muted/50 hover:bg-muted/50 border-b">
                 <TableHead className="w-[40px] h-10 px-3">
                   <Checkbox 
                     checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
                     onCheckedChange={handleSelectAll}
-                    className="border-gray-400"
+                    className="border-muted-foreground"
                   />
                 </TableHead>
                 <TableHead className="w-[40px] h-10 px-2">
                   <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                 </TableHead>
-                <TableHead className="w-[60px] h-10 px-3 text-xs font-medium text-foreground">Tipo</TableHead>
-                <TableHead className="w-[100px] h-10 px-3 text-xs font-medium text-foreground">
+                <TableHead className="w-[60px] h-10 px-3 text-xs font-semibold text-foreground">Tipo</TableHead>
+                <TableHead className="w-[100px] h-10 px-3 text-xs font-semibold text-foreground">
                   Cód. Sistema
                   <ChevronDown className="inline h-3 w-3 ml-1" />
                 </TableHead>
-                <TableHead className="w-[120px] h-10 px-3 text-xs font-medium text-foreground">Código SKU</TableHead>
-                <TableHead className="h-10 px-3 text-xs font-medium text-foreground">Nome</TableHead>
-                <TableHead className="w-[120px] h-10 px-3 text-xs font-medium text-foreground text-center">Visível Vendas</TableHead>
-                <TableHead className="w-[120px] h-10 px-3 text-xs font-medium text-foreground">Marca</TableHead>
-                <TableHead className="w-[120px] h-10 px-3 text-xs font-medium text-foreground">Modelo</TableHead>
-                <TableHead className="w-[140px] h-10 px-3 text-xs font-medium text-foreground">Fornecedor</TableHead>
+                <TableHead className="w-[120px] h-10 px-3 text-xs font-semibold text-foreground">Código SKU</TableHead>
+                <TableHead className="h-10 px-3 text-xs font-semibold text-foreground">Nome</TableHead>
+                <TableHead className="w-[120px] h-10 px-3 text-xs font-semibold text-foreground text-center">Visível Vendas</TableHead>
+                <TableHead className="w-[120px] h-10 px-3 text-xs font-semibold text-foreground">Marca</TableHead>
+                <TableHead className="w-[120px] h-10 px-3 text-xs font-semibold text-foreground">Modelo</TableHead>
+                <TableHead className="w-[140px] h-10 px-3 text-xs font-semibold text-foreground">Fornecedor</TableHead>
                 <TableHead className="w-[60px] h-10 px-2 text-right">
                   <Filter className="h-3.5 w-3.5 ml-auto text-muted-foreground" />
                 </TableHead>
@@ -998,49 +999,55 @@ const Products = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredProducts.map((product) => (
-                  <TableRow key={product.id} className="hover:bg-[#fafafa]">
+                filteredProducts.map((product, index) => (
+                  <TableRow 
+                    key={product.id} 
+                    className={cn(
+                      "border-b hover:bg-muted/30 transition-colors",
+                      index % 2 === 0 ? "bg-background" : "bg-muted/10"
+                    )}
+                  >
                     <TableCell className="px-3 py-2.5">
                       <Checkbox 
                         checked={selectedProducts.includes(product.id)}
                         onCheckedChange={(checked) => handleSelectProduct(product.id, checked as boolean)}
-                        className="border-gray-400"
+                        className="border-muted-foreground"
                       />
                     </TableCell>
                     <TableCell className="px-2 py-2.5">
-                      <ChevronDown className="h-3.5 w-3.5 text-[#26b9d6]" />
+                      <ChevronDown className="h-3.5 w-3.5 text-primary" />
                     </TableCell>
                     <TableCell className="px-3 py-2.5">
-                      <Circle className="h-4 w-4 text-gray-400" />
+                      <Circle className="h-4 w-4 text-muted-foreground" />
                     </TableCell>
-                    <TableCell className="px-3 py-2.5 text-xs text-foreground">{product.system_code || "-"}</TableCell>
-                    <TableCell className="px-3 py-2.5 text-xs text-[#26b9d6] font-medium">{product.sku || "-"}</TableCell>
-                    <TableCell className="px-3 py-2.5 text-xs text-foreground">{product.name}</TableCell>
+                    <TableCell className="px-3 py-2.5 text-sm font-medium text-foreground">{product.system_code || "-"}</TableCell>
+                    <TableCell className="px-3 py-2.5 text-sm text-primary font-semibold">{product.sku || "-"}</TableCell>
+                    <TableCell className="px-3 py-2.5 text-sm font-medium text-foreground">{product.name}</TableCell>
                     <TableCell className="px-3 py-2.5 text-center">
                       {!product.hide_in_sales && (
-                        <Check className="h-4 w-4 text-green-600 mx-auto" />
+                        <Check className="h-4 w-4 text-green-600 dark:text-green-400 mx-auto" />
                       )}
                     </TableCell>
-                    <TableCell className="px-3 py-2.5 text-xs text-foreground">{product.brand || ""}</TableCell>
-                    <TableCell className="px-3 py-2.5 text-xs text-foreground">{product.model || ""}</TableCell>
-                    <TableCell className="px-3 py-2.5 text-xs text-foreground">{getSupplierName(product.supplier_id)}</TableCell>
+                    <TableCell className="px-3 py-2.5 text-sm text-foreground">{product.brand || ""}</TableCell>
+                    <TableCell className="px-3 py-2.5 text-sm text-foreground">{product.model || ""}</TableCell>
+                    <TableCell className="px-3 py-2.5 text-sm text-foreground">{getSupplierName(product.supplier_id)}</TableCell>
                     <TableCell className="px-2 py-2.5">
                       <div className="flex items-center justify-end gap-0.5">
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 hover:bg-gray-100"
+                          className="h-7 w-7 hover:bg-muted"
                           onClick={() => openForm(product)}
                         >
-                          <Edit className="h-3.5 w-3.5 text-gray-600" />
+                          <Edit className="h-3.5 w-3.5 text-foreground" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 hover:bg-gray-100"
+                          className="h-7 w-7 hover:bg-destructive/10"
                           onClick={() => handleDelete(product)}
                         >
-                          <Trash2 className="h-3.5 w-3.5 text-gray-600" />
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
                         </Button>
                       </div>
                     </TableCell>

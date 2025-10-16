@@ -958,12 +958,12 @@ const Products = () => {
         <div className="bg-background rounded border border-border shadow-sm">
           <Table>
             <TableHeader>
-              <TableRow className="bg-muted/50 hover:bg-muted/50 border-b">
+              <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border">
                 <TableHead className="w-[40px] h-10 px-3">
                   <Checkbox 
                     checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
                     onCheckedChange={handleSelectAll}
-                    className="border-muted-foreground"
+                    className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                   />
                 </TableHead>
                 <TableHead className="w-[40px] h-10 px-2">
@@ -972,7 +972,7 @@ const Products = () => {
                 <TableHead className="w-[60px] h-10 px-3 text-xs font-semibold text-foreground">Tipo</TableHead>
                 <TableHead className="w-[100px] h-10 px-3 text-xs font-semibold text-foreground">
                   Cód. Sistema
-                  <ChevronDown className="inline h-3 w-3 ml-1" />
+                  <ChevronDown className="inline h-3 w-3 ml-1 text-muted-foreground" />
                 </TableHead>
                 <TableHead className="w-[120px] h-10 px-3 text-xs font-semibold text-foreground">Código SKU</TableHead>
                 <TableHead className="h-10 px-3 text-xs font-semibold text-foreground">Nome</TableHead>
@@ -988,12 +988,12 @@ const Products = () => {
             <TableBody>
               {filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="text-center py-16">
-                    <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-base font-medium text-muted-foreground mb-2">
+                  <TableCell colSpan={11} className="text-center py-16 bg-background">
+                    <Package className="mx-auto h-12 w-12 text-muted-foreground/60 mb-4" />
+                    <h3 className="text-base font-semibold text-foreground mb-2">
                       {searchTerm ? "Nenhum produto encontrado" : "Nenhum produto cadastrado"}
                     </h3>
-                    <p className="text-sm text-muted-foreground mb-4">
+                    <p className="text-sm text-muted-foreground">
                       {searchTerm ? "Tente alterar os filtros de busca" : "Comece criando seu primeiro produto"}
                     </p>
                   </TableCell>
@@ -1003,51 +1003,52 @@ const Products = () => {
                   <TableRow 
                     key={product.id} 
                     className={cn(
-                      "border-b hover:bg-muted/30 transition-colors",
-                      index % 2 === 0 ? "bg-background" : "bg-muted/10"
+                      "border-b border-border transition-colors",
+                      index % 2 === 0 ? "bg-background" : "bg-muted/10",
+                      "hover:bg-muted/30"
                     )}
                   >
                     <TableCell className="px-3 py-2.5">
                       <Checkbox 
                         checked={selectedProducts.includes(product.id)}
                         onCheckedChange={(checked) => handleSelectProduct(product.id, checked as boolean)}
-                        className="border-muted-foreground"
+                        className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                       />
                     </TableCell>
                     <TableCell className="px-2 py-2.5">
                       <ChevronDown className="h-3.5 w-3.5 text-primary" />
                     </TableCell>
                     <TableCell className="px-3 py-2.5">
-                      <Circle className="h-4 w-4 text-muted-foreground" />
+                      <Circle className="h-4 w-4 text-muted-foreground fill-muted-foreground/20" />
                     </TableCell>
-                    <TableCell className="px-3 py-2.5 text-sm font-medium text-foreground">{product.system_code || "-"}</TableCell>
-                    <TableCell className="px-3 py-2.5 text-sm text-primary font-semibold">{product.sku || "-"}</TableCell>
-                    <TableCell className="px-3 py-2.5 text-sm font-medium text-foreground">{product.name}</TableCell>
+                    <TableCell className="px-3 py-2.5 text-sm font-semibold text-foreground">{product.system_code || "-"}</TableCell>
+                    <TableCell className="px-3 py-2.5 text-sm text-primary font-bold">{product.sku || "-"}</TableCell>
+                    <TableCell className="px-3 py-2.5 text-sm font-semibold text-foreground">{product.name}</TableCell>
                     <TableCell className="px-3 py-2.5 text-center">
                       {!product.hide_in_sales && (
-                        <Check className="h-4 w-4 text-green-600 dark:text-green-400 mx-auto" />
+                        <Check className="h-4 w-4 text-green-600 dark:text-green-500 mx-auto font-bold" />
                       )}
                     </TableCell>
-                    <TableCell className="px-3 py-2.5 text-sm text-foreground">{product.brand || ""}</TableCell>
-                    <TableCell className="px-3 py-2.5 text-sm text-foreground">{product.model || ""}</TableCell>
-                    <TableCell className="px-3 py-2.5 text-sm text-foreground">{getSupplierName(product.supplier_id)}</TableCell>
+                    <TableCell className="px-3 py-2.5 text-sm text-foreground/90">{product.brand || "-"}</TableCell>
+                    <TableCell className="px-3 py-2.5 text-sm text-foreground/90">{product.model || "-"}</TableCell>
+                    <TableCell className="px-3 py-2.5 text-sm text-foreground/90">{getSupplierName(product.supplier_id) || "-"}</TableCell>
                     <TableCell className="px-2 py-2.5">
                       <div className="flex items-center justify-end gap-0.5">
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 hover:bg-muted"
+                          className="h-7 w-7 hover:bg-primary/10 hover:text-primary transition-colors"
                           onClick={() => openForm(product)}
                         >
-                          <Edit className="h-3.5 w-3.5 text-foreground" />
+                          <Edit className="h-3.5 w-3.5" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 hover:bg-destructive/10"
+                          className="h-7 w-7 hover:bg-destructive/10 hover:text-destructive transition-colors"
                           onClick={() => handleDelete(product)}
                         >
-                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     </TableCell>

@@ -108,18 +108,26 @@ const OrdersAndQuotes = () => {
 
       // Combine and format data
       const combinedData: OrderQuote[] = [
-        ...(orders || []).map(order => ({
-          id: order.id,
-          number: order.order_number,
-          type: 'order' as const,
-          status: order.status,
-          customer_name: order.customer_id ? customerMap.get(order.customer_id) || "Cliente não informado" : "Cliente não informado",
-          seller_name: "SERGIO MENDES",
-          total_amount: order.total_amount,
-          date: order.order_date,
-          payment_method: order.payment_method || '-',
-          nfe: ""
-        })),
+        ...(orders || []).map(order => {
+          // Extract payment method description without value
+          let paymentMethodDesc = order.payment_method || '-';
+          if (paymentMethodDesc.includes(':')) {
+            paymentMethodDesc = paymentMethodDesc.split(':')[0].trim();
+          }
+          
+          return {
+            id: order.id,
+            number: order.order_number,
+            type: 'order' as const,
+            status: order.status,
+            customer_name: order.customer_id ? customerMap.get(order.customer_id) || "Cliente não informado" : "Cliente não informado",
+            seller_name: "SERGIO MENDES",
+            total_amount: order.total_amount,
+            date: order.order_date,
+            payment_method: paymentMethodDesc,
+            nfe: ""
+          };
+        }),
         ...(quotes || []).map(quote => ({
           id: quote.id,
           number: quote.number,

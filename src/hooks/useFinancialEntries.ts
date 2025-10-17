@@ -152,7 +152,7 @@ export function useFinancialEntries() {
           ? supabase.from('suppliers').select('id, name').in('id', supplierIds)
           : Promise.resolve({ data: [] }),
         pessoaIds.length > 0
-          ? supabase.from('pessoas').select('id, nome_fantasia, razao_social, tipo_pessoa').in('id', pessoaIds)
+          ? supabase.from('pessoas').select('id, nome_fantasia, razao_social, rotulos').in('id', pessoaIds)
           : Promise.resolve({ data: [] })
       ])
 
@@ -183,12 +183,16 @@ export function useFinancialEntries() {
         suppliersData.data?.map(s => [s.id, { ...s, name: s.name }] as const) || []
       )
       
-      // Adicionar pessoas ao mapa apropriado baseado no tipo
+      // Adicionar pessoas ao mapa apropriado baseado nos rótulos
       pessoasData.data?.forEach(p => {
         const pessoaData = { ...p, name: p.nome_fantasia || p.razao_social || 'Sem nome' }
-        if (p.tipo_pessoa === 'cliente') {
+        const rotulos = p.rotulos || []
+        
+        // Verifica se tem o rótulo "Cliente" ou "Fornecedor"
+        if (rotulos.includes('Cliente')) {
           customersMap.set(p.id, pessoaData)
-        } else if (p.tipo_pessoa === 'fornecedor') {
+        }
+        if (rotulos.includes('Fornecedor')) {
           suppliersMap.set(p.id, pessoaData)
         }
       })

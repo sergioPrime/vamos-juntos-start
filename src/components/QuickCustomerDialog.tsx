@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { UserPlus, X } from "lucide-react"
+import { UserPlus } from "lucide-react"
 import { usePessoas } from "@/hooks/usePessoas"
 import { useOrganization } from "@/hooks/useOrganization"
 import { useAuth } from "@/hooks/useAuth"
@@ -106,130 +106,162 @@ export function QuickCustomerDialog({ open, onOpenChange }: QuickCustomerDialogP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <UserPlus className="h-6 w-6 text-cyan-400" />
-            <div>
-              <div className="text-sm text-muted-foreground">NOVO</div>
-              <DialogTitle className="text-2xl">Cliente</DialogTitle>
+      <DialogContent className="sm:max-w-[880px] max-h-[90vh] overflow-y-auto p-8">
+        <DialogHeader className="relative pb-6">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 bg-cyan-400/10 p-2 rounded-lg">
+              <UserPlus className="h-7 w-7 text-cyan-400" />
+            </div>
+            <div className="flex flex-col gap-0">
+              <div className="text-xs font-medium text-muted-foreground tracking-wide">NOVO</div>
+              <DialogTitle className="text-3xl font-bold text-foreground">Cliente</DialogTitle>
             </div>
           </div>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+        <form onSubmit={handleSubmit} className="space-y-5 mt-2">
           {/* Linha 1: CPF/CNPJ e Nome */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="documento">CPF / CNPJ</Label>
+          <div className="grid grid-cols-12 gap-3">
+            <div className="col-span-3 space-y-1.5">
+              <Label htmlFor="documento" className="text-sm font-semibold text-foreground">
+                CPF / CNPJ
+              </Label>
               <Input
                 id="documento"
                 value={formData.documento}
                 onChange={(e) => handleInputChange("documento", e.target.value)}
-                placeholder="000.000.000-00"
+                placeholder=""
+                className="h-9 bg-background border-input"
               />
             </div>
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="nomeFantasia" className="text-foreground">
+            <div className="col-span-9 space-y-1.5">
+              <Label htmlFor="nomeFantasia" className="text-sm font-semibold text-foreground">
                 Nome do Cliente <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="nomeFantasia"
                 value={formData.nomeFantasia}
                 onChange={(e) => handleInputChange("nomeFantasia", e.target.value)}
-                placeholder="Nome do cliente"
+                placeholder=""
                 required
+                className="h-9 bg-background border-input"
               />
             </div>
           </div>
 
           {/* Linha 2: E-mail e Telefone */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-sm font-semibold text-foreground">
+                E-mail
+              </Label>
               <Input
                 id="email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                placeholder="email@exemplo.com"
+                placeholder=""
+                className="h-9 bg-background border-input"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="telefone">Telefone</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="telefone" className="text-sm font-semibold text-foreground">
+                Telefone
+              </Label>
               <Input
                 id="telefone"
                 value={formData.telefone}
                 onChange={(e) => handleInputChange("telefone", e.target.value)}
-                placeholder="(00) 00000-0000"
+                placeholder=""
+                className="h-9 bg-background border-input"
               />
             </div>
           </div>
 
           {/* Linha 3: CEP, Logradouro, Número */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-            <div className="md:col-span-3 space-y-2">
-              <Label htmlFor="cep">CEP</Label>
+          <div className="grid grid-cols-12 gap-3">
+            <div className="col-span-2 space-y-1.5">
+              <Label htmlFor="cep" className="text-sm font-semibold text-foreground">
+                CEP
+              </Label>
               <Input
                 id="cep"
                 value={formData.cep}
                 onChange={(e) => handleInputChange("cep", e.target.value)}
-                placeholder="00000-000"
+                placeholder=""
+                className="h-9 bg-background border-input"
               />
             </div>
-            <div className="md:col-span-6 space-y-2">
-              <Label htmlFor="logradouro">Logradouro</Label>
+            <div className="col-span-7 space-y-1.5">
+              <Label htmlFor="logradouro" className="text-sm font-semibold text-foreground">
+                Logradouro
+              </Label>
               <Input
                 id="logradouro"
                 value={formData.logradouro}
                 onChange={(e) => handleInputChange("logradouro", e.target.value)}
-                placeholder="Rua, Avenida..."
+                placeholder=""
+                className="h-9 bg-background border-input"
               />
             </div>
-            <div className="md:col-span-3 space-y-2">
-              <Label htmlFor="numero">Número</Label>
+            <div className="col-span-3 space-y-1.5">
+              <Label htmlFor="numero" className="text-sm font-semibold text-foreground">
+                Número
+              </Label>
               <Input
                 id="numero"
                 value={formData.numero}
                 onChange={(e) => handleInputChange("numero", e.target.value)}
-                placeholder="123"
+                placeholder=""
+                className="h-9 bg-background border-input"
               />
             </div>
           </div>
 
           {/* Linha 4: Complemento, Bairro, Cidade, UF */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-            <div className="md:col-span-3 space-y-2">
-              <Label htmlFor="complemento">Complemento</Label>
+          <div className="grid grid-cols-12 gap-3">
+            <div className="col-span-3 space-y-1.5">
+              <Label htmlFor="complemento" className="text-sm font-semibold text-foreground">
+                Complemento
+              </Label>
               <Input
                 id="complemento"
                 value={formData.complemento}
                 onChange={(e) => handleInputChange("complemento", e.target.value)}
-                placeholder="Apto, Sala..."
+                placeholder=""
+                className="h-9 bg-background border-input"
               />
             </div>
-            <div className="md:col-span-3 space-y-2">
-              <Label htmlFor="bairro">Bairro</Label>
+            <div className="col-span-3 space-y-1.5">
+              <Label htmlFor="bairro" className="text-sm font-semibold text-foreground">
+                Bairro
+              </Label>
               <Input
                 id="bairro"
                 value={formData.bairro}
                 onChange={(e) => handleInputChange("bairro", e.target.value)}
-                placeholder="Bairro"
+                placeholder=""
+                className="h-9 bg-background border-input"
               />
             </div>
-            <div className="md:col-span-4 space-y-2">
-              <Label htmlFor="cidade">Cidade</Label>
+            <div className="col-span-4 space-y-1.5">
+              <Label htmlFor="cidade" className="text-sm font-semibold text-foreground">
+                Cidade
+              </Label>
               <Input
                 id="cidade"
                 value={formData.cidade}
                 onChange={(e) => handleInputChange("cidade", e.target.value)}
-                placeholder="Cidade"
+                placeholder=""
+                className="h-9 bg-background border-input"
               />
             </div>
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="uf">UF</Label>
+            <div className="col-span-2 space-y-1.5">
+              <Label htmlFor="uf" className="text-sm font-semibold text-foreground">
+                UF
+              </Label>
               <Select value={formData.uf} onValueChange={(value) => handleInputChange("uf", value)}>
-                <SelectTrigger id="uf">
+                <SelectTrigger id="uf" className="h-9 bg-background border-input">
                   <SelectValue placeholder="UF" />
                 </SelectTrigger>
                 <SelectContent className="max-h-[300px]">
@@ -266,10 +298,10 @@ export function QuickCustomerDialog({ open, onOpenChange }: QuickCustomerDialogP
           </div>
 
           {/* Botão Cadastrar */}
-          <div className="flex justify-start pt-4">
+          <div className="flex justify-start pt-2">
             <Button 
               type="submit" 
-              className="bg-black hover:bg-black/90 text-white px-8"
+              className="bg-black hover:bg-black/80 text-white px-10 h-10 text-sm font-semibold rounded"
               disabled={loading}
             >
               {loading ? "Cadastrando..." : "Cadastrar"}

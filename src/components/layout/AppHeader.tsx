@@ -98,7 +98,10 @@ export function AppHeader() {
       <header className="fixed top-0 left-0 right-0 h-14 sm:h-16 border-b bg-background/80 backdrop-blur-sm flex items-center justify-between px-3 sm:px-4 lg:px-6 shrink-0 z-40">
         <div className="flex items-center gap-2 sm:gap-4">
           <SidebarTrigger />
-          <h1 className="font-semibold text-sm sm:text-base lg:text-lg truncate">
+          <h1 
+            className="font-semibold text-sm sm:text-base lg:text-lg truncate cursor-pointer hover:text-primary transition-colors"
+            onClick={() => navigate("/dashboard")}
+          >
             Vamos Juntos
           </h1>
         </div>

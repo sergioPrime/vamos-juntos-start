@@ -309,7 +309,7 @@ export function useFinancialEntries() {
     }
   }
 
-  const createFromOrder = async (orderId: string, customerId: string, amount: number, dueDate?: string, chartOfAccountId?: string, costCenterId?: string): Promise<boolean> => {
+  const createFromOrder = async (orderId: string, customerId: string, amount: number, dueDate?: string, chartOfAccountId?: string, costCenterId?: string, paymentMethod?: string): Promise<boolean> => {
     if (!chartOfAccountId || !costCenterId) {
       toast({
         title: "Erro",
@@ -319,7 +319,28 @@ export function useFinancialEntries() {
       return false
     }
 
-    const calculatedDueDate = dueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    // Calcular data de vencimento baseado no método de pagamento
+    let calculatedDueDate = dueDate
+    if (!calculatedDueDate && paymentMethod) {
+      const paymentMethodLower = paymentMethod.toLowerCase()
+      const today = new Date()
+      
+      if (paymentMethodLower.includes('débito')) {
+        // Cartão de débito: vencimento D+1
+        today.setDate(today.getDate() + 1)
+        calculatedDueDate = today.toISOString().split('T')[0]
+      } else if (paymentMethodLower.includes('crédito')) {
+        // Cartão de crédito: vencimento D+30
+        today.setDate(today.getDate() + 30)
+        calculatedDueDate = today.toISOString().split('T')[0]
+      } else {
+        // Outros métodos: data atual
+        calculatedDueDate = today.toISOString().split('T')[0]
+      }
+    } else if (!calculatedDueDate) {
+      // Fallback: D+7
+      calculatedDueDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    }
     
     return createEntry({
       entry_type: "receivable",

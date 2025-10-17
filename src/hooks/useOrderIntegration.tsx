@@ -42,7 +42,7 @@ export function useOrderIntegration() {
           // Get order details for financial entry
           const { data: order, error: orderError } = await supabase
             .from('orders')
-            .select('customer_id, total_amount')
+            .select('customer_id, total_amount, payment_method')
             .eq('id', orderData.order_id)
             .single()
 
@@ -52,7 +52,11 @@ export function useOrderIntegration() {
           await createFromOrder(
             orderData.order_id, 
             order.customer_id || '', 
-            order.total_amount
+            order.total_amount,
+            undefined, // dueDate será calculado automaticamente
+            undefined, // chartOfAccountId
+            undefined, // costCenterId
+            order.payment_method || undefined // Passar método de pagamento
           )
 
           toast({

@@ -83,7 +83,15 @@ const OrdersAndQuotes = () => {
       // Load orders
       const { data: orders, error: ordersError } = await supabase
         .from('orders')
-        .select('id, order_number, status, total_amount, order_date, payment_method, customer_id')
+        .select(`
+          id, 
+          order_number, 
+          status, 
+          total_amount, 
+          order_date, 
+          customer_id,
+          payment_methods!orders_payment_method_fkey(name)
+        `)
         .eq('org_id', currentOrg?.id)
 
       if (ordersError) throw ordersError
@@ -117,7 +125,7 @@ const OrdersAndQuotes = () => {
           seller_name: "SERGIO MENDES",
           total_amount: order.total_amount,
           date: order.order_date,
-          payment_method: order.payment_method || '-',
+          payment_method: (order as any).payment_methods?.name || '-',
           nfe: ""
         })),
         ...(quotes || []).map(quote => ({

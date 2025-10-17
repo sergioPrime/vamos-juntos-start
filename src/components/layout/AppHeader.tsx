@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Plus, User, MoreHorizontal, LogOut, Moon, Sun, Zap, Shield, Settings, Lock, Link2, Camera, DollarSign, UserCog } from "lucide-react"
+import { Plus, User, MoreHorizontal, LogOut, Moon, Sun, Zap, Shield, Settings, Lock, Link2, Camera, DollarSign, UserCog, ChevronDown, UserPlus, Truck, Package, Wrench, TrendingUp } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { UserPhotoDialog } from "@/components/UserPhotoDialog"
@@ -104,6 +104,42 @@ export function AppHeader() {
           >
             Vamos Juntos
           </h1>
+          
+          {/* Botão Atalhos */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-400/10 font-medium gap-1"
+              >
+                ATALHOS
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm">
+              <DropdownMenuItem onClick={() => navigate("/pessoas?tipo=cliente")} className="cursor-pointer">
+                <UserPlus className="h-4 w-4 mr-3 text-cyan-400" />
+                <span>Novo Cliente</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/suppliers")} className="cursor-pointer">
+                <Truck className="h-4 w-4 mr-3 text-cyan-400" />
+                <span>Novo Fornecedor</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/products")} className="cursor-pointer">
+                <Package className="h-4 w-4 mr-3 text-cyan-400" />
+                <span>Novo Produto</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/products")} className="cursor-pointer">
+                <Wrench className="h-4 w-4 mr-3 text-cyan-400" />
+                <span>Novo Serviço</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/finance/lancamentos")} className="cursor-pointer">
+                <TrendingUp className="h-4 w-4 mr-3 text-cyan-400" />
+                <span>Novo Lançamento</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         
         {/* Desktop Actions */}

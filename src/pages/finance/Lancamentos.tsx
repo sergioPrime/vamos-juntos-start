@@ -240,12 +240,15 @@ export default function Lancamentos() {
       } else {
         // Create new entry
         await createEntry(entryData)
-
-        toast({
-          title: "Sucesso",
-          description: "Lançamento criado com sucesso",
-        })
       }
+
+      // Reload entries immediately
+      await loadEntries()
+
+      toast({
+        title: "Sucesso",
+        description: editingEntry ? "Lançamento atualizado com sucesso" : "Lançamento criado com sucesso",
+      })
 
       // Reset form but keep default company selected
       const defaultCompany = companies.find(company => company.is_default)
@@ -259,8 +262,6 @@ export default function Lancamentos() {
       })
       setAmountDisplayValue("")
       setEditingEntry(null)
-      loadData()
-      loadEntries()
       setActiveTab("listagem")
     } catch (error) {
       console.error("Error saving entry:", error)

@@ -5,7 +5,7 @@ import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -155,204 +155,203 @@ export function FinancialFilters({
         )}
       </DialogTrigger>
       
-      <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl flex items-center gap-2">
-            <Filter className="h-6 w-6 text-primary" />
+      <DialogContent className="max-w-6xl bg-[#1a1a1a] border-gray-800">
+        <DialogHeader className="border-b border-gray-800 pb-4">
+          <DialogTitle className="text-lg text-cyan-400">
             Busca Avançada
           </DialogTitle>
-          <DialogDescription>
-            Utilize os filtros abaixo para refinar sua pesquisa de lançamentos financeiros
-          </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 py-4">
-          {/* Main Filters Column (3/4 width) */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Primeira linha - Busca de Texto */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-primary border-b pb-2">Busca por Texto</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm">COD, DOC, BOLETO, Descrição</Label>
-                  <Input
-                    placeholder="Buscar..."
-                    value={filters.searchText || ""}
-                    onChange={(e) => updateFilter("searchText", e.target.value)}
-                    className="bg-background"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label className="text-sm">Cliente / Fornecedor</Label>
-                  <ComboboxAsync
-                    value={filters.personId}
-                    onValueChange={(value) => updateFilter("personId", value)}
-                    searchFunction={searchPessoasAll}
-                    placeholder="Selecionar..."
-                    emptyText="Nenhuma pessoa encontrada"
-                    className="bg-background"
-                  />
-                </div>
+        <div className="grid grid-cols-12 gap-4 py-6">
+          {/* Main Filters - 9 columns */}
+          <div className="col-span-9 space-y-4">
+            {/* First Row */}
+            <div className="grid grid-cols-4 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs text-white font-medium">COD, DOC, BOLETO, Descrição</Label>
+                <Input
+                  placeholder=""
+                  value={filters.searchText || ""}
+                  onChange={(e) => updateFilter("searchText", e.target.value)}
+                  className="h-9 bg-cyan-500/30 border-cyan-600/50 text-white placeholder:text-gray-400"
+                />
+              </div>
+              
+              <div className="space-y-1">
+                <Label className="text-xs text-white font-medium">Cliente / Fornecedor</Label>
+                <ComboboxAsync
+                  value={filters.personId}
+                  onValueChange={(value) => updateFilter("personId", value)}
+                  searchFunction={searchPessoasAll}
+                  placeholder=""
+                  emptyText="Nenhuma pessoa encontrada"
+                  className="h-9 bg-cyan-500/30 border-cyan-600/50 text-white"
+                />
+              </div>
 
-                <div className="space-y-2">
-                  <Label className="text-sm">Plano de Conta</Label>
-                  <ComboboxAsync
-                    value={filters.chartOfAccountId === "all" ? "" : filters.chartOfAccountId}
-                    onValueChange={(value) => updateFilter("chartOfAccountId", value || "all")}
-                    searchFunction={asyncSearch.searchChartOfAccounts}
-                    placeholder="Todas as contas"
-                    emptyText="Nenhuma conta encontrada"
-                    className="bg-background"
-                  />
-                </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-white font-medium">Plano de Conta</Label>
+                <ComboboxAsync
+                  value={filters.chartOfAccountId === "all" ? "" : filters.chartOfAccountId}
+                  onValueChange={(value) => updateFilter("chartOfAccountId", value || "all")}
+                  searchFunction={asyncSearch.searchChartOfAccounts}
+                  placeholder=""
+                  emptyText="Nenhuma conta encontrada"
+                  className="h-9 bg-cyan-500/30 border-cyan-600/50 text-white"
+                />
+              </div>
 
-                <div className="space-y-2">
-                  <Label className="text-sm">Forma de Pagamento</Label>
-                  <ComboboxAsync
-                    value={filters.paymentMethodId === "all" ? "" : filters.paymentMethodId}
-                    onValueChange={(value) => updateFilter("paymentMethodId", value || "all")}
-                    searchFunction={asyncSearch.searchPaymentMethods}
-                    placeholder="Todas as formas"
-                    emptyText="Nenhuma forma de pagamento encontrada"
-                    className="bg-background"
-                  />
-                </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-white font-medium">Forma de Pagamento</Label>
+                <ComboboxAsync
+                  value={filters.paymentMethodId === "all" ? "" : filters.paymentMethodId}
+                  onValueChange={(value) => updateFilter("paymentMethodId", value || "all")}
+                  searchFunction={asyncSearch.searchPaymentMethods}
+                  placeholder=""
+                  emptyText="Nenhuma forma de pagamento encontrada"
+                  className="h-9 bg-cyan-500/30 border-cyan-600/50 text-white"
+                />
               </div>
             </div>
 
-            {/* Segunda linha - Filtros de Empresa, Conta, Grupo, Centro de Custo */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-primary border-b pb-2">Informações Adicionais</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm">Empresa</Label>
-                  <ComboboxAsync
-                    value={filters.companyId === "all" ? "" : filters.companyId}
-                    onValueChange={(value) => updateFilter("companyId", value || "all")}
-                    searchFunction={asyncSearch.searchCompanies}
-                    placeholder="Todas as empresas"
-                    emptyText="Nenhuma empresa encontrada"
-                    className="bg-background"
-                  />
-                </div>
+            {/* Second Row */}
+            <div className="grid grid-cols-4 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs text-white font-medium">Empresa</Label>
+                <ComboboxAsync
+                  value={filters.companyId === "all" ? "" : filters.companyId}
+                  onValueChange={(value) => updateFilter("companyId", value || "all")}
+                  searchFunction={asyncSearch.searchCompanies}
+                  placeholder=""
+                  emptyText="Nenhuma empresa encontrada"
+                  className="h-9 bg-cyan-500/30 border-cyan-600/50 text-white"
+                />
+              </div>
 
-                <div className="space-y-2">
-                  <Label className="text-sm">Conta Bancária</Label>
-                  <ComboboxAsync
-                    value={filters.bankAccountId === "all" ? "" : filters.bankAccountId}
-                    onValueChange={(value) => updateFilter("bankAccountId", value || "all")}
-                    searchFunction={asyncSearch.searchBankAccounts}
-                    placeholder="Todas as contas"
-                    emptyText="Nenhuma conta bancária encontrada"
-                    className="bg-background"
-                  />
-                </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-white font-medium">Conta Bancária</Label>
+                <ComboboxAsync
+                  value={filters.bankAccountId === "all" ? "" : filters.bankAccountId}
+                  onValueChange={(value) => updateFilter("bankAccountId", value || "all")}
+                  searchFunction={asyncSearch.searchBankAccounts}
+                  placeholder=""
+                  emptyText="Nenhuma conta bancária encontrada"
+                  className="h-9 bg-cyan-500/30 border-cyan-600/50 text-white"
+                />
+              </div>
 
-                <div className="space-y-2">
-                  <Label className="text-sm">Grupo</Label>
-                  <Select value={filters.grupo} onValueChange={(value) => updateFilter("grupo", value)}>
-                    <SelectTrigger className="bg-background">
-                      <SelectValue placeholder="Todos" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border z-50">
-                      <SelectItem value="all">Todos os grupos</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-white font-medium">Grupo</Label>
+                <Select value={filters.grupo} onValueChange={(value) => updateFilter("grupo", value)}>
+                  <SelectTrigger className="h-9 bg-cyan-500/30 border-cyan-600/50 text-white">
+                    <SelectValue placeholder="" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700 text-white z-[100]">
+                    <SelectItem value="all">Todos os grupos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-                <div className="space-y-2">
-                  <Label className="text-sm">Centro de Custo</Label>
-                  <ComboboxAsync
-                    value={filters.costCenterId === "all" ? "" : filters.costCenterId}
-                    onValueChange={(value) => updateFilter("costCenterId", value || "all")}
-                    searchFunction={asyncSearch.searchCostCenters}
-                    placeholder="Todos os centros"
-                    emptyText="Nenhum centro de custo encontrado"
-                    className="bg-background"
-                  />
-                </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-white font-medium">Centro de Custo</Label>
+                <ComboboxAsync
+                  value={filters.costCenterId === "all" ? "" : filters.costCenterId}
+                  onValueChange={(value) => updateFilter("costCenterId", value || "all")}
+                  searchFunction={asyncSearch.searchCostCenters}
+                  placeholder=""
+                  emptyText="Nenhum centro de custo encontrado"
+                  className="h-9 bg-cyan-500/30 border-cyan-600/50 text-white"
+                />
               </div>
             </div>
 
-            {/* Terceira linha - Valor, Tipo e Situação */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-primary border-b pb-2">Valor e Classificação</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm">Valor Mínimo</Label>
-                  <Input
-                    type="number"
-                    placeholder="0,00"
-                    value={filters.minAmount}
-                    onChange={(e) => updateFilter("minAmount", e.target.value)}
-                    className="bg-background"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm">Valor Máximo</Label>
-                  <Input
-                    type="number"
-                    placeholder="0,00"
-                    value={filters.maxAmount}
-                    onChange={(e) => updateFilter("maxAmount", e.target.value)}
-                    className="bg-background"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm">Tipo de Lançamento</Label>
-                  <Select value={filters.entryType} onValueChange={(value) => updateFilter("entryType", value)}>
-                    <SelectTrigger className="bg-background">
-                      <SelectValue placeholder="Todos" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border z-50">
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="receivable">Receita</SelectItem>
-                      <SelectItem value="payable">Despesa</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm">Situação do Lançamento</Label>
-                  <Select value={filters.status} onValueChange={(value) => updateFilter("status", value)}>
-                    <SelectTrigger className="bg-background">
-                      <SelectValue placeholder="Todas" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border z-50">
-                      <SelectItem value="all">Todas</SelectItem>
-                      <SelectItem value="pending">Pendente</SelectItem>
-                      <SelectItem value="settled">Quitada</SelectItem>
-                      <SelectItem value="overdue">Vencida</SelectItem>
-                      <SelectItem value="conciliated">Conciliado</SelectItem>
-                      <SelectItem value="not_conciliated">Não Conciliado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+            {/* Third Row */}
+            <div className="grid grid-cols-4 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs text-white font-medium">Valor</Label>
+                <Input
+                  type="number"
+                  placeholder=""
+                  value={filters.minAmount}
+                  onChange={(e) => updateFilter("minAmount", e.target.value)}
+                  className="h-9 bg-cyan-500/30 border-cyan-600/50 text-white placeholder:text-gray-400"
+                />
               </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs text-white font-medium">Tipo de Lançamento</Label>
+                <Select value={filters.entryType} onValueChange={(value) => updateFilter("entryType", value)}>
+                  <SelectTrigger className="h-9 bg-cyan-500/30 border-cyan-600/50 text-white">
+                    <SelectValue placeholder="Receitas" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700 text-white z-[100]">
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="receivable">Receitas</SelectItem>
+                    <SelectItem value="payable">Despesas</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs text-white font-medium">Situação do Lançamento</Label>
+                <Select value={filters.status} onValueChange={(value) => updateFilter("status", value)}>
+                  <SelectTrigger className="h-9 bg-cyan-500/30 border-cyan-600/50 text-white">
+                    <SelectValue placeholder="Não Quitado" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700 text-white z-[100]">
+                    <SelectItem value="all">Todas</SelectItem>
+                    <SelectItem value="pending">Pendente</SelectItem>
+                    <SelectItem value="settled">Quitada</SelectItem>
+                    <SelectItem value="overdue">Vencida</SelectItem>
+                    <SelectItem value="conciliated">Conciliado</SelectItem>
+                    <SelectItem value="not_conciliated">Não Conciliado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-end">
+                <Button 
+                  type="button" 
+                  onClick={handleApplyFilters}
+                  disabled={loading}
+                  className="h-9 w-full bg-white text-gray-900 hover:bg-gray-100 font-medium"
+                >
+                  Buscar
+                </Button>
+              </div>
+            </div>
+
+            {/* Clear Filters Button */}
+            <div className="pt-2">
+              <Button 
+                type="button" 
+                variant="ghost"
+                onClick={clearAllFilters}
+                className="h-8 px-4 text-white hover:bg-gray-800"
+              >
+                Limpar Filtros
+              </Button>
             </div>
           </div>
 
-          {/* Date Filters Sidebar (1/4 width) */}
-          <div className="lg:col-span-1 space-y-4">
-            <div className="bg-primary/10 rounded-lg p-4 space-y-4">
-              <div className="flex items-center gap-2 border-b border-primary/20 pb-2">
-                <CalendarIconLucide className="h-5 w-5 text-primary" />
-                <h3 className="text-sm font-semibold text-primary">Filtros por Datas</h3>
+          {/* Date Filters Sidebar - 3 columns */}
+          <div className="col-span-3">
+            <div className="bg-cyan-600/40 rounded-lg p-4 space-y-4 h-full">
+              <div className="flex items-center gap-2 pb-2">
+                <CalendarIconLucide className="h-4 w-4 text-white" />
+                <h3 className="text-sm font-semibold text-white">Filtros por Datas</h3>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm">Por Período</Label>
+                <Label className="text-xs text-white font-medium">Por Período</Label>
                 <Select 
                   value={filters.periodType || "thisMonth"} 
                   onValueChange={(value) => updateFilter("periodType", value)}
                 >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Selecionar período" />
+                  <SelectTrigger className="h-9 bg-blue-700/50 border-blue-600/50 text-white">
+                    <SelectValue placeholder="Este Mês" />
                   </SelectTrigger>
-                  <SelectContent className="bg-popover border z-[100]" position="popper" sideOffset={5}>
+                  <SelectContent className="bg-gray-800 border-gray-700 text-white z-[100]">
                     {periodOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
@@ -365,21 +364,21 @@ export function FinancialFilters({
               {filters.periodType === "custom" && (
                 <>
                   <div className="space-y-2">
-                    <Label className="text-sm">Data Inicial</Label>
+                    <Label className="text-xs text-white font-medium">Data Inicial</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
                           className={cn(
-                            "w-full justify-start text-left font-normal bg-background",
-                            !filters.startDate && "text-muted-foreground"
+                            "h-9 w-full justify-start text-left font-normal bg-blue-700/50 border-blue-600/50 text-white hover:bg-blue-700/60 hover:text-white",
+                            !filters.startDate && "text-gray-400"
                           )}
                         >
-                          <CalendarIconLucide className="mr-2 h-4 w-4" />
-                          {filters.startDate ? format(filters.startDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
+                          <CalendarIconLucide className="mr-2 h-3 w-3" />
+                          {filters.startDate ? format(filters.startDate, "dd/MM/yyyy", { locale: ptBR }) : "01/10/2025"}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 bg-popover border z-[100]" align="start" sideOffset={5}>
+                      <PopoverContent className="w-auto p-0 bg-popover border z-[100]" align="start">
                         <Calendar
                           mode="single"
                           selected={filters.startDate}
@@ -392,21 +391,21 @@ export function FinancialFilters({
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-sm">Data Final</Label>
+                    <Label className="text-xs text-white font-medium">Data Final</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
                           className={cn(
-                            "w-full justify-start text-left font-normal bg-background",
-                            !filters.endDate && "text-muted-foreground"
+                            "h-9 w-full justify-start text-left font-normal bg-blue-700/50 border-blue-600/50 text-white hover:bg-blue-700/60 hover:text-white",
+                            !filters.endDate && "text-gray-400"
                           )}
                         >
-                          <CalendarIconLucide className="mr-2 h-4 w-4" />
-                          {filters.endDate ? format(filters.endDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
+                          <CalendarIconLucide className="mr-2 h-3 w-3" />
+                          {filters.endDate ? format(filters.endDate, "dd/MM/yyyy", { locale: ptBR }) : "31/10/2025"}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 bg-popover border z-[100]" align="start" sideOffset={5}>
+                      <PopoverContent className="w-auto p-0 bg-popover border z-[100]" align="start">
                         <Calendar
                           mode="single"
                           selected={filters.endDate}
@@ -421,15 +420,15 @@ export function FinancialFilters({
               )}
 
               <div className="space-y-2">
-                <Label className="text-sm">Filtrar Por</Label>
+                <Label className="text-xs text-white font-medium">Filtrar Por</Label>
                 <Select 
                   value={filters.dateFilterType || "due"} 
                   onValueChange={(value) => updateFilter("dateFilterType", value)}
                 >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Tipo de data" />
+                  <SelectTrigger className="h-9 bg-blue-700/50 border-blue-600/50 text-white">
+                    <SelectValue placeholder="Data Vencimento" />
                   </SelectTrigger>
-                  <SelectContent className="bg-popover border z-[100]" position="popper" sideOffset={5}>
+                  <SelectContent className="bg-gray-800 border-gray-700 text-white z-[100]">
                     {dateFilterTypeOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
@@ -441,26 +440,6 @@ export function FinancialFilters({
             </div>
           </div>
         </div>
-
-        <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
-          <Button
-            variant="outline"
-            onClick={clearAllFilters}
-            disabled={loading || activeFiltersCount === 0}
-            className="flex items-center gap-2"
-          >
-            <X className="h-4 w-4" />
-            Limpar Filtros
-          </Button>
-          <Button
-            onClick={handleApplyFilters}
-            disabled={loading}
-            className="flex items-center gap-2"
-          >
-            <Search className="h-4 w-4" />
-            {loading ? "Buscando..." : "Buscar"}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

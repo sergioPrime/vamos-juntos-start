@@ -736,6 +736,20 @@ const PDV = () => {
         // Obter o primeiro método de pagamento usado
         const firstPaymentMethodId = payments[0]?.paymentMethodId
 
+        // Calcular data de vencimento baseado no método de pagamento
+        const firstPaymentMethod = paymentMethods.find(pm => pm.id === firstPaymentMethodId)
+        const paymentMethodName = firstPaymentMethod?.name?.toLowerCase() || ''
+        
+        let dueDate = new Date()
+        if (paymentMethodName.includes('débito')) {
+          // Cartão de débito: vencimento D+1
+          dueDate.setDate(dueDate.getDate() + 1)
+        } else if (paymentMethodName.includes('crédito')) {
+          // Cartão de crédito: vencimento D+30
+          dueDate.setDate(dueDate.getDate() + 30)
+        }
+        // Para outros métodos (Dinheiro, PIX, etc): data atual
+
         const { error: financialError } = await supabase
           .from('financial_entries')
           .insert({
@@ -746,7 +760,7 @@ const PDV = () => {
             entry_type: 'receivable',
             amount: finalTotal,
             description: `Venda PDV - ${order.order_number}`,
-            due_date: new Date().toISOString().split('T')[0],
+            due_date: dueDate.toISOString().split('T')[0],
             competence_date: new Date().toISOString().split('T')[0],
             is_settled: true,
             settled_at: new Date().toISOString(),

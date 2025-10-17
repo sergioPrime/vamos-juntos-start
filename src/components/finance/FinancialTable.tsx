@@ -57,6 +57,7 @@ interface FinancialEntry {
   payment_method_name?: string
   bank_account_name?: string
   origin_type?: string
+  origin_id?: string
   document_number?: string
   // Dados relacionados
   companies?: { name: string }
@@ -66,6 +67,7 @@ interface FinancialEntry {
   cost_centers?: { code: string; name: string }
   payment_methods?: { name: string }
   bank_accounts?: { bank_name: string; account_number: string }
+  orders?: { order_number: string }
 }
 
 interface FinancialTableProps {
@@ -203,6 +205,7 @@ export function FinancialTable({
       case 'settled_amount': return '130px'
       case 'balance': return '130px'
       case 'person_name': return '200px'
+      case 'order_code': return '110px'
       case 'chart_of_account': return '180px'
       case 'cost_center': return '150px'
       case 'payment_method': return '160px'
@@ -267,6 +270,12 @@ export function FinancialTable({
         }
         
         return <span className="truncate block text-foreground font-medium">{personName}</span>
+      
+      case 'order_code':
+        const orderNumber = entry.origin_type === 'order' && entry.orders?.order_number 
+          ? entry.orders.order_number 
+          : '-'
+        return <span className="truncate block font-medium">{orderNumber}</span>
       
       case 'bank_account':
         const bankName = entry.bank_accounts?.bank_name 

@@ -118,6 +118,9 @@ export function useFinancialEntries() {
       const customerIds = [...new Set(data.filter(e => e.person_type === 'customer').map(e => e.person_id).filter(Boolean))]
       const supplierIds = [...new Set(data.filter(e => e.person_type === 'supplier').map(e => e.person_id).filter(Boolean))]
       const pessoaIds = [...new Set(data.map(e => e.person_id).filter(Boolean))]
+      
+      // Coletar IDs de pedidos (orders) quando origin_type for 'order'
+      const orderIds = [...new Set(data.filter(e => e.origin_type === 'order' && e.origin_id).map(e => e.origin_id).filter(Boolean))]
 
       // Buscar todos os dados relacionados em paralelo
       const [
@@ -128,7 +131,8 @@ export function useFinancialEntries() {
         bankAccountsData,
         customersData,
         suppliersData,
-        pessoasData
+        pessoasData,
+        ordersData
       ] = await Promise.all([
         companyIds.length > 0
           ? supabase.from('companies').select('id, name').in('id', companyIds)
@@ -153,6 +157,9 @@ export function useFinancialEntries() {
           : Promise.resolve({ data: [] }),
         pessoaIds.length > 0
           ? supabase.from('pessoas').select('id, nome_fantasia, razao_social, rotulos').in('id', pessoaIds)
+          : Promise.resolve({ data: [] }),
+        orderIds.length > 0
+          ? supabase.from('orders').select('id, order_number').in('id', orderIds)
           : Promise.resolve({ data: [] })
       ])
 
@@ -171,6 +178,9 @@ export function useFinancialEntries() {
       )
       const bankAccountsMap = new Map(
         bankAccountsData.data?.map(b => [b.id, b] as const) || []
+      )
+      const ordersMap = new Map(
+        ordersData.data?.map(o => [o.id, o] as const) || []
       )
       
       // Criar mapa combinado de clientes (customers table e pessoas table)
@@ -210,7 +220,8 @@ export function useFinancialEntries() {
           payment_methods: entry.payment_method_id ? paymentMethodsMap.get(entry.payment_method_id) : null,
           bank_accounts: entry.bank_account_id ? bankAccountsMap.get(entry.bank_account_id) : null,
           customers: customer,
-          suppliers: supplier
+          suppliers: supplier,
+          orders: entry.origin_type === 'order' && entry.origin_id ? ordersMap.get(entry.origin_id) : null
         }
       })
 

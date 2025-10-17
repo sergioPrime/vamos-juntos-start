@@ -85,6 +85,7 @@ const DEFAULT_COLUMNS: ColumnConfig[] = [
   { key: 'settled_amount', label: 'Realizado', visible: true, sortable: true },
   { key: 'balance', label: 'Saldo', visible: true, sortable: true },
   { key: 'person_name', label: 'Cliente/Fornecedor', visible: true, sortable: true },
+  { key: 'order_code', label: 'Pedido', visible: true, sortable: true },
   { key: 'chart_of_account', label: 'Plano de Conta', visible: true, sortable: true },
   { key: 'cost_center', label: 'Centro Custo', visible: false, sortable: true },
   { key: 'payment_method', label: 'Forma Pagamento', visible: false, sortable: true },

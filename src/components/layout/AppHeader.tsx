@@ -7,6 +7,7 @@ import { UserPhotoDialog } from "@/components/UserPhotoDialog"
 import { UserDataDialog } from "@/components/UserDataDialog"
 import { UserCommissionDialog } from "@/components/UserCommissionDialog"
 import { UserPasswordDialog } from "@/components/UserPasswordDialog"
+import { QuickCustomerDialog } from "@/components/QuickCustomerDialog"
 import { supabase } from "@/integrations/supabase/client"
 import { AlertNotificationBell } from "@/components/inventory/AlertNotificationBell"
 import { OverdueNotifications } from "@/components/appointments/OverdueNotifications"
@@ -45,6 +46,7 @@ export function AppHeader() {
   const [dataDialogOpen, setDataDialogOpen] = useState(false)
   const [commissionDialogOpen, setCommissionDialogOpen] = useState(false)
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false)
+  const [quickCustomerDialogOpen, setQuickCustomerDialogOpen] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   
   useEffect(() => {
@@ -118,7 +120,10 @@ export function AppHeader() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm">
-              <DropdownMenuItem onClick={() => navigate("/pessoas?tipo=cliente")} className="cursor-pointer">
+              <DropdownMenuItem 
+                onClick={() => setQuickCustomerDialogOpen(true)} 
+                className="cursor-pointer"
+              >
                 <UserPlus className="h-4 w-4 mr-3 text-cyan-400" />
                 <span>Novo Cliente</span>
               </DropdownMenuItem>
@@ -412,6 +417,10 @@ export function AppHeader() {
       <UserPasswordDialog
         open={passwordDialogOpen}
         onOpenChange={setPasswordDialogOpen}
+      />
+      <QuickCustomerDialog
+        open={quickCustomerDialogOpen}
+        onOpenChange={setQuickCustomerDialogOpen}
       />
       </header>
     </TooltipProvider>

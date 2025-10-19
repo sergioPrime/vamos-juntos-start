@@ -109,12 +109,24 @@ export default function Lancamentos() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      entry_type: "receivable",
-      competence_date: new Date(),
-      due_date: new Date(),
-      is_settled: false,
-      installment_type: "none",
+    defaultValues: async () => {
+      // Load companies to get default company
+      const { data: companiesData } = await supabase
+        .from("companies")
+        .select("*")
+        .eq("org_id", organization?.currentOrg?.id)
+        .eq("is_active", true)
+        .eq("is_default", true)
+        .single()
+
+      return {
+        entry_type: "receivable",
+        competence_date: new Date(),
+        due_date: new Date(),
+        is_settled: false,
+        installment_type: "none",
+        company_id: companiesData?.id || '',
+      }
     },
   })
 
@@ -142,9 +154,10 @@ export default function Lancamentos() {
       console.log("Editing entry:", entry);
       
       if (!entry) {
-        // New entry - reset form
+        // New entry - reset form with default company
         setEditingEntry(null);
         const defaultCompany = companies.find(company => company.is_default);
+        
         form.reset({
           entry_type: "receivable",
           competence_date: new Date(),

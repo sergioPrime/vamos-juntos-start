@@ -156,7 +156,21 @@ export default function Lancamentos() {
       if (!entry) {
         // New entry - reset form with default company
         setEditingEntry(null);
-        const defaultCompany = companies.find(company => company.is_default);
+        
+        // Wait for companies to load if needed
+        let defaultCompany = companies.find(company => company.is_default);
+        
+        if (!defaultCompany && organization?.currentOrg?.id) {
+          const { data } = await supabase
+            .from("companies")
+            .select("*")
+            .eq("org_id", organization.currentOrg.id)
+            .eq("is_active", true)
+            .eq("is_default", true)
+            .single();
+          
+          defaultCompany = data;
+        }
         
         form.reset({
           entry_type: "receivable",

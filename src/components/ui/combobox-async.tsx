@@ -49,14 +49,28 @@ export function ComboboxAsync({
 
   // Load initial data when value changes externally
   useEffect(() => {
-    if (value && !selectedItem) {
+    if (value) {
       // Try to find the item in current results first
       const item = searchResults.find(item => item.id === value)
       if (item) {
         setSelectedItem(item)
+      } else if (!selectedItem || selectedItem.id !== value) {
+        // If value exists but item not found, fetch it
+        searchFunction("").then(results => {
+          const foundItem = results.find(item => item.id === value)
+          if (foundItem) {
+            setSelectedItem(foundItem)
+            setSearchResults(prev => {
+              const exists = prev.some(item => item.id === foundItem.id)
+              return exists ? prev : [...prev, foundItem]
+            })
+          }
+        }).catch(err => console.error('Error loading initial item:', err))
       }
+    } else {
+      setSelectedItem(null)
     }
-  }, [value, selectedItem, searchResults])
+  }, [value])
 
   // Perform search when query changes
   useEffect(() => {

@@ -466,7 +466,15 @@ export function FinancialListingTab({ onEntriesSelected }: { onEntriesSelected?:
               Mais Ações
             </Button>
             
-            <Button className="gap-2">
+            <Button 
+              className="gap-2"
+              onClick={() => {
+                const event = new CustomEvent('switch-to-dados-tab', { 
+                  detail: { entry: null } 
+                });
+                window.dispatchEvent(event);
+              }}
+            >
               <Plus className="h-4 w-4" />
               NOVO
             </Button>

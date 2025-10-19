@@ -141,34 +141,51 @@ export default function Lancamentos() {
       
       console.log("Editing entry:", entry);
       
-      setEditingEntry(entry);
+      if (!entry) {
+        // New entry - reset form
+        setEditingEntry(null);
+        const defaultCompany = companies.find(company => company.is_default);
+        form.reset({
+          entry_type: "receivable",
+          competence_date: new Date(),
+          due_date: new Date(),
+          is_settled: false,
+          installment_type: "none",
+          company_id: defaultCompany?.id || '',
+        });
+        setAmountDisplayValue("");
+      } else {
+        // Edit existing entry
+        setEditingEntry(entry);
+        
+        // Pre-fill form with entry data
+        form.reset({
+          company_id: entry.company_id || '',
+          person_id: entry.person_id || '',
+          entry_type: entry.entry_type || 'receivable',
+          chart_of_account_id: entry.chart_of_account_id || '',
+          cost_center_id: entry.cost_center_id || '',
+          amount: entry.amount?.toString() || '',
+          payment_method_id: entry.payment_method_id || '',
+          bank_account_id: entry.bank_account_id || '',
+          competence_date: entry.competence_date ? new Date(entry.competence_date) : new Date(),
+          due_date: entry.due_date ? new Date(entry.due_date) : new Date(),
+          is_settled: entry.is_settled || false,
+          settled_at: entry.settled_at ? new Date(entry.settled_at) : undefined,
+          settled_payment_method_id: entry.settled_payment_method_id || '',
+          description: entry.description || '',
+          installment_type: "none",
+        });
+        
+        setAmountDisplayValue(entry.amount ? formatCurrencyInput((entry.amount * 100).toString()) : '');
+      }
       
-      // Pre-fill form with entry data
-      form.reset({
-        company_id: entry.company_id || '',
-        person_id: entry.person_id || '',
-        entry_type: entry.entry_type || 'receivable',
-        chart_of_account_id: entry.chart_of_account_id || '',
-        cost_center_id: entry.cost_center_id || '',
-        amount: entry.amount?.toString() || '',
-        payment_method_id: entry.payment_method_id || '',
-        bank_account_id: entry.bank_account_id || '',
-        competence_date: entry.competence_date ? new Date(entry.competence_date) : new Date(),
-        due_date: entry.due_date ? new Date(entry.due_date) : new Date(),
-        is_settled: entry.is_settled || false,
-        settled_at: entry.settled_at ? new Date(entry.settled_at) : undefined,
-        settled_payment_method_id: entry.settled_payment_method_id || '',
-        description: entry.description || '',
-        installment_type: "none",
-      });
-      
-      setAmountDisplayValue(entry.amount ? formatCurrencyInput((entry.amount * 100).toString()) : '');
       setActiveTab("dados");
     };
 
     window.addEventListener('switch-to-dados-tab', handleSwitchToEditTab);
     return () => window.removeEventListener('switch-to-dados-tab', handleSwitchToEditTab);
-  }, [form])
+  }, [form, companies])
 
   const loadData = async () => {
     if (!organization?.currentOrg?.id) return

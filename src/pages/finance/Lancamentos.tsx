@@ -146,39 +146,70 @@ export default function Lancamentos() {
     const handleSwitchToEditTab = async (event: any) => {
       const entry = event.detail.entry;
       
-      console.log("Editing entry:", entry);
+      console.log("🔄 Switching to dados tab, entry:", entry);
       
       if (!entry) {
         // New entry - reset form with default company
         setEditingEntry(null);
         
-        // Wait for companies to load if needed
+        // Find default company
         let defaultCompany = companies.find(company => company.is_default);
         
+        // If not in cache, fetch from database
         if (!defaultCompany && organization?.currentOrg?.id) {
-          const { data } = await supabase
+          console.log("🔍 Fetching default company from database...");
+          const { data, error } = await supabase
             .from("companies")
             .select("*")
             .eq("org_id", organization.currentOrg.id)
             .eq("is_active", true)
             .eq("is_default", true)
-            .single();
+            .maybeSingle();
           
-          defaultCompany = data;
+          if (error) {
+            console.error("❌ Error fetching default company:", error);
+          } else if (data) {
+            defaultCompany = data;
+            console.log("✅ Default company found:", defaultCompany);
+          } else {
+            console.warn("⚠️ No default company found");
+          }
         }
         
-        form.reset({
-          entry_type: "receivable",
+        console.log("🏢 Setting default company:", defaultCompany?.name || "None");
+        
+        // Reset form with default values
+        const newValues = {
+          entry_type: "receivable" as const,
           competence_date: new Date(),
           due_date: new Date(),
           is_settled: false,
-          installment_type: "none",
+          installment_type: "none" as const,
           company_id: defaultCompany?.id || '',
-        });
+          person_id: '',
+          chart_of_account_id: '',
+          amount: '',
+        };
+        
+        form.reset(newValues);
         setAmountDisplayValue("");
+        
+        // Force update company_id after reset
+        if (defaultCompany?.id) {
+          setTimeout(() => {
+            form.setValue('company_id', defaultCompany.id, { 
+              shouldValidate: true,
+              shouldDirty: false,
+              shouldTouch: false
+            });
+            console.log("✅ Company ID set to:", defaultCompany.id);
+          }, 100);
+        }
       } else {
         // Edit existing entry
         setEditingEntry(entry);
+        
+        console.log("📝 Editing entry:", entry.id);
         
         // Pre-fill form with entry data
         form.reset({
@@ -207,7 +238,7 @@ export default function Lancamentos() {
 
     window.addEventListener('switch-to-dados-tab', handleSwitchToEditTab);
     return () => window.removeEventListener('switch-to-dados-tab', handleSwitchToEditTab);
-  }, [form, companies])
+  }, [form, companies, organization])
 
   const loadData = async () => {
     if (!organization?.currentOrg?.id) return

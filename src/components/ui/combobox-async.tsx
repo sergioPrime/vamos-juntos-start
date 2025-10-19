@@ -49,33 +49,45 @@ export function ComboboxAsync({
 
   // Load initial data when value changes externally
   useEffect(() => {
-    if (value) {
-      // Try to find the item in current results first
-      const item = searchResults.find(item => item.id === value)
-      if (item) {
-        setSelectedItem(item)
-      } else if (!selectedItem || selectedItem.id !== value) {
-        // If value exists but item not found, fetch it
-        searchFunction("").then(results => {
+    const loadInitialItem = async () => {
+      if (value && (!selectedItem || selectedItem.id !== value)) {
+        try {
+          // Try to find in current results first
+          const item = searchResults.find(item => item.id === value)
+          if (item) {
+            setSelectedItem(item)
+            return
+          }
+          
+          // If not found, fetch all items to find the one with this ID
+          // Pass empty string to get all results
+          const results = await searchFunction("")
           const foundItem = results.find(item => item.id === value)
+          
           if (foundItem) {
             setSelectedItem(foundItem)
+            // Add to search results if not already there
             setSearchResults(prev => {
               const exists = prev.some(item => item.id === foundItem.id)
-              return exists ? prev : [...prev, foundItem]
+              return exists ? prev : [foundItem, ...prev]
             })
           }
-        }).catch(err => console.error('Error loading initial item:', err))
+        } catch (err) {
+          console.error('Error loading initial item:', err)
+        }
+      } else if (!value) {
+        setSelectedItem(null)
       }
-    } else {
-      setSelectedItem(null)
     }
-  }, [value])
+    
+    loadInitialItem()
+  }, [value, searchFunction])
 
   // Perform search when query changes
   useEffect(() => {
     const performSearch = async () => {
-      if (searchQuery.length >= 2) {
+      // Allow empty search to load all items, or search with at least 2 characters
+      if (searchQuery.length === 0 || searchQuery.length >= 2) {
         setLoading(true)
         try {
           const results = await searchFunction(searchQuery)
@@ -86,7 +98,8 @@ export function ComboboxAsync({
         } finally {
           setLoading(false)
         }
-      } else {
+      } else if (searchQuery.length > 0 && searchQuery.length < 2) {
+        // If user is typing but hasn't reached 2 chars yet, clear results
         setSearchResults([])
       }
     }
@@ -141,7 +154,7 @@ export function ComboboxAsync({
             {!loading && searchQuery.length >= 2 && searchResults.length === 0 && (
               <CommandEmpty>{emptyText}</CommandEmpty>
             )}
-            {!loading && searchQuery.length < 2 && (
+            {!loading && searchQuery.length > 0 && searchQuery.length < 2 && (
               <div className="p-2 text-sm text-muted-foreground text-center">
                 Digite pelo menos 2 caracteres para buscar
               </div>

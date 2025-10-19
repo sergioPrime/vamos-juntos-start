@@ -109,24 +109,13 @@ export default function Lancamentos() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: async () => {
-      // Load companies to get default company
-      const { data: companiesData } = await supabase
-        .from("companies")
-        .select("*")
-        .eq("org_id", organization?.currentOrg?.id)
-        .eq("is_active", true)
-        .eq("is_default", true)
-        .single()
-
-      return {
-        entry_type: "receivable",
-        competence_date: new Date(),
-        due_date: new Date(),
-        is_settled: false,
-        installment_type: "none",
-        company_id: companiesData?.id || '',
-      }
+    defaultValues: {
+      entry_type: "receivable",
+      competence_date: new Date(),
+      due_date: new Date(),
+      is_settled: false,
+      installment_type: "none",
+      company_id: '',
     },
   })
 
@@ -138,13 +127,19 @@ export default function Lancamentos() {
 
   // Auto-select default company when companies are loaded
   useEffect(() => {
-    if (companies.length > 0 && !form.getValues('company_id')) {
+    if (companies.length > 0) {
       const defaultCompany = companies.find(company => company.is_default)
-      if (defaultCompany) {
-        form.setValue('company_id', defaultCompany.id)
+      const currentCompanyId = form.getValues('company_id')
+      
+      // Only set if no company is selected or if we need to reset to default
+      if (defaultCompany && (!currentCompanyId || currentCompanyId === '')) {
+        form.setValue('company_id', defaultCompany.id, { 
+          shouldValidate: false,
+          shouldDirty: false 
+        })
       }
     }
-  }, [companies, form])
+  }, [companies])
 
   // Listen for edit entry events from listing tab
   useEffect(() => {
@@ -418,24 +413,6 @@ export default function Lancamentos() {
           <Button variant="outline" size="sm" onClick={loadData}>
             <RefreshCcw className="h-4 w-4 mr-2" />
             Atualizar
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => {
-            console.log("Debug data:", { companies, costCenters: getFlatCostCenters() })
-          }}>
-            Debug
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => {
-              setEditingEntry(null);
-              form.reset();
-              setAmountDisplayValue("");
-              setActiveTab("dados");
-            }}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Novo
           </Button>
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />

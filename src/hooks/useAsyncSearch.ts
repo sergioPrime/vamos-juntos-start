@@ -12,15 +12,20 @@ export const useAsyncSearch = () => {
   const organization = useOrganization()
 
   const searchCompanies = useCallback(async (query: string): Promise<SearchResult[]> => {
-    if (!organization?.currentOrg?.id || query.length < 2) return []
+    if (!organization?.currentOrg?.id) return []
     
-    const { data } = await supabase
+    let queryBuilder = supabase
       .from('companies')
       .select('id, name')
       .eq('org_id', organization.currentOrg.id)
       .eq('is_active', true)
-      .ilike('name', `%${query}%`)
-      .limit(10)
+    
+    // Se query não está vazia, filtra por nome
+    if (query.length >= 2) {
+      queryBuilder = queryBuilder.ilike('name', `%${query}%`)
+    }
+    
+    const { data } = await queryBuilder.limit(10)
     
     return data?.map(item => ({ id: item.id, name: item.name })) || []
   }, [organization?.currentOrg?.id])

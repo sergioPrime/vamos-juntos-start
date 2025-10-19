@@ -59,21 +59,20 @@ export function ComboboxAsync({
             return
           }
           
-          // If not found, fetch all items to find the one with this ID
-          // Pass empty string to get all results
+          // If not found, fetch with empty query to get all items
+          setLoading(true)
           const results = await searchFunction("")
           const foundItem = results.find(item => item.id === value)
           
           if (foundItem) {
             setSelectedItem(foundItem)
-            // Add to search results if not already there
-            setSearchResults(prev => {
-              const exists = prev.some(item => item.id === foundItem.id)
-              return exists ? prev : [foundItem, ...prev]
-            })
+            // Update search results to include this item
+            setSearchResults(results)
           }
         } catch (err) {
           console.error('Error loading initial item:', err)
+        } finally {
+          setLoading(false)
         }
       } else if (!value) {
         setSelectedItem(null)

@@ -127,19 +127,21 @@ export default function Lancamentos() {
 
   // Auto-select default company when companies are loaded
   useEffect(() => {
-    if (companies.length > 0) {
+    if (companies.length > 0 && !editingEntry) {
       const defaultCompany = companies.find(company => company.is_default)
       const currentCompanyId = form.getValues('company_id')
       
-      // Only set if no company is selected or if we need to reset to default
-      if (defaultCompany && (!currentCompanyId || currentCompanyId === '')) {
+      // Only set if no company is selected AND we're not editing
+      if (defaultCompany && !currentCompanyId) {
+        console.log("✅ Setting default company:", defaultCompany.name)
         form.setValue('company_id', defaultCompany.id, { 
           shouldValidate: false,
-          shouldDirty: false 
+          shouldDirty: false,
+          shouldTouch: false
         })
       }
     }
-  }, [companies])
+  }, [companies, editingEntry, form])
 
   // Listen for edit entry events from listing tab
   useEffect(() => {
@@ -149,43 +151,16 @@ export default function Lancamentos() {
       console.log("🔄 Switching to dados tab, entry:", entry);
       
       if (!entry) {
-        // New entry - reset form with default company
+        // New entry - reset form
         setEditingEntry(null);
         
-        // Find default company
-        let defaultCompany = companies.find(company => company.is_default);
-        
-        // If not in cache, fetch from database
-        if (!defaultCompany && organization?.currentOrg?.id) {
-          console.log("🔍 Fetching default company from database...");
-          const { data, error } = await supabase
-            .from("companies")
-            .select("*")
-            .eq("org_id", organization.currentOrg.id)
-            .eq("is_active", true)
-            .eq("is_default", true)
-            .maybeSingle();
-          
-          if (error) {
-            console.error("❌ Error fetching default company:", error);
-          } else if (data) {
-            defaultCompany = data;
-            console.log("✅ Default company found:", defaultCompany);
-          } else {
-            console.warn("⚠️ No default company found");
-          }
-        }
-        
-        console.log("🏢 Setting default company:", defaultCompany?.name || "None");
-        
-        // Reset form with default values
         const newValues = {
           entry_type: "receivable" as const,
           competence_date: new Date(),
           due_date: new Date(),
           is_settled: false,
           installment_type: "none" as const,
-          company_id: defaultCompany?.id || '',
+          company_id: '', // Será preenchido pelo useEffect
           person_id: '',
           chart_of_account_id: '',
           amount: '',
@@ -194,17 +169,7 @@ export default function Lancamentos() {
         form.reset(newValues);
         setAmountDisplayValue("");
         
-        // Force update company_id after reset
-        if (defaultCompany?.id) {
-          setTimeout(() => {
-            form.setValue('company_id', defaultCompany.id, { 
-              shouldValidate: true,
-              shouldDirty: false,
-              shouldTouch: false
-            });
-            console.log("✅ Company ID set to:", defaultCompany.id);
-          }, 100);
-        }
+        // O useEffect de companies cuidará de definir a empresa padrão
       } else {
         // Edit existing entry
         setEditingEntry(entry);

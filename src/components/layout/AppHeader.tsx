@@ -167,21 +167,6 @@ export function AppHeader() {
             </TooltipContent>
           </Tooltip>
           
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="outline"
-                onClick={() => navigate("/pdv")}
-                size="icon"
-              >
-                <Zap className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>PDV</p>
-            </TooltipContent>
-          </Tooltip>
-          
            {/* Notification Center */}
            <NotificationCenter />
            
@@ -327,13 +312,6 @@ export function AppHeader() {
                   <p className="text-xs text-muted-foreground mt-1">Versão {appVersion}</p>
                 </div>
               </div>
-              
-              <DropdownMenuSeparator />
-              
-              <DropdownMenuItem onClick={() => navigate("/pdv")}>
-                <Zap className="h-4 w-4 mr-2" />
-                PDV
-              </DropdownMenuItem>
               
               <DropdownMenuSeparator />
               

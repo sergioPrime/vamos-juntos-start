@@ -6,12 +6,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useFinancialMetrics } from '@/hooks/useFinancialMetrics';
+import { useOrganization } from '@/hooks/useOrganization';
 import { FinancialMetricsGrid } from '@/components/finance/FinancialMetricsGrid';
 import { CashFlowChart } from '@/components/finance/CashFlowChart';
 import { CategoryBreakdownChart } from '@/components/finance/CategoryBreakdownChart';
 import { AgingAnalysisPanel } from '@/components/finance/AgingAnalysisPanel';
 import { OverdueInstallmentsPanel } from '@/components/finance/OverdueInstallmentsPanel';
 import { SyncMonitorPanel } from '@/components/integration/SyncMonitorPanel';
+import { ExportDialog } from '@/components/finance/ExportDialog';
 import { 
   Download, 
   RefreshCw, 
@@ -23,10 +25,12 @@ import {
 } from 'lucide-react';
 
 export default function AdvancedDashboard() {
+  const { currentOrg } = useOrganization();
   const [startDate, setStartDate] = useState(
     new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0]
   );
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
   
   const { 
     metrics, 
@@ -36,11 +40,6 @@ export default function AdvancedDashboard() {
     loading,
     refreshMetrics 
   } = useFinancialMetrics(startDate, endDate);
-
-  const handleExport = () => {
-    // Implementar exportação de dados
-    console.log('Exporting data...');
-  };
 
   return (
     <AppLayout>
@@ -54,7 +53,7 @@ export default function AdvancedDashboard() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={handleExport}>
+            <Button variant="outline" onClick={() => setExportDialogOpen(true)}>
               <Download className="h-4 w-4 mr-2" />
               Exportar
             </Button>
@@ -174,6 +173,23 @@ export default function AdvancedDashboard() {
             </TabsContent>
           </Tabs>
         )}
+
+        {/* Export Dialog */}
+        <ExportDialog
+          open={exportDialogOpen}
+          onOpenChange={setExportDialogOpen}
+          data={{
+            metrics,
+            cashFlowData,
+            revenueByCategory,
+            expensesByCategory
+          }}
+          organizationName={currentOrg?.name}
+          period={{
+            start: startDate,
+            end: endDate
+          }}
+        />
       </div>
     </AppLayout>
   );

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, Plus, Minus, ShoppingCart, CreditCard, X, Barcode, Check, Pause, TrendingDown } from "lucide-react"
+import { Search, Plus, Minus, ShoppingCart, CreditCard, X, Barcode, Check, Pause, TrendingDown, FileText, User, MessageSquare, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -510,10 +510,10 @@ const PDV = () => {
     {
       key: 'f2',
       action: () => {
-        setSearchTerm("")
-        searchInputRef.current?.focus()
+        // Abrir seletor de cliente
+        // TODO: Implementar abertura de seletor de cliente
       },
-      description: 'Nova Busca'
+      description: 'Cliente'
     },
     {
       key: 'f5',
@@ -522,7 +522,21 @@ const PDV = () => {
           setIsDiscountDialogOpen(true)
         }
       },
-      description: 'Desconto Geral'
+      description: 'Desconto'
+    },
+    {
+      key: 'f6',
+      action: () => {
+        clearCart()
+      },
+      description: 'Cancelar'
+    },
+    {
+      key: 'f7',
+      action: () => {
+        suspendSale()
+      },
+      description: 'Aguardar'
     },
     {
       key: 'f8',
@@ -531,12 +545,30 @@ const PDV = () => {
           setIsPaymentDialogOpen(true)
         }
       },
-      description: 'Finalizar Venda'
+      description: 'Finalizar Rápido'
     },
     {
       key: 'f9',
-      action: () => suspendSale(),
-      description: 'Suspender Venda'
+      action: () => {
+        // TODO: Abrir relatório de vendas
+        console.log('Relatório de vendas')
+      },
+      description: 'Relatório de Vendas'
+    },
+    {
+      key: 'f10',
+      action: () => {
+        // TODO: Abrir observações
+        console.log('Observações')
+      },
+      description: 'Observações'
+    },
+    {
+      key: 'f11',
+      action: () => {
+        setShowSuspendedSales(true)
+      },
+      description: 'Aguardando'
     },
     {
       key: 'escape',
@@ -1070,12 +1102,98 @@ const PDV = () => {
             </div>
           </div>
 
-          {/* Customer Search */}
-          <div className="mt-4">
-            <CustomerSelector
-              selectedCustomer={selectedCustomer}
-              onCustomerChange={setSelectedCustomer}
-            />
+          {/* Action Buttons Row */}
+          <div className="mt-4 grid grid-cols-7 gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={suspendSale}
+              disabled={cart.length === 0}
+              className="gap-1 h-12 flex-col"
+            >
+              <Pause className="h-4 w-4" />
+              <span className="text-xs">Aguardar (F7)</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={clearCart}
+              disabled={cart.length === 0}
+              className="gap-1 h-12 flex-col hover:bg-destructive/10 hover:text-destructive"
+            >
+              <X className="h-4 w-4" />
+              <span className="text-xs">Cancelar (F6)</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setIsPaymentDialogOpen(true)}
+              disabled={cart.length === 0}
+              className="gap-1 h-12 flex-col"
+            >
+              <CreditCard className="h-4 w-4" />
+              <span className="text-xs">Finalizar (F8)</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setShowSuspendedSales(true)}
+              className="gap-1 h-12 flex-col"
+            >
+              <Clock className="h-4 w-4" />
+              <span className="text-xs">Aguardando (F11)</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                // TODO: Abrir seletor de cliente
+              }}
+              className="gap-1 h-12 flex-col"
+            >
+              <User className="h-4 w-4" />
+              <span className="text-xs">Cliente (F2)</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                // TODO: Abrir observações
+              }}
+              className="gap-1 h-12 flex-col"
+            >
+              <MessageSquare className="h-4 w-4" />
+              <span className="text-xs">Observações (F10)</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setIsDiscountDialogOpen(true)}
+              disabled={cart.length === 0}
+              className="gap-1 h-12 flex-col"
+            >
+              <TrendingDown className="h-4 w-4" />
+              <span className="text-xs">Desconto (F5)</span>
+            </Button>
+          </div>
+          
+          {/* Relatório de Vendas Button */}
+          <div className="mt-2">
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              onClick={() => {
+                // TODO: Abrir relatório de vendas
+                toast({
+                  title: "Relatório de Vendas",
+                  description: "Funcionalidade em desenvolvimento.",
+                })
+              }}
+              className="w-full gap-2 h-10"
+            >
+              <FileText className="h-4 w-4" />
+              Relatório de Vendas (F9)
+            </Button>
           </div>
         </div>
 
@@ -1124,40 +1242,6 @@ const PDV = () => {
               
               {/* Action Buttons */}
               <div className="space-y-3 mt-auto">
-                {cart.length > 0 && (
-                  <>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => setIsDiscountDialogOpen(true)}
-                        className="gap-2"
-                      >
-                        <TrendingDown className="h-4 w-4" />
-                        Desconto (F5)
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={suspendSale}
-                        className="gap-2"
-                      >
-                        <Pause className="h-4 w-4" />
-                        Suspender (F9)
-                      </Button>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={clearCart} 
-                      className="w-full hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
-                    >
-                      <X className="mr-2 h-4 w-4" />
-                      Limpar Carrinho
-                    </Button>
-                  </>
-                )}
-                
                 <Button 
                   className="w-full h-14 text-lg font-semibold relative z-50" 
                   size="lg" 

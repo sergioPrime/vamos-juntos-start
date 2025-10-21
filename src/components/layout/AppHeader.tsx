@@ -170,21 +170,6 @@ export function AppHeader() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button 
-                onClick={() => navigate("/finance/receivables")}
-                className="bg-primary text-primary-foreground hover:bg-primary/90"
-                size="icon"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Cobrança Pix</p>
-            </TooltipContent>
-          </Tooltip>
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
                 variant="outline"
                 onClick={() => navigate("/pdv")}
                 size="icon"
@@ -317,21 +302,6 @@ export function AppHeader() {
              </TooltipTrigger>
              <TooltipContent>
                <p>Assistente IA</p>
-             </TooltipContent>
-           </Tooltip>
-           
-           <Tooltip>
-             <TooltipTrigger asChild>
-               <Button 
-                 onClick={() => navigate("/finance/receivables")}
-                 className="bg-primary text-primary-foreground hover:bg-primary/90"
-                 size="icon"
-               >
-                 <Plus className="h-4 w-4" />
-               </Button>
-             </TooltipTrigger>
-             <TooltipContent>
-               <p>Cobrança Pix</p>
              </TooltipContent>
            </Tooltip>
           

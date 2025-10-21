@@ -1193,6 +1193,34 @@ const PDV = () => {
               Relatório de Vendas (F9)
             </Button>
           </div>
+
+          {/* Selected Customer Display */}
+          {selectedCustomer && (
+            <div className="mt-3 p-3 bg-primary/10 border-2 border-primary/30 rounded-lg">
+              <div className="flex items-center gap-2 mb-1">
+                <User className="h-4 w-4 text-primary" />
+                <span className="text-xs font-semibold text-muted-foreground">Cliente Selecionado:</span>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-sm truncate">{selectedCustomer.name}</div>
+                  {selectedCustomer.document && (
+                    <div className="text-xs text-muted-foreground truncate">
+                      {selectedCustomer.document}
+                    </div>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedCustomer(null)}
+                  className="h-7 w-7 p-0 hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Summary Section */}

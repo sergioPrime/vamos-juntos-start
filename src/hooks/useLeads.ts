@@ -40,7 +40,10 @@ export function useLeads() {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      setLeads(data || [])
+      setLeads((data || []).map(item => ({
+        ...item,
+        status: item.status as Lead['status']
+      })))
     } catch (error) {
       console.error('Error fetching leads:', error)
       toast.error('Erro ao carregar leads')
@@ -65,7 +68,7 @@ export function useLeads() {
 
       if (error) throw error
       
-      setLeads(prev => [data, ...prev])
+      setLeads(prev => [{ ...data, status: data.status as Lead['status'] }, ...prev])
       toast.success('Lead criado com sucesso')
       return data
     } catch (error) {
@@ -86,7 +89,9 @@ export function useLeads() {
 
       if (error) throw error
       
-      setLeads(prev => prev.map(lead => lead.id === id ? data : lead))
+      setLeads(prev => prev.map(lead => 
+        lead.id === id ? { ...data, status: data.status as Lead['status'] } : lead
+      ))
       toast.success('Lead atualizado com sucesso')
       return data
     } catch (error) {

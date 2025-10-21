@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 export interface PipelineStage {
   id: string
   name: string
-  order: number
+  order_number: number
   probability: number
 }
 
@@ -41,7 +41,7 @@ export function useSalesPipeline() {
         .from('crm_pipeline_stages')
         .select('*')
         .eq('org_id', currentOrg.id)
-        .order('order')
+        .order('order_number')
 
       if (stagesError) throw stagesError
 

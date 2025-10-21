@@ -1,13 +1,12 @@
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { 
   TrendingUp, Users, DollarSign, Calendar, 
   Phone, Mail, CheckCircle, AlertCircle 
 } from "lucide-react"
 import { useCRMMetrics } from "@/hooks/useCRMMetrics"
-import { CRMActivitiesTimeline } from "@/components/crm/CRMActivitiesTimeline"
-import { CRMPerformanceChart } from "@/components/crm/CRMPerformanceChart"
-import { TopLeadsWidget } from "@/components/crm/TopLeadsWidget"
 
 export default function CRMDashboard() {
   const { metrics, loading } = useCRMMetrics()
@@ -88,12 +87,20 @@ export default function CRMDashboard() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Performance de Vendas</h3>
-          <CRMPerformanceChart />
+          <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+            Gráfico de performance em desenvolvimento
+          </div>
         </Card>
 
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Top Leads</h3>
-          <TopLeadsWidget />
+          <div className="space-y-3">
+            {metrics.totalLeads > 0 ? (
+              <p className="text-sm text-muted-foreground">Top leads serão exibidos aqui</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">Nenhum lead cadastrado ainda</p>
+            )}
+          </div>
         </Card>
       </div>
 
@@ -106,7 +113,11 @@ export default function CRMDashboard() {
         
         <TabsContent value="activities" className="mt-6">
           <Card className="p-6">
-            <CRMActivitiesTimeline />
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Timeline de atividades recentes será exibida aqui
+              </p>
+            </div>
           </Card>
         </TabsContent>
         

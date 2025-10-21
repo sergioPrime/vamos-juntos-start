@@ -1025,7 +1025,7 @@ const PDV = () => {
           )}
 
           {/* Sales Table - Compact */}
-          <div className="border-2 rounded-xl overflow-hidden shadow-lg" style={{ height: '280px', marginBottom: '1rem' }}>
+          <div className="border-2 rounded-xl overflow-hidden shadow-lg" style={{ height: '450px', marginBottom: '1rem' }}>
             <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
               <div className="grid grid-cols-12 gap-2 p-3 font-semibold text-xs">
                 <div className="col-span-1 text-center">#</div>
@@ -1034,7 +1034,7 @@ const PDV = () => {
               </div>
             </div>
             
-            <div className="bg-background overflow-auto" style={{ height: 'calc(280px - 45px)' }}>
+            <div className="bg-background overflow-auto" style={{ height: 'calc(450px - 45px)' }}>
               {cart.length === 0 ? (
                 <div className="flex items-center justify-center h-full text-center p-4">
                   <div className="animate-fade-in">

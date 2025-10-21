@@ -47,33 +47,59 @@ export function useInventoryIntegration() {
     }
 
     try {
+      // Note: Stock validation is now handled by database triggers
+      // The trigger will automatically prevent insufficient stock and sync quantities
+      
       // Create stock movements for each item
-      const stockMovements = orderData.items.map(item => ({
+      const movements = orderData.items.map(item => ({
+        org_id: currentOrg.id,
         product_id: item.product_id,
-        quantity: -Math.abs(item.quantity), // Negative for exit
-        movement_type: 'out' as const,
+        movement_type: 'out',
+        quantity: item.quantity,
         reference_type: 'order',
         reference_id: orderData.order_id,
-        notes: `Saída automática - Pedido finalizado`,
-        org_id: currentOrg.id,
-        created_by: user.id
+        notes: `Saída automática - Pedido #${orderData.order_id.slice(0, 8)}`,
+        created_by: user.id,
       }))
 
+      // Insert movements - triggers will handle validation and stock sync
       const { error: movementError } = await supabase
         .from('stock_movements')
-        .insert(stockMovements)
+        .insert(movements)
 
-      if (movementError) throw movementError
+      if (movementError) {
+        console.error('Error creating stock movements:', movementError)
+        // Check if it's a stock validation error from trigger
+        if (movementError.message?.includes('Estoque insuficiente')) {
+          toast({
+            title: "Estoque insuficiente",
+            description: movementError.message,
+            variant: "destructive",
+          })
+        } else {
+          toast({
+            title: "Erro ao atualizar estoque",
+            description: "Houve um erro ao processar a movimentação de estoque.",
+            variant: "destructive",
+          })
+        }
+        throw movementError
+      }
 
-      // Update CMV (Cost of Goods Sold) for financial integration
+      // Update CMV (Cost of Goods Sold) for accounting
       await updateCMV(orderData.items)
 
+      toast({
+        title: "Estoque atualizado",
+        description: "Movimentação de estoque registrada automaticamente.",
+      })
+      
       return { success: true }
     } catch (error) {
       console.error('Error processing order completion:', error)
       throw error
     }
-  }, [user?.id, currentOrg?.id])
+  }, [user?.id, currentOrg?.id, toast])
 
   // Process automatic stock entry when purchase is received
   const processPurchaseReceipt = useCallback(async (purchaseData: PurchaseReceiptData) => {
@@ -83,32 +109,47 @@ export function useInventoryIntegration() {
 
     try {
       // Create stock movements for each item
-      const stockMovements = purchaseData.items.map(item => ({
+      // Triggers will automatically sync stock quantities
+      const movements = purchaseData.items.map(item => ({
+        org_id: currentOrg.id,
         product_id: item.product_id,
-        quantity: Math.abs(item.quantity), // Positive for entry
-        movement_type: 'in' as const,
+        movement_type: 'in',
+        quantity: item.quantity,
+        unit_cost: item.cost_price,
         reference_type: 'purchase',
         reference_id: purchaseData.purchase_id,
-        notes: `Entrada automática - Nota de entrada`,
-        org_id: currentOrg.id,
-        created_by: user.id
+        notes: `Entrada automática - Compra #${purchaseData.purchase_id.slice(0, 8)}`,
+        created_by: user.id,
       }))
 
       const { error: movementError } = await supabase
         .from('stock_movements')
-        .insert(stockMovements)
+        .insert(movements)
 
-      if (movementError) throw movementError
+      if (movementError) {
+        console.error('Error creating stock movements:', movementError)
+        toast({
+          title: "Erro ao atualizar estoque",
+          description: "Houve um erro ao processar a entrada de estoque.",
+          variant: "destructive",
+        })
+        throw movementError
+      }
 
-      // Update product cost prices
+      // Update product costs based on purchase prices
       await updateProductCosts(purchaseData.items)
 
+      toast({
+        title: "Estoque atualizado",
+        description: "Entrada de estoque registrada automaticamente.",
+      })
+      
       return { success: true }
     } catch (error) {
       console.error('Error processing purchase receipt:', error)
       throw error
     }
-  }, [user?.id, currentOrg?.id])
+  }, [user?.id, currentOrg?.id, toast])
 
   // Update Cost of Goods Sold for financial integration
   const updateCMV = useCallback(async (items: Array<{ product_id: string; quantity: number; unit_price: number }>) => {
@@ -176,36 +217,50 @@ export function useInventoryIntegration() {
     }
   }, [])
 
-  // Manual stock movement with integration hooks
+  // Manual stock movement creation (with automatic validation)
   const createStockMovement = useCallback(async (movementData: StockMovementData) => {
     if (!user?.id || !currentOrg?.id) {
       throw new Error('User or organization not found')
     }
 
     try {
+      // Database triggers will validate stock and sync quantities automatically
       const { error } = await supabase
         .from('stock_movements')
         .insert({
           ...movementData,
           org_id: currentOrg.id,
-          created_by: user.id
+          created_by: user.id,
         })
 
-      if (error) throw error
+      if (error) {
+        console.error('Error creating stock movement:', error)
+        
+        // Check if it's a stock validation error from trigger
+        if (error.message?.includes('Estoque insuficiente')) {
+          toast({
+            title: "Estoque insuficiente",
+            description: error.message,
+            variant: "destructive",
+          })
+        } else {
+          toast({
+            title: "Erro ao criar movimentação",
+            description: "Houve um erro ao registrar a movimentação.",
+            variant: "destructive",
+          })
+        }
+        throw error
+      }
 
       toast({
         title: "Movimentação registrada",
-        description: "Movimento de estoque registrado com sucesso.",
+        description: "Estoque atualizado automaticamente.",
       })
-
+      
       return { success: true }
     } catch (error) {
       console.error('Error creating stock movement:', error)
-      toast({
-        title: "Erro ao registrar movimento",
-        description: "Não foi possível registrar o movimento de estoque.",
-        variant: "destructive",
-      })
       throw error
     }
   }, [user?.id, currentOrg?.id, toast])

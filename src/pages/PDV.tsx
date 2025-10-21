@@ -616,9 +616,7 @@ const PDV = () => {
       if (orderError) throw orderError
       const order = orderData[0]
 
-      if (orderError) throw orderError
-
-      // Create order items and update stock
+      // Create order items and stock movements (triggers will validate and sync automatically)
       for (const item of cart) {
         // Create order item
         const { error: itemError } = await supabase
@@ -635,7 +633,7 @@ const PDV = () => {
 
         if (itemError) throw itemError
 
-        // Create stock movement
+        // Create stock movement - triggers will validate stock and sync quantities
         const { error: stockError } = await supabase
           .from('stock_movements')
           .insert({
@@ -649,7 +647,18 @@ const PDV = () => {
             created_by: user?.id
           })
 
-        if (stockError) throw stockError
+        // Check if stock validation failed
+        if (stockError) {
+          // If stock validation error, show specific message
+          if (stockError.message?.includes('Estoque insuficiente')) {
+            toast({
+              title: "Estoque insuficiente",
+              description: stockError.message,
+              variant: "destructive",
+            })
+          }
+          throw stockError
+        }
       }
 
       // Registrar venda no caixa (já verificado que está aberto)

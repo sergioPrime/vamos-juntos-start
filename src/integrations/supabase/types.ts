@@ -3185,6 +3185,17 @@ export type Database = {
       }
     }
     Functions: {
+      check_low_stock_alert: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          current_stock: number
+          min_stock: number
+          org_id: string
+          product_id: string
+          product_name: string
+          reorder_point: number
+        }[]
+      }
       create_organization_with_owner: {
         Args: { org_name: string; org_slug: string }
         Returns: {
@@ -3231,6 +3242,10 @@ export type Database = {
       generate_next_system_code: {
         Args: { p_org_id: string }
         Returns: string
+      }
+      get_warehouse_stock: {
+        Args: { p_product_id: string; p_warehouse_id: string }
+        Returns: number
       }
       has_children: {
         Args: { item_id: string; table_name: string }

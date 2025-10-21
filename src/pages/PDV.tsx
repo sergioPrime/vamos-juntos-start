@@ -96,6 +96,7 @@ const PDV = () => {
   
   // New features states
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+  const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false)
   const [globalDiscount, setGlobalDiscount] = useState(0)
   const [globalDiscountType, setGlobalDiscountType] = useState<'percentage' | 'value'>('percentage')
   const [isDiscountDialogOpen, setIsDiscountDialogOpen] = useState(false)
@@ -510,8 +511,7 @@ const PDV = () => {
     {
       key: 'f2',
       action: () => {
-        // Abrir seletor de cliente
-        // TODO: Implementar abertura de seletor de cliente
+        setIsCustomerDialogOpen(true)
       },
       description: 'Cliente'
     },
@@ -1146,9 +1146,7 @@ const PDV = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => {
-                // TODO: Abrir seletor de cliente
-              }}
+              onClick={() => setIsCustomerDialogOpen(true)}
               className="gap-1 h-12 flex-col"
             >
               <User className="h-4 w-4" />
@@ -1298,6 +1296,33 @@ const PDV = () => {
           setSearchTerm("")
         }}
       />
+
+      {/* Customer Selection Dialog */}
+      <Dialog open={isCustomerDialogOpen} onOpenChange={setIsCustomerDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Selecionar Cliente
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <CustomerSelector
+              selectedCustomer={selectedCustomer}
+              onCustomerChange={(customer) => {
+                setSelectedCustomer(customer)
+                if (customer) {
+                  setIsCustomerDialogOpen(false)
+                  toast({
+                    title: "Cliente selecionado",
+                    description: customer.name,
+                  })
+                }
+              }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
 
     </div>
     </div>

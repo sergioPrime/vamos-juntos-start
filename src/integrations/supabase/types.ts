@@ -1390,6 +1390,63 @@ export type Database = {
           },
         ]
       }
+      lot_management: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          expiration_date: string | null
+          id: string
+          lot_number: string
+          manufacturing_date: string | null
+          org_id: string
+          product_id: string
+          quantity: number
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          expiration_date?: string | null
+          id?: string
+          lot_number: string
+          manufacturing_date?: string | null
+          org_id: string
+          product_id: string
+          quantity?: number
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          expiration_date?: string | null
+          id?: string
+          lot_number?: string
+          manufacturing_date?: string | null
+          org_id?: string
+          product_id?: string
+          quantity?: number
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lot_management_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lot_management_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       module_permissions: {
         Row: {
           can_create: boolean
@@ -2620,6 +2677,115 @@ export type Database = {
           visible_in_fiscal_operations?: boolean
         }
         Relationships: []
+      }
+      serial_number_history: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          location: string | null
+          movement_type: string
+          notes: string | null
+          org_id: string
+          serial_number_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          location?: string | null
+          movement_type: string
+          notes?: string | null
+          org_id: string
+          serial_number_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          location?: string | null
+          movement_type?: string
+          notes?: string | null
+          org_id?: string
+          serial_number_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "serial_number_history_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "serial_number_history_serial_number_id_fkey"
+            columns: ["serial_number_id"]
+            isOneToOne: false
+            referencedRelation: "serial_number_tracking"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      serial_number_tracking: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          current_location: string | null
+          id: string
+          lot_id: string | null
+          org_id: string
+          product_id: string
+          serial_number: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          current_location?: string | null
+          id?: string
+          lot_id?: string | null
+          org_id: string
+          product_id: string
+          serial_number: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          current_location?: string | null
+          id?: string
+          lot_id?: string | null
+          org_id?: string
+          product_id?: string
+          serial_number?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "serial_number_tracking_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "lot_management"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "serial_number_tracking_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "serial_number_tracking_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       services: {
         Row: {

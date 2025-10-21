@@ -992,11 +992,15 @@ export type Database = {
           bank_account_id: string | null
           created_at: string
           created_by: string
+          discount_amount: number | null
           due_date: string
           entry_id: string
+          final_amount: number | null
           id: string
           installment_number: number
+          interest_amount: number | null
           is_settled: boolean
+          late_fee: number | null
           notes: string | null
           org_id: string
           payment_method_id: string | null
@@ -1010,11 +1014,15 @@ export type Database = {
           bank_account_id?: string | null
           created_at?: string
           created_by: string
+          discount_amount?: number | null
           due_date: string
           entry_id: string
+          final_amount?: number | null
           id?: string
           installment_number: number
+          interest_amount?: number | null
           is_settled?: boolean
+          late_fee?: number | null
           notes?: string | null
           org_id: string
           payment_method_id?: string | null
@@ -1028,11 +1036,15 @@ export type Database = {
           bank_account_id?: string | null
           created_at?: string
           created_by?: string
+          discount_amount?: number | null
           due_date?: string
           entry_id?: string
+          final_amount?: number | null
           id?: string
           installment_number?: number
+          interest_amount?: number | null
           is_settled?: boolean
+          late_fee?: number | null
           notes?: string | null
           org_id?: string
           payment_method_id?: string | null
@@ -1569,6 +1581,10 @@ export type Database = {
       organizations: {
         Row: {
           created_at: string
+          default_daily_interest_percentage: number | null
+          default_early_discount_days: number | null
+          default_early_discount_percentage: number | null
+          default_late_fee_percentage: number | null
           id: string
           name: string
           slug: string | null
@@ -1576,6 +1592,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          default_daily_interest_percentage?: number | null
+          default_early_discount_days?: number | null
+          default_early_discount_percentage?: number | null
+          default_late_fee_percentage?: number | null
           id?: string
           name: string
           slug?: string | null
@@ -1583,6 +1603,10 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          default_daily_interest_percentage?: number | null
+          default_early_discount_days?: number | null
+          default_early_discount_percentage?: number | null
+          default_late_fee_percentage?: number | null
           id?: string
           name?: string
           slug?: string | null
@@ -3271,6 +3295,18 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_installment_charges: {
+        Args: { p_installment_id: string; p_payment_date?: string }
+        Returns: {
+          days_early: number
+          days_late: number
+          discount_amount: number
+          final_amount: number
+          interest_amount: number
+          late_fee: number
+          original_amount: number
+        }[]
+      }
       check_low_stock_alert: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3356,6 +3392,23 @@ export type Database = {
           total_installments: number
         }[]
       }
+      get_overdue_installments_with_charges: {
+        Args: { p_org_id: string; p_reference_date?: string }
+        Returns: {
+          days_overdue: number
+          due_date: string
+          entry_id: string
+          entry_type: string
+          final_amount: number
+          installment_id: string
+          installment_number: number
+          interest_amount: number
+          late_fee: number
+          original_amount: number
+          person_name: string
+          total_installments: number
+        }[]
+      }
       get_warehouse_stock: {
         Args: { p_product_id: string; p_warehouse_id: string }
         Returns: number
@@ -3402,8 +3455,53 @@ export type Database = {
         }
         Returns: boolean
       }
+      settle_installment_with_charges: {
+        Args: {
+          p_bank_account_id?: string
+          p_custom_amount?: number
+          p_installment_id: string
+          p_payment_date?: string
+          p_payment_method_id?: string
+        }
+        Returns: {
+          discount_amount: number
+          final_amount: number
+          interest_amount: number
+          late_fee: number
+          message: string
+          original_amount: number
+          success: boolean
+        }[]
+      }
+      simulate_installment_payment: {
+        Args: { p_installment_id: string; p_payment_date?: string }
+        Returns: {
+          days_early: number
+          days_late: number
+          discount_amount: number
+          due_date: string
+          final_amount: number
+          installment_number: number
+          interest_amount: number
+          late_fee: number
+          original_amount: number
+          payment_date: string
+          total_charges: number
+          total_discount: number
+        }[]
+      }
       unsettle_installment: {
         Args: { p_installment_id: string }
+        Returns: boolean
+      }
+      update_organization_financial_config: {
+        Args: {
+          p_daily_interest_percentage?: number
+          p_early_discount_days?: number
+          p_early_discount_percentage?: number
+          p_late_fee_percentage?: number
+          p_org_id: string
+        }
         Returns: boolean
       }
       validate_account_code_hierarchy: {

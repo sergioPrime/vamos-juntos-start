@@ -1094,65 +1094,65 @@ const PDV = () => {
           </div>
 
           {/* Action Buttons Grid - 2 rows x 3 columns */}
-          <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="grid grid-cols-3 gap-2 mb-3">
             <Button 
               variant="outline" 
-              size="lg" 
+              size="sm" 
               onClick={suspendSale}
               disabled={cart.length === 0}
-              className="gap-2 h-16 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
+              className="gap-1 h-12 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <Pause className="h-5 w-5" />
-              <span className="text-sm font-semibold">Aguardar (F7)</span>
+              <Pause className="h-4 w-4" />
+              <span className="text-xs font-semibold">Aguardar (F7)</span>
             </Button>
             <Button 
               variant="outline" 
-              size="lg" 
+              size="sm" 
               onClick={clearCart}
               disabled={cart.length === 0}
-              className="gap-2 h-16 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
+              className="gap-1 h-12 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <X className="h-5 w-5" />
-              <span className="text-sm font-semibold">Cancelar (F6)</span>
+              <X className="h-4 w-4" />
+              <span className="text-xs font-semibold">Cancelar (F6)</span>
             </Button>
             <Button 
               variant="outline" 
-              size="lg" 
+              size="sm" 
               onClick={() => setIsPaymentDialogOpen(true)}
               disabled={cart.length === 0}
-              className="gap-2 h-16 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
+              className="gap-1 h-12 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <CreditCard className="h-5 w-5" />
-              <span className="text-sm font-semibold">Finalizar Rápido (F8)</span>
+              <CreditCard className="h-4 w-4" />
+              <span className="text-xs font-semibold">Finalizar Rápido (F8)</span>
             </Button>
             <Button 
               variant="outline" 
-              size="lg" 
+              size="sm" 
               onClick={() => setShowSuspendedSales(true)}
-              className="gap-2 h-16 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
+              className="gap-1 h-12 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <Clock className="h-5 w-5" />
-              <span className="text-sm font-semibold">Aguardando (F11)</span>
+              <Clock className="h-4 w-4" />
+              <span className="text-xs font-semibold">Aguardando (F11)</span>
             </Button>
             <Button 
               variant="outline" 
-              size="lg" 
+              size="sm" 
               onClick={() => setIsCustomerDialogOpen(true)}
-              className="gap-2 h-16 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
+              className="gap-1 h-12 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <User className="h-5 w-5" />
-              <span className="text-sm font-semibold">Cliente (F2)</span>
+              <User className="h-4 w-4" />
+              <span className="text-xs font-semibold">Cliente (F2)</span>
             </Button>
             <Button 
               variant="outline" 
-              size="lg" 
+              size="sm" 
               onClick={() => {
                 // TODO: Abrir observações
               }}
-              className="gap-2 h-16 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
+              className="gap-1 h-12 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <MessageSquare className="h-5 w-5" />
-              <span className="text-sm font-semibold">Observações (F10)</span>
+              <MessageSquare className="h-4 w-4" />
+              <span className="text-xs font-semibold">Observações (F10)</span>
             </Button>
           </div>
 

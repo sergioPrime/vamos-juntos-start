@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, X, Edit, CheckCircle, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,7 +34,7 @@ export function AppointmentsList({
   onClose, 
   isModal = false 
 }: AppointmentsListProps) {
-  const { getAppointmentStatus } = useAppointments();
+  const { getAppointmentStatus, updateAppointment, deleteAppointment } = useAppointments();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -66,6 +66,18 @@ export function AppointmentsList({
     }
   };
 
+  const handleCompleteAppointment = async (e: React.MouseEvent, appointment: Appointment) => {
+    e.stopPropagation();
+    await updateAppointment(appointment.id, { is_completed: true });
+  };
+
+  const handleDeleteAppointment = async (e: React.MouseEvent, appointmentId: string) => {
+    e.stopPropagation();
+    if (confirm('Tem certeza que deseja excluir este agendamento?')) {
+      await deleteAppointment(appointmentId);
+    }
+  };
+
   const content = (
     <Card>
       <CardHeader>
@@ -92,6 +104,7 @@ export function AppointmentsList({
               <TableHead>Tipo de Compromisso</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Título</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -100,8 +113,7 @@ export function AppointmentsList({
               return (
                 <TableRow 
                   key={appointment.id}
-                  className="cursor-pointer hover:bg-accent"
-                  onClick={() => onEditAppointment(appointment)}
+                  className="hover:bg-accent"
                 >
                   <TableCell className="font-medium">
                     {appointment.responsible}
@@ -126,12 +138,48 @@ export function AppointmentsList({
                     </Badge>
                   </TableCell>
                   <TableCell>{appointment.title}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditAppointment(appointment);
+                        }}
+                        title="Visualizar/Editar"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      {status !== 'completed' && appointment.is_task && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+                          onClick={(e) => handleCompleteAppointment(e, appointment)}
+                          title="Concluir"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={(e) => handleDeleteAppointment(e, appointment.id)}
+                        title="Excluir"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               );
             })}
             {appointments.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground">
+                <TableCell colSpan={8} className="text-center text-muted-foreground">
                   Nenhum agendamento encontrado
                 </TableCell>
               </TableRow>

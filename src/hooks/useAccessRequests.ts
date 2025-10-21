@@ -46,7 +46,7 @@ export function useAccessRequests() {
             email
           )
         `)
-        .eq('organization_id', currentOrg)
+        .eq('organization_id', currentOrg.id)
         .order('requested_at', { ascending: false });
 
       // Se não é admin, mostra apenas as próprias solicitações
@@ -87,7 +87,7 @@ export function useAccessRequests() {
             event: '*',
             schema: 'public',
             table: 'access_requests',
-            filter: `organization_id=eq.${currentOrg}`,
+            filter: `organization_id=eq.${currentOrg.id}`,
           },
           () => {
             loadRequests();
@@ -115,9 +115,9 @@ export function useAccessRequests() {
 
     const { error } = await supabase.from('access_requests').insert({
       user_id: user.id,
-      organization_id: currentOrg,
+      organization_id: currentOrg.id,
       module_key: data.module_key,
-      permissions: data.permissions,
+      permissions: data.permissions as any,
       justification: data.justification,
       status: 'pending',
     });

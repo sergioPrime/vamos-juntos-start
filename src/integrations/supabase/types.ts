@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_requests: {
+        Row: {
+          id: string
+          justification: string
+          module_key: string
+          organization_id: string
+          permissions: Json
+          requested_at: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          justification: string
+          module_key: string
+          organization_id: string
+          permissions: Json
+          requested_at?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          justification?: string
+          module_key?: string
+          organization_id?: string
+          permissions?: Json
+          requested_at?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       api_integrations: {
         Row: {
           api_key_encrypted: string | null
@@ -3345,6 +3387,10 @@ export type Database = {
       }
     }
     Functions: {
+      approve_access_request: {
+        Args: { notes?: string; request_id: string; reviewer_id: string }
+        Returns: undefined
+      }
       calculate_installment_charges: {
         Args: { p_installment_id: string; p_payment_date?: string }
         Returns: {
@@ -3516,6 +3562,10 @@ export type Database = {
       is_used_in_financial_entries: {
         Args: { item_id: string; reference_type: string }
         Returns: boolean
+      }
+      reject_access_request: {
+        Args: { notes: string; request_id: string; reviewer_id: string }
+        Returns: undefined
       }
       settle_installment: {
         Args: {

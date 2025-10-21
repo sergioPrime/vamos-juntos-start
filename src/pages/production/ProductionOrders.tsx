@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
-import { usePermissionGuard } from "@/hooks/usePermissionGuard"
+import { usePermissionCheck } from "@/hooks/usePermissionCheck"
 
 interface ProductionOrder {
   id: string
@@ -52,7 +52,7 @@ const priorityLabels = {
 }
 
 const ProductionOrders = () => {
-  usePermissionGuard('producao', 'read')
+  usePermissionCheck('producao', 'read')
   const { user } = useAuth()
   const { currentOrg, loading: orgLoading } = useOrganization()
   const { toast } = useToast()

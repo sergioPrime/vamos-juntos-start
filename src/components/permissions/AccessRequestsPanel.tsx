@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAccessRequests } from '@/hooks/useAccessRequests';
-import { MODULES } from '@/constants/permissions';
+import { MODULE_INFO, ModuleKey } from '@/constants/permissions';
 import { CheckCircle, XCircle, Eye, Loader2, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -148,7 +148,7 @@ export function AccessRequestsPanel() {
                           <div>
                             <span className="text-muted-foreground">Módulo:</span>{' '}
                             <span className="font-medium">
-                              {MODULES[request.module_key as keyof typeof MODULES]?.name || request.module_key}
+                              {MODULE_INFO[request.module_key as ModuleKey]?.name || request.module_key}
                             </span>
                           </div>
                           <div>

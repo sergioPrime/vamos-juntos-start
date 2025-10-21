@@ -3,7 +3,7 @@ import { RefreshCcw, Download, Search, Filter, ChevronLeft, ChevronRight } from 
 import { supabase } from "@/integrations/supabase/client"
 import { useOrganization } from "@/hooks/useOrganization"
 import { useToast } from "@/hooks/use-toast"
-import { usePermissionGuard } from "@/hooks/usePermissionGuard"
+import { usePermissionCheck } from "@/hooks/usePermissionCheck"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { FinancialActionsBar } from "@/components/finance/FinancialActionsBar"
@@ -54,7 +54,7 @@ const defaultColumns: ColumnConfig[] = [
 ]
 
 export default function Boletos() {
-  usePermissionGuard('financeiro', 'read')
+  usePermissionCheck('financeiro', 'read')
   const organization = useOrganization()
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)

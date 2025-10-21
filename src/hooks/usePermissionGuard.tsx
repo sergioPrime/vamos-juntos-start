@@ -1,29 +1,83 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useModulePermissions } from './useModulePermissions';
-import { ModuleKey, PermissionType } from '@/constants/permissions';
-import { toast } from '@/hooks/use-toast';
+import { ModuleKey, PermissionType, ModulePermission } from '@/constants/permissions';
+import { useMemo, useCallback } from 'react';
 
-export function usePermissionGuard(moduleKey: ModuleKey, requiredPermission: PermissionType) {
-  const { hasPermission, loading } = useModulePermissions();
-  const navigate = useNavigate();
+interface PermissionCheck {
+  moduleKey: ModuleKey;
+  permission: PermissionType;
+}
 
-  useEffect(() => {
-    // Wait for permissions to load completely
-    if (loading) return;
+export function usePermissionGuard() {
+  const { hasPermission: baseHasPermission, loading, permissions } = useModulePermissions();
 
-    // Only check and redirect if we're sure the user doesn't have permission
-    const hasAccess = hasPermission(moduleKey, requiredPermission);
-    
-    if (!hasAccess) {
-      toast({
-        title: 'Acesso Negado',
-        description: 'Você não tem permissão para acessar este recurso.',
-        variant: 'destructive',
-      });
-      navigate('/dashboard');
-    }
-  }, [moduleKey, requiredPermission, hasPermission, loading, navigate]);
+  // Verifica se tem uma permissão específica
+  const hasPermission = useCallback(
+    (moduleKey: ModuleKey, permission: PermissionType): boolean => {
+      return baseHasPermission(moduleKey, permission);
+    },
+    [baseHasPermission]
+  );
 
-  return { loading, hasAccess: hasPermission(moduleKey, requiredPermission) };
+  // Verifica se tem TODAS as permissões (AND)
+  const hasAllPermissions = useCallback(
+    (checks: PermissionCheck[]): boolean => {
+      return checks.every(check => hasPermission(check.moduleKey, check.permission));
+    },
+    [hasPermission]
+  );
+
+  // Verifica se tem ALGUMA das permissões (OR)
+  const hasAnyPermission = useCallback(
+    (checks: PermissionCheck[]): boolean => {
+      return checks.some(check => hasPermission(check.moduleKey, check.permission));
+    },
+    [hasPermission]
+  );
+
+  // Verifica se tem acesso ao módulo (pelo menos read)
+  const hasModuleAccess = useCallback(
+    (moduleKey: ModuleKey): boolean => {
+      return hasPermission(moduleKey, 'read');
+    },
+    [hasPermission]
+  );
+
+  // Retorna todas as permissões do módulo
+  const getModulePermissions = useCallback(
+    (moduleKey: ModuleKey) => {
+      return {
+        canCreate: hasPermission(moduleKey, 'create'),
+        canRead: hasPermission(moduleKey, 'read'),
+        canUpdate: hasPermission(moduleKey, 'update'),
+        canDelete: hasPermission(moduleKey, 'delete'),
+      };
+    },
+    [hasPermission]
+  );
+
+  // Verifica se pode realizar uma ação específica
+  const canPerformAction = useCallback(
+    (moduleKey: ModuleKey, action: 'create' | 'read' | 'update' | 'delete'): boolean => {
+      return hasPermission(moduleKey, action);
+    },
+    [hasPermission]
+  );
+
+  // Lista de módulos que o usuário tem acesso
+  const accessibleModules = useMemo(() => {
+    if (!permissions) return [];
+    return Array.from(new Set(permissions.map(p => p.module_key)));
+  }, [permissions]);
+
+  return {
+    hasPermission,
+    hasAllPermissions,
+    hasAnyPermission,
+    hasModuleAccess,
+    getModulePermissions,
+    canPerformAction,
+    accessibleModules,
+    userPermissions: permissions,
+    loading,
+  };
 }

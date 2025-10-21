@@ -1,8 +1,8 @@
 import { AuditLogsTable } from '@/components/audit/AuditLogsTable';
-import { usePermissionGuard } from '@/hooks/usePermissionGuard';
+import { usePermissionCheck } from '@/hooks/usePermissionCheck';
 
 export default function AuditLogs() {
-  usePermissionGuard('configuracoes', 'read');
+  usePermissionCheck('configuracoes', 'read');
 
   return (
     <div className="space-y-6">

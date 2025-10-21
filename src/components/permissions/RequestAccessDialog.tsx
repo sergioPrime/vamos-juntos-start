@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAccessRequests } from '@/hooks/useAccessRequests';
-import { ModuleKey, PermissionType, MODULES } from '@/constants/permissions';
+import { ModuleKey, PermissionType, MODULE_INFO } from '@/constants/permissions';
 import { Loader2, Send } from 'lucide-react';
 
 interface RequestAccessDialogProps {
@@ -117,9 +117,9 @@ export function RequestAccessDialog({
                 <SelectValue placeholder="Selecione um módulo" />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(MODULES).map(([key, module]) => (
+                {Object.entries(MODULE_INFO).map(([key, info]) => (
                   <SelectItem key={key} value={key}>
-                    {module.name}
+                    {info.name}
                   </SelectItem>
                 ))}
               </SelectContent>

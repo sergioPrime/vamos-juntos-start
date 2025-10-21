@@ -19,7 +19,7 @@ import { DiscountDialog } from "@/components/pdv/DiscountDialog"
 import { AbrirCaixaDialog } from "@/components/pdv/AbrirCaixaDialog"
 import { CaixaClosedScreen } from "@/components/pdv/CaixaClosedScreen"
 import { QuickProductDialog } from "@/components/pdv/QuickProductDialog"
-import { usePermissionGuard } from "@/hooks/usePermissionGuard"
+import { usePermissionCheck } from "@/hooks/usePermissionCheck"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { cn } from "@/lib/utils"
 
@@ -70,7 +70,7 @@ interface PaymentSplit {
 }
 
 const PDV = () => {
-  usePermissionGuard('vendas', 'read')
+  usePermissionCheck('vendas', 'read')
   const { user } = useAuth()
   const { currentOrg, loading: orgLoading } = useOrganization()
   const { toast } = useToast()

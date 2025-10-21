@@ -229,7 +229,7 @@ export function ExpirationAlertsPanel() {
                 <TabsTrigger value="warning">
                   Atenção (8-15d)
                   {categorizedLots.warning.length > 0 && (
-                    <Badge variant="warning" className="ml-2">
+                    <Badge variant="secondary" className="ml-2">
                       {categorizedLots.warning.length}
                     </Badge>
                   )}

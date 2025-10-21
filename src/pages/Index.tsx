@@ -114,46 +114,75 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-6 py-20 text-center">
-        <Badge variant="secondary" className="mb-6">
-          <Zap className="h-3 w-3 mr-1" />
-          Sistema ERP Completo
-        </Badge>
+      <section className="relative container mx-auto px-6 py-20 text-center overflow-hidden">
+        {/* Animated background gradient orbs */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
         
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-          Gerencie seu negócio com
-          <span className="text-primary block">inteligência e eficiência</span>
-        </h1>
-        
-        <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-          O Prime ERP é a solução completa para gestão empresarial, integrando vendas, estoque, 
-          financeiro e muito mais em uma única plataforma moderna e intuitiva.
-        </p>
-        
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-          <Button size="lg" onClick={() => navigate('/auth')} className="group">
-            Começar Agora
-            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
-          <Button size="lg" variant="outline" onClick={() => navigate('/auth')}>
-            Ver Demonstração
-          </Button>
+        <div className="relative z-10">
+          <Badge variant="secondary" className="mb-6 animate-fade-in hover:scale-110 transition-transform cursor-default backdrop-blur-sm bg-background/80">
+            <Zap className="h-3 w-3 mr-1 animate-pulse" />
+            Sistema ERP Completo
+          </Badge>
+          
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 animate-fade-in">
+            <span className="bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent animate-gradient">
+              Gerencie seu negócio com
+            </span>
+            <span className="text-primary block mt-2 animate-gradient bg-gradient-to-r from-primary via-blue-500 to-primary bg-clip-text text-transparent">
+              inteligência e eficiência
+            </span>
+          </h1>
+          
+          <p className="text-xl text-muted-foreground mb-10 max-w-3xl mx-auto animate-fade-in leading-relaxed" style={{ animationDelay: '0.2s' }}>
+            O Prime ERP é a solução completa para gestão empresarial, integrando vendas, estoque, 
+            financeiro e muito mais em uma única plataforma moderna e intuitiva.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <Button 
+              size="lg" 
+              onClick={() => navigate('/auth')} 
+              className="group relative overflow-hidden bg-primary hover:bg-primary/90 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/50 hover:scale-105"
+            >
+              <span className="relative z-10 flex items-center">
+                Começar Agora
+                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-2 transition-transform duration-300" />
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              onClick={() => navigate('/auth')}
+              className="group backdrop-blur-sm border-2 hover:border-primary hover:bg-primary/5 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+            >
+              Ver Demonstração
+              <span className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">✨</span>
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-primary">99.9%</div>
-            <div className="text-sm text-muted-foreground">Uptime garantido</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-primary">24/7</div>
-            <div className="text-sm text-muted-foreground">Suporte especializado</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-primary">100%</div>
-            <div className="text-sm text-muted-foreground">Segurança de dados</div>
-          </div>
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
+          <Card className="text-center border-0 bg-background/60 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group">
+            <CardContent className="pt-6">
+              <div className="text-4xl font-bold bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent group-hover:scale-110 transition-transform">99.9%</div>
+              <div className="text-sm text-muted-foreground mt-2">Uptime garantido</div>
+            </CardContent>
+          </Card>
+          <Card className="text-center border-0 bg-background/60 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group">
+            <CardContent className="pt-6">
+              <div className="text-4xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent group-hover:scale-110 transition-transform">24/7</div>
+              <div className="text-sm text-muted-foreground mt-2">Suporte especializado</div>
+            </CardContent>
+          </Card>
+          <Card className="text-center border-0 bg-background/60 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group">
+            <CardContent className="pt-6">
+              <div className="text-4xl font-bold bg-gradient-to-r from-primary to-green-500 bg-clip-text text-transparent group-hover:scale-110 transition-transform">100%</div>
+              <div className="text-sm text-muted-foreground mt-2">Segurança de dados</div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
@@ -170,18 +199,28 @@ const Index = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <Card key={index} className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <CardHeader>
-                <div className="text-primary mb-4">
+            <Card 
+              key={index} 
+              className="relative overflow-hidden border-0 bg-background/60 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 group"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              {/* Gradient overlay on hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              
+              <CardHeader className="relative z-10">
+                <div className="text-primary mb-4 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                   {feature.icon}
                 </div>
-                <CardTitle className="text-xl">{feature.title}</CardTitle>
+                <CardTitle className="text-xl group-hover:text-primary transition-colors duration-300">{feature.title}</CardTitle>
               </CardHeader>
-              <CardContent>
-                <CardDescription className="text-base">
+              <CardContent className="relative z-10">
+                <CardDescription className="text-base leading-relaxed">
                   {feature.description}
                 </CardDescription>
               </CardContent>
+              
+              {/* Animated border gradient */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-blue-500 to-purple-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
             </Card>
           ))}
         </div>
@@ -201,9 +240,16 @@ const Index = () => {
               </p>
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-center space-x-3">
-                    <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
-                    <span>{benefit}</span>
+                  <div 
+                    key={index} 
+                    className="flex items-center space-x-3 group hover:translate-x-2 transition-transform duration-300"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <div className="relative">
+                      <CheckCircle className="h-5 w-5 text-primary flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+                      <div className="absolute inset-0 bg-primary/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+                    <span className="group-hover:text-primary transition-colors duration-300">{benefit}</span>
                   </div>
                 ))}
               </div>
@@ -260,32 +306,47 @@ const Index = () => {
       <ClientsSection />
 
       {/* CTA Section */}
-      <section className="container mx-auto px-6 py-20 text-center">
-        <Card className="border-0 bg-primary text-primary-foreground shadow-2xl max-w-4xl mx-auto">
-          <CardContent className="p-12">
-            <Shield className="h-16 w-16 mx-auto mb-6 opacity-90" />
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Pronto para transformar seu negócio?
+      <section className="relative container mx-auto px-6 py-20 text-center overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-blue-500/10 to-purple-500/10 animate-gradient"></div>
+        
+        <Card className="relative border-0 bg-gradient-to-br from-primary via-primary to-blue-600 text-primary-foreground shadow-2xl max-w-4xl mx-auto overflow-hidden">
+          {/* Animated shine effect */}
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent -translate-x-full animate-[slide-in-right_3s_ease-in-out_infinite]"></div>
+          </div>
+          
+          <CardContent className="relative z-10 p-12">
+            <div className="relative inline-block mb-6">
+              <Shield className="h-16 w-16 mx-auto opacity-90 animate-pulse" />
+              <div className="absolute inset-0 bg-white/20 rounded-full blur-xl"></div>
+            </div>
+            
+            <h2 className="text-3xl md:text-5xl font-bold mb-4 animate-fade-in">
+              Pronto para <span className="underline decoration-wavy decoration-white/50">transformar</span> seu negócio?
             </h2>
-            <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl opacity-90 mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
               Comece gratuitamente e descubra como o Prime ERP pode revolucionar 
               a gestão da sua empresa em poucos minutos.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
               <Button 
                 size="lg" 
                 variant="secondary" 
                 onClick={() => navigate('/auth')}
-                className="group"
+                className="group relative overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-2xl"
               >
-                Começar Gratuitamente
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                <span className="relative z-10 flex items-center">
+                  Começar Gratuitamente
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-2 transition-transform duration-300" />
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
               </Button>
               <Button 
                 size="lg" 
                 variant="outline" 
                 onClick={() => navigate('/auth')}
-                className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10"
+                className="border-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20 backdrop-blur-sm hover:scale-105 transition-all duration-300 hover:border-white"
               >
                 Falar com Especialista
               </Button>

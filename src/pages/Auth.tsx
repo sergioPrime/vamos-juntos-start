@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Mail, Lock } from "lucide-react"
 import { validatePassword } from "@/utils/passwordValidation"
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator"
+import primeGestorLogo from "@/assets/primegestor-logo.png"
 
 export default function Auth() {
   const [email, setEmail] = useState("")
@@ -138,10 +139,9 @@ export default function Auth() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <img src="/lovable-uploads/61604d4b-329d-45cb-b4f7-386f93edfb14.png" alt="Prime ERP" className="h-16 w-auto" />
+          <div className="flex justify-center mb-6">
+            <img src={primeGestorLogo} alt="PrimeGestor" className="h-40 w-auto" />
           </div>
-          <CardTitle className="text-2xl font-bold">Prime ERP</CardTitle>
           <CardDescription>
             Entre na sua conta ou crie uma nova para continuar
           </CardDescription>

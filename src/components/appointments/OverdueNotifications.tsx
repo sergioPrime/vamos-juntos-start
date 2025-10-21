@@ -26,7 +26,7 @@ export function OverdueNotifications() {
 
   const handleViewAllAppointments = () => {
     setIsOpen(false);
-    navigate('/cadastros/agendamentos');
+    navigate('/cadastros/appointments');
   };
 
   const handleCreateAppointment = () => {

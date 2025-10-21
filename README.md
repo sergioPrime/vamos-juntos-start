@@ -1,73 +1,64 @@
-# Welcome to your Lovable project
+# 🚀 Prime ERP - Sistema de Gestão Empresarial Completo
 
-## Project info
+<div align="center">
 
-**URL**: https://lovable.dev/projects/60d24e01-e88e-4a98-ae5d-3df65d171bfc
+![Prime ERP](https://img.shields.io/badge/Prime_ERP-v1.0.0-blue)
+![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)
+![Supabase](https://img.shields.io/badge/Supabase-Cloud-3ECF8E?logo=supabase)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-## How can I edit this code?
+**Solução completa de gestão empresarial com módulos integrados de vendas, estoque, financeiro e muito mais.**
 
-There are several ways of editing your application.
+</div>
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/60d24e01-e88e-4a98-ae5d-3df65d171bfc) and start prompting.
+## ✨ Features Principais
 
-Changes made via Lovable will be committed automatically to this repo.
+- 📊 **Dashboard Inteligente** com KPIs em tempo real
+- 💰 **Financeiro Completo** - Lançamentos, fluxo de caixa, relatórios
+- 📦 **Gestão de Estoque** - Lotes, validades, múltiplos depósitos
+- 🛒 **Vendas & PDV** - Ponto de venda integrado
+- 🏭 **Produção** - Ordens e rastreabilidade
+- 👥 **Cadastros** - Clientes, produtos, fornecedores
+- ⚙️ **Permissões Granulares** - Controle de acesso por módulo
+- 🔍 **Auditoria Completa** - Rastreio de todas as ações
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🚀 Quick Start
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+# Clone
+git clone https://github.com/seu-usuario/prime-erp.git
 
-Follow these steps:
+# Instale
+npm install
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Configure .env
+cp .env.example .env
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Execute
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🛠️ Stack
 
-**Use GitHub Codespaces**
+**Frontend:** React 18 · TypeScript · Vite · TanStack Query · Tailwind CSS  
+**Backend:** Supabase (PostgreSQL · Auth · Storage · Realtime)  
+**Testing:** Vitest · React Testing Library
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+## 📚 Documentação
 
-This project is built with:
+- [Arquitetura](ARCHITECTURE.md)
+- [Cronograma](CRONOGRAMA_EFICAZ.md)
+- [Testes](ANALISE_TESTES_AUTOMATIZADOS.md)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/60d24e01-e88e-4a98-ae5d-3df65d171bfc) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+**Desenvolvido com ❤️ pela equipe Prime ERP**

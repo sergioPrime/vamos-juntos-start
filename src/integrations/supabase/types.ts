@@ -986,6 +986,92 @@ export type Database = {
           },
         ]
       }
+      financial_entry_installments: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          created_at: string
+          created_by: string
+          due_date: string
+          entry_id: string
+          id: string
+          installment_number: number
+          is_settled: boolean
+          notes: string | null
+          org_id: string
+          payment_method_id: string | null
+          settled_amount: number | null
+          settled_at: string | null
+          total_installments: number
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by: string
+          due_date: string
+          entry_id: string
+          id?: string
+          installment_number: number
+          is_settled?: boolean
+          notes?: string | null
+          org_id: string
+          payment_method_id?: string | null
+          settled_amount?: number | null
+          settled_at?: string | null
+          total_installments: number
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by?: string
+          due_date?: string
+          entry_id?: string
+          id?: string
+          installment_number?: number
+          is_settled?: boolean
+          notes?: string | null
+          org_id?: string
+          payment_method_id?: string | null
+          settled_amount?: number | null
+          settled_at?: string | null
+          total_installments?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_entry_installments_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_entry_installments_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "financial_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_entry_installments_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "financial_entries_report"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_entry_installments_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_entry_payments: {
         Row: {
           bank_account_id: string | null
@@ -3215,6 +3301,21 @@ export type Database = {
           projection_date: string
         }[]
       }
+      generate_installments: {
+        Args: {
+          p_created_by: string
+          p_entry_id: string
+          p_first_due_date: string
+          p_num_installments: number
+          p_org_id: string
+          p_total_amount: number
+        }
+        Returns: {
+          amount: number
+          due_date: string
+          installment_number: number
+        }[]
+      }
       generate_next_caixa_number: {
         Args: { p_org_id: string }
         Returns: number
@@ -3242,6 +3343,18 @@ export type Database = {
       generate_next_system_code: {
         Args: { p_org_id: string }
         Returns: string
+      }
+      get_installments_summary: {
+        Args: { p_entry_id: string }
+        Returns: {
+          next_due_date: string
+          pending_amount: number
+          pending_installments: number
+          settled_amount: number
+          settled_installments: number
+          total_amount: number
+          total_installments: number
+        }[]
       }
       get_warehouse_stock: {
         Args: { p_product_id: string; p_warehouse_id: string }
@@ -3278,6 +3391,19 @@ export type Database = {
       }
       is_used_in_financial_entries: {
         Args: { item_id: string; reference_type: string }
+        Returns: boolean
+      }
+      settle_installment: {
+        Args: {
+          p_bank_account_id?: string
+          p_installment_id: string
+          p_payment_method_id?: string
+          p_settled_amount: number
+        }
+        Returns: boolean
+      }
+      unsettle_installment: {
+        Args: { p_installment_id: string }
         Returns: boolean
       }
       validate_account_code_hierarchy: {

@@ -138,16 +138,13 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-6">
+        <CardHeader className="text-center pb-2">
+          <div className="flex justify-center mb-8">
             <img src={primeGestorLogo} alt="PrimeGestor" className="h-40 w-auto" />
           </div>
-          <CardDescription>
-            Entre na sua conta ou crie uma nova para continuar
-          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="text-center mb-6">
+        <CardContent className="pt-4">
+          <div className="text-center mb-8">
             <p className="text-sm text-muted-foreground">
               Acesse sua conta ou crie uma nova para começar a usar todas as funcionalidades do Prime ERP
             </p>

@@ -1,4 +1,4 @@
-import { Bell, AlertCircle } from 'lucide-react'
+import { Package, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -17,7 +17,7 @@ export function AlertNotificationBell() {
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
+          <Package className="h-5 w-5" />
           {hasAlerts && (
             <Badge 
               variant="destructive" 
@@ -39,7 +39,7 @@ export function AlertNotificationBell() {
         <div className="max-h-80 overflow-y-auto">
           {alerts.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">
-              <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p>Nenhum alerta no momento</p>
             </div>
           ) : (

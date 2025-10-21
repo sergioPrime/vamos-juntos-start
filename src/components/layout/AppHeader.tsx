@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Plus, User, MoreHorizontal, LogOut, Moon, Sun, Zap, Shield, Settings, Lock, Link2, Camera, DollarSign, UserCog, ChevronDown, UserPlus, Truck, Package, Wrench, TrendingUp } from "lucide-react"
+import { Plus, User, MoreHorizontal, LogOut, Moon, Sun, Zap, Shield, Settings, Lock, Link2, Camera, DollarSign, UserCog, ChevronDown, UserPlus, Truck, Package, Wrench, TrendingUp, Sparkles } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { UserPhotoDialog } from "@/components/UserPhotoDialog"
@@ -34,6 +34,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { AIAssistantDialog } from "@/components/ai/AIAssistantDialog"
 
 export function AppHeader() {
   const navigate = useNavigate()
@@ -47,6 +48,7 @@ export function AppHeader() {
   const [commissionDialogOpen, setCommissionDialogOpen] = useState(false)
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false)
   const [quickCustomerDialogOpen, setQuickCustomerDialogOpen] = useState(false)
+  const [aiDialogOpen, setAiDialogOpen] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   
   useEffect(() => {
@@ -149,6 +151,22 @@ export function AppHeader() {
         
         {/* Desktop Actions */}
         <div className="hidden lg:flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => setAiDialogOpen(true)}
+                className="gap-2 bg-gradient-to-br from-primary to-purple-600 text-white hover:from-primary/90 hover:to-purple-700"
+                size="sm"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span>IA</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Assistente Inteligente</p>
+            </TooltipContent>
+          </Tooltip>
+          
           <Tooltip>
             <TooltipTrigger asChild>
               <Button 
@@ -289,6 +307,21 @@ export function AppHeader() {
            
            <Tooltip>
              <TooltipTrigger asChild>
+               <Button
+                 onClick={() => setAiDialogOpen(true)}
+                 className="bg-gradient-to-br from-primary to-purple-600 text-white hover:from-primary/90 hover:to-purple-700"
+                 size="icon"
+               >
+                 <Sparkles className="h-4 w-4" />
+               </Button>
+             </TooltipTrigger>
+             <TooltipContent>
+               <p>Assistente IA</p>
+             </TooltipContent>
+           </Tooltip>
+           
+           <Tooltip>
+             <TooltipTrigger asChild>
                <Button 
                  onClick={() => navigate("/finance/receivables")}
                  className="bg-primary text-primary-foreground hover:bg-primary/90"
@@ -421,6 +454,11 @@ export function AppHeader() {
       <QuickCustomerDialog
         open={quickCustomerDialogOpen}
         onOpenChange={setQuickCustomerDialogOpen}
+      />
+      
+      <AIAssistantDialog
+        open={aiDialogOpen}
+        onOpenChange={setAiDialogOpen}
       />
       </header>
     </TooltipProvider>

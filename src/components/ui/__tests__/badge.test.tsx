@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { screen, renderWithProviders } from '@/test/utils/renderWithProviders';
+import { renderWithProviders } from '@/test/utils/renderWithProviders';
 import { Badge } from '../badge';
 
 describe('Badge', () => {
   it('should render with default variant', () => {
-    renderWithProviders(<Badge>Default Badge</Badge>);
-    expect(screen.getByText('Default Badge')).toBeInTheDocument();
+    const { getByText } = renderWithProviders(<Badge>Default Badge</Badge>);
+    expect(getByText('Default Badge')).toBeInTheDocument();
   });
 });

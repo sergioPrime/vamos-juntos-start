@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { screen, renderWithProviders, userEvent } from '@/test/utils/renderWithProviders';
+import { renderWithProviders } from '@/test/utils/renderWithProviders';
 import { ActionButton } from '../ActionButton';
 import * as usePermissionGuardModule from '@/hooks/usePermissionGuard';
 
@@ -27,7 +27,7 @@ describe('ActionButton', () => {
   it('should render enabled button when user has permission', () => {
     mockHasPermission.mockReturnValue(true);
 
-    renderWithProviders(
+    const { getByRole } = renderWithProviders(
       <ActionButton 
         moduleKey="estoque" 
         permission="create"
@@ -37,7 +37,7 @@ describe('ActionButton', () => {
       </ActionButton>
     );
 
-    const button = screen.getByRole('button', { name: /create product/i });
+    const button = getByRole('button', { name: /create product/i });
     expect(button).toBeInTheDocument();
     expect(button).not.toBeDisabled();
   });
@@ -45,7 +45,7 @@ describe('ActionButton', () => {
   it('should render disabled button when user lacks permission', () => {
     mockHasPermission.mockReturnValue(false);
 
-    renderWithProviders(
+    const { getByRole } = renderWithProviders(
       <ActionButton 
         moduleKey="financeiro" 
         permission="delete"
@@ -55,7 +55,7 @@ describe('ActionButton', () => {
       </ActionButton>
     );
 
-    const button = screen.getByRole('button', { name: /delete entry/i });
+    const button = getByRole('button', { name: /delete entry/i });
     expect(button).toBeDisabled();
   });
 });

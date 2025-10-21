@@ -2978,6 +2978,56 @@ export type Database = {
         }
         Relationships: []
       }
+      sync_logs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          org_id: string
+          source_id: string
+          source_table: string
+          status: string
+          sync_type: string
+          target_id: string | null
+          target_table: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          org_id: string
+          source_id: string
+          source_table: string
+          status?: string
+          sync_type: string
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          org_id?: string
+          source_id?: string
+          source_table?: string
+          status?: string
+          sync_type?: string
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sync_logs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transaction_audit: {
         Row: {
           action_type: string
@@ -3328,6 +3378,17 @@ export type Database = {
           updated_at: string
         }[]
       }
+      create_sync_log: {
+        Args: {
+          p_org_id: string
+          p_source_id: string
+          p_source_table: string
+          p_sync_type: string
+          p_target_id?: string
+          p_target_table?: string
+        }
+        Returns: string
+      }
       generate_cash_flow_projections: {
         Args: { p_days_ahead?: number; p_org_id: string }
         Returns: {
@@ -3407,6 +3468,16 @@ export type Database = {
           original_amount: number
           person_name: string
           total_installments: number
+        }[]
+      }
+      get_sync_statistics: {
+        Args: { p_days?: number; p_org_id: string }
+        Returns: {
+          failed_syncs: number
+          success_rate: number
+          successful_syncs: number
+          sync_type: string
+          total_syncs: number
         }[]
       }
       get_warehouse_stock: {

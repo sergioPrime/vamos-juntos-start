@@ -1024,77 +1024,68 @@ const PDV = () => {
             </div>
           )}
 
-          {/* Sales Table */}
-          <div className="flex-1 border-2 rounded-xl overflow-hidden shadow-lg">
+          {/* Sales Table - Compact */}
+          <div className="border-2 rounded-xl overflow-hidden shadow-lg" style={{ height: '280px', marginBottom: '1rem' }}>
             <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
-              <div className="grid grid-cols-12 gap-4 p-4 font-semibold text-sm">
+              <div className="grid grid-cols-12 gap-2 p-3 font-semibold text-xs">
+                <div className="col-span-1 text-center">#</div>
                 <div className="col-span-6">Produto</div>
-                <div className="col-span-2 text-center">Quantidade</div>
-                <div className="col-span-2 text-center">Valor Un.</div>
-                <div className="col-span-2 text-center">Total</div>
+                <div className="col-span-5 text-right">Total</div>
               </div>
             </div>
             
-            <div className="bg-background overflow-auto max-h-[400px]">
+            <div className="bg-background overflow-auto" style={{ height: 'calc(280px - 45px)' }}>
               {cart.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center p-12 text-center">
+                <div className="flex items-center justify-center h-full text-center p-4">
                   <div className="animate-fade-in">
-                    <ShoppingCart className="h-16 w-16 mx-auto mb-4 text-muted-foreground/30" />
-                    <p className="text-lg font-medium text-muted-foreground">Carrinho vazio</p>
-                    <p className="text-sm text-muted-foreground/60 mt-2">
-                      Busque produtos ou passe o código de barras
-                    </p>
+                    <ShoppingCart className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
+                    <p className="text-sm font-medium text-muted-foreground italic">Não há nenhum produto vendido.</p>
                   </div>
                 </div>
               ) : (
                 cart.map((item, index) => (
                   <div 
                     key={item.id} 
-                    className="grid grid-cols-12 gap-4 p-4 border-b hover:bg-accent/50 transition-all duration-200 animate-fade-in group"
+                    className="grid grid-cols-12 gap-2 p-2 border-b hover:bg-accent/50 transition-all duration-200 animate-fade-in group"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <div className="col-span-6 flex items-center gap-3">
+                    <div className="col-span-1 flex items-center justify-center">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => removeFromCart(item.id)}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10 p-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10 p-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
-                        <X className="h-4 w-4" />
+                        <X className="h-3 w-3" />
                       </Button>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-sm truncate">{item.name}</div>
-                        <div className="text-xs text-muted-foreground flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs font-mono">
-                            {item.sku || item.barcode}
-                          </Badge>
-                        </div>
+                    </div>
+                    <div className="col-span-6 flex flex-col justify-center min-w-0">
+                      <div className="font-medium text-xs truncate">{item.name}</div>
+                      <div className="text-xs text-muted-foreground flex items-center gap-1">
+                        <span>{item.quantity}x R$ {item.unit_price.toFixed(2)}</span>
                       </div>
                     </div>
-                    <div className="col-span-2 flex items-center justify-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                      <span className="w-10 text-center font-bold text-base">{item.quantity}</span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary hover:border-primary"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <div className="col-span-2 text-center flex items-center justify-center">
-                      <span className="text-sm font-medium">R$ {item.unit_price.toFixed(2)}</span>
-                    </div>
-                    <div className="col-span-2 text-center flex items-center justify-center">
-                      <span className="text-base font-bold text-primary">R$ {item.total.toFixed(2)}</span>
+                    <div className="col-span-5 flex items-center justify-end gap-2">
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        <span className="w-8 text-center font-bold text-xs">{item.quantity}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="h-6 w-6 p-0 hover:bg-primary/10 hover:text-primary"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
+                      <span className="text-sm font-bold text-primary min-w-[70px] text-right">R$ {item.total.toFixed(2)}</span>
                     </div>
                   </div>
                 ))
@@ -1102,101 +1093,72 @@ const PDV = () => {
             </div>
           </div>
 
-          {/* Action Buttons Row */}
-          <div className="mt-4 grid grid-cols-7 gap-2">
+          {/* Action Buttons Grid - 2 rows x 3 columns */}
+          <div className="grid grid-cols-3 gap-3 mb-4">
             <Button 
               variant="outline" 
-              size="sm" 
+              size="lg" 
               onClick={suspendSale}
               disabled={cart.length === 0}
-              className="gap-1 h-12 flex-col"
+              className="gap-2 h-16 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <Pause className="h-4 w-4" />
-              <span className="text-xs">Aguardar (F7)</span>
+              <Pause className="h-5 w-5" />
+              <span className="text-sm font-semibold">Aguardar (F7)</span>
             </Button>
             <Button 
               variant="outline" 
-              size="sm" 
+              size="lg" 
               onClick={clearCart}
               disabled={cart.length === 0}
-              className="gap-1 h-12 flex-col hover:bg-destructive/10 hover:text-destructive"
+              className="gap-2 h-16 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <X className="h-4 w-4" />
-              <span className="text-xs">Cancelar (F6)</span>
+              <X className="h-5 w-5" />
+              <span className="text-sm font-semibold">Cancelar (F6)</span>
             </Button>
             <Button 
               variant="outline" 
-              size="sm" 
+              size="lg" 
               onClick={() => setIsPaymentDialogOpen(true)}
               disabled={cart.length === 0}
-              className="gap-1 h-12 flex-col"
+              className="gap-2 h-16 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <CreditCard className="h-4 w-4" />
-              <span className="text-xs">Finalizar (F8)</span>
+              <CreditCard className="h-5 w-5" />
+              <span className="text-sm font-semibold">Finalizar Rápido (F8)</span>
             </Button>
             <Button 
               variant="outline" 
-              size="sm" 
+              size="lg" 
               onClick={() => setShowSuspendedSales(true)}
-              className="gap-1 h-12 flex-col"
+              className="gap-2 h-16 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <Clock className="h-4 w-4" />
-              <span className="text-xs">Aguardando (F11)</span>
+              <Clock className="h-5 w-5" />
+              <span className="text-sm font-semibold">Aguardando (F11)</span>
             </Button>
             <Button 
               variant="outline" 
-              size="sm" 
+              size="lg" 
               onClick={() => setIsCustomerDialogOpen(true)}
-              className="gap-1 h-12 flex-col"
+              className="gap-2 h-16 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <User className="h-4 w-4" />
-              <span className="text-xs">Cliente (F2)</span>
+              <User className="h-5 w-5" />
+              <span className="text-sm font-semibold">Cliente (F2)</span>
             </Button>
             <Button 
               variant="outline" 
-              size="sm" 
+              size="lg" 
               onClick={() => {
                 // TODO: Abrir observações
               }}
-              className="gap-1 h-12 flex-col"
+              className="gap-2 h-16 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <MessageSquare className="h-4 w-4" />
-              <span className="text-xs">Observações (F10)</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setIsDiscountDialogOpen(true)}
-              disabled={cart.length === 0}
-              className="gap-1 h-12 flex-col"
-            >
-              <TrendingDown className="h-4 w-4" />
-              <span className="text-xs">Desconto (F5)</span>
-            </Button>
-          </div>
-          
-          {/* Relatório de Vendas Button */}
-          <div className="mt-2">
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              onClick={() => {
-                // TODO: Abrir relatório de vendas
-                toast({
-                  title: "Relatório de Vendas",
-                  description: "Funcionalidade em desenvolvimento.",
-                })
-              }}
-              className="w-full gap-2 h-10"
-            >
-              <FileText className="h-4 w-4" />
-              Relatório de Vendas (F9)
+              <MessageSquare className="h-5 w-5" />
+              <span className="text-sm font-semibold">Observações (F10)</span>
             </Button>
           </div>
 
           {/* Selected Customer Display */}
           {selectedCustomer && (
-            <div className="mt-3 p-3 bg-primary/10 border-2 border-primary/30 rounded-lg">
+            <div className="p-3 bg-primary/10 border-2 border-primary/30 rounded-lg">
               <div className="flex items-center gap-2 mb-1">
                 <User className="h-4 w-4 text-primary" />
                 <span className="text-xs font-semibold text-muted-foreground">Cliente Selecionado:</span>
@@ -1225,59 +1187,60 @@ const PDV = () => {
 
         {/* Summary Section */}
         <div className="w-full lg:w-96">
-          <Card className="h-full flex flex-col border-2 shadow-xl">
-            <CardHeader className="bg-gradient-to-br from-primary/5 to-primary/10 border-b">
-              <CardTitle className="text-center text-xl">Resumo da Venda</CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col p-6 space-y-6">
-              {/* Items Count */}
-              <div className="text-center p-4 bg-accent/50 rounded-lg">
-                <div className="text-sm font-medium text-muted-foreground mb-1">Itens no Carrinho</div>
-                <div className="text-4xl font-bold text-foreground">{cartQuantity}</div>
-              </div>
-              
-              {/* Detailed Totals and Total Amount - Combined */}
-              <div className="space-y-4 p-5 bg-accent/30 rounded-lg">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Subtotal:</span>
-                  <span className="font-medium">R$ {cartSubtotal.toFixed(2)}</span>
+          <Card className="border-2 shadow-xl">
+            <CardContent className="p-4 space-y-3">
+              {/* Summary Stats Row */}
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="flex justify-between p-2 bg-accent/30 rounded">
+                  <span className="text-muted-foreground">Total de itens:</span>
+                  <span className="font-bold">{cartQuantity}</span>
                 </div>
-                {cartItemsDiscount > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Desc. Itens:</span>
-                    <span className="font-medium text-orange-600">- R$ {cartItemsDiscount.toFixed(2)}</span>
-                  </div>
-                )}
-                {globalDiscountAmount > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Desc. Geral:</span>
-                    <span className="font-medium text-orange-600">- R$ {globalDiscountAmount.toFixed(2)}</span>
-                  </div>
-                )}
-                
-                <Separator className="my-3" />
-                
-                {/* Total Amount - Inside the box */}
-                <div className="text-center pt-2">
-                  <div className="text-sm font-semibold text-muted-foreground mb-2">TOTAL A PAGAR</div>
-                  <div className="text-5xl font-bold text-primary animate-scale-in">
-                    R$ {cartTotal.toFixed(2).replace('.', ',')}
-                  </div>
+                <div className="flex justify-between p-2 bg-accent/30 rounded">
+                  <span className="text-muted-foreground">Itens cancelados:</span>
+                  <span className="font-bold">0</span>
+                </div>
+                <div className="flex justify-between p-2 bg-accent/30 rounded">
+                  <span className="text-muted-foreground">Total de desconto:</span>
+                  <span className="font-bold text-orange-600">R$ {(cartItemsDiscount + globalDiscountAmount).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between p-2 bg-accent/30 rounded">
+                  <span className="text-muted-foreground">Total de acréscimo:</span>
+                  <span className="font-bold">R$ 0,00</span>
                 </div>
               </div>
+
+              <Separator />
+
+              {/* Discount Button */}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setIsDiscountDialogOpen(true)}
+                disabled={cart.length === 0}
+                className="w-full gap-2"
+              >
+                <TrendingDown className="h-4 w-4" />
+                Aplicar Desconto (F5)
+              </Button>
+
+              <Separator />
               
-              {/* Action Buttons */}
-              <div className="space-y-3 mt-auto">
-                <Button 
-                  className="w-full h-14 text-lg font-semibold relative z-50" 
-                  size="lg" 
-                  disabled={cart.length === 0}
-                  onClick={() => setIsPaymentDialogOpen(true)}
-                >
-                  <CreditCard className="mr-2 h-5 w-5" />
-                  Ir para Pagamento
-                </Button>
+              {/* Total Amount */}
+              <div className="text-center py-4 bg-accent/20 rounded-lg">
+                <div className="text-6xl font-bold text-destructive">
+                  R$ {cartTotal.toFixed(2).replace('.', ',')}
+                </div>
               </div>
+              
+              {/* Finalize Button */}
+              <Button 
+                className="w-full h-16 text-xl font-bold bg-destructive hover:bg-destructive/90 text-destructive-foreground" 
+                size="lg" 
+                disabled={cart.length === 0}
+                onClick={() => setIsPaymentDialogOpen(true)}
+              >
+                Finalizar (F5)
+              </Button>
             </CardContent>
           </Card>
         </div>

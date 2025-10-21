@@ -14,69 +14,81 @@ import { AnimationProvider } from "./contexts/AnimationContext";
 import { ThemeProvider } from "./hooks/useTheme";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { SuperAdminRoute } from "./components/auth/SuperAdminRoute";
+import { lazy, Suspense } from "react";
+import { LoadingWrapper } from "./components/animations/LoadingWrapper";
 
-import Dashboard from "./pages/Dashboard";
-import Lancamentos from "./pages/finance/Lancamentos";
-import Boletos from "./pages/finance/Boletos";
-import FinancialReports from "./pages/finance/FinancialReports";
-import FinancialDashboard from "./pages/FinancialDashboard";
-import Charges from "./pages/Charges";
-import NFSe from "./pages/NFSe";
-import Quotes from "./pages/Quotes";
-import Customers from "./pages/Customers";
-import Reports from "./pages/Reports";
-import Settings from "./pages/Settings";
-import Permissions from "./pages/settings/Permissions";
-import AuditLogs from "./pages/settings/AuditLogs";
-import Companies from "./pages/settings/Companies";
-import Integrations from "./pages/settings/Integrations";
-import ERPConfig from "./pages/settings/ERPConfig";
-import RenovarLicenca from "./pages/RenovarLicenca";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import PDV from "./pages/PDV";
-import OperacoesPDV from "./pages/pdv/OperacoesPDV";
-import TestePDV from "./pages/pdv/TestePDV";
-import Products from "./pages/Products";
-import Orders from "./pages/Orders";
-import OrdersAndQuotes from "./pages/OrdersAndQuotes";
-import OrdersQuotesForm from "./pages/OrdersQuotesForm";
-import PurchaseRequests from "./pages/purchases/PurchaseRequests";
-import PurchaseReports from "./pages/purchases/PurchaseReports";
-import Suppliers from "./pages/Suppliers";
-import Welcome from "./pages/onboarding/Welcome";
-import Signup from "./pages/onboarding/Signup";
-import BusinessType from "./pages/onboarding/BusinessType";
-import Tutorial from "./pages/onboarding/Tutorial";
-import Auth from "./pages/Auth";
-import NewUserPlans from "./pages/NewUserPlans";
-import NotFound from "./pages/NotFound";
-import Inventory from "./pages/Inventory";
-import StockReports from "./pages/StockReports";
-import StockEntryPage from "./pages/inventory/StockEntry";
-import StockExitPage from "./pages/inventory/StockExit";
-import StockTransferPage from "./pages/inventory/StockTransfer";
-import ReturnsPage from "./pages/inventory/Returns";
-import InventoryReportsPage from "./pages/inventory/InventoryReports";
-import InventoryAlertsPage from "./pages/inventory/InventoryAlerts";
-import OrderForm from "./components/orders/OrderForm";
-import QuoteForm from "./components/quotes/QuoteForm";
-import ProductionOrders from "./pages/production/ProductionOrders";
-import { Pessoas } from "./pages/Pessoas";
-import PlanoDeContas from "./pages/settings/PlanoDeContas";
-import CentrosDeCusto from "./pages/settings/CentrosDeCusto";
-import PaymentMethods from "./pages/cadastros/PaymentMethods";
-import BankAccounts from "./pages/cadastros/BankAccounts";
-import Appointments from "./pages/cadastros/Appointments";
-import AppointmentTypes from "./pages/cadastros/AppointmentTypes";
-import SalesCategories from "./pages/cadastros/SalesCategories";
-import SalesCategoriesForm from "./pages/cadastros/SalesCategoriesForm";
-import PriceTables from "./pages/cadastros/PriceTables";
-import PriceTablesForm from "./pages/cadastros/PriceTablesForm";
-import Warehouses from "./pages/cadastros/Warehouses";
-import WarehouseForm from "./pages/cadastros/WarehouseForm";
-import Index from "./pages/Index";
+// Lazy load all pages for optimal performance
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Lancamentos = lazy(() => import("./pages/finance/Lancamentos"));
+const Boletos = lazy(() => import("./pages/finance/Boletos"));
+const FinancialReports = lazy(() => import("./pages/finance/FinancialReports"));
+const FinancialDashboard = lazy(() => import("./pages/FinancialDashboard"));
+const Charges = lazy(() => import("./pages/Charges"));
+const NFSe = lazy(() => import("./pages/NFSe"));
+const Quotes = lazy(() => import("./pages/Quotes"));
+const Customers = lazy(() => import("./pages/Customers"));
+const Reports = lazy(() => import("./pages/Reports"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Permissions = lazy(() => import("./pages/settings/Permissions"));
+const AuditLogs = lazy(() => import("./pages/settings/AuditLogs"));
+const Companies = lazy(() => import("./pages/settings/Companies"));
+const Integrations = lazy(() => import("./pages/settings/Integrations"));
+const ERPConfig = lazy(() => import("./pages/settings/ERPConfig"));
+const RenovarLicenca = lazy(() => import("./pages/RenovarLicenca"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const PDV = lazy(() => import("./pages/PDV"));
+const OperacoesPDV = lazy(() => import("./pages/pdv/OperacoesPDV"));
+const TestePDV = lazy(() => import("./pages/pdv/TestePDV"));
+const Products = lazy(() => import("./pages/Products"));
+const Orders = lazy(() => import("./pages/Orders"));
+const OrdersAndQuotes = lazy(() => import("./pages/OrdersAndQuotes"));
+const OrdersQuotesForm = lazy(() => import("./pages/OrdersQuotesForm"));
+const PurchaseRequests = lazy(() => import("./pages/purchases/PurchaseRequests"));
+const PurchaseReports = lazy(() => import("./pages/purchases/PurchaseReports"));
+const Suppliers = lazy(() => import("./pages/Suppliers"));
+const Welcome = lazy(() => import("./pages/onboarding/Welcome"));
+const Signup = lazy(() => import("./pages/onboarding/Signup"));
+const BusinessType = lazy(() => import("./pages/onboarding/BusinessType"));
+const Tutorial = lazy(() => import("./pages/onboarding/Tutorial"));
+const Auth = lazy(() => import("./pages/Auth"));
+const NewUserPlans = lazy(() => import("./pages/NewUserPlans"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Inventory = lazy(() => import("./pages/Inventory"));
+const StockReports = lazy(() => import("./pages/StockReports"));
+const StockEntryPage = lazy(() => import("./pages/inventory/StockEntry"));
+const StockExitPage = lazy(() => import("./pages/inventory/StockExit"));
+const StockTransferPage = lazy(() => import("./pages/inventory/StockTransfer"));
+const ReturnsPage = lazy(() => import("./pages/inventory/Returns"));
+const InventoryReportsPage = lazy(() => import("./pages/inventory/InventoryReports"));
+const InventoryAlertsPage = lazy(() => import("./pages/inventory/InventoryAlerts"));
+const OrderForm = lazy(() => import("./components/orders/OrderForm"));
+const QuoteForm = lazy(() => import("./components/quotes/QuoteForm"));
+const ProductionOrders = lazy(() => import("./pages/production/ProductionOrders"));
+const Pessoas = lazy(() => import("./pages/Pessoas").then(module => ({ default: module.Pessoas })));
+const PlanoDeContas = lazy(() => import("./pages/settings/PlanoDeContas"));
+const CentrosDeCusto = lazy(() => import("./pages/settings/CentrosDeCusto"));
+const PaymentMethods = lazy(() => import("./pages/cadastros/PaymentMethods"));
+const BankAccounts = lazy(() => import("./pages/cadastros/BankAccounts"));
+const Appointments = lazy(() => import("./pages/cadastros/Appointments"));
+const AppointmentTypes = lazy(() => import("./pages/cadastros/AppointmentTypes"));
+const SalesCategories = lazy(() => import("./pages/cadastros/SalesCategories"));
+const SalesCategoriesForm = lazy(() => import("./pages/cadastros/SalesCategoriesForm"));
+const PriceTables = lazy(() => import("./pages/cadastros/PriceTables"));
+const PriceTablesForm = lazy(() => import("./pages/cadastros/PriceTablesForm"));
+const Warehouses = lazy(() => import("./pages/cadastros/Warehouses"));
+const WarehouseForm = lazy(() => import("./pages/cadastros/WarehouseForm"));
+const Index = lazy(() => import("./pages/Index"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1 minute
+      gcTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -91,6 +103,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
         <Routes>
           <Route path="/" element={
             <PageTransition direction="fade">
@@ -122,6 +135,9 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
+
+          
+          
           <Route path="/finance/lancamentos" element={
             <ProtectedRoute>
               <AppLayout>
@@ -140,7 +156,6 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          {/* Redirect old routes */}
           <Route path="/finance/receivables" element={<Navigate to="/finance/lancamentos" replace />} />
           <Route path="/finance/payables" element={<Navigate to="/finance/lancamentos" replace />} />
           <Route path="/finance/reports" element={
@@ -483,7 +498,7 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/cadastros/plano-de-contas" element={
+          <Route path="/settings/plano-de-contas" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">
@@ -492,7 +507,7 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/cadastros/centros-de-custo" element={
+          <Route path="/settings/centros-de-custo" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">
@@ -501,7 +516,7 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/cadastros/formas-de-pagamento" element={
+          <Route path="/cadastros/payment-methods" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">
@@ -510,7 +525,7 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/cadastros/contas-bancarias" element={
+          <Route path="/cadastros/bank-accounts" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">
@@ -519,7 +534,7 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/cadastros/agendamentos" element={
+          <Route path="/cadastros/appointments" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">
@@ -528,7 +543,7 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/cadastros/tipos-compromisso" element={
+          <Route path="/cadastros/appointment-types" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">
@@ -537,7 +552,7 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/cadastros/categorias-vendas" element={
+          <Route path="/cadastros/sales-categories" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">
@@ -546,7 +561,7 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/cadastros/categorias-vendas/novo" element={
+          <Route path="/cadastros/sales-categories/new" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">
@@ -555,7 +570,7 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/cadastros/categorias-vendas/:id" element={
+          <Route path="/cadastros/sales-categories/:id" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">
@@ -564,7 +579,7 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/cadastros/tabela-precos" element={
+          <Route path="/cadastros/price-tables" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">
@@ -573,7 +588,7 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/cadastros/tabela-precos/:id" element={
+          <Route path="/cadastros/price-tables/new" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">
@@ -582,7 +597,16 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/cadastros/depositos" element={
+          <Route path="/cadastros/price-tables/:id" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <PriceTablesForm />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/warehouses" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">
@@ -591,7 +615,7 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/cadastros/depositos/novo" element={
+          <Route path="/cadastros/warehouses/new" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">
@@ -600,32 +624,33 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
-          <Route path="/cadastros/depositos/editar/:id" element={
+          <Route path="/cadastros/warehouses/:id" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">
                   <WarehouseForm />
                 </PageTransition>
               </AppLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin" element={
-            <ProtectedRoute>
-              <SuperAdminRoute>
-                <AppLayout>
-                  <PageTransition direction="left">
-                    <AdminDashboard />
-                  </PageTransition>
-                </AppLayout>
-              </SuperAdminRoute>
             </ProtectedRoute>
           } />
           
-          {/* Catch-all route */}
+          {/* Admin routes */}
+          <Route path="/admin/dashboard" element={
+            <SuperAdminRoute>
+              <AppLayout>
+                <PageTransition direction="right">
+                  <AdminDashboard />
+                </PageTransition>
+              </AppLayout>
+            </SuperAdminRoute>
+          } />
+          
+          {/* 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+            </Suspense>
           </BrowserRouter>
-          </NotificationProvider>
+                  </NotificationProvider>
                 </TooltipProvider>
               </AnimationProvider>
             </SidebarConfigProvider>
@@ -637,3 +662,4 @@ const App = () => (
 );
 
 export default App;
+

@@ -807,6 +807,284 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_activities: {
+        Row: {
+          activity_type: string
+          assigned_to: string | null
+          completed: boolean | null
+          completed_at: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          lead_id: string | null
+          opportunity_id: string | null
+          org_id: string
+          scheduled_at: string | null
+          title: string
+        }
+        Insert: {
+          activity_type: string
+          assigned_to?: string | null
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          lead_id?: string | null
+          opportunity_id?: string | null
+          org_id: string
+          scheduled_at?: string | null
+          title: string
+        }
+        Update: {
+          activity_type?: string
+          assigned_to?: string | null
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          lead_id?: string | null
+          opportunity_id?: string | null
+          org_id?: string
+          scheduled_at?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_activities_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_activities_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_activities_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "crm_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_activities_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_leads: {
+        Row: {
+          assigned_to: string | null
+          company: string | null
+          created_at: string | null
+          created_by: string | null
+          email: string | null
+          estimated_value: number | null
+          id: string
+          name: string
+          notes: string | null
+          org_id: string
+          phone: string | null
+          position: string | null
+          score: number | null
+          source: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          company?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          estimated_value?: number | null
+          id?: string
+          name: string
+          notes?: string | null
+          org_id: string
+          phone?: string | null
+          position?: string | null
+          score?: number | null
+          source?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          company?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          estimated_value?: number | null
+          id?: string
+          name?: string
+          notes?: string | null
+          org_id?: string
+          phone?: string | null
+          position?: string | null
+          score?: number | null
+          source?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_leads_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_leads_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_leads_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_opportunities: {
+        Row: {
+          company_name: string | null
+          created_at: string | null
+          created_by: string | null
+          expected_close_date: string | null
+          id: string
+          lead_id: string | null
+          notes: string | null
+          org_id: string
+          probability: number | null
+          stage_id: string | null
+          status: string | null
+          title: string
+          updated_at: string | null
+          value: number | null
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          expected_close_date?: string | null
+          id?: string
+          lead_id?: string | null
+          notes?: string | null
+          org_id: string
+          probability?: number | null
+          stage_id?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string | null
+          value?: number | null
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          expected_close_date?: string | null
+          id?: string
+          lead_id?: string | null
+          notes?: string | null
+          org_id?: string
+          probability?: number | null
+          stage_id?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_opportunities_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_opportunities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_opportunities_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_opportunities_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipeline_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_pipeline_stages: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          order_number: number
+          org_id: string
+          probability: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          order_number: number
+          org_id: string
+          probability?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          order_number?: number
+          org_id?: string
+          probability?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_pipeline_stages_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           created_at: string

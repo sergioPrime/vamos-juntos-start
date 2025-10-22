@@ -542,7 +542,7 @@ const PDV = () => {
       key: 'f8',
       action: () => {
         if (cart.length > 0) {
-          setIsPaymentDialogOpen(true)
+          processQuickCashSale()
         }
       },
       description: 'Finalizar Rápido'
@@ -581,6 +581,35 @@ const PDV = () => {
       preventDefault: false
     }
   ])
+
+  // Quick cash sale function
+  const processQuickCashSale = async () => {
+    if (cart.length === 0) return
+
+    // Find cash payment method
+    const cashPaymentMethod = paymentMethods.find(pm => 
+      pm.name.toLowerCase().includes('dinheiro') || 
+      pm.type.toLowerCase().includes('cash')
+    )
+
+    if (!cashPaymentMethod) {
+      toast({
+        title: "Forma de pagamento não encontrada",
+        description: "Não foi possível encontrar o método de pagamento 'Dinheiro'. Configure-o antes de usar esta opção.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Create payment split for cash
+    const cashPayment: PaymentSplit = {
+      id: Date.now().toString(),
+      paymentMethodId: cashPaymentMethod.id,
+      amount: finalTotal
+    }
+
+    await processSale([cashPayment], finalTotal)
+  }
 
   const processSale = async (payments: PaymentSplit[], receivedAmount: number) => {
     if (cart.length === 0) {
@@ -1116,7 +1145,7 @@ const PDV = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => setIsPaymentDialogOpen(true)}
+              onClick={processQuickCashSale}
               disabled={cart.length === 0}
               className="gap-1 h-12 flex-col bg-primary text-primary-foreground hover:bg-primary/90"
             >

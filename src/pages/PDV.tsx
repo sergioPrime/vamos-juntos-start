@@ -1028,9 +1028,9 @@ const PDV = () => {
           <div className="border-2 rounded-xl overflow-hidden shadow-lg" style={{ height: '450px', marginBottom: '1rem' }}>
             <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
               <div className="grid grid-cols-12 gap-2 p-3 font-semibold text-xs">
-                <div className="col-span-1 text-center">#</div>
-                <div className="col-span-6">Produto</div>
-                <div className="col-span-5 text-right">Total</div>
+                <div className="col-span-1 text-center">Item</div>
+                <div className="col-span-5">Produto</div>
+                <div className="col-span-6 text-right">Total</div>
               </div>
             </div>
             
@@ -1049,23 +1049,24 @@ const PDV = () => {
                     className="grid grid-cols-12 gap-2 p-2 border-b hover:bg-accent/50 transition-all duration-200 animate-fade-in group"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <div className="col-span-1 flex items-center justify-center">
+                    <div className="col-span-1 flex items-center justify-center relative">
+                      <span className="text-sm font-semibold text-muted-foreground">{index + 1}</span>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => removeFromCart(item.id)}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10 p-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute text-destructive hover:text-destructive hover:bg-destructive/10 p-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="h-3 w-3" />
                       </Button>
                     </div>
-                    <div className="col-span-6 flex flex-col justify-center min-w-0">
+                    <div className="col-span-5 flex flex-col justify-center min-w-0">
                       <div className="font-medium text-xs truncate">{item.name}</div>
                       <div className="text-xs text-muted-foreground flex items-center gap-1">
                         <span>{item.quantity}x R$ {item.unit_price.toFixed(2)}</span>
                       </div>
                     </div>
-                    <div className="col-span-5 flex items-center justify-end gap-2">
+                    <div className="col-span-6 flex items-center justify-end gap-2">
                       <div className="flex items-center gap-1">
                         <Button
                           variant="outline"

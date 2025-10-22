@@ -1046,7 +1046,7 @@ const PDV = () => {
                 cart.map((item, index) => (
                   <div 
                     key={item.id} 
-                    className="grid grid-cols-12 gap-2 p-2 border-b hover:bg-accent/50 transition-all duration-200 animate-fade-in group"
+                    className="grid grid-cols-12 gap-2 py-1 px-2 border-b hover:bg-accent/50 transition-all duration-200 animate-fade-in group"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
                     <div className="col-span-1 flex items-center justify-center relative">

@@ -20,6 +20,7 @@ import {
   Globe
 } from "lucide-react"
 import { ClientsSection } from "@/components/landing/ClientsSection"
+import primegestorLogo from "@/assets/primegestor-logo.png"
 
 const Index = () => {
   const navigate = useNavigate()
@@ -93,9 +94,11 @@ const Index = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-primary rounded-lg">
-                <Building className="h-6 w-6 text-primary-foreground" />
-              </div>
+              <img 
+                src={primegestorLogo} 
+                alt="PrimeGestor Logo" 
+                className="w-10 h-10 object-contain"
+              />
               <div>
                 <h1 className="text-xl font-bold">Prime ERP</h1>
                 <p className="text-xs text-muted-foreground">Gestão Empresarial Completa</p>

@@ -1060,11 +1060,8 @@ const PDV = () => {
                         <X className="h-3 w-3" />
                       </Button>
                     </div>
-                    <div className="col-span-5 flex flex-col justify-center min-w-0">
+                    <div className="col-span-5 flex items-center min-w-0">
                       <div className="font-medium text-xs truncate">{item.name}</div>
-                      <div className="text-xs text-muted-foreground flex items-center gap-1">
-                        <span>{item.quantity}x R$ {item.unit_price.toFixed(2)}</span>
-                      </div>
                     </div>
                     <div className="col-span-6 flex items-center justify-end gap-2">
                       <div className="flex items-center gap-1">

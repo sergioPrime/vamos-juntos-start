@@ -48,6 +48,16 @@ interface FilterValues {
   endDate?: Date
 }
 
+// Calculate current month start and end dates
+const getCurrentMonthDates = () => {
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+  return { startOfMonth, endOfMonth }
+}
+
+const { startOfMonth, endOfMonth } = getCurrentMonthDates()
+
 const DEFAULT_FILTERS: FilterValues = {
   // Text search
   searchText: "",
@@ -70,9 +80,11 @@ const DEFAULT_FILTERS: FilterValues = {
   minAmount: "",
   maxAmount: "",
   
-  // Dates
-  periodType: undefined,
-  dateFilterType: "none"
+  // Dates - Default to current month filtered by due date
+  periodType: "custom",
+  dateFilterType: "due_date",
+  startDate: startOfMonth,
+  endDate: endOfMonth
 }
 
 const DEFAULT_COLUMNS: ColumnConfig[] = [

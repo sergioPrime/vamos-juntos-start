@@ -40,6 +40,7 @@ export default function FinancialReports() {
   const [expensesByCategory, setExpensesByCategory] = useState<any[]>([])
   const [allInvoices, setAllInvoices] = useState<any[]>([])
   const [allTransactions, setAllTransactions] = useState<any[]>([])
+  const [allFinancialEntries, setAllFinancialEntries] = useState<any[]>([])
   const [selectedCategory, setSelectedCategory] = useState("all")
 
   useEffect(() => {
@@ -95,6 +96,20 @@ export default function FinancialReports() {
 
       setAllTransactions(transactions || [])
 
+      // Load financial entries within date range
+      const { data: financialEntries } = await supabase
+        .from("financial_entries")
+        .select(`
+          *,
+          chart_of_accounts (account_name, account_code),
+          pessoas!financial_entries_person_id_fkey (nome_fantasia)
+        `)
+        .eq("org_id", organization.currentOrg.id)
+        .gte("due_date", dateFrom.toISOString().split('T')[0])
+        .lte("due_date", dateTo.toISOString().split('T')[0])
+
+      setAllFinancialEntries(financialEntries || [])
+
       // Get counts
       const [
         { count: totalCustomers },
@@ -105,7 +120,7 @@ export default function FinancialReports() {
       ])
 
       // Calculate metrics from loaded data
-      calculateMetrics(invoices || [], transactions || [], totalBalance, totalCustomers || 0, totalProducts || 0)
+      calculateMetrics(invoices || [], transactions || [], financialEntries || [], totalBalance, totalCustomers || 0, totalProducts || 0)
       
     } catch (error) {
       console.error("Error loading financial data:", error)
@@ -119,30 +134,52 @@ export default function FinancialReports() {
     }
   }
 
-  const calculateMetrics = (invoices: any[], transactions: any[], totalBalance: number, totalCustomers: number, totalProducts: number) => {
+  const calculateMetrics = (invoices: any[], transactions: any[], financialEntries: any[], totalBalance: number, totalCustomers: number, totalProducts: number) => {
     const paidInvoices = invoices.filter(i => i.status === "paid")
     const pendingInvoices = invoices.filter(i => i.status === "pending")
     
-    const monthlyRevenue = paidInvoices.reduce((sum, invoice) => sum + Number(invoice.total_amount), 0)
-    const pendingReceivables = pendingInvoices.reduce((sum, invoice) => sum + Number(invoice.total_amount), 0)
+    // Calculate revenue from invoices and financial entries (receivables)
+    const invoiceRevenue = paidInvoices.reduce((sum, invoice) => sum + Number(invoice.total_amount), 0)
+    const settledReceivables = financialEntries
+      .filter(entry => entry.entry_type === "receivable" && entry.is_settled)
+      .reduce((sum, entry) => sum + Number(entry.amount), 0)
+    const monthlyRevenue = invoiceRevenue + settledReceivables
+    
+    // Calculate pending receivables from invoices and financial entries
+    const invoicePending = pendingInvoices.reduce((sum, invoice) => sum + Number(invoice.total_amount), 0)
+    const entriesPending = financialEntries
+      .filter(entry => entry.entry_type === "receivable" && !entry.is_settled)
+      .reduce((sum, entry) => sum + Number(entry.amount), 0)
+    const pendingReceivables = invoicePending + entriesPending
     
     const today = new Date()
-    const overdueAmount = pendingInvoices
+    const invoiceOverdue = pendingInvoices
       .filter(invoice => invoice.due_date && new Date(invoice.due_date) < today)
       .reduce((sum, invoice) => sum + Number(invoice.total_amount), 0)
+    const entriesOverdue = financialEntries
+      .filter(entry => !entry.is_settled && entry.due_date && new Date(entry.due_date) < today)
+      .reduce((sum, entry) => sum + Number(entry.amount), 0)
+    const overdueAmount = invoiceOverdue + entriesOverdue
+
+    // Calculate expenses from transactions and financial entries (payables)
+    const transactionExpenses = transactions.filter(t => t.transaction_type === 'outflow').reduce((sum, t) => sum + Number(t.amount), 0)
+    const settledPayables = financialEntries
+      .filter(entry => entry.entry_type === "payable" && entry.is_settled)
+      .reduce((sum, entry) => sum + Number(entry.amount), 0)
+    const monthlyExpenses = transactionExpenses + settledPayables
 
     setMetrics({
       totalBalance,
       monthlyRevenue,
-      monthlyExpenses: transactions.filter(t => t.transaction_type === 'outflow').reduce((sum, t) => sum + Number(t.amount), 0),
+      monthlyExpenses,
       pendingReceivables,
       overdueAmount,
       totalCustomers,
-      totalInvoices: invoices.length,
+      totalInvoices: invoices.length + financialEntries.length,
       totalProducts
     })
 
-    // Calculate cash flow
+    // Calculate cash flow including financial entries
     const monthlyData: { [key: string]: { inflow: number, outflow: number } } = {}
     
     transactions.forEach(transaction => {
@@ -158,6 +195,25 @@ export default function FinancialReports() {
         monthlyData[monthKey].inflow += amount
       } else {
         monthlyData[monthKey].outflow += amount
+      }
+    })
+
+    // Add financial entries to cash flow
+    financialEntries.forEach(entry => {
+      if (entry.is_settled && entry.settled_at) {
+        const date = new Date(entry.settled_at)
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+        
+        if (!monthlyData[monthKey]) {
+          monthlyData[monthKey] = { inflow: 0, outflow: 0 }
+        }
+        
+        const amount = Number(entry.amount)
+        if (entry.entry_type === 'receivable') {
+          monthlyData[monthKey].inflow += amount
+        } else {
+          monthlyData[monthKey].outflow += amount
+        }
       }
     })
 
@@ -180,7 +236,7 @@ export default function FinancialReports() {
       { category: "Serviços", amount: totalRevenue, count: paidInvoices.length, color: "hsl(var(--primary))" }
     ] : [])
 
-    // Calculate expenses by category
+    // Calculate expenses by category including financial entries
     const expensesByCategory: { [key: string]: { amount: number, count: number } } = {}
     
     transactions.filter(t => t.transaction_type === 'outflow').forEach(transaction => {
@@ -189,6 +245,16 @@ export default function FinancialReports() {
         expensesByCategory[category] = { amount: 0, count: 0 }
       }
       expensesByCategory[category].amount += Number(transaction.amount)
+      expensesByCategory[category].count += 1
+    })
+
+    // Add payables from financial entries
+    financialEntries.filter(entry => entry.entry_type === 'payable' && entry.is_settled).forEach(entry => {
+      const category = entry.chart_of_accounts?.account_name || "Outros"
+      if (!expensesByCategory[category]) {
+        expensesByCategory[category] = { amount: 0, count: 0 }
+      }
+      expensesByCategory[category].amount += Number(entry.amount)
       expensesByCategory[category].count += 1
     })
 

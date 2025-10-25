@@ -320,17 +320,22 @@ export function useFinancialEntries() {
         created_by: validatedData.created_by,
         is_settled: validatedData.is_settled,
         is_conciliated: validatedData.is_conciliated || false,
-        // Data de lançamento personalizada (se fornecida)
-        ...(data.entry_date && {
-          created_at: data.entry_date instanceof Date 
-            ? data.entry_date.toISOString() 
-            : data.entry_date
-        }),
       }
+
+      // Se entry_date for fornecida e for diferente de hoje, usar como created_at
+      const finalData = data.entry_date && 
+        new Date(data.entry_date).toDateString() !== new Date().toDateString()
+        ? {
+            ...dataForSupabase,
+            created_at: data.entry_date instanceof Date 
+              ? data.entry_date.toISOString() 
+              : new Date(data.entry_date).toISOString()
+          }
+        : dataForSupabase
 
       const { error } = await supabase
         .from("financial_entries")
-        .insert([dataForSupabase])
+        .insert([finalData])
 
       if (error) throw error
 
@@ -342,9 +347,16 @@ export function useFinancialEntries() {
       return true
     } catch (error) {
       if (error instanceof z.ZodError) {
+        const errorMessages = error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
         toast({
           title: "Dados inválidos",
-          description: error.errors[0].message,
+          description: errorMessages,
+          variant: "destructive",
+        })
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        toast({
+          title: "Erro",
+          description: `Erro ao criar lançamento: ${(error as any).message}`,
           variant: "destructive",
         })
       } else {
@@ -354,6 +366,7 @@ export function useFinancialEntries() {
           variant: "destructive",
         })
       }
+      console.error("Erro detalhado ao criar entry:", error)
       return false
     }
   }

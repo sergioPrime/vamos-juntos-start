@@ -297,7 +297,17 @@ export function useFinancialEntries() {
       const validatedData = validateCreateEntry(dataToValidate)
 
       // Convert Date objects to ISO strings for Supabase
-      const dataForSupabase = {
+      const entryDateISO = data.entry_date 
+        ? (data.entry_date instanceof Date 
+            ? data.entry_date.toISOString() 
+            : new Date(data.entry_date).toISOString())
+        : undefined
+
+      if (entryDateISO) {
+        console.log('📅 Data de lançamento personalizada:', entryDateISO)
+      }
+
+      const dataForSupabase: any = {
         org_id: validatedData.org_id,
         company_id: validatedData.company_id,
         person_id: validatedData.person_id,
@@ -320,24 +330,25 @@ export function useFinancialEntries() {
         created_by: validatedData.created_by,
         is_settled: validatedData.is_settled,
         is_conciliated: validatedData.is_conciliated || false,
+        ...(entryDateISO && { created_at: entryDateISO })
       }
 
-      // Se entry_date for fornecida e for diferente de hoje, usar como created_at
-      const finalData = data.entry_date && 
-        new Date(data.entry_date).toDateString() !== new Date().toDateString()
-        ? {
-            ...dataForSupabase,
-            created_at: data.entry_date instanceof Date 
-              ? data.entry_date.toISOString() 
-              : new Date(data.entry_date).toISOString()
-          }
-        : dataForSupabase
+      console.log('💾 Dados para inserir no banco:', {
+        ...dataForSupabase,
+        created_at: dataForSupabase.created_at || 'default (now())'
+      })
 
-      const { error } = await supabase
+      const { error, data: insertedData } = await supabase
         .from("financial_entries")
-        .insert([finalData])
+        .insert([dataForSupabase])
+        .select()
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Erro ao inserir:', error)
+        throw error
+      }
+
+      console.log('✅ Lançamento criado:', insertedData)
 
       await loadEntries()
       toast({

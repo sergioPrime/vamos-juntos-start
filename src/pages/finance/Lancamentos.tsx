@@ -274,7 +274,12 @@ export default function Lancamentos() {
         })
       } else {
         // Create new entry
-        await createEntry(entryData)
+        const success = await createEntry(entryData)
+        
+        if (!success) {
+          // Don't continue if creation failed
+          return
+        }
       }
 
       // Reload entries immediately

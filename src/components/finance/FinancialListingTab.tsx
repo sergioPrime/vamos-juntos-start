@@ -56,9 +56,11 @@ const getCurrentMonthDates = () => {
   return { startOfMonth, endOfMonth }
 }
 
-const { startOfMonth, endOfMonth } = getCurrentMonthDates()
-
-const DEFAULT_FILTERS: FilterValues = {
+// Function to get default filters with dynamic dates
+const getDefaultFilters = (): FilterValues => {
+  const { startOfMonth, endOfMonth } = getCurrentMonthDates()
+  
+  return {
   // Text search
   searchText: "",
   documentNumber: "",
@@ -80,11 +82,12 @@ const DEFAULT_FILTERS: FilterValues = {
   minAmount: "",
   maxAmount: "",
   
-  // Dates - Default to current month filtered by due date
-  periodType: "custom",
-  dateFilterType: "due_date",
-  startDate: startOfMonth,
-  endDate: endOfMonth
+    // Dates - Default to current month filtered by due date
+    periodType: "custom",
+    dateFilterType: "due_date",
+    startDate: startOfMonth,
+    endDate: endOfMonth
+  }
 }
 
 const DEFAULT_COLUMNS: ColumnConfig[] = [
@@ -131,8 +134,29 @@ export function FinancialListingTab({ onEntriesSelected }: { onEntriesSelected?:
     clearFilters
   } = usePersistentFilters<FilterValues>({
     key: 'financial-listing-filters',
-    defaultFilters: DEFAULT_FILTERS
+    defaultFilters: getDefaultFilters()
   })
+  
+  // Refresh filters when entries are loaded to ensure current month is displayed
+  useEffect(() => {
+    if (entries.length > 0 && filters.dateFilterType === "due_date") {
+      const { startOfMonth, endOfMonth } = getCurrentMonthDates()
+      
+      // Only update if dates have changed (e.g., month rolled over)
+      const currentStart = filters.startDate?.toISOString().split('T')[0]
+      const currentEnd = filters.endDate?.toISOString().split('T')[0]
+      const newStart = startOfMonth.toISOString().split('T')[0]
+      const newEnd = endOfMonth.toISOString().split('T')[0]
+      
+      if (currentStart !== newStart || currentEnd !== newEnd) {
+        updateFilters({
+          ...filters,
+          startDate: startOfMonth,
+          endDate: endOfMonth
+        })
+      }
+    }
+  }, [entries])
 
   useEffect(() => {
     if (organization?.currentOrg?.id) {

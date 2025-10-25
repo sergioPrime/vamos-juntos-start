@@ -294,9 +294,35 @@ export function useFinancialEntries() {
       // Validate data using Zod schema
       const validatedData = validateCreateEntry(dataToValidate)
 
+      // Convert Date objects to ISO strings for Supabase
+      const dataForSupabase = {
+        org_id: validatedData.org_id,
+        company_id: validatedData.company_id,
+        person_id: validatedData.person_id,
+        person_type: validatedData.person_type,
+        entry_type: validatedData.entry_type,
+        chart_of_account_id: validatedData.chart_of_account_id,
+        cost_center_id: validatedData.cost_center_id,
+        amount: validatedData.amount,
+        competence_date: validatedData.competence_date instanceof Date 
+          ? validatedData.competence_date.toISOString() 
+          : validatedData.competence_date,
+        due_date: validatedData.due_date instanceof Date 
+          ? validatedData.due_date.toISOString() 
+          : validatedData.due_date,
+        description: validatedData.description,
+        origin_type: validatedData.origin_type,
+        origin_id: validatedData.origin_id,
+        payment_method_id: validatedData.payment_method_id,
+        bank_account_id: validatedData.bank_account_id,
+        created_by: validatedData.created_by,
+        is_settled: validatedData.is_settled,
+        is_conciliated: validatedData.is_conciliated || false,
+      }
+
       const { error } = await supabase
         .from("financial_entries")
-        .insert([validatedData as any])
+        .insert([dataForSupabase])
 
       if (error) throw error
 

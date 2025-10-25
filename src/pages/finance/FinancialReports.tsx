@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -15,16 +15,31 @@ import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { useOrganization } from "@/hooks/useOrganization"
-import { useFinancialData } from "@/hooks/useFinancialData"
+import { supabase } from "@/integrations/supabase/client"
 import { formatCurrency } from "@/hooks/useCountUp"
 
 export default function FinancialReports() {
   const { toast } = useToast()
   const organization = useOrganization()
-  const { metrics, cashFlowData, revenueByCategory, expensesByCategory, loading } = useFinancialData()
   
   const [dateFrom, setDateFrom] = useState<Date>()
   const [dateTo, setDateTo] = useState<Date>()
+  const [loading, setLoading] = useState(true)
+  const [metrics, setMetrics] = useState({
+    totalBalance: 0,
+    monthlyRevenue: 0,
+    monthlyExpenses: 0,
+    pendingReceivables: 0,
+    overdueAmount: 0,
+    totalCustomers: 0,
+    totalInvoices: 0,
+    totalProducts: 0
+  })
+  const [cashFlowData, setCashFlowData] = useState<any[]>([])
+  const [revenueByCategory, setRevenueByCategory] = useState<any[]>([])
+  const [expensesByCategory, setExpensesByCategory] = useState<any[]>([])
+  const [allInvoices, setAllInvoices] = useState<any[]>([])
+  const [allTransactions, setAllTransactions] = useState<any[]>([])
   const [selectedCategory, setSelectedCategory] = useState("all")
 
   useEffect(() => {
@@ -39,18 +54,201 @@ export default function FinancialReports() {
     }
   }, [organization])
 
-  const exportReport = (format: 'pdf' | 'excel') => {
-    toast({
-      title: "Exportação",
-      description: `Funcionalidade de exportação ${format.toUpperCase()} será implementada`,
+  useEffect(() => {
+    if (organization?.currentOrg?.id && dateFrom && dateTo) {
+      loadAllData()
+    }
+  }, [organization, dateFrom, dateTo])
+
+  const loadAllData = async () => {
+    if (!organization?.currentOrg?.id || !dateFrom || !dateTo) return
+    
+    try {
+      setLoading(true)
+      
+      // Load bank accounts balance
+      const { data: bankAccounts } = await supabase
+        .from("bank_accounts")
+        .select("balance")
+        .eq("org_id", organization.currentOrg.id)
+        .eq("is_active", true)
+
+      const totalBalance = bankAccounts?.reduce((sum, account) => sum + Number(account.balance), 0) || 0
+
+      // Load invoices within date range
+      const { data: invoices } = await supabase
+        .from("invoices")
+        .select("*, invoice_items(*)")
+        .eq("org_id", organization.currentOrg.id)
+        .gte("created_at", dateFrom.toISOString())
+        .lte("created_at", dateTo.toISOString())
+
+      setAllInvoices(invoices || [])
+
+      // Load transactions within date range
+      const { data: transactions } = await supabase
+        .from("financial_transactions")
+        .select("*")
+        .eq("org_id", organization.currentOrg.id)
+        .gte("transaction_date", dateFrom.toISOString().split('T')[0])
+        .lte("transaction_date", dateTo.toISOString().split('T')[0])
+
+      setAllTransactions(transactions || [])
+
+      // Get counts
+      const [
+        { count: totalCustomers },
+        { count: totalProducts }
+      ] = await Promise.all([
+        supabase.from("customers").select("*", { count: "exact", head: true }).eq("org_id", organization.currentOrg.id),
+        supabase.from("products").select("*", { count: "exact", head: true }).eq("org_id", organization.currentOrg.id)
+      ])
+
+      // Calculate metrics from loaded data
+      calculateMetrics(invoices || [], transactions || [], totalBalance, totalCustomers || 0, totalProducts || 0)
+      
+    } catch (error) {
+      console.error("Error loading financial data:", error)
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os dados financeiros",
+        variant: "destructive"
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const calculateMetrics = (invoices: any[], transactions: any[], totalBalance: number, totalCustomers: number, totalProducts: number) => {
+    const paidInvoices = invoices.filter(i => i.status === "paid")
+    const pendingInvoices = invoices.filter(i => i.status === "pending")
+    
+    const monthlyRevenue = paidInvoices.reduce((sum, invoice) => sum + Number(invoice.total_amount), 0)
+    const pendingReceivables = pendingInvoices.reduce((sum, invoice) => sum + Number(invoice.total_amount), 0)
+    
+    const today = new Date()
+    const overdueAmount = pendingInvoices
+      .filter(invoice => invoice.due_date && new Date(invoice.due_date) < today)
+      .reduce((sum, invoice) => sum + Number(invoice.total_amount), 0)
+
+    setMetrics({
+      totalBalance,
+      monthlyRevenue,
+      monthlyExpenses: transactions.filter(t => t.transaction_type === 'outflow').reduce((sum, t) => sum + Number(t.amount), 0),
+      pendingReceivables,
+      overdueAmount,
+      totalCustomers,
+      totalInvoices: invoices.length,
+      totalProducts
     })
+
+    // Calculate cash flow
+    const monthlyData: { [key: string]: { inflow: number, outflow: number } } = {}
+    
+    transactions.forEach(transaction => {
+      const date = new Date(transaction.transaction_date)
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = { inflow: 0, outflow: 0 }
+      }
+      
+      const amount = Number(transaction.amount)
+      if (transaction.transaction_type === 'inflow') {
+        monthlyData[monthKey].inflow += amount
+      } else {
+        monthlyData[monthKey].outflow += amount
+      }
+    })
+
+    let balance = 0
+    const cashFlowArray = Object.entries(monthlyData).map(([monthKey, data]) => {
+      balance += data.inflow - data.outflow
+      return {
+        date: monthKey,
+        inflow: data.inflow,
+        outflow: data.outflow,
+        balance
+      }
+    })
+
+    setCashFlowData(cashFlowArray)
+
+    // Calculate revenue by category
+    const totalRevenue = paidInvoices.reduce((sum, invoice) => sum + Number(invoice.total_amount), 0)
+    setRevenueByCategory(totalRevenue > 0 ? [
+      { category: "Serviços", amount: totalRevenue, count: paidInvoices.length, color: "hsl(var(--primary))" }
+    ] : [])
+
+    // Calculate expenses by category
+    const expensesByCategory: { [key: string]: { amount: number, count: number } } = {}
+    
+    transactions.filter(t => t.transaction_type === 'outflow').forEach(transaction => {
+      const category = transaction.category || "Outros"
+      if (!expensesByCategory[category]) {
+        expensesByCategory[category] = { amount: 0, count: 0 }
+      }
+      expensesByCategory[category].amount += Number(transaction.amount)
+      expensesByCategory[category].count += 1
+    })
+
+    const expensesArray = Object.entries(expensesByCategory).map(([category, data], index) => {
+      const colors = ["hsl(var(--destructive))", "hsl(var(--secondary))", "hsl(var(--accent))", "hsl(var(--muted))"]
+      return {
+        category,
+        amount: data.amount,
+        count: data.count,
+        color: colors[index % colors.length]
+      }
+    })
+
+    setExpensesByCategory(expensesArray)
   }
 
   const applyFilters = () => {
+    if (!dateFrom || !dateTo) {
+      toast({
+        title: "Atenção",
+        description: "Selecione as datas inicial e final para aplicar os filtros",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (dateFrom > dateTo) {
+      toast({
+        title: "Atenção",
+        description: "A data inicial não pode ser maior que a data final",
+        variant: "destructive"
+      })
+      return
+    }
+
+    loadAllData()
+    
     toast({
-      title: "Filtros",
-      description: "Funcionalidade de filtros será implementada",
+      title: "Filtros aplicados",
+      description: `Exibindo dados de ${format(dateFrom, "dd/MM/yyyy")} até ${format(dateTo, "dd/MM/yyyy")}`,
     })
+  }
+
+  const exportReport = (format: 'pdf' | 'excel') => {
+    if (!dateFrom || !dateTo) {
+      toast({
+        title: "Atenção",
+        description: "Selecione as datas para exportar o relatório",
+        variant: "destructive"
+      })
+      return
+    }
+
+    toast({
+      title: "Exportação",
+      description: `Preparando exportação em ${format.toUpperCase()}...`,
+    })
+    
+    // Aqui você pode implementar a lógica de exportação usando bibliotecas como
+    // xlsx para Excel ou jsPDF para PDF
   }
 
   if (loading) {

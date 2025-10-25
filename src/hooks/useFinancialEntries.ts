@@ -329,7 +329,6 @@ export function useFinancialEntries() {
         bank_account_id: validatedData.bank_account_id,
         created_by: validatedData.created_by,
         is_settled: validatedData.is_settled,
-        is_conciliated: validatedData.is_conciliated || false,
         ...(entryDateISO && { created_at: entryDateISO })
       }
 

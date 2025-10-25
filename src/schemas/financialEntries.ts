@@ -95,7 +95,6 @@ export const createFinancialEntrySchema = z.object({
     .optional(),
   
   original_due_date: dateSchema.optional(),
-  is_conciliated: z.boolean().default(false),
 })
 
 // Schema para atualização (todos os campos opcionais exceto ID)
@@ -142,7 +141,6 @@ export const updateFinancialEntrySchema = z.object({
     .optional(),
   
   original_due_date: dateSchema.optional(),
-  is_conciliated: z.boolean().optional(),
 })
 
 // Schema para filtros de busca

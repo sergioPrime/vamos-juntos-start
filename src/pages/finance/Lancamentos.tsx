@@ -56,7 +56,6 @@ const formSchema = z.object({
   document_number: z.string().optional(),
   discount_percent: z.number().optional(),
   original_due_date: z.date().optional(),
-  is_conciliated: z.boolean().default(false),
   // Installment/Recurrence fields
   installment_type: z.enum(["none", "manual", "automatic", "recurring"]).default("none"),
   installment_count: z.number().optional(),

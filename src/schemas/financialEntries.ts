@@ -27,10 +27,14 @@ export const descriptionSchema = z
   .transform(sanitizeString)
   .optional()
 
-// Schema para datas
-export const dateSchema = z.date({
-  required_error: "Data é obrigatória",
-  invalid_type_error: "Data inválida",
+// Schema para datas - aceita Date ou string ISO
+export const dateSchema = z.union([
+  z.date(),
+  z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: "Data inválida",
+  }).transform((val) => new Date(val))
+], {
+  errorMap: () => ({ message: "Data inválida" })
 })
 
 // Schema principal para criação de lançamento financeiro

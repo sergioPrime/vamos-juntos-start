@@ -38,7 +38,7 @@ export default function Auth() {
           title: "Login realizado",
           description: "Bem-vindo de volta!",
         })
-        navigate("/dashboard")
+        navigate("/pdv")
       }
     } catch (error) {
       toast({
@@ -82,7 +82,7 @@ export default function Auth() {
             title: "Login realizado",
             description: "Bem-vindo de volta!",
           })
-          navigate("/dashboard")
+          navigate("/pdv")
           return
         }
 

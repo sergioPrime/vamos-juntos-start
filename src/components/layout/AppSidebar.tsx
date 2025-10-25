@@ -30,7 +30,6 @@ const financeItems = [
   { title: "Dashboard", url: "/finance/dashboard", icon: PieChart },
   { title: "Lançamentos", url: "/finance/lancamentos?tab=listagem", icon: FileText },
   { title: "Boletos", url: "/finance/boletos", icon: Receipt },
-  { title: "Cobranças", url: "/charges", icon: Receipt },
   { title: "Relatórios", url: "/finance/reports", icon: BarChart3 },
 ]
 

@@ -47,6 +47,7 @@ export interface CreateFinancialEntryData {
   amount: number
   due_date: string
   competence_date?: string
+  entry_date?: Date // Data de lançamento personalizada
   description?: string
   origin_type?: "order" | "purchase" | "manual"
   origin_id?: string
@@ -63,6 +64,7 @@ export interface CreateFinancialEntryDataRequired {
   amount: number
   due_date: string
   competence_date?: string
+  entry_date?: Date // Data de lançamento personalizada
   description?: string
   origin_type?: "order" | "purchase" | "manual"
   origin_id?: string
@@ -318,6 +320,12 @@ export function useFinancialEntries() {
         created_by: validatedData.created_by,
         is_settled: validatedData.is_settled,
         is_conciliated: validatedData.is_conciliated || false,
+        // Data de lançamento personalizada (se fornecida)
+        ...(data.entry_date && {
+          created_at: data.entry_date instanceof Date 
+            ? data.entry_date.toISOString() 
+            : data.entry_date
+        }),
       }
 
       const { error } = await supabase

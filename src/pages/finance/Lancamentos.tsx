@@ -46,6 +46,7 @@ const formSchema = z.object({
   bank_account_id: z.string().optional(),
   competence_date: z.date(),
   due_date: z.date(),
+  entry_date: z.date(), // Data de lançamento (created_at)
   is_settled: z.boolean().default(false),
   settled_at: z.date().optional(),
   settled_payment_method_id: z.string().optional(),
@@ -113,6 +114,7 @@ export default function Lancamentos() {
       entry_type: "receivable",
       competence_date: new Date(),
       due_date: new Date(),
+      entry_date: new Date(), // Data de lançamento padrão é hoje
       is_settled: false,
       installment_type: "none",
       company_id: '',
@@ -158,6 +160,7 @@ export default function Lancamentos() {
           entry_type: "receivable" as const,
           competence_date: new Date(),
           due_date: new Date(),
+          entry_date: new Date(),
           is_settled: false,
           installment_type: "none" as const,
           company_id: '', // Será preenchido pelo useEffect
@@ -188,6 +191,7 @@ export default function Lancamentos() {
           bank_account_id: entry.bank_account_id || '',
           competence_date: entry.competence_date ? new Date(entry.competence_date) : new Date(),
           due_date: entry.due_date ? new Date(entry.due_date) : new Date(),
+          entry_date: entry.created_at ? new Date(entry.created_at) : new Date(),
           is_settled: entry.is_settled || false,
           settled_at: entry.settled_at ? new Date(entry.settled_at) : undefined,
           settled_payment_method_id: entry.settled_payment_method_id || '',
@@ -249,6 +253,7 @@ export default function Lancamentos() {
         amount: parseFloat(values.amount),
         due_date: values.due_date.toISOString().split('T')[0],
         competence_date: values.competence_date.toISOString().split('T')[0],
+        entry_date: values.entry_date, // Data de lançamento personalizada
         company_id: values.company_id,
         payment_method_id: values.payment_method_id,
         bank_account_id: values.bank_account_id,
@@ -296,6 +301,7 @@ export default function Lancamentos() {
         entry_type: "receivable",
         competence_date: new Date(),
         due_date: new Date(),
+        entry_date: new Date(),
         is_settled: false,
         installment_type: "none",
         company_id: defaultCompany?.id || '',
@@ -684,7 +690,7 @@ export default function Lancamentos() {
                         )}
                       />
 
-                      <FormField
+                       <FormField
                         control={form.control}
                         name="due_date"
                         render={({ field }) => (
@@ -719,6 +725,49 @@ export default function Lancamentos() {
                                 />
                               </PopoverContent>
                             </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="entry_date"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel>Data de Lançamento *</FormLabel>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant="outline"
+                                    className={cn(
+                                      "pl-3 text-left font-normal",
+                                      !field.value && "text-muted-foreground"
+                                    )}
+                                  >
+                                    {field.value ? (
+                                      format(field.value, "dd/MM/yyyy")
+                                    ) : (
+                                      <span>Selecione a data</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={field.onChange}
+                                  initialFocus
+                                  className="p-3 pointer-events-auto"
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Use para lançamentos retroativos
+                            </p>
                             <FormMessage />
                           </FormItem>
                         )}

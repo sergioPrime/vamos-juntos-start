@@ -213,10 +213,12 @@ export function FinancialListingTab({ onEntriesSelected }: { onEntriesSelected?:
     
     const result = entries.filter(entry => {
       // === DATE FILTERING LOGIC ===
-      if (filters.dateFilterType === "none" || !filters.dateFilterType) {
-        console.log("📅 [FILTER DEBUG] Skipping date filter - none selected or undefined")
-      } else if (filters.dateFilterType && filters.dateFilterType !== "none") {
-        // Use the new validation utility
+      // IMPORTANT: If no date filter is set, show ALL entries (including retroactive ones)
+      if (!filters.dateFilterType || filters.dateFilterType === "none") {
+        console.log("📅 [FILTER DEBUG] No date filter - showing all entries")
+        // Skip date filtering entirely - show all entries
+      } else {
+        // Apply date filter only when explicitly set
         const dateValidation = validateDateFilter(
           entry, 
           filters.dateFilterType, 

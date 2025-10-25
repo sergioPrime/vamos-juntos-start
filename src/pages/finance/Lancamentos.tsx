@@ -37,7 +37,7 @@ const formSchema = z.object({
   person_id: z.string().min(1, "Cliente/Fornecedor é obrigatório"),
   entry_type: z.enum(["receivable", "payable"]),
   chart_of_account_id: z.string().min(1, "Plano de conta é obrigatório"),
-  cost_center_id: z.string().optional(),
+  cost_center_id: z.string().min(1, "Centro de custo é obrigatório"),
   amount: z.string().min(1, "Valor é obrigatório").refine((val) => {
     const numericValue = parseFloat(val)
     return numericValue > 0

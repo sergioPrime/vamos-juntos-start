@@ -250,6 +250,25 @@ export function useFinancialEntries() {
       return false
     }
 
+    // Validate required fields
+    if (!data.chart_of_account_id) {
+      toast({
+        title: "Erro",
+        description: "Plano de conta é obrigatório",
+        variant: "destructive",
+      })
+      return false
+    }
+
+    if (!data.cost_center_id) {
+      toast({
+        title: "Erro",
+        description: "Centro de custo é obrigatório",
+        variant: "destructive",
+      })
+      return false
+    }
+
     try {
       // Prepare data for validation
       const dataToValidate = {

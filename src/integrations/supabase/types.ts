@@ -3848,7 +3848,7 @@ export type Database = {
         }[]
       }
       check_low_stock_alert: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           current_stock: number
           min_stock: number
@@ -3907,10 +3907,7 @@ export type Database = {
         Args: { p_org_id: string }
         Returns: number
       }
-      generate_next_entry_code: {
-        Args: { p_org_id: string }
-        Returns: number
-      }
+      generate_next_entry_code: { Args: { p_org_id: string }; Returns: number }
       generate_next_order_number: {
         Args: { p_org_id: string }
         Returns: number
@@ -3927,10 +3924,7 @@ export type Database = {
         Args: { p_org_id: string }
         Returns: number
       }
-      generate_next_system_code: {
-        Args: { p_org_id: string }
-        Returns: string
-      }
+      generate_next_system_code: { Args: { p_org_id: string }; Returns: string }
       get_installments_summary: {
         Args: { p_entry_id: string }
         Returns: {

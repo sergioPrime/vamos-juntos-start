@@ -3879,6 +3879,35 @@ export type Database = {
           },
         ]
       }
+      sales_integrity_check: {
+        Row: {
+          calculated_total: number | null
+          created_at: string | null
+          declared_total: number | null
+          financial_entries_count: number | null
+          id: string | null
+          items_count: number | null
+          order_number: string | null
+          payment_status: string | null
+          status: string | null
+          status_check: string | null
+          stock_movements_count: number | null
+          value_difference: number | null
+        }
+        Relationships: []
+      }
+      sales_sync_statistics: {
+        Row: {
+          financial_sync_percentage: number | null
+          orders_with_financial_sync: number | null
+          orders_with_stock_sync: number | null
+          paid_orders: number | null
+          processed_orders: number | null
+          stock_sync_percentage: number | null
+          total_orders: number | null
+        }
+        Relationships: []
+      }
       stock_integrity_check: {
         Row: {
           calculated_stock: number | null

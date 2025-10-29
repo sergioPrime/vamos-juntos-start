@@ -93,6 +93,47 @@ const Inventory = () => {
   useEffect(() => {
     if (currentOrg?.id) {
       loadData()
+      
+      // Setup realtime subscriptions for automatic updates
+      const stockMovementsChannel = supabase
+        .channel('stock_movements_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'stock_movements',
+            filter: `org_id=eq.${currentOrg.id}`
+          },
+          () => {
+            // Reload data when stock movements change
+            loadData()
+          }
+        )
+        .subscribe()
+
+      const productsChannel = supabase
+        .channel('products_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'products',
+            filter: `org_id=eq.${currentOrg.id}`
+          },
+          () => {
+            // Reload data when products are updated
+            loadData()
+          }
+        )
+        .subscribe()
+
+      // Cleanup subscriptions on unmount
+      return () => {
+        supabase.removeChannel(stockMovementsChannel)
+        supabase.removeChannel(productsChannel)
+      }
     }
   }, [currentOrg])
 

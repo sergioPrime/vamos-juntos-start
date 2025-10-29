@@ -270,15 +270,24 @@ export function useInventoryIntegration() {
     if (!currentOrg?.id) return []
 
     try {
+      // Use the database function to check low stock
       const { data: lowStockProducts, error } = await supabase
-        .from('products')
-        .select('id, name, stock_quantity, min_stock_level, reorder_point')
-        .eq('org_id', currentOrg.id)
-        .filter('stock_quantity', 'lte', 'min_stock_level')
+        .rpc('check_low_stock_alert')
 
       if (error) throw error
 
-      return lowStockProducts || []
+      // Filter by current organization
+      const orgProducts = (lowStockProducts || []).filter(
+        p => p.org_id === currentOrg.id
+      )
+
+      return orgProducts.map(p => ({
+        id: p.product_id,
+        name: p.product_name,
+        stock_quantity: p.current_stock,
+        min_stock_level: p.min_stock,
+        reorder_point: p.reorder_point
+      }))
     } catch (error) {
       console.error('Error checking stock levels:', error)
       return []

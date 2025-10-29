@@ -175,7 +175,7 @@ const PDV = () => {
         .select(`
           *,
           price_table_products(
-            unit_price,
+            sale_price,
             price_table_id
           )
         `)
@@ -194,7 +194,7 @@ const PDV = () => {
       // Map products with price table prices
       const mappedProducts = data?.map((product: any) => ({
         ...product,
-        unit_price: product.price_table_products?.[0]?.unit_price || product.unit_price
+        unit_price: product.price_table_products?.[0]?.sale_price || product.unit_price
       })) || []
 
       setProducts(mappedProducts)

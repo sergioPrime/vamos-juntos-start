@@ -2139,7 +2139,22 @@ export type Database = {
           seller_commission?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "price_table_products_price_table_id_fkey"
+            columns: ["price_table_id"]
+            isOneToOne: false
+            referencedRelation: "price_tables"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "price_table_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       price_tables: {
         Row: {

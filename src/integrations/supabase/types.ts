@@ -1723,6 +1723,13 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "lot_management_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "stock_integrity_check"
+            referencedColumns: ["id"]
+          },
         ]
       }
       module_permissions: {
@@ -2154,6 +2161,13 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "price_table_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "stock_integrity_check"
+            referencedColumns: ["id"]
+          },
         ]
       }
       price_tables: {
@@ -2283,6 +2297,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_lots_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "stock_integrity_check"
             referencedColumns: ["id"]
           },
         ]
@@ -3078,6 +3099,13 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "serial_number_tracking_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "stock_integrity_check"
+            referencedColumns: ["id"]
+          },
         ]
       }
       services: {
@@ -3177,6 +3205,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "stock_integrity_check"
             referencedColumns: ["id"]
           },
         ]
@@ -3843,6 +3878,18 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      stock_integrity_check: {
+        Row: {
+          calculated_stock: number | null
+          difference: number | null
+          id: string | null
+          name: string | null
+          registered_stock: number | null
+          sku: string | null
+          status: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {

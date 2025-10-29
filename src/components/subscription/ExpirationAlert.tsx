@@ -2,15 +2,18 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { AlertTriangle, CreditCard } from "lucide-react"
 import { useSubscription } from "@/hooks/useSubscription"
+import { useAuth } from "@/hooks/useAuth"
 
 export function ExpirationAlert() {
+  const { user } = useAuth()
   const { showExpirationAlert, daysUntilExpiration, subscription_end } = useSubscription()
 
   const handleRenewSubscription = () => {
     window.location.href = '/settings/renovar-licenca'
   }
 
-  if (!showExpirationAlert) return null
+  // Só exibe o alerta se o usuário estiver autenticado
+  if (!user || !showExpirationAlert) return null
 
   return (
     <Alert className="border-orange-200 bg-orange-50 mb-6">

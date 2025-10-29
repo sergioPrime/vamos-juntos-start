@@ -649,6 +649,8 @@ const PDV = () => {
     }
 
     try {
+      console.log('[PDV] Iniciando processo de venda...')
+      
       // Create payment methods string
       const paymentMethodsStr = payments
         .map(p => {
@@ -656,6 +658,12 @@ const PDV = () => {
           return `${method?.name}: ${p.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`
         })
         .join(', ')
+
+      console.log('[PDV] Criando pedido...', {
+        org_id: currentOrg?.id,
+        customer_id: selectedCustomer?.id,
+        total_amount: finalTotal
+      })
 
       // Create order (order_number será gerado automaticamente pelo trigger)
       const { data: orderData, error: orderError } = await supabase
@@ -675,9 +683,16 @@ const PDV = () => {
         }])
         .select()
       
-      if (orderError) throw orderError
+      if (orderError) {
+        console.error('[PDV] Erro ao criar pedido:', orderError)
+        throw orderError
+      }
+      
+      console.log('[PDV] Pedido criado com sucesso:', orderData[0])
       const order = orderData[0]
 
+      console.log('[PDV] Criando itens do pedido...')
+      
       // Create order items and stock movements (triggers will validate and sync automatically)
       for (const item of cart) {
         // Create order item
@@ -746,9 +761,13 @@ const PDV = () => {
           created_by: user?.id
         })
 
+      console.log('[PDV] Movimentações de caixa registradas com sucesso')
+      
       // Criar lançamento financeiro (receita já liquidada)
       // Se não houver cliente selecionado, buscar ou criar um cliente "CONSUMIDOR"
       let customerId = selectedCustomer?.id
+      
+      console.log('[PDV] Preparando lançamento financeiro para cliente:', customerId || 'CONSUMIDOR')
       
       if (!customerId) {
         // Buscar cliente padrão "CONSUMIDOR"
@@ -781,6 +800,8 @@ const PDV = () => {
 
       // Criar lançamento financeiro
       if (customerId) {
+        console.log('[PDV] Criando lançamento financeiro...')
+        
         // Obter o primeiro método de pagamento usado
         const firstPaymentMethodId = payments[0]?.paymentMethodId
 
@@ -819,11 +840,17 @@ const PDV = () => {
           })
 
         if (financialError) {
-          console.error('Error creating financial entry:', financialError)
+          console.error('[PDV] Erro ao criar lançamento financeiro:', financialError)
           // Não interrompe o fluxo se houver erro no lançamento financeiro
+        } else {
+          console.log('[PDV] Lançamento financeiro criado com sucesso')
         }
+      } else {
+        console.warn('[PDV] Nenhum cliente encontrado, lançamento financeiro não criado')
       }
 
+      console.log('[PDV] Venda finalizada com sucesso!')
+      
       toast({
         title: "Venda finalizada com sucesso!",
         description: `Pedido ${order.order_number} criado e lançamento financeiro registrado.`,

@@ -1205,7 +1205,7 @@ export type Database = {
           origin_id: string | null
           origin_type: string | null
           payment_method_id: string | null
-          person_id: string
+          person_id: string | null
           person_type: string
           settled_at: string | null
           settled_payment_method_id: string | null
@@ -1230,7 +1230,7 @@ export type Database = {
           origin_id?: string | null
           origin_type?: string | null
           payment_method_id?: string | null
-          person_id: string
+          person_id?: string | null
           person_type: string
           settled_at?: string | null
           settled_payment_method_id?: string | null
@@ -1255,7 +1255,7 @@ export type Database = {
           origin_id?: string | null
           origin_type?: string | null
           payment_method_id?: string | null
-          person_id?: string
+          person_id?: string | null
           person_type?: string
           settled_at?: string | null
           settled_payment_method_id?: string | null

@@ -763,91 +763,9 @@ const PDV = () => {
 
       console.log('[PDV] Movimentações de caixa registradas com sucesso')
       
-      // Criar lançamento financeiro (receita já liquidada)
-      // Se não houver cliente selecionado, buscar ou criar um cliente "CONSUMIDOR"
-      let customerId = selectedCustomer?.id
-      
-      console.log('[PDV] Preparando lançamento financeiro para cliente:', customerId || 'CONSUMIDOR')
-      
-      if (!customerId) {
-        // Buscar cliente padrão "CONSUMIDOR"
-        const { data: consumidorCliente, error: consumidorError } = await supabase
-          .from('customers')
-          .select('id')
-          .eq('org_id', currentOrg?.id)
-          .eq('name', 'CONSUMIDOR')
-          .maybeSingle()
-
-        if (consumidorCliente) {
-          customerId = consumidorCliente.id
-        } else {
-          // Criar cliente "CONSUMIDOR" se não existir
-          const { data: novoConsumidor, error: createConsumidorError } = await supabase
-            .from('customers')
-            .insert({
-              org_id: currentOrg?.id,
-              name: 'CONSUMIDOR',
-              owner_id: user?.id
-            })
-            .select('id')
-            .single()
-
-          if (!createConsumidorError && novoConsumidor) {
-            customerId = novoConsumidor.id
-          }
-        }
-      }
-
-      // Criar lançamento financeiro
-      if (customerId) {
-        console.log('[PDV] Criando lançamento financeiro...')
-        
-        // Obter o primeiro método de pagamento usado
-        const firstPaymentMethodId = payments[0]?.paymentMethodId
-
-        // Calcular data de vencimento baseado no método de pagamento
-        const firstPaymentMethod = paymentMethods.find(pm => pm.id === firstPaymentMethodId)
-        const paymentMethodName = firstPaymentMethod?.name?.toLowerCase() || ''
-        
-        let dueDate = new Date()
-        if (paymentMethodName.includes('débito')) {
-          // Cartão de débito: vencimento D+1
-          dueDate.setDate(dueDate.getDate() + 1)
-        } else if (paymentMethodName.includes('crédito')) {
-          // Cartão de crédito: vencimento D+30
-          dueDate.setDate(dueDate.getDate() + 30)
-        }
-        // Para outros métodos (Dinheiro, PIX, etc): data atual
-
-        const { error: financialError } = await supabase
-          .from('financial_entries')
-          .insert({
-            org_id: currentOrg?.id,
-            person_id: customerId,
-            person_type: 'customer',
-            entry_type: 'receivable',
-            amount: finalTotal,
-            description: `Venda PDV - ${order.order_number}`,
-            due_date: dueDate.toISOString().split('T')[0],
-            competence_date: new Date().toISOString().split('T')[0],
-            is_settled: true,
-            settled_at: new Date().toISOString(),
-            payment_method_id: firstPaymentMethodId,
-            settled_payment_method_id: firstPaymentMethodId,
-            origin_type: 'order',
-            origin_id: order.id,
-            created_by: user?.id
-          })
-
-        if (financialError) {
-          console.error('[PDV] Erro ao criar lançamento financeiro:', financialError)
-          // Não interrompe o fluxo se houver erro no lançamento financeiro
-        } else {
-          console.log('[PDV] Lançamento financeiro criado com sucesso')
-        }
-      } else {
-        console.warn('[PDV] Nenhum cliente encontrado, lançamento financeiro não criado')
-      }
+      // NOTA: O lançamento financeiro é criado automaticamente pelo trigger 
+      // sync_financial_from_order quando o pedido é marcado como 'paid'
+      console.log('[PDV] Lançamento financeiro será criado automaticamente pelo trigger do banco')
 
       console.log('[PDV] Venda finalizada com sucesso!')
       

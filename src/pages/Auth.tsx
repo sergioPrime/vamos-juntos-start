@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Mail, Lock } from "lucide-react"
 import { validatePassword } from "@/utils/passwordValidation"
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator"
-import primeGestorLogo from "@/assets/primegestor-logo.png"
+import primeGestorLogo from "@/assets/primegestor-login-logo.png"
 
 export default function Auth() {
   const [email, setEmail] = useState("")

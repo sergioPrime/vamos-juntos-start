@@ -174,8 +174,9 @@ const PDV = () => {
         .from('products')
         .select(`
           *,
-          price_table_products!inner(
-            unit_price
+          price_table_products(
+            unit_price,
+            price_table_id
           )
         `)
         .eq('org_id', currentOrg?.id)

@@ -693,50 +693,28 @@ const PDV = () => {
 
       console.log('[PDV] Criando itens do pedido...')
       
-      // Create order items and stock movements (triggers will validate and sync automatically)
-      for (const item of cart) {
-        // Create order item
-        const { error: itemError } = await supabase
-          .from('order_items')
-          .insert({
-            order_id: order.id,
-            product_id: item.id,
-            product_name: item.name,
-            product_sku: item.sku,
-            quantity: item.quantity,
-            unit_price: item.unit_price,
-            total_price: item.total
-          })
+      // Create order items (stock movements will be created automatically by trigger_sync_stock_from_order)
+      const orderItems = cart.map(item => ({
+        order_id: order.id,
+        product_id: item.id,
+        product_name: item.name,
+        product_sku: item.sku,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        total_price: item.total
+      }))
 
-        if (itemError) throw itemError
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems)
 
-        // Create stock movement - triggers will validate stock and sync quantities
-        const { error: stockError } = await supabase
-          .from('stock_movements')
-          .insert({
-            org_id: currentOrg?.id,
-            product_id: item.id,
-            movement_type: 'out',
-            quantity: item.quantity,
-            reference_type: 'order',
-            reference_id: order.id,
-            notes: `Venda PDV - ${order.order_number}`,
-            created_by: user?.id
-          })
-
-        // Check if stock validation failed
-        if (stockError) {
-          // If stock validation error, show specific message
-          if (stockError.message?.includes('Estoque insuficiente')) {
-            toast({
-              title: "Estoque insuficiente",
-              description: stockError.message,
-              variant: "destructive",
-            })
-          }
-          throw stockError
-        }
+      if (itemsError) {
+        console.error('[PDV] Erro ao criar itens do pedido:', itemsError)
+        throw itemsError
       }
+
+      console.log('[PDV] Itens do pedido criados. Movimentações de estoque serão criadas pelo trigger do banco.')
+      console.log('[PDV] Total de itens:', orderItems.length)
 
       // Registrar venda no caixa (já verificado que está aberto)
       // Atualizar valor do caixa

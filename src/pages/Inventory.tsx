@@ -340,30 +340,53 @@ const Inventory = () => {
     )
   }
 
+  const getCriticalityLevel = () => {
+    const criticalPercentage = (outOfStockProducts.length / products.length) * 100;
+    if (criticalPercentage > 20) return 'critical';
+    if (lowStockProducts.length > 5) return 'warning';
+    return 'normal';
+  };
+
   return (
-    <div className="page-container container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Gestão de Estoque</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => window.open('/inventory/entry', '_blank')}>
-            <TrendingUp className="mr-2 h-4 w-4 text-green-600" />
-            Entrada de Estoque
+    <div className="page-container container mx-auto p-6 space-y-6">
+      {/* Enhanced Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold tracking-tight">Gestão de Estoque</h1>
+            {getCriticalityLevel() !== 'normal' && (
+              <Badge variant={getCriticalityLevel() === 'critical' ? 'destructive' : 'default'}>
+                <AlertTriangle className="h-3 w-3 mr-1" />
+                {outOfStockProducts.length > 0 && `${outOfStockProducts.length} sem estoque`}
+              </Badge>
+            )}
+          </div>
+          <p className="text-muted-foreground">
+            Controle total do seu inventário e movimentações
+          </p>
+        </div>
+        
+        {/* Quick Actions Grid */}
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={() => window.open('/inventory/entry', '_blank')} className="hover-scale">
+            <TrendingUp className="mr-2 h-4 w-4 text-success" />
+            <span className="hidden sm:inline">Entrada</span>
           </Button>
-          <Button variant="outline" onClick={() => window.open('/inventory/exit', '_blank')}>
-            <TrendingDown className="mr-2 h-4 w-4 text-red-600" />
-            Saída de Estoque
+          <Button variant="outline" size="sm" onClick={() => window.open('/inventory/exit', '_blank')} className="hover-scale">
+            <TrendingDown className="mr-2 h-4 w-4 text-destructive" />
+            <span className="hidden sm:inline">Saída</span>
           </Button>
-          <Button variant="outline" onClick={() => window.open('/inventory/transfer', '_blank')}>
-            <RotateCcw className="mr-2 h-4 w-4 text-blue-600" />
-            Transferência
+          <Button variant="outline" size="sm" onClick={() => window.open('/inventory/transfer', '_blank')} className="hover-scale">
+            <RotateCcw className="mr-2 h-4 w-4 text-primary" />
+            <span className="hidden sm:inline">Transferência</span>
           </Button>
-          <Button variant="outline" onClick={() => window.open('/inventory/reports', '_blank')}>
-            <BarChart3 className="mr-2 h-4 w-4 text-purple-600" />
-            Relatórios Avançados
+          <Button variant="outline" size="sm" onClick={() => window.open('/inventory/reports', '_blank')} className="hover-scale">
+            <BarChart3 className="mr-2 h-4 w-4 text-chart-3" />
+            <span className="hidden sm:inline">Relatórios</span>
           </Button>
-          <Button variant="outline" onClick={() => window.open('/inventory/alerts', '_blank')}>
-            <Bell className="mr-2 h-4 w-4 text-orange-600" />
-            Central de Alertas
+          <Button variant="outline" size="sm" onClick={() => window.open('/inventory/alerts', '_blank')} className="hover-scale">
+            <Bell className="mr-2 h-4 w-4 text-warning" />
+            <span className="hidden sm:inline">Alertas</span>
           </Button>
           <Dialog open={isMovementDialogOpen} onOpenChange={setIsMovementDialogOpen}>
             <DialogTrigger asChild>
@@ -529,55 +552,87 @@ const Inventory = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-          <TabsTrigger value="products">Produtos</TabsTrigger>
-          <TabsTrigger value="movements">Movimentações</TabsTrigger>
-          <TabsTrigger value="alerts">Alertas</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <BarChart3 className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Visão Geral</span>
+            <span className="sm:hidden">Visão</span>
+          </TabsTrigger>
+          <TabsTrigger value="products" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Package className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Produtos</span>
+            <span className="sm:hidden">Prod.</span>
+          </TabsTrigger>
+          <TabsTrigger value="movements" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TrendingUp className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Movimentações</span>
+            <span className="sm:hidden">Mov.</span>
+          </TabsTrigger>
+          <TabsTrigger value="alerts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <AlertTriangle className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Alertas</span>
+            <span className="sm:hidden">Alert.</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          {/* KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
+          {/* Enhanced KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="transition-all hover:shadow-md hover:border-primary/30">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total de Produtos</CardTitle>
-                <Package className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total de Produtos</CardTitle>
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Package className="h-4 w-4 text-primary" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{products.length}</div>
+                <div className="text-2xl font-bold tracking-tight">{products.length}</div>
+                <p className="text-xs text-muted-foreground mt-1">Produtos ativos</p>
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="transition-all hover:shadow-md hover:border-success/30">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Valor Total do Estoque</CardTitle>
-                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium text-muted-foreground">Valor em Estoque</CardTitle>
+                <div className="p-2 rounded-lg bg-success/10">
+                  <BarChart3 className="h-4 w-4 text-success" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold tracking-tight">
                   {totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </div>
+                <p className="text-xs text-muted-foreground mt-1">Valor ao custo</p>
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="transition-all hover:shadow-md hover:border-warning/30">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Estoque Baixo</CardTitle>
-                <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                <CardTitle className="text-sm font-medium text-muted-foreground">Estoque Baixo</CardTitle>
+                <div className="p-2 rounded-lg bg-warning/10">
+                  <AlertTriangle className="h-4 w-4 text-warning" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-yellow-600">{lowStockProducts.length}</div>
+                <div className="text-2xl font-bold text-warning tracking-tight">{lowStockProducts.length}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {lowStockProducts.length > 0 ? 'Requer atenção' : 'Níveis adequados'}
+                </p>
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="transition-all hover:shadow-md hover:border-destructive/30">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Sem Estoque</CardTitle>
-                <AlertTriangle className="h-4 w-4 text-red-600" />
+                <CardTitle className="text-sm font-medium text-muted-foreground">Sem Estoque</CardTitle>
+                <div className="p-2 rounded-lg bg-destructive/10">
+                  <AlertTriangle className="h-4 w-4 text-destructive" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-red-600">{outOfStockProducts.length}</div>
+                <div className="text-2xl font-bold text-destructive tracking-tight">{outOfStockProducts.length}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {outOfStockProducts.length > 0 ? 'Ação necessária' : 'Todos em estoque'}
+                </p>
               </CardContent>
             </Card>
           </div>

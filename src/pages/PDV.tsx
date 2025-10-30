@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, Plus, Minus, ShoppingCart, CreditCard, X, Barcode, Check, Pause, TrendingDown, FileText, User, MessageSquare, Clock } from "lucide-react"
+import { Search, Plus, Minus, ShoppingCart, CreditCard, X, Barcode, Check, Pause, TrendingDown, FileText, User, MessageSquare, Clock, Grid3x3, List, DollarSign, Package, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -22,6 +22,7 @@ import { QuickProductDialog } from "@/components/pdv/QuickProductDialog"
 import { usePermissionCheck } from "@/hooks/usePermissionCheck"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { cn } from "@/lib/utils"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 interface Product {
   id: string
@@ -117,6 +118,17 @@ const PDV = () => {
   // Quick product dialog
   const [isQuickProductDialogOpen, setIsQuickProductDialogOpen] = useState(false)
   const [quickProductInitialName, setQuickProductInitialName] = useState("")
+  
+  // View mode (grid or list)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  
+  // Recent sales for performance tracking
+  const [recentSales, setRecentSales] = useState<any[]>([])
+  const [todayStats, setTodayStats] = useState({
+    totalSales: 0,
+    totalAmount: 0,
+    averageTicket: 0
+  })
 
   // Check if cash register is open
   useEffect(() => {

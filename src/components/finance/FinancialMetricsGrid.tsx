@@ -21,27 +21,28 @@ interface MetricCardProps {
 
 function MetricCard({ title, value, change, icon, colorClass = 'text-primary' }: MetricCardProps) {
   return (
-    <Card>
+    <Card className="transition-all hover:shadow-md hover:border-primary/30">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             {title}
           </CardTitle>
-          <div className={colorClass}>{icon}</div>
+          <div className={`${colorClass} p-2 rounded-lg bg-muted/50`}>{icon}</div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold mb-2">
+        <div className="text-2xl font-bold mb-2 tracking-tight">
           {typeof value === 'number' ? formatCurrency(value) : value}
         </div>
         {change !== undefined && (
-          <div className={`flex items-center gap-1 text-sm ${change >= 0 ? 'text-success' : 'text-destructive'}`}>
+          <div className={`flex items-center gap-1 text-sm font-medium ${change >= 0 ? 'text-success' : 'text-destructive'}`}>
             {change >= 0 ? (
-              <TrendingUp className="h-4 w-4" />
+              <TrendingUp className="h-3.5 w-3.5" />
             ) : (
-              <TrendingDown className="h-4 w-4" />
+              <TrendingDown className="h-3.5 w-3.5" />
             )}
-            <span>{Math.abs(change).toFixed(1)}% vs período anterior</span>
+            <span>{Math.abs(change).toFixed(1)}%</span>
+            <span className="text-muted-foreground font-normal">vs período anterior</span>
           </div>
         )}
       </CardContent>
@@ -69,7 +70,7 @@ interface FinancialMetricsGridProps {
 
 export function FinancialMetricsGrid({ metrics, changes = {} }: FinancialMetricsGridProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
       <MetricCard
         title="Receitas"
         value={metrics.totalRevenue}

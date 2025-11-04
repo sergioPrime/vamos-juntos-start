@@ -6,6 +6,7 @@ export const MODULES = {
   COMPRAS: 'compras',
   ESTOQUE: 'estoque',
   CADASTROS: 'cadastros',
+  FISCAL: 'fiscal',
   PRODUCAO: 'producao',
   RELATORIOS: 'relatorios',
   CONFIGURACOES: 'configuracoes',
@@ -48,6 +49,12 @@ export const FEATURES = {
   METODOS_PAGAMENTO: 'cadastros.metodos_pagamento',
   CATEGORIAS_VENDAS: 'cadastros.categorias_vendas',
   COMPROMISSOS: 'cadastros.compromissos',
+  
+  // Fiscal
+  NFE: 'fiscal.nfe',
+  NFCE: 'fiscal.nfce',
+  CTE: 'fiscal.cte',
+  MDFE: 'fiscal.mdfe',
   
   // Produção
   ORDENS_PRODUCAO: 'producao.ordens',
@@ -125,6 +132,11 @@ export const MODULE_INFO: Record<ModuleKey, { name: string; icon: string; descri
     name: 'Cadastros',
     icon: 'FileText',
     description: 'Cadastros gerais',
+  },
+  [MODULES.FISCAL]: {
+    name: 'Fiscal',
+    icon: 'FileText',
+    description: 'Gestão de documentos fiscais',
   },
   [MODULES.PRODUCAO]: {
     name: 'Produção',

@@ -64,7 +64,12 @@ const cadastrosItems = [
   { title: "Contas Bancárias", url: "/cadastros/contas-bancarias", icon: Wallet },
 ]
 
-
+const fiscalItems = [
+  { title: "NFe - Modelo 55", url: "/fiscal/nfe", icon: FileText },
+  { title: "NFCe - Modelo 65", url: "/fiscal/nfce", icon: Receipt },
+  { title: "CTe", url: "/fiscal/cte", icon: FileText },
+  { title: "MDFe", url: "/fiscal/mdfe", icon: FileText },
+]
 
 const configItems = [
   { title: "Permissões e Acessos", url: "/settings/permissions", icon: Settings },
@@ -90,6 +95,7 @@ export function AppSidebar() {
     purchases: false,
     inventory: false,
     cadastros: false,
+    fiscal: false,
     settings: false,
   })
 
@@ -118,6 +124,7 @@ export function AppSidebar() {
         purchases: false,
         inventory: false,
         cadastros: false,
+        fiscal: false,
         settings: false,
       }
       
@@ -342,6 +349,39 @@ export function AppSidebar() {
             </SidebarGroup>
           </Collapsible>
 
+          {/* Fiscal Module */}
+          <Collapsible 
+            open={expandedModules.fiscal} 
+            onOpenChange={() => toggleModule('fiscal')}
+          >
+            <SidebarGroup className="py-0">
+              <CollapsibleTrigger asChild>
+                <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent/50 rounded-md p-2 flex items-center justify-between transition-colors">
+                  <span className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Fiscal
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedModules.fiscal ? 'rotate-180' : ''}`} />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {fiscalItems.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink to={item.url} className={getNavClass}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
 
           {/* Settings Module */}
           <Collapsible 

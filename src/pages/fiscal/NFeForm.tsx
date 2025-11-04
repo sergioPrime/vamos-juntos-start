@@ -12,14 +12,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Send } from "lucide-react";
+import { ArrowLeft, Save, Send, Plus, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
+import NFeProductsTable from "@/components/fiscal/NFeProductsTable";
+import NFeProductDialog from "@/components/fiscal/NFeProductDialog";
 
 export default function NFeForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditing = !!id;
+
+  const [productDialogOpen, setProductDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
 
   const [formData, setFormData] = useState({
     // Dados do Destinatário
@@ -43,7 +48,7 @@ export default function NFeForm() {
     // Produtos/Serviços
     produtos: [] as any[],
 
-    // Valores
+    // Valores Totalizadores
     bc_icms: "0.00",
     valor_icms: "0.00",
     valor_frete: "0.00",
@@ -70,6 +75,78 @@ export default function NFeForm() {
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddProduct = () => {
+    setEditingProduct(null);
+    setProductDialogOpen(true);
+  };
+
+  const handleEditProduct = (product: any) => {
+    setEditingProduct(product);
+    setProductDialogOpen(true);
+  };
+
+  const handleSaveProduct = (product: any) => {
+    if (editingProduct) {
+      // Editar produto existente
+      const updatedProducts = formData.produtos.map((p) =>
+        p.id === product.id ? product : p
+      );
+      setFormData((prev) => ({ ...prev, produtos: updatedProducts }));
+    } else {
+      // Adicionar novo produto
+      setFormData((prev) => ({
+        ...prev,
+        produtos: [...prev.produtos, product],
+      }));
+    }
+    updateTotals(formData.produtos);
+  };
+
+  const handleRemoveProduct = (id: string) => {
+    const updatedProducts = formData.produtos.filter((p) => p.id !== id);
+    setFormData((prev) => ({ ...prev, produtos: updatedProducts }));
+    updateTotals(updatedProducts);
+  };
+
+  const updateTotals = (produtos: any[]) => {
+    const totals = produtos.reduce(
+      (acc, product) => {
+        acc.valor_produtos += product.valor_total;
+        acc.valor_icms += product.icms_valor;
+        acc.valor_ipi += product.ipi_valor;
+        acc.valor_pis += product.pis_valor;
+        acc.valor_cofins += product.cofins_valor;
+        return acc;
+      },
+      {
+        valor_produtos: 0,
+        valor_icms: 0,
+        valor_ipi: 0,
+        valor_pis: 0,
+        valor_cofins: 0,
+      }
+    );
+
+    const valor_total =
+      totals.valor_produtos +
+      totals.valor_ipi +
+      parseFloat(formData.valor_frete || "0") +
+      parseFloat(formData.valor_seguro || "0") +
+      parseFloat(formData.valor_outras_despesas || "0") -
+      parseFloat(formData.valor_desconto || "0");
+
+    setFormData((prev) => ({
+      ...prev,
+      valor_produtos: totals.valor_produtos.toFixed(2),
+      valor_icms: totals.valor_icms.toFixed(2),
+      valor_ipi: totals.valor_ipi.toFixed(2),
+      valor_pis: totals.valor_pis.toFixed(2),
+      valor_cofins: totals.valor_cofins.toFixed(2),
+      bc_icms: totals.valor_produtos.toFixed(2),
+      valor_total: valor_total.toFixed(2),
+    }));
   };
 
   const handleSave = async () => {
@@ -354,14 +431,17 @@ export default function NFeForm() {
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h2 className="title-md">Produtos/Serviços</h2>
-                <Button variant="outline" size="sm">
-                  <span className="text-xl mr-1">+</span> Adicionar Produto
+                <Button onClick={handleAddProduct} size="sm" className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Adicionar Produto
                 </Button>
               </div>
-              <div className="text-center text-muted-foreground py-8 border-2 border-dashed rounded-lg">
-                Nenhum produto adicionado. Clique em "Adicionar Produto" para
-                começar.
-              </div>
+              <NFeProductsTable
+                products={formData.produtos}
+                onRemove={handleRemoveProduct}
+                onEdit={handleEditProduct}
+                onUpdateTotals={() => updateTotals(formData.produtos)}
+              />
             </div>
 
             <Separator />
@@ -504,6 +584,14 @@ export default function NFeForm() {
             Emitir NFe
           </Button>
         </div>
+
+        {/* Dialog de Produtos */}
+        <NFeProductDialog
+          open={productDialogOpen}
+          onOpenChange={setProductDialogOpen}
+          onSave={handleSaveProduct}
+          product={editingProduct}
+        />
       </div>
     </div>
   );

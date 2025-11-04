@@ -12,7 +12,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Plus, Search, Download, Eye } from "lucide-react";
+import { FileText, Plus, Search, Download, Eye, Filter } from "lucide-react";
+import NFeActionsMenu from "@/components/fiscal/NFeActionsMenu";
 import {
   Select,
   SelectContent,
@@ -36,6 +37,7 @@ export default function NFe() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("todos");
+  const [dateFilter, setDateFilter] = useState<string>("todos");
 
   // Dados mockados para demonstração
   const [nfeList] = useState<NFe[]>([
@@ -114,30 +116,77 @@ export default function NFe() {
 
         {/* Filtros */}
         <Card className="bg-level-2">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar por número, cliente ou chave de acesso..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar por número, cliente ou chave de acesso..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos os Status</SelectItem>
+                  <SelectItem value="autorizada">Autorizada</SelectItem>
+                  <SelectItem value="cancelada">Cancelada</SelectItem>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                  <SelectItem value="rejeitada">Rejeitada</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={dateFilter} onValueChange={setDateFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Período" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos os Períodos</SelectItem>
+                  <SelectItem value="hoje">Hoje</SelectItem>
+                  <SelectItem value="semana">Esta Semana</SelectItem>
+                  <SelectItem value="mes">Este Mês</SelectItem>
+                  <SelectItem value="ano">Este Ano</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Resumo rápido */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
+              <div>
+                <p className="text-xs text-muted-foreground">Total de Notas</p>
+                <p className="text-2xl font-bold">{nfeList.length}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Autorizadas</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {nfeList.filter((n) => n.status === "autorizada").length}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Pendentes</p>
+                <p className="text-2xl font-bold text-yellow-600">
+                  {nfeList.filter((n) => n.status === "pendente").length}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Valor Total</p>
+                <p className="text-2xl font-bold font-mono">
+                  {new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  }).format(
+                    nfeList
+                      .filter((n) => n.status === "autorizada")
+                      .reduce((acc, n) => acc + n.valor_total, 0)
+                  )}
+                </p>
               </div>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Filtrar por status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos os Status</SelectItem>
-                <SelectItem value="autorizada">Autorizada</SelectItem>
-                <SelectItem value="cancelada">Cancelada</SelectItem>
-                <SelectItem value="pendente">Pendente</SelectItem>
-                <SelectItem value="rejeitada">Rejeitada</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </Card>
 
@@ -182,22 +231,11 @@ export default function NFe() {
                     </TableCell>
                     <TableCell>{getStatusBadge(nfe.status)}</TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate(`/fiscal/nfe/${nfe.id}`)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          disabled={nfe.status !== "autorizada"}
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      <NFeActionsMenu
+                        status={nfe.status}
+                        chaveAcesso={nfe.chave_acesso}
+                        onView={() => navigate(`/fiscal/nfe/${nfe.id}`)}
+                      />
                     </TableCell>
                   </TableRow>
                 ))

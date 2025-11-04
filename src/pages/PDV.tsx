@@ -19,8 +19,10 @@ import { DiscountDialog } from "@/components/pdv/DiscountDialog"
 import { AbrirCaixaDialog } from "@/components/pdv/AbrirCaixaDialog"
 import { CaixaClosedScreen } from "@/components/pdv/CaixaClosedScreen"
 import { QuickProductDialog } from "@/components/pdv/QuickProductDialog"
+import { EmitirNFeDialog } from "@/components/pdv/EmitirNFeDialog"
 import { usePermissionCheck } from "@/hooks/usePermissionCheck"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
+import { useFiscalIntegration } from "@/hooks/useFiscalIntegration"
 import { cn } from "@/lib/utils"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
@@ -76,6 +78,7 @@ const PDV = () => {
   const { currentOrg, loading: orgLoading } = useOrganization()
   const { toast } = useToast()
   const navigate = useNavigate()
+  const { createNFeFromOrder } = useFiscalIntegration()
   
   const [products, setProducts] = useState<Product[]>([])
   const [cart, setCart] = useState<CartItem[]>([])
@@ -89,6 +92,10 @@ const PDV = () => {
   const [addingToCart, setAddingToCart] = useState<string | null>(null)
   const [barcodeBuffer, setBarcodeBuffer] = useState("")
   const [lastKeyTime, setLastKeyTime] = useState(0)
+  
+  // NFe emission states
+  const [isEmitirNFeDialogOpen, setIsEmitirNFeDialogOpen] = useState(false)
+  const [lastCompletedOrder, setLastCompletedOrder] = useState<any>(null)
   
   // Cash register states
   const [caixaAberto, setCaixaAberto] = useState<boolean | null>(null)
@@ -759,18 +766,19 @@ const PDV = () => {
 
       console.log('[PDV] Venda finalizada com sucesso!')
       
-      toast({
-        title: "Venda finalizada com sucesso!",
-        description: `Pedido ${order.order_number} criado e lançamento financeiro registrado.`,
-      })
-
-      // Clear cart and close dialog
+      // Salvar pedido para possível emissão de NFe
+      setLastCompletedOrder(order)
+      
+      // Clear cart and close payment dialog
       clearCart()
       setIsPaymentDialogOpen(false)
       setSelectedPaymentMethod("")
       
       // Reload products to update stock
       loadProducts()
+
+      // Abrir dialog para perguntar sobre emissão de NFe
+      setIsEmitirNFeDialogOpen(true)
 
     } catch (error) {
       console.error('Error processing sale:', error)
@@ -1253,6 +1261,28 @@ const PDV = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Emitir NFe Dialog */}
+      <EmitirNFeDialog
+        open={isEmitirNFeDialogOpen}
+        onOpenChange={setIsEmitirNFeDialogOpen}
+        orderNumber={lastCompletedOrder?.order_number || ''}
+        orderTotal={lastCompletedOrder?.total_amount || 0}
+        customerName={selectedCustomer?.name}
+        onConfirm={async () => {
+          setIsEmitirNFeDialogOpen(false)
+          if (lastCompletedOrder) {
+            await createNFeFromOrder(lastCompletedOrder.id)
+          }
+        }}
+        onCancel={() => {
+          setIsEmitirNFeDialogOpen(false)
+          toast({
+            title: "Venda finalizada",
+            description: `Pedido ${lastCompletedOrder?.order_number} criado com sucesso.`,
+          })
+        }}
+      />
 
     </div>
     </div>

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,11 +20,44 @@ import NFeProductDialog from "@/components/fiscal/NFeProductDialog";
 
 export default function NFeForm() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
   const isEditing = !!id;
 
+  // Dados vindos do PDV
+  const fromOrder = location.state?.fromOrder || false;
+  const orderData = location.state?.orderData;
+  const orderItems = location.state?.orderItems || [];
+
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+
+  // Inicializar produtos vindos do pedido (se houver)
+  const initialProducts = orderItems.map((item: any) => ({
+    id: item.product_id,
+    codigo: item.product_sku || item.product_id.substring(0, 8),
+    descricao: item.product_name,
+    ncm: "00000000",
+    cfop: "5102",
+    unidade: "UN",
+    quantidade: item.quantity.toString(),
+    valor_unitario: item.unit_price.toFixed(2),
+    valor_total: item.total_price.toFixed(2),
+    // Tributos
+    icms_cst: "00",
+    icms_base: item.total_price.toFixed(2),
+    icms_aliquota: "0.00",
+    icms_valor: "0.00",
+    ipi_cst: "99",
+    ipi_aliquota: "0.00",
+    ipi_valor: "0.00",
+    pis_cst: "01",
+    pis_aliquota: "0.00",
+    pis_valor: "0.00",
+    cofins_cst: "01",
+    cofins_aliquota: "0.00",
+    cofins_valor: "0.00",
+  }));
 
   const [formData, setFormData] = useState({
     // Dados do Destinatário
@@ -46,7 +79,7 @@ export default function NFeForm() {
     serie: "1",
     
     // Produtos/Serviços
-    produtos: [] as any[],
+    produtos: initialProducts,
 
     // Valores Totalizadores
     bc_icms: "0.00",
@@ -58,8 +91,8 @@ export default function NFeForm() {
     valor_ipi: "0.00",
     valor_pis: "0.00",
     valor_cofins: "0.00",
-    valor_produtos: "0.00",
-    valor_total: "0.00",
+    valor_produtos: orderData?.subtotal?.toFixed(2) || "0.00",
+    valor_total: orderData?.total_amount?.toFixed(2) || "0.00",
 
     // Informações Adicionais
     informacoes_complementares: "",
@@ -149,6 +182,13 @@ export default function NFeForm() {
     }));
   };
 
+  // Calcular totais ao carregar produtos do pedido
+  useEffect(() => {
+    if (initialProducts.length > 0) {
+      updateTotals(formData.produtos);
+    }
+  }, []);
+
   const handleSave = async () => {
     try {
       // Validações básicas
@@ -200,9 +240,17 @@ export default function NFeForm() {
           <div>
             <h1 className="title-xl">
               {isEditing ? "Editar NFe" : "Nova NFe - Modelo 55"}
+              {fromOrder && (
+                <span className="text-sm font-normal text-muted-foreground ml-3">
+                  (Originada do Pedido #{orderData?.order_number})
+                </span>
+              )}
             </h1>
             <p className="text-muted-foreground mt-2">
-              Preencha os dados para emissão da nota fiscal
+              {fromOrder 
+                ? "Verifique e complete os dados para emissão da nota fiscal"
+                : "Preencha os dados para emissão da nota fiscal"
+              }
             </p>
           </div>
           <div className="flex gap-2">

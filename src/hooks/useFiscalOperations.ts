@@ -13,7 +13,8 @@ export interface FiscalOperation {
   id: string;
   org_id: string;
   tax_group_id: string;
-  operation_name: string;
+  sales_category_id?: string;
+  operation_name?: string;
   destination_state: string;
   pis_situation: string;
   cofins_situation: string;

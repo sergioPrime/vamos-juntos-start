@@ -79,6 +79,20 @@ export function useTaxGroups() {
 
   const deleteTaxGroup = async (id: string) => {
     try {
+      // Verificar se o grupo está vinculado a operações fiscais
+      const { data: linkedOperations, error: checkError } = await supabase
+        .from('fiscal_operations')
+        .select('id')
+        .eq('tax_group_id', id)
+        .limit(1);
+
+      if (checkError) throw checkError;
+
+      if (linkedOperations && linkedOperations.length > 0) {
+        toast.error('Este grupo tributário não pode ser excluído pois está vinculado a operações fiscais ativas. Desative-o ou remova os vínculos primeiro.');
+        throw new Error('Grupo tributário vinculado a operações fiscais');
+      }
+
       const { error } = await supabase
         .from('tax_groups')
         .delete()
@@ -89,7 +103,9 @@ export function useTaxGroups() {
       await loadTaxGroups();
     } catch (error: any) {
       console.error('Erro ao excluir grupo tributário:', error);
-      toast.error('Erro ao excluir grupo tributário');
+      if (error.message && !error.message.includes('Grupo tributário vinculado')) {
+        toast.error('Erro ao excluir grupo tributário');
+      }
       throw error;
     }
   };

@@ -86,8 +86,9 @@ export default function TaxGroups() {
       await deleteTaxGroup(selectedGroup.id);
       setShowDeleteDialog(false);
       setSelectedGroup(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao excluir grupo tributário:', error);
+      // A mensagem de erro já será exibida pelo hook useTaxGroups
     }
   };
 

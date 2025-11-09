@@ -24,6 +24,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import { CompetitorPriceScraper } from "@/components/products/CompetitorPriceScraper"
+import { NCMSearchDialog } from "@/components/products/NCMSearchDialog"
 
 interface Product {
   id: string
@@ -218,6 +219,7 @@ const Products = () => {
     cfop: "",
     cest: "",
   })
+  const [showNCMSearchDialog, setShowNCMSearchDialog] = useState(false)
 
   // Estados para valores mascarados
   const [maskedCostPrice, setMaskedCostPrice] = useState("")
@@ -412,6 +414,10 @@ const Products = () => {
     const numericValue = value.replace(/\D/g, '').slice(0, 7)
     setFormData(prev => ({ ...prev, codigo_cest: numericValue }))
     setFiscalErrors(prev => ({ ...prev, cest: validateCEST(numericValue) }))
+  }
+
+  const handleNCMSelect = (ncm: string) => {
+    handleNCMChange(ncm)
   }
 
   const resetForm = () => {
@@ -2161,18 +2167,33 @@ const Products = () => {
 
                           <div className="space-y-2">
                             <Label htmlFor="codigo_ncm">Código NCM <span className="text-primary">*</span></Label>
-                            <Input
-                              id="codigo_ncm"
-                              type="text"
-                              maxLength={8}
-                              value={formData.codigo_ncm}
-                              onChange={(e) => handleNCMChange(e.target.value)}
-                              placeholder="00000000"
-                              className={cn(fiscalErrors.ncm && "border-red-500")}
-                            />
-                            {fiscalErrors.ncm && (
+                            <div className="flex gap-2">
+                              <Input
+                                id="codigo_ncm"
+                                type="text"
+                                maxLength={8}
+                                value={formData.codigo_ncm}
+                                onChange={(e) => handleNCMChange(e.target.value)}
+                                placeholder="00000000"
+                                className={cn(fiscalErrors.ncm && "border-red-500", "flex-1")}
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setShowNCMSearchDialog(true)}
+                                className="shrink-0"
+                                title="Buscar NCM pela descrição do produto"
+                              >
+                                <Search className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            {fiscalErrors.ncm ? (
                               <p className="text-xs text-red-600 flex items-center gap-1">
                                 ⚠️ {fiscalErrors.ncm}
+                              </p>
+                            ) : formData.codigo_ncm && formData.codigo_ncm.length === 8 && (
+                              <p className="text-xs text-green-600 flex items-center gap-1">
+                                ✓ NCM válido: {formData.codigo_ncm.substring(0, 4)}.{formData.codigo_ncm.substring(4, 6)}.{formData.codigo_ncm.substring(6, 8)}
                               </p>
                             )}
                           </div>
@@ -2321,6 +2342,14 @@ const Products = () => {
                         </div>
                       </CardContent>
                     </Card>
+
+                    {/* Dialog de Busca de NCM */}
+                    <NCMSearchDialog
+                      open={showNCMSearchDialog}
+                      onOpenChange={setShowNCMSearchDialog}
+                      onSelect={handleNCMSelect}
+                      productName={formData.name}
+                    />
 
                   </div>
                 </TabsContent>

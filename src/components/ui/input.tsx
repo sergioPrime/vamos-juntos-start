@@ -16,20 +16,22 @@ export interface InputProps extends React.ComponentProps<"input"> {
   validateCNAE?: boolean
   validateIE?: boolean
   validateCreditCard?: boolean
+  validateCNH?: boolean
   uf?: string
   onCardBrandDetected?: (brand: string) => void
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, uppercase = false, blockSpecialChars = false, allowedChars, mask, onChange, onValueChange, validateDocument = false, validateCNAE = false, validateIE = false, validateCreditCard = false, uf, onCardBrandDetected, ...props }, ref) => {
+  ({ className, type, uppercase = false, blockSpecialChars = false, allowedChars, mask, onChange, onValueChange, validateDocument = false, validateCNAE = false, validateIE = false, validateCreditCard = false, validateCNH = false, uf, onCardBrandDetected, ...props }, ref) => {
     const { toast } = useToast()
-    const { applyMask, removeMask, getConfig, detectDocumentType, validateCPF, validateCNPJ, validateCNAE: validateCNAEFn, validateCreditCard: validateCreditCardFn, cardBrand, detectCardBrand } = useMask(mask)
+    const { applyMask, removeMask, getConfig, detectDocumentType, validateCPF, validateCNPJ, validateCNAE: validateCNAEFn, validateCreditCard: validateCreditCardFn, validateCNH: validateCNHFn, cardBrand, detectCardBrand } = useMask(mask)
     const { applyIEMask, validateIE: validateIEFn, getIEConfig } = useInscricaoEstadual()
     const [lastInvalidChar, setLastInvalidChar] = React.useState<string | null>(null)
     const [documentValidation, setDocumentValidation] = React.useState<{ isValid: boolean; message: string } | null>(null)
     const [cnaeValidation, setCnaeValidation] = React.useState<{ isValid: boolean; message: string } | null>(null)
     const [ieValidation, setIeValidation] = React.useState<{ isValid: boolean; message: string } | null>(null)
     const [cardValidation, setCardValidation] = React.useState<{ isValid: boolean; message: string; brand: string } | null>(null)
+    const [cnhValidation, setCnhValidation] = React.useState<{ isValid: boolean; message: string } | null>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       let value = e.target.value
@@ -218,6 +220,34 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         }
       }
 
+      // Validar CNH se necessário
+      if (validateCNH && value.length > 0) {
+        const numbers = value.replace(/\D/g, '')
+        
+        if (numbers.length === 11) {
+          const isValid = validateCNHFn(value)
+          
+          if (isValid) {
+            setCnhValidation({
+              isValid: true,
+              message: 'CNH válida'
+            })
+          } else {
+            setCnhValidation({
+              isValid: false,
+              message: 'CNH inválida - verifique os dígitos verificadores'
+            })
+          }
+        } else if (numbers.length > 0) {
+          setCnhValidation({
+            isValid: false,
+            message: 'Digite a CNH completa (11 dígitos)'
+          })
+        } else {
+          setCnhValidation(null)
+        }
+      }
+
       // Atualizar o valor do input
       target.value = value
       
@@ -249,7 +279,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             validateIE && ieValidation && ieValidation.isValid && "border-green-500 focus-visible:ring-green-500",
             validateCreditCard && cardValidation && !cardValidation.isValid && "border-destructive focus-visible:ring-destructive",
             validateCreditCard && cardValidation && cardValidation.isValid && "border-green-500 focus-visible:ring-green-500",
-            (validateDocument || validateCNAE || validateIE || validateCreditCard) && "pr-10",
+            validateCNH && cnhValidation && !cnhValidation.isValid && "border-destructive focus-visible:ring-destructive",
+            validateCNH && cnhValidation && cnhValidation.isValid && "border-green-500 focus-visible:ring-green-500",
+            (validateDocument || validateCNAE || validateIE || validateCreditCard || validateCNH) && "pr-10",
             className
           )}
           ref={ref}
@@ -331,6 +363,22 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 </span>
               )}
             </div>
+          </>
+        )}
+        {validateCNH && cnhValidation && (
+          <>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {cnhValidation.isValid ? (
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+              ) : (
+                <AlertCircle className="h-5 w-5 text-destructive" />
+              )}
+            </div>
+            {!cnhValidation.isValid && (
+              <p className="mt-1 text-xs text-destructive">
+                {cnhValidation.message}
+              </p>
+            )}
           </>
         )}
       </div>

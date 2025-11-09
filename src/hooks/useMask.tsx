@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export type MaskType = 'cpf' | 'cnpj' | 'phone' | 'mobile' | 'cep' | 'currency' | 'cnae' | 'creditCard' | 'none';
+export type MaskType = 'cpf' | 'cnpj' | 'phone' | 'mobile' | 'cep' | 'currency' | 'cnae' | 'creditCard' | 'cnh' | 'none';
 
 interface MaskConfig {
   mask: string;
@@ -48,6 +48,11 @@ const maskConfigs: Record<MaskType, MaskConfig | null> = {
     mask: '#### #### #### ####',
     placeholder: '0000 0000 0000 0000',
     maxLength: 19,
+  },
+  cnh: {
+    mask: '###########',
+    placeholder: '00000000000',
+    maxLength: 11,
   },
   none: null,
 };
@@ -383,6 +388,45 @@ export const useMask = (maskType: MaskType = 'none') => {
     return sum % 10 === 0;
   };
 
+  const validateCNH = (cnh: string): boolean => {
+    const numbers = cnh.replace(/\D/g, '');
+    
+    if (numbers.length !== 11) return false;
+    
+    // Verifica se todos os dígitos são iguais
+    if (/^(\d)\1+$/.test(numbers)) return false;
+
+    // Validação do primeiro dígito verificador
+    let sum = 0;
+    let weight = 9;
+    
+    for (let i = 0; i < 9; i++) {
+      sum += parseInt(numbers.charAt(i)) * weight;
+      weight--;
+    }
+    
+    let firstDigit = sum % 11;
+    if (firstDigit >= 10) firstDigit = 0;
+    
+    if (firstDigit !== parseInt(numbers.charAt(9))) return false;
+
+    // Validação do segundo dígito verificador
+    sum = 0;
+    weight = 1;
+    
+    for (let i = 0; i < 9; i++) {
+      sum += parseInt(numbers.charAt(i)) * weight;
+      weight++;
+    }
+    
+    let secondDigit = sum % 11;
+    if (secondDigit >= 10) secondDigit = 0;
+    
+    if (secondDigit !== parseInt(numbers.charAt(10))) return false;
+
+    return true;
+  };
+
   const searchAddressByCEP = async (cep: string): Promise<{
     logradouro: string;
     bairro: string;
@@ -423,6 +467,7 @@ export const useMask = (maskType: MaskType = 'none') => {
     validateCNPJ,
     validateCNAE,
     validateCreditCard,
+    validateCNH,
     searchAddressByCEP,
     getCurrencyValue,
     cardBrand,

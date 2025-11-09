@@ -182,10 +182,17 @@ const Products = () => {
   const [maskedCostPrice, setMaskedCostPrice] = useState("")
   const [maskedUnitPrice, setMaskedUnitPrice] = useState("")
   const [activeTab, setActiveTab] = useState("dados")
+  const [priceAlert, setPriceAlert] = useState<{ show: boolean; message: string }>({ 
+    show: false, 
+    message: "" 
+  })
 
   // Efeito para cálculo automático de preços
   useEffect(() => {
-    if (!autoCalculatePrice) return
+    if (!autoCalculatePrice) {
+      setPriceAlert({ show: false, message: "" })
+      return
+    }
 
     // Calcular preço de custo com acréscimos
     const costBase = formData.cost_price || 0
@@ -214,6 +221,24 @@ const Products = () => {
     const mvaAmount = calculatedPrice - costWithAdditions
     const mvaPercent = costWithAdditions > 0 ? (mvaAmount / costWithAdditions) * 100 : 0
 
+    // Validar preço mínimo
+    const minimumPrice = formData.minimum_sale_price || 0
+    if (minimumPrice > 0 && calculatedPrice < minimumPrice) {
+      const difference = minimumPrice - calculatedPrice
+      setPriceAlert({
+        show: true,
+        message: `⚠️ Preço calculado (R$ ${calculatedPrice.toFixed(2)}) está R$ ${difference.toFixed(2)} abaixo do preço mínimo!`
+      })
+      
+      toast({
+        title: "Atenção: Preço Abaixo do Mínimo",
+        description: `O preço de venda calculado (R$ ${calculatedPrice.toFixed(2)}) está abaixo do preço mínimo configurado (R$ ${minimumPrice.toFixed(2)}). Diferença: R$ ${difference.toFixed(2)}`,
+        variant: "destructive",
+      })
+    } else {
+      setPriceAlert({ show: false, message: "" })
+    }
+
     setFormData(prev => ({
       ...prev,
       cost_with_additions: parseFloat(costWithAdditions.toFixed(2)),
@@ -233,7 +258,9 @@ const Products = () => {
     formData.icms_st_on_purchase,
     formData.fcp_st_on_purchase,
     formData.desired_profit_margin,
-    autoCalculatePrice
+    formData.minimum_sale_price,
+    autoCalculatePrice,
+    toast
   ])
 
   useEffect(() => {
@@ -339,6 +366,7 @@ const Products = () => {
     setMaskedUnitPrice("")
     setActiveTab("dados")
     setAutoCalculatePrice(true)
+    setPriceAlert({ show: false, message: "" })
     setEditingProduct(null)
   }
 
@@ -933,6 +961,30 @@ const Products = () => {
                           </Label>
                         </div>
 
+                        {/* Alerta de preço abaixo do mínimo */}
+                        {priceAlert.show && (
+                          <div className="mb-6 p-4 bg-red-50 dark:bg-red-950 rounded-lg border-2 border-red-500 animate-pulse">
+                            <div className="flex items-start gap-3">
+                              <div className="flex-shrink-0 w-8 h-8 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+                                <span className="text-red-600 dark:text-red-400 text-lg font-bold">⚠️</span>
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="text-red-800 dark:text-red-200 font-semibold text-sm mb-1">
+                                  Atenção: Preço Abaixo do Mínimo Configurado
+                                </h4>
+                                <p className="text-red-700 dark:text-red-300 text-sm">
+                                  O preço de venda calculado (R$ {formData.unit_price.toFixed(2)}) está abaixo do preço mínimo 
+                                  configurado (R$ {formData.minimum_sale_price.toFixed(2)}). 
+                                  <span className="font-semibold"> Diferença: R$ {(formData.minimum_sale_price - formData.unit_price).toFixed(2)}</span>
+                                </p>
+                                <p className="text-red-600 dark:text-red-400 text-xs mt-2">
+                                  💡 Dica: Aumente a margem de lucro desejada ou reduza as despesas operacionais para alcançar o preço mínimo.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
                         {/* Linha 1 */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                           <div className="space-y-2">
@@ -1014,7 +1066,14 @@ const Products = () => {
                           </div>
 
                           <div className="space-y-2">
-                            <Label htmlFor="minimum_sale_price">Preço Mínimo Para Venda (R$)</Label>
+                            <Label htmlFor="minimum_sale_price">
+                              Preço Mínimo Para Venda (R$)
+                              {priceAlert.show && (
+                                <Badge variant="destructive" className="ml-2 animate-pulse">
+                                  Violado
+                                </Badge>
+                              )}
+                            </Label>
                             <Input
                               id="minimum_sale_price"
                               type="number"
@@ -1022,7 +1081,15 @@ const Products = () => {
                               onChange={(e) => setFormData(prev => ({ ...prev, minimum_sale_price: parseFloat(e.target.value) || 0 }))}
                               placeholder="0"
                               step="0.01"
+                              className={cn(
+                                priceAlert.show && "border-red-500 border-2"
+                              )}
                             />
+                            {priceAlert.show && (
+                              <p className="text-xs text-red-600 font-medium flex items-center gap-1">
+                                ⚠️ {priceAlert.message}
+                              </p>
+                            )}
                           </div>
 
                           <div className="space-y-2">
@@ -1173,6 +1240,11 @@ const Products = () => {
                           <div className="space-y-2">
                             <Label htmlFor="unit_price" className="text-green-600 font-semibold">
                               Preço de Venda (R$) {autoCalculatePrice ? '— Calculado' : '— Fixado'}
+                              {priceAlert.show && (
+                                <Badge variant="destructive" className="ml-2 animate-pulse">
+                                  Abaixo do Mínimo
+                                </Badge>
+                              )}
                             </Label>
                             <Input
                               id="unit_price"
@@ -1193,6 +1265,7 @@ const Products = () => {
                               placeholder="R$ 0,00"
                               className={cn(
                                 "font-bold text-lg",
+                                priceAlert.show ? "bg-red-50 dark:bg-red-950 border-red-600 border-2" :
                                 autoCalculatePrice ? "bg-green-50 dark:bg-green-950 border-green-600" : "border-green-600"
                               )}
                               disabled={autoCalculatePrice}

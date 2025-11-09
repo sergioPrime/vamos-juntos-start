@@ -2,16 +2,20 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
+import { useMask, type MaskType } from "@/hooks/useMask"
 
 export interface InputProps extends React.ComponentProps<"input"> {
   uppercase?: boolean
   blockSpecialChars?: boolean
   allowedChars?: RegExp
+  mask?: MaskType
+  onValueChange?: (value: string) => void
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, uppercase = false, blockSpecialChars = false, allowedChars, onChange, ...props }, ref) => {
+  ({ className, type, uppercase = false, blockSpecialChars = false, allowedChars, mask, onChange, onValueChange, ...props }, ref) => {
     const { toast } = useToast()
+    const { applyMask, removeMask, getConfig } = useMask(mask)
     const [lastInvalidChar, setLastInvalidChar] = React.useState<string | null>(null)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,6 +23,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       const target = e.target
       const start = target.selectionStart
       const end = target.selectionEnd
+
+      // Aplicar máscara se definida
+      if (mask && mask !== 'none') {
+        value = applyMask(value, mask)
+        target.value = value
+        
+        // Chamar onValueChange com valor sem máscara
+        if (onValueChange) {
+          onValueChange(removeMask(value))
+        }
+      }
 
       // Validar caracteres especiais
       if (blockSpecialChars || allowedChars) {
@@ -47,8 +62,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         }
       }
 
-      // Converter para maiúsculas se necessário
-      if (uppercase && type !== "password" && type !== "email") {
+      // Converter para maiúsculas se necessário (não aplicar em campos com máscara)
+      if (uppercase && type !== "password" && type !== "email" && !mask) {
         value = value.toUpperCase()
       }
 
@@ -56,7 +71,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       target.value = value
       
       // Restaurar posição do cursor
-      if (start !== null && end !== null) {
+      if (start !== null && end !== null && !mask) {
         target.setSelectionRange(start, end)
       }
       
@@ -65,16 +80,20 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       }
     }
 
+    const maskConfig = mask ? getConfig(mask) : null
+
     return (
       <input
         type={type}
         className={cn(
           "flex h-11 w-full rounded-lg border border-input bg-background px-4 py-3 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm transition-colors",
-          uppercase && type !== "password" && type !== "email" && "uppercase",
+          uppercase && type !== "password" && type !== "email" && !mask && "uppercase",
           className
         )}
         ref={ref}
         onChange={handleChange}
+        maxLength={maskConfig?.maxLength}
+        placeholder={maskConfig?.placeholder || props.placeholder}
         {...props}
       />
     )

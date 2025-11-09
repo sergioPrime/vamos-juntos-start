@@ -16,6 +16,7 @@ import { PessoasListagem } from "@/components/pessoas/PessoasListagem"
 import { usePessoas, type Pessoa } from "@/hooks/usePessoas"
 import { useOrganization } from "@/hooks/useOrganization"
 import { useAuth } from "@/hooks/useAuth"
+import { useMask } from "@/hooks/useMask"
 
 interface PessoaFormData {
   nomeFantasia: string
@@ -52,6 +53,8 @@ export function Pessoas() {
   const { createPessoa, updatePessoa } = usePessoas()
   const { currentOrg: currentOrganization } = useOrganization()
   const { user } = useAuth()
+  const { detectDocumentType, detectPhoneType } = useMask()
+  
   const [formData, setFormData] = useState<PessoaFormData>({
     nomeFantasia: "",
     tipoPessoa: "",
@@ -70,6 +73,12 @@ export function Pessoas() {
 
   const [newEmailSecundario, setNewEmailSecundario] = useState("")
   const [newWhatsapp, setNewWhatsapp] = useState("")
+
+  // Detectar tipo de máscara dinamicamente
+  const documentMask = formData.documento ? detectDocumentType(formData.documento) : (formData.tipoPessoa === 'juridica' ? 'cnpj' : 'cpf')
+  const phoneMask = formData.telefone ? detectPhoneType(formData.telefone) : 'phone'
+  const mobileMask = formData.telefonecelular ? detectPhoneType(formData.telefonecelular) : 'mobile'
+  const whatsappMask = newWhatsapp ? detectPhoneType(newWhatsapp) : 'mobile'
 
   const handleInputChange = (field: keyof PessoaFormData, value: any) => {
     setFormData(prev => ({
@@ -370,13 +379,13 @@ export function Pessoas() {
                     {getDocumentLabel()}
                   </label>
                   <div className="flex items-center gap-2">
-                    <input
+                    <Input
                       id="documento"
                       type="text"
                       className={styles.formInput}
                       value={formData.documento}
                       onChange={(e) => handleInputChange("documento", e.target.value)}
-                      placeholder={getDocumentPlaceholder()}
+                      mask={documentMask}
                     />
                     <button 
                       type="button" 
@@ -448,13 +457,13 @@ export function Pessoas() {
                   <label htmlFor="telefone" className={styles.formLabel}>
                     Telefone
                   </label>
-                  <input
+                  <Input
                     id="telefone"
                     type="text"
                     className={styles.formInput}
                     value={formData.telefone}
                     onChange={(e) => handleInputChange("telefone", e.target.value)}
-                    placeholder="(00) 0000-0000"
+                    mask={phoneMask}
                   />
                 </div>
               </div>
@@ -466,13 +475,13 @@ export function Pessoas() {
                     Whatsapp (Tecle enter para adicionar o whatsapp)
                   </label>
                   <div className="flex gap-2">
-                    <input
+                    <Input
                       type="text"
                       className={styles.formInput}
                       value={newWhatsapp}
                       onChange={(e) => setNewWhatsapp(e.target.value)}
                       onKeyPress={(e) => handleKeyPress(e, () => addWhatsapp(newWhatsapp))}
-                      placeholder="(00) 00000-0000"
+                      mask={whatsappMask}
                     />
                     <Button 
                       type="button" 
@@ -504,13 +513,13 @@ export function Pessoas() {
                   <label htmlFor="telefonecelular" className={styles.formLabel}>
                     Telefone Celular
                   </label>
-                  <input
+                  <Input
                     id="telefonecelular"
                     type="text"
                     className={styles.formInput}
                     value={formData.telefonecelular}
                     onChange={(e) => handleInputChange("telefonecelular", e.target.value)}
-                    placeholder="(00) 00000-0000"
+                    mask={mobileMask}
                   />
                 </div>
               </div>

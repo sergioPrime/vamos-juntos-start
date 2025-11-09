@@ -1667,6 +1667,120 @@ export type Database = {
         }
         Relationships: []
       }
+      fiscal_operations: {
+        Row: {
+          additional_info: string | null
+          calculate_base_inside: boolean | null
+          cfop_codes: Json | null
+          cofins_situation: string
+          created_at: string
+          created_by: string
+          destination_state: string
+          effective_icms_bc_reduction: number | null
+          effective_icms_rate: number | null
+          ex_tipi_general: string | null
+          ex_tipi_suframa: string | null
+          fcp_rate: number | null
+          fiscal_benefit: string | null
+          icms_situation: string | null
+          id: string
+          internal_icms_rate: number | null
+          interstate_icms_rate: number | null
+          ipi_class_general: string | null
+          ipi_class_suframa: string | null
+          ipi_rate_general: number | null
+          ipi_rate_suframa: number | null
+          ipi_situation_general: string | null
+          ipi_situation_suframa: string | null
+          operation_name: string
+          org_id: string
+          pis_situation: string
+          show_icms_st_on_invoice: boolean | null
+          sum_ipi_on_base: boolean | null
+          tax_group_id: string
+          updated_at: string
+        }
+        Insert: {
+          additional_info?: string | null
+          calculate_base_inside?: boolean | null
+          cfop_codes?: Json | null
+          cofins_situation: string
+          created_at?: string
+          created_by: string
+          destination_state: string
+          effective_icms_bc_reduction?: number | null
+          effective_icms_rate?: number | null
+          ex_tipi_general?: string | null
+          ex_tipi_suframa?: string | null
+          fcp_rate?: number | null
+          fiscal_benefit?: string | null
+          icms_situation?: string | null
+          id?: string
+          internal_icms_rate?: number | null
+          interstate_icms_rate?: number | null
+          ipi_class_general?: string | null
+          ipi_class_suframa?: string | null
+          ipi_rate_general?: number | null
+          ipi_rate_suframa?: number | null
+          ipi_situation_general?: string | null
+          ipi_situation_suframa?: string | null
+          operation_name: string
+          org_id: string
+          pis_situation: string
+          show_icms_st_on_invoice?: boolean | null
+          sum_ipi_on_base?: boolean | null
+          tax_group_id: string
+          updated_at?: string
+        }
+        Update: {
+          additional_info?: string | null
+          calculate_base_inside?: boolean | null
+          cfop_codes?: Json | null
+          cofins_situation?: string
+          created_at?: string
+          created_by?: string
+          destination_state?: string
+          effective_icms_bc_reduction?: number | null
+          effective_icms_rate?: number | null
+          ex_tipi_general?: string | null
+          ex_tipi_suframa?: string | null
+          fcp_rate?: number | null
+          fiscal_benefit?: string | null
+          icms_situation?: string | null
+          id?: string
+          internal_icms_rate?: number | null
+          interstate_icms_rate?: number | null
+          ipi_class_general?: string | null
+          ipi_class_suframa?: string | null
+          ipi_rate_general?: number | null
+          ipi_rate_suframa?: number | null
+          ipi_situation_general?: string | null
+          ipi_situation_suframa?: string | null
+          operation_name?: string
+          org_id?: string
+          pis_situation?: string
+          show_icms_st_on_invoice?: boolean | null
+          sum_ipi_on_base?: boolean | null
+          tax_group_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscal_operations_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscal_operations_tax_group_id_fkey"
+            columns: ["tax_group_id"]
+            isOneToOne: false
+            referencedRelation: "tax_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_items: {
         Row: {
           created_at: string
@@ -3682,6 +3796,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "sync_logs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tax_groups: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          org_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          org_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          org_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_groups_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"

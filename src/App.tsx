@@ -78,6 +78,9 @@ const PriceTables = lazy(() => import("./pages/cadastros/PriceTables"));
 const PriceTablesForm = lazy(() => import("./pages/cadastros/PriceTablesForm"));
 const Warehouses = lazy(() => import("./pages/cadastros/Warehouses"));
 const WarehouseForm = lazy(() => import("./pages/cadastros/WarehouseForm"));
+const TaxGroups = lazy(() => import("./pages/cadastros/TaxGroups"));
+const FiscalOperations = lazy(() => import("./pages/cadastros/FiscalOperations"));
+const FiscalOperationsForm = lazy(() => import("./pages/cadastros/FiscalOperationsForm"));
 const NFe = lazy(() => import("./pages/fiscal/NFe"));
 const NFeForm = lazy(() => import("./pages/fiscal/NFeForm"));
 const Index = lazy(() => import("./pages/Index"));
@@ -641,6 +644,33 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <WarehouseForm />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/tax-groups" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <TaxGroups />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/fiscal-operations" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <FiscalOperations />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/fiscal-operations/:id" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <FiscalOperationsForm />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

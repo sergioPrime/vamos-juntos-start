@@ -409,6 +409,62 @@ export type Database = {
           },
         ]
       }
+      blockchain_records: {
+        Row: {
+          block_number: number
+          created_at: string
+          current_hash: string
+          data_snapshot: Json
+          id: string
+          is_valid: boolean | null
+          org_id: string
+          previous_hash: string
+          record_id: string
+          table_name: string
+          timestamp: string
+          transaction_type: string
+          user_id: string | null
+        }
+        Insert: {
+          block_number?: number
+          created_at?: string
+          current_hash: string
+          data_snapshot: Json
+          id?: string
+          is_valid?: boolean | null
+          org_id: string
+          previous_hash: string
+          record_id: string
+          table_name: string
+          timestamp?: string
+          transaction_type: string
+          user_id?: string | null
+        }
+        Update: {
+          block_number?: number
+          created_at?: string
+          current_hash?: string
+          data_snapshot?: Json
+          id?: string
+          is_valid?: boolean | null
+          org_id?: string
+          previous_hash?: string
+          record_id?: string
+          table_name?: string
+          timestamp?: string
+          transaction_type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blockchain_records_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_alerts: {
         Row: {
           alert_type: string
@@ -3801,6 +3857,27 @@ export type Database = {
         }
         Relationships: []
       }
+      blockchain_statistics: {
+        Row: {
+          first_block_date: string | null
+          invalid_blocks: number | null
+          last_block_date: string | null
+          org_id: string | null
+          total_blocks: number | null
+          transaction_types: number | null
+          unique_users: number | null
+          valid_blocks: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blockchain_records_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_entries_report: {
         Row: {
           account_code: string | null
@@ -3922,6 +3999,17 @@ export type Database = {
       }
     }
     Functions: {
+      add_blockchain_record: {
+        Args: {
+          p_data_snapshot: Json
+          p_org_id: string
+          p_record_id: string
+          p_table_name: string
+          p_transaction_type: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       approve_access_request: {
         Args: { notes?: string; request_id: string; reviewer_id: string }
         Returns: undefined
@@ -3967,6 +4055,18 @@ export type Database = {
           p_sync_type: string
           p_target_id?: string
           p_target_table?: string
+        }
+        Returns: string
+      }
+      generate_blockchain_hash: {
+        Args: {
+          p_block_number: number
+          p_data_snapshot: Json
+          p_previous_hash: string
+          p_record_id: string
+          p_table_name: string
+          p_timestamp: string
+          p_transaction_type: string
         }
         Returns: string
       }
@@ -4026,6 +4126,13 @@ export type Database = {
           settled_installments: number
           total_amount: number
           total_installments: number
+        }[]
+      }
+      get_last_blockchain_hash: {
+        Args: { p_org_id: string }
+        Returns: {
+          block_number: number
+          current_hash: string
         }[]
       }
       get_overdue_installments_with_charges: {
@@ -4157,6 +4264,16 @@ export type Database = {
       validate_account_code_hierarchy: {
         Args: { new_account_code: string; parent_account_code: string }
         Returns: boolean
+      }
+      validate_blockchain_chain: {
+        Args: { p_org_id: string }
+        Returns: {
+          first_invalid_block: number
+          invalid_blocks: number
+          is_valid: boolean
+          total_blocks: number
+          validation_message: string
+        }[]
       }
       validate_hierarchy_cycle: {
         Args: { new_id: string; new_parent_id: string; table_name: string }

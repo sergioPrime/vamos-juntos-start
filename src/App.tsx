@@ -34,6 +34,7 @@ const AuditLogs = lazy(() => import("./pages/settings/AuditLogs"));
 const Companies = lazy(() => import("./pages/settings/Companies"));
 const Integrations = lazy(() => import("./pages/settings/Integrations"));
 const ERPConfig = lazy(() => import("./pages/settings/ERPConfig"));
+const Blockchain = lazy(() => import("./pages/settings/Blockchain"));
 const RenovarLicenca = lazy(() => import("./pages/RenovarLicenca"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const PDV = lazy(() => import("./pages/PDV"));
@@ -460,6 +461,15 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <AuditLogs />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/settings/blockchain" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Blockchain />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

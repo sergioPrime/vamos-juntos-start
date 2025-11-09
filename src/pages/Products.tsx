@@ -173,12 +173,68 @@ const Products = () => {
     fcp_st_on_purchase: 0,
     last_purchase_value: 0,
     cost_calculation_method: "nfe_rules",
+    desired_profit_margin: 0,
   })
+  
+  const [autoCalculatePrice, setAutoCalculatePrice] = useState(true)
 
   // Estados para valores mascarados
   const [maskedCostPrice, setMaskedCostPrice] = useState("")
   const [maskedUnitPrice, setMaskedUnitPrice] = useState("")
   const [activeTab, setActiveTab] = useState("dados")
+
+  // Efeito para cálculo automático de preços
+  useEffect(() => {
+    if (!autoCalculatePrice) return
+
+    // Calcular preço de custo com acréscimos
+    const costBase = formData.cost_price || 0
+    const totalExpensesPercent = 
+      (formData.operational_expenses || 0) +
+      (formData.freight_on_purchase || 0) +
+      (formData.insurance_on_purchase || 0) +
+      (formData.ipi_on_purchase || 0) +
+      (formData.icms_st_on_purchase || 0) +
+      (formData.fcp_st_on_purchase || 0)
+    
+    const costWithAdditions = costBase * (1 + totalExpensesPercent / 100)
+    
+    // Calcular preço de venda baseado na margem de lucro desejada
+    const profitMargin = formData.desired_profit_margin || 0
+    let calculatedPrice = 0
+    
+    if (profitMargin > 0 && profitMargin < 100) {
+      // Fórmula: Preço = Custo / (1 - Margem/100)
+      calculatedPrice = costWithAdditions / (1 - profitMargin / 100)
+    } else if (profitMargin === 0) {
+      calculatedPrice = costWithAdditions
+    }
+    
+    // Calcular MVA (Margem de Valor Agregado)
+    const mvaAmount = calculatedPrice - costWithAdditions
+    const mvaPercent = costWithAdditions > 0 ? (mvaAmount / costWithAdditions) * 100 : 0
+
+    setFormData(prev => ({
+      ...prev,
+      cost_with_additions: parseFloat(costWithAdditions.toFixed(2)),
+      unit_price: parseFloat(calculatedPrice.toFixed(2)),
+      mva_profit_amount: parseFloat(mvaAmount.toFixed(2)),
+      mva_profit_percent: parseFloat(mvaPercent.toFixed(2))
+    }))
+
+    // Atualizar valor mascarado do preço de venda
+    setMaskedUnitPrice(applyMask((calculatedPrice * 100).toString(), 'currency'))
+  }, [
+    formData.cost_price,
+    formData.operational_expenses,
+    formData.freight_on_purchase,
+    formData.insurance_on_purchase,
+    formData.ipi_on_purchase,
+    formData.icms_st_on_purchase,
+    formData.fcp_st_on_purchase,
+    formData.desired_profit_margin,
+    autoCalculatePrice
+  ])
 
   useEffect(() => {
     if (currentOrg?.id) {
@@ -277,10 +333,12 @@ const Products = () => {
       fcp_st_on_purchase: 0,
       last_purchase_value: 0,
       cost_calculation_method: "nfe_rules",
+      desired_profit_margin: 0,
     })
     setMaskedCostPrice("")
     setMaskedUnitPrice("")
     setActiveTab("dados")
+    setAutoCalculatePrice(true)
     setEditingProduct(null)
   }
 
@@ -330,6 +388,7 @@ const Products = () => {
         fcp_st_on_purchase: product.fcp_st_on_purchase || 0,
         last_purchase_value: product.last_purchase_value || 0,
         cost_calculation_method: product.cost_calculation_method || "nfe_rules",
+        desired_profit_margin: (product as any).desired_profit_margin || 0,
       })
       // Aplicar máscara aos preços
       setMaskedCostPrice(applyMask((product.cost_price * 100).toString(), 'currency'))
@@ -862,6 +921,18 @@ const Products = () => {
                         <CardTitle>Custos e Precificação</CardTitle>
                       </CardHeader>
                       <CardContent>
+                        {/* Switch para cálculo automático */}
+                        <div className="flex items-center space-x-2 mb-6 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <Switch
+                            id="auto-calculate"
+                            checked={autoCalculatePrice}
+                            onCheckedChange={setAutoCalculatePrice}
+                          />
+                          <Label htmlFor="auto-calculate" className="cursor-pointer">
+                            Calcular preço de venda automaticamente
+                          </Label>
+                        </div>
+
                         {/* Linha 1 */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                           <div className="space-y-2">
@@ -897,9 +968,9 @@ const Products = () => {
                             <Input
                               id="cost_with_additions"
                               type="text"
-                              value={formData.cost_with_additions.toFixed(2)}
+                              value={`R$ ${formData.cost_with_additions.toFixed(2)}`}
                               disabled
-                              className="bg-muted"
+                              className="bg-muted font-semibold"
                             />
                           </div>
 
@@ -1009,11 +1080,10 @@ const Products = () => {
                             <Label htmlFor="mva_profit_amount">(MVA) Lucro R$</Label>
                             <Input
                               id="mva_profit_amount"
-                              type="number"
-                              value={formData.mva_profit_amount}
-                              onChange={(e) => setFormData(prev => ({ ...prev, mva_profit_amount: parseFloat(e.target.value) || 0 }))}
-                              placeholder="0"
-                              step="0.01"
+                              type="text"
+                              value={`R$ ${formData.mva_profit_amount.toFixed(2)}`}
+                              disabled
+                              className="bg-muted font-semibold"
                             />
                           </div>
 
@@ -1021,11 +1091,10 @@ const Products = () => {
                             <Label htmlFor="mva_profit_percent">(MVA) Lucro %</Label>
                             <Input
                               id="mva_profit_percent"
-                              type="number"
-                              value={formData.mva_profit_percent}
-                              onChange={(e) => setFormData(prev => ({ ...prev, mva_profit_percent: parseFloat(e.target.value) || 0 }))}
-                              placeholder="0"
-                              step="0.01"
+                              type="text"
+                              value={`${formData.mva_profit_percent.toFixed(2)}%`}
+                              disabled
+                              className="bg-muted font-semibold"
                             />
                           </div>
 
@@ -1042,7 +1111,28 @@ const Products = () => {
                           </div>
                         </div>
 
-                        {/* Linha 4 */}
+                        {/* Linha 4 - Margem de Lucro Desejada */}
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="desired_profit_margin" className="font-semibold text-primary">
+                              Margem de Lucro Desejada (%)
+                            </Label>
+                            <Input
+                              id="desired_profit_margin"
+                              type="number"
+                              value={formData.desired_profit_margin}
+                              onChange={(e) => setFormData(prev => ({ ...prev, desired_profit_margin: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0"
+                              step="0.01"
+                              min="0"
+                              max="99.99"
+                              className="border-primary font-semibold"
+                              disabled={!autoCalculatePrice}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Linha 5 */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                           <div className="space-y-2">
                             <Label htmlFor="assembly_fee_percent">Taxa Montagem (%)</Label>
@@ -1081,24 +1171,36 @@ const Products = () => {
                           </div>
 
                           <div className="space-y-2">
-                            <Label htmlFor="unit_price" className="text-green-600 font-semibold">Preço de Venda (R$) — Fixado</Label>
+                            <Label htmlFor="unit_price" className="text-green-600 font-semibold">
+                              Preço de Venda (R$) {autoCalculatePrice ? '— Calculado' : '— Fixado'}
+                            </Label>
                             <Input
                               id="unit_price"
                               type="text"
                               value={maskedUnitPrice}
-                              onChange={(e) => setMaskedUnitPrice(e.target.value)}
+                              onChange={(e) => {
+                                if (!autoCalculatePrice) {
+                                  setMaskedUnitPrice(e.target.value)
+                                }
+                              }}
                               onValueChange={(unmasked) => {
-                                const value = getCurrencyValue(applyMask(unmasked, 'currency'))
-                                setFormData(prev => ({ ...prev, unit_price: value }))
+                                if (!autoCalculatePrice) {
+                                  const value = getCurrencyValue(applyMask(unmasked, 'currency'))
+                                  setFormData(prev => ({ ...prev, unit_price: value }))
+                                }
                               }}
                               mask="currency"
                               placeholder="R$ 0,00"
-                              className="border-green-600"
+                              className={cn(
+                                "font-bold text-lg",
+                                autoCalculatePrice ? "bg-green-50 dark:bg-green-950 border-green-600" : "border-green-600"
+                              )}
+                              disabled={autoCalculatePrice}
                             />
                           </div>
                         </div>
 
-                        {/* Linha 5 */}
+                        {/* Linha 6 - Valor última compra */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                           <div className="space-y-2">
                             <Label htmlFor="last_purchase_value">Valor última compra (R$)</Label>

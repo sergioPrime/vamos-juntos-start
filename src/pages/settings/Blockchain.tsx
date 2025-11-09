@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useBlockchain } from '@/hooks/useBlockchain'
+import { useBlockchainAlerts } from '@/hooks/useBlockchainAlerts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Shield, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Clock, Database, Users, Activity } from 'lucide-react'
+import { Shield, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Clock, Database, Users, Activity, Bell } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
+import { BlockchainAlertsPanel } from '@/components/blockchain/BlockchainAlertsPanel'
 
 export default function Blockchain() {
   const { 
@@ -17,6 +19,8 @@ export default function Blockchain() {
     getBlockchainStatistics, 
     validateBlockchainChain 
   } = useBlockchain()
+  
+  const { unreadCount } = useBlockchainAlerts()
 
   const [records, setRecords] = useState<any[]>([])
   const [statistics, setStatistics] = useState<any>(null)
@@ -144,6 +148,9 @@ export default function Blockchain() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Alerts Panel */}
+      <BlockchainAlertsPanel />
 
       {/* Validation Card */}
       <Card>

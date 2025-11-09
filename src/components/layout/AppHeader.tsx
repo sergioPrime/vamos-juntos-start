@@ -11,6 +11,7 @@ import { QuickCustomerDialog } from "@/components/QuickCustomerDialog"
 import { supabase } from "@/integrations/supabase/client"
 import { AlertNotificationBell } from "@/components/inventory/AlertNotificationBell"
 import { OverdueNotifications } from "@/components/appointments/OverdueNotifications"
+import { BlockchainAlertBell } from "@/components/blockchain/BlockchainAlertBell"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -175,6 +176,9 @@ export function AppHeader() {
            
            {/* Alert Notification Bell */}
            <AlertNotificationBell />
+           
+           {/* Blockchain Alerts */}
+           <BlockchainAlertBell />
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -274,6 +278,9 @@ export function AppHeader() {
         <div className="flex lg:hidden items-center gap-2">
            {/* Overdue Appointments Mobile */}
            <OverdueNotifications />
+           
+           {/* Blockchain Alerts Mobile */}
+           <BlockchainAlertBell />
            
            <Tooltip>
              <TooltipTrigger asChild>

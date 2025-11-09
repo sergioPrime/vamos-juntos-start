@@ -409,6 +409,75 @@ export type Database = {
           },
         ]
       }
+      blockchain_alerts: {
+        Row: {
+          alert_type: string
+          block_id: string | null
+          block_number: number | null
+          created_at: string
+          details: Json | null
+          email_sent: boolean | null
+          email_sent_at: string | null
+          id: string
+          is_read: boolean | null
+          is_resolved: boolean | null
+          message: string
+          org_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+        }
+        Insert: {
+          alert_type: string
+          block_id?: string | null
+          block_number?: number | null
+          created_at?: string
+          details?: Json | null
+          email_sent?: boolean | null
+          email_sent_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          is_resolved?: boolean | null
+          message: string
+          org_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+        }
+        Update: {
+          alert_type?: string
+          block_id?: string | null
+          block_number?: number | null
+          created_at?: string
+          details?: Json | null
+          email_sent?: boolean | null
+          email_sent_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          is_resolved?: boolean | null
+          message?: string
+          org_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blockchain_alerts_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "blockchain_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blockchain_alerts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blockchain_records: {
         Row: {
           block_number: number
@@ -4037,6 +4106,18 @@ export type Database = {
           reorder_point: number
         }[]
       }
+      create_blockchain_alert: {
+        Args: {
+          p_alert_type: string
+          p_block_id: string
+          p_block_number: number
+          p_details?: Json
+          p_message: string
+          p_org_id: string
+          p_severity: string
+        }
+        Returns: string
+      }
       create_organization_with_owner: {
         Args: { org_name: string; org_slug: string }
         Returns: {
@@ -4161,6 +4242,10 @@ export type Database = {
           sync_type: string
           total_syncs: number
         }[]
+      }
+      get_unread_blockchain_alerts_count: {
+        Args: { p_org_id: string }
+        Returns: number
       }
       get_warehouse_stock: {
         Args: { p_product_id: string; p_warehouse_id: string }

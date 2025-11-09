@@ -79,6 +79,17 @@ interface Product {
   market_price_min?: number
   market_price_max?: number
   last_market_check?: string
+  // Campos fiscais
+  grupo_tributario?: string
+  cfop_padrao?: string
+  codigo_ncm?: string
+  codigo_cest?: string
+  ean_codigo_barras?: string
+  unidade_comercial?: string
+  origem_mercadoria?: string
+  produzido_escala_nao_relevante?: boolean
+  fabricante?: string
+  codigo_beneficio_fiscal?: string
 }
 
 interface Supplier {
@@ -183,6 +194,17 @@ const Products = () => {
     competitor_prices: [],
     market_price_min: 0,
     market_price_max: 0,
+    // Campos fiscais
+    grupo_tributario: "",
+    cfop_padrao: "",
+    codigo_ncm: "",
+    codigo_cest: "",
+    ean_codigo_barras: "",
+    unidade_comercial: "UN",
+    origem_mercadoria: "0",
+    produzido_escala_nao_relevante: false,
+    fabricante: "",
+    codigo_beneficio_fiscal: "",
   })
   
   const [autoCalculatePrice, setAutoCalculatePrice] = useState(true)
@@ -390,6 +412,16 @@ const Products = () => {
       competitor_prices: [],
       market_price_min: 0,
       market_price_max: 0,
+      grupo_tributario: "",
+      cfop_padrao: "",
+      codigo_ncm: "",
+      codigo_cest: "",
+      ean_codigo_barras: "",
+      unidade_comercial: "UN",
+      origem_mercadoria: "0",
+      produzido_escala_nao_relevante: false,
+      fabricante: "",
+      codigo_beneficio_fiscal: "",
     })
     setMaskedCostPrice("")
     setMaskedUnitPrice("")
@@ -584,6 +616,16 @@ const Products = () => {
         competitor_prices: product.competitor_prices || [],
         market_price_min: product.market_price_min || 0,
         market_price_max: product.market_price_max || 0,
+        grupo_tributario: (product as any).grupo_tributario || "",
+        cfop_padrao: (product as any).cfop_padrao || "",
+        codigo_ncm: (product as any).codigo_ncm || "",
+        codigo_cest: (product as any).codigo_cest || "",
+        ean_codigo_barras: (product as any).ean_codigo_barras || "",
+        unidade_comercial: (product as any).unidade_comercial || "UN",
+        origem_mercadoria: (product as any).origem_mercadoria || "0",
+        produzido_escala_nao_relevante: (product as any).produzido_escala_nao_relevante || false,
+        fabricante: (product as any).fabricante || "",
+        codigo_beneficio_fiscal: (product as any).codigo_beneficio_fiscal || "",
       })
       // Aplicar máscara aos preços
       setMaskedCostPrice(applyMask((product.cost_price * 100).toString(), 'currency'))
@@ -855,6 +897,12 @@ const Products = () => {
                     className="data-[state=active]:bg-white data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none pb-3"
                   >
                     Precificação
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="fiscal"
+                    className="data-[state=active]:bg-white data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none pb-3"
+                  >
+                    Fiscal
                   </TabsTrigger>
                 </TabsList>
 
@@ -1955,6 +2003,204 @@ const Products = () => {
                         </Dialog>
                       </CardContent>
                     </Card>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="fiscal" className="mt-0">
+                  <div className="space-y-6 p-6">
+                    
+                    {/* Card: Informações Fiscais Básicas */}
+                    <Card>
+                      <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950">
+                        <CardTitle className="flex items-center gap-2">
+                          📋 Informações Fiscais Básicas
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="grupo_tributario">Grupo Tributário <span className="text-primary">*</span></Label>
+                            <Input
+                              id="grupo_tributario"
+                              type="text"
+                              value={formData.grupo_tributario}
+                              onChange={(e) => setFormData(prev => ({ ...prev, grupo_tributario: e.target.value }))}
+                              placeholder="Digite o grupo tributário"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="cfop_padrao">CFOP Padrão</Label>
+                            <Input
+                              id="cfop_padrao"
+                              type="text"
+                              maxLength={4}
+                              value={formData.cfop_padrao}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, '')
+                                setFormData(prev => ({ ...prev, cfop_padrao: value }))
+                              }}
+                              placeholder="0000"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="codigo_ncm">Código NCM <span className="text-primary">*</span></Label>
+                            <Input
+                              id="codigo_ncm"
+                              type="text"
+                              maxLength={8}
+                              value={formData.codigo_ncm}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, '')
+                                setFormData(prev => ({ ...prev, codigo_ncm: value }))
+                              }}
+                              placeholder="00000000"
+                            />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Card: Códigos e Identificação */}
+                    <Card>
+                      <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950">
+                        <CardTitle className="flex items-center gap-2">
+                          🔢 Códigos e Identificação
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="codigo_cest">Código CEST</Label>
+                            <Input
+                              id="codigo_cest"
+                              type="text"
+                              maxLength={7}
+                              value={formData.codigo_cest}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, '')
+                                setFormData(prev => ({ ...prev, codigo_cest: value }))
+                              }}
+                              placeholder="0000000"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="ean_codigo_barras">EAN - CÓDIGO DE BARRAS</Label>
+                            <Input
+                              id="ean_codigo_barras"
+                              type="text"
+                              value={formData.ean_codigo_barras}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, '')
+                                setFormData(prev => ({ ...prev, ean_codigo_barras: value }))
+                              }}
+                              placeholder="Código de barras"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="unidade_comercial">Unidade Comercial <span className="text-primary">*</span></Label>
+                            <Input
+                              id="unidade_comercial"
+                              type="text"
+                              maxLength={6}
+                              value={formData.unidade_comercial}
+                              onChange={(e) => setFormData(prev => ({ ...prev, unidade_comercial: e.target.value.toUpperCase() }))}
+                              placeholder="UN"
+                            />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Card: Origem e Características */}
+                    <Card>
+                      <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950 dark:to-purple-950">
+                        <CardTitle className="flex items-center gap-2">
+                          🌍 Origem e Características
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="origem_mercadoria">Origem da Mercadoria <span className="text-primary">*</span></Label>
+                            <Select 
+                              value={formData.origem_mercadoria} 
+                              onValueChange={(value) => setFormData(prev => ({ ...prev, origem_mercadoria: value }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione a origem" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="0">0 - Nacional</SelectItem>
+                                <SelectItem value="1">1 - Estrangeira - Importação Direta</SelectItem>
+                                <SelectItem value="2">2 - Estrangeira - Adquirida no Mercado Interno</SelectItem>
+                                <SelectItem value="3">3 - Nacional - Mercadoria com Conteúdo de Importação &gt; 40%</SelectItem>
+                                <SelectItem value="4">4 - Nacional - Produção em Conformidade com Processos Produtivos Básicos</SelectItem>
+                                <SelectItem value="5">5 - Nacional - Mercadoria com Conteúdo de Importação ≤ 40%</SelectItem>
+                                <SelectItem value="6">6 - Estrangeira - Importação Direta, sem Similar Nacional</SelectItem>
+                                <SelectItem value="7">7 - Estrangeira - Adquirida no Mercado Interno, sem Similar Nacional</SelectItem>
+                                <SelectItem value="8">8 - Nacional - Mercadoria com Conteúdo de Importação &gt; 70%</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="fabricante">Fabricante</Label>
+                            <Input
+                              id="fabricante"
+                              type="text"
+                              value={formData.fabricante}
+                              onChange={(e) => setFormData(prev => ({ ...prev, fabricante: e.target.value }))}
+                              placeholder="Nome do fabricante"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
+                          <div className="flex-1">
+                            <Label htmlFor="produzido_escala_nao_relevante" className="cursor-pointer font-medium">
+                              Produzido em Escala Não Relevante
+                            </Label>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Indica se o produto é fabricado em pequena escala
+                            </p>
+                          </div>
+                          <Switch
+                            id="produzido_escala_nao_relevante"
+                            checked={formData.produzido_escala_nao_relevante}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, produzido_escala_nao_relevante: checked }))}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Card: Benefícios Fiscais */}
+                    <Card>
+                      <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-950">
+                        <CardTitle className="flex items-center gap-2">
+                          🎁 Benefícios Fiscais
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="codigo_beneficio_fiscal">Código de Benefício Fiscal</Label>
+                          <Input
+                            id="codigo_beneficio_fiscal"
+                            type="text"
+                            value={formData.codigo_beneficio_fiscal}
+                            onChange={(e) => setFormData(prev => ({ ...prev, codigo_beneficio_fiscal: e.target.value }))}
+                            placeholder="Código conforme legislação estadual"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Código do benefício fiscal utilizado pela unidade federativa (conforme legislação estadual)
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
                   </div>
                 </TabsContent>
               </Tabs>

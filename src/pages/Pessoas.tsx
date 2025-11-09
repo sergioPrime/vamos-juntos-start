@@ -386,6 +386,7 @@ export function Pessoas() {
                       value={formData.documento}
                       onChange={(e) => handleInputChange("documento", e.target.value)}
                       mask={documentMask}
+                      validateDocument={true}
                     />
                     <button 
                       type="button" 

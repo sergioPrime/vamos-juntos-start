@@ -1,4 +1,5 @@
 import * as React from "react"
+import { AlertCircle, CheckCircle2 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
@@ -10,13 +11,15 @@ export interface InputProps extends React.ComponentProps<"input"> {
   allowedChars?: RegExp
   mask?: MaskType
   onValueChange?: (value: string) => void
+  validateDocument?: boolean
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, uppercase = false, blockSpecialChars = false, allowedChars, mask, onChange, onValueChange, ...props }, ref) => {
+  ({ className, type, uppercase = false, blockSpecialChars = false, allowedChars, mask, onChange, onValueChange, validateDocument = false, ...props }, ref) => {
     const { toast } = useToast()
-    const { applyMask, removeMask, getConfig } = useMask(mask)
+    const { applyMask, removeMask, getConfig, detectDocumentType, validateCPF, validateCNPJ } = useMask(mask)
     const [lastInvalidChar, setLastInvalidChar] = React.useState<string | null>(null)
+    const [documentValidation, setDocumentValidation] = React.useState<{ isValid: boolean; message: string } | null>(null)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       let value = e.target.value
@@ -67,6 +70,35 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         value = value.toUpperCase()
       }
 
+      // Validar documento se necessário
+      if (validateDocument && value.length > 0) {
+        const docType = detectDocumentType(value)
+        const numbers = value.replace(/\D/g, '')
+        
+        if (numbers.length === 11 || numbers.length === 14) {
+          const isValid = docType === 'cpf' ? validateCPF(value) : validateCNPJ(value)
+          
+          if (isValid) {
+            setDocumentValidation({
+              isValid: true,
+              message: `${docType === 'cpf' ? 'CPF' : 'CNPJ'} válido`
+            })
+          } else {
+            setDocumentValidation({
+              isValid: false,
+              message: `${docType === 'cpf' ? 'CPF' : 'CNPJ'} inválido - verifique os dígitos`
+            })
+          }
+        } else if (numbers.length > 0) {
+          setDocumentValidation({
+            isValid: false,
+            message: 'Digite o documento completo'
+          })
+        } else {
+          setDocumentValidation(null)
+        }
+      }
+
       // Atualizar o valor do input
       target.value = value
       
@@ -83,19 +115,40 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const maskConfig = mask ? getConfig(mask) : null
 
     return (
-      <input
-        type={type}
-        className={cn(
-          "flex h-11 w-full rounded-lg border border-input bg-background px-4 py-3 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm transition-colors",
-          uppercase && type !== "password" && type !== "email" && !mask && "uppercase",
-          className
+      <div className="relative w-full">
+        <input
+          type={type}
+          className={cn(
+            "flex h-11 w-full rounded-lg border border-input bg-background px-4 py-3 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm transition-colors",
+            uppercase && type !== "password" && type !== "email" && !mask && "uppercase",
+            validateDocument && documentValidation && !documentValidation.isValid && "border-destructive focus-visible:ring-destructive",
+            validateDocument && documentValidation && documentValidation.isValid && "border-green-500 focus-visible:ring-green-500",
+            validateDocument && "pr-10",
+            className
+          )}
+          ref={ref}
+          onChange={handleChange}
+          maxLength={maskConfig?.maxLength}
+          placeholder={maskConfig?.placeholder || props.placeholder}
+          {...props}
+        />
+        {validateDocument && documentValidation && (
+          <>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {documentValidation.isValid ? (
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+              ) : (
+                <AlertCircle className="h-5 w-5 text-destructive" />
+              )}
+            </div>
+            {!documentValidation.isValid && (
+              <p className="mt-1 text-xs text-destructive">
+                {documentValidation.message}
+              </p>
+            )}
+          </>
         )}
-        ref={ref}
-        onChange={handleChange}
-        maxLength={maskConfig?.maxLength}
-        placeholder={maskConfig?.placeholder || props.placeholder}
-        {...props}
-      />
+      </div>
     )
   }
 )

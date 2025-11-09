@@ -126,6 +126,42 @@ export function useFiscalOperations() {
     }
   };
 
+  const duplicateFiscalOperation = async (id: string) => {
+    if (!currentOrg || !user) return;
+
+    try {
+      // Buscar a operação fiscal original
+      const original = fiscalOperations.find(op => op.id === id);
+      if (!original) {
+        throw new Error('Operação fiscal não encontrada');
+      }
+
+      // Criar cópia sem o ID e com nome modificado
+      const { id: _id, created_at, updated_at, created_by, ...dataToCopy } = original;
+      
+      const duplicatedData = {
+        ...dataToCopy,
+        operation_name: original.operation_name 
+          ? `${original.operation_name} - Cópia` 
+          : undefined,
+        org_id: currentOrg.id,
+        created_by: user.id,
+      };
+
+      const { error } = await supabase
+        .from('fiscal_operations')
+        .insert(duplicatedData as any);
+
+      if (error) throw error;
+      toast.success('Operação fiscal duplicada com sucesso');
+      await loadFiscalOperations();
+    } catch (error: any) {
+      console.error('Erro ao duplicar operação fiscal:', error);
+      toast.error('Erro ao duplicar operação fiscal');
+      throw error;
+    }
+  };
+
   useEffect(() => {
     if (currentOrg) {
       loadFiscalOperations();
@@ -138,6 +174,7 @@ export function useFiscalOperations() {
     createFiscalOperation,
     updateFiscalOperation,
     deleteFiscalOperation,
+    duplicateFiscalOperation,
     refetch: loadFiscalOperations,
   };
 }

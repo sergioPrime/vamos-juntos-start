@@ -40,12 +40,13 @@ const BRAZILIAN_STATES = [
 
 export default function FiscalOperations() {
   const navigate = useNavigate();
-  const { fiscalOperations, loading, deleteFiscalOperation } = useFiscalOperations();
+  const { fiscalOperations, loading, deleteFiscalOperation, duplicateFiscalOperation } = useFiscalOperations();
   const { taxGroups } = useTaxGroups();
   const [search, setSearch] = useState('');
   const [filterState, setFilterState] = useState<string>('all');
   const [filterTaxGroup, setFilterTaxGroup] = useState<string>('all');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
   const [selectedOperation, setSelectedOperation] = useState<FiscalOperation | null>(null);
 
   const filteredOperations = fiscalOperations.filter((op) => {
@@ -63,6 +64,17 @@ export default function FiscalOperations() {
       setSelectedOperation(null);
     } catch (error) {
       console.error('Erro ao excluir operação fiscal:', error);
+    }
+  };
+
+  const handleDuplicate = async () => {
+    if (!selectedOperation) return;
+    try {
+      await duplicateFiscalOperation(selectedOperation.id);
+      setShowDuplicateDialog(false);
+      setSelectedOperation(null);
+    } catch (error) {
+      console.error('Erro ao duplicar operação fiscal:', error);
     }
   };
 
@@ -170,7 +182,10 @@ export default function FiscalOperations() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => navigate(`/cadastros/fiscal-operations/duplicate/${operation.id}`)}
+                            onClick={() => {
+                              setSelectedOperation(operation);
+                              setShowDuplicateDialog(true);
+                            }}
                             title="Duplicar"
                           >
                             <Copy className="h-4 w-4" />
@@ -209,6 +224,22 @@ export default function FiscalOperations() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete}>Excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Duplicar Operação Fiscal</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deseja criar uma cópia da operação fiscal "{selectedOperation?.operation_name}"?
+              Uma nova operação será criada com os mesmos dados e o nome "{selectedOperation?.operation_name} - Cópia".
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDuplicate}>Duplicar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

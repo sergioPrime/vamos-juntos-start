@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Copy, Search, ArrowLeft, Save } from 'lucide-react';
+import { Plus, Pencil, Trash2, Copy, Search, ArrowLeft, Save, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Table,
   TableBody,
@@ -85,6 +86,23 @@ export default function FiscalOperations() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
+      <Alert className="border-primary/20 bg-primary/5">
+        <Shield className="h-4 w-4 text-primary" />
+        <AlertDescription className="flex items-center justify-between">
+          <span>
+            <strong>Auditoria Blockchain Ativa:</strong> Todas as alterações em operações fiscais são registradas de forma imutável.
+          </span>
+          <Button 
+            variant="link" 
+            size="sm" 
+            onClick={() => navigate('/settings/blockchain')}
+            className="text-primary h-auto p-0"
+          >
+            Ver Histórico →
+          </Button>
+        </AlertDescription>
+      </Alert>
+
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">

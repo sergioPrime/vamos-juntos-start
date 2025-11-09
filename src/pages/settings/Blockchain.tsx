@@ -5,12 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Shield, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Clock, Database, Users, Activity, Bell } from 'lucide-react'
+import { Shield, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Clock, Database, Users, Activity, FileText } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import { BlockchainAlertsPanel } from '@/components/blockchain/BlockchainAlertsPanel'
+import { FiscalAuditHistory } from '@/components/fiscal/FiscalAuditHistory'
 
 export default function Blockchain() {
   const { 
@@ -151,6 +152,9 @@ export default function Blockchain() {
 
       {/* Alerts Panel */}
       <BlockchainAlertsPanel />
+
+      {/* Fiscal Audit History */}
+      <FiscalAuditHistory />
 
       {/* Validation Card */}
       <Card>

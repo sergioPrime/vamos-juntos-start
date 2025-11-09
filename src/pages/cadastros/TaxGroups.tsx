@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Power, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Power, Search, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Table,
   TableBody,
@@ -34,8 +35,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useTaxGroups, TaxGroup } from '@/hooks/useTaxGroups';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 export default function TaxGroups() {
+  const navigate = useNavigate();
   const { taxGroups, loading, createTaxGroup, updateTaxGroup, deleteTaxGroup } = useTaxGroups();
   const [search, setSearch] = useState('');
   const [showDialog, setShowDialog] = useState(false);
@@ -98,6 +101,23 @@ export default function TaxGroups() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
+      <Alert className="border-primary/20 bg-primary/5">
+        <Shield className="h-4 w-4 text-primary" />
+        <AlertDescription className="flex items-center justify-between">
+          <span>
+            <strong>Auditoria Blockchain Ativa:</strong> Todas as alterações em grupos tributários são registradas de forma imutável.
+          </span>
+          <Button 
+            variant="link" 
+            size="sm" 
+            onClick={() => navigate('/settings/blockchain')}
+            className="text-primary h-auto p-0"
+          >
+            Ver Histórico →
+          </Button>
+        </AlertDescription>
+      </Alert>
+
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">

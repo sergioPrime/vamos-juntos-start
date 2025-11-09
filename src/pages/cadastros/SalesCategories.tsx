@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Search, Edit, Trash2, Check, X } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Check, X, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -116,6 +117,23 @@ const SalesCategories = () => {
 
   return (
     <div className="space-y-6">
+      <Alert className="border-primary/20 bg-primary/5">
+        <Shield className="h-4 w-4 text-primary" />
+        <AlertDescription className="flex items-center justify-between">
+          <span>
+            <strong>Auditoria Blockchain Ativa:</strong> Todas as alterações em categorias de vendas são registradas de forma imutável.
+          </span>
+          <Button 
+            variant="link" 
+            size="sm" 
+            onClick={() => navigate('/settings/blockchain')}
+            className="text-primary h-auto p-0"
+          >
+            Ver Histórico →
+          </Button>
+        </AlertDescription>
+      </Alert>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Categorias de Vendas</h1>

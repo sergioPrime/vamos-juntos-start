@@ -12,14 +12,16 @@ export interface InputProps extends React.ComponentProps<"input"> {
   mask?: MaskType
   onValueChange?: (value: string) => void
   validateDocument?: boolean
+  validateCNAE?: boolean
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, uppercase = false, blockSpecialChars = false, allowedChars, mask, onChange, onValueChange, validateDocument = false, ...props }, ref) => {
+  ({ className, type, uppercase = false, blockSpecialChars = false, allowedChars, mask, onChange, onValueChange, validateDocument = false, validateCNAE = false, ...props }, ref) => {
     const { toast } = useToast()
-    const { applyMask, removeMask, getConfig, detectDocumentType, validateCPF, validateCNPJ } = useMask(mask)
+    const { applyMask, removeMask, getConfig, detectDocumentType, validateCPF, validateCNPJ, validateCNAE: validateCNAEFn } = useMask(mask)
     const [lastInvalidChar, setLastInvalidChar] = React.useState<string | null>(null)
     const [documentValidation, setDocumentValidation] = React.useState<{ isValid: boolean; message: string } | null>(null)
+    const [cnaeValidation, setCnaeValidation] = React.useState<{ isValid: boolean; message: string } | null>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       let value = e.target.value
@@ -99,6 +101,34 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         }
       }
 
+      // Validar CNAE se necessário
+      if (validateCNAE && value.length > 0) {
+        const numbers = value.replace(/\D/g, '')
+        
+        if (numbers.length === 7) {
+          const isValid = validateCNAEFn(value)
+          
+          if (isValid) {
+            setCnaeValidation({
+              isValid: true,
+              message: 'CNAE válido'
+            })
+          } else {
+            setCnaeValidation({
+              isValid: false,
+              message: 'CNAE inválido - verifique o dígito verificador'
+            })
+          }
+        } else if (numbers.length > 0) {
+          setCnaeValidation({
+            isValid: false,
+            message: 'Digite o CNAE completo (7 dígitos)'
+          })
+        } else {
+          setCnaeValidation(null)
+        }
+      }
+
       // Atualizar o valor do input
       target.value = value
       
@@ -123,7 +153,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             uppercase && type !== "password" && type !== "email" && !mask && "uppercase",
             validateDocument && documentValidation && !documentValidation.isValid && "border-destructive focus-visible:ring-destructive",
             validateDocument && documentValidation && documentValidation.isValid && "border-green-500 focus-visible:ring-green-500",
-            validateDocument && "pr-10",
+            validateCNAE && cnaeValidation && !cnaeValidation.isValid && "border-destructive focus-visible:ring-destructive",
+            validateCNAE && cnaeValidation && cnaeValidation.isValid && "border-green-500 focus-visible:ring-green-500",
+            (validateDocument || validateCNAE) && "pr-10",
             className
           )}
           ref={ref}
@@ -144,6 +176,22 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {!documentValidation.isValid && (
               <p className="mt-1 text-xs text-destructive">
                 {documentValidation.message}
+              </p>
+            )}
+          </>
+        )}
+        {validateCNAE && cnaeValidation && (
+          <>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {cnaeValidation.isValid ? (
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+              ) : (
+                <AlertCircle className="h-5 w-5 text-destructive" />
+              )}
+            </div>
+            {!cnaeValidation.isValid && (
+              <p className="mt-1 text-xs text-destructive">
+                {cnaeValidation.message}
               </p>
             )}
           </>

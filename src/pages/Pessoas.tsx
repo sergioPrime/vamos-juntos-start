@@ -24,6 +24,7 @@ interface PessoaFormData {
   tipoPessoa: "fisica" | "juridica" | ""
   documento: string
   razaoSocial: string
+  cnae: string
   emailGeral: string
   emailsSecundarios: string[]
   telefone: string
@@ -69,6 +70,7 @@ export function Pessoas() {
     tipoPessoa: "",
     documento: "",
     razaoSocial: "",
+    cnae: "",
     emailGeral: "",
     emailsSecundarios: [],
     telefone: "",
@@ -242,6 +244,7 @@ export function Pessoas() {
         tipoPessoa: "",
         documento: "",
         razaoSocial: "",
+        cnae: "",
         emailGeral: "",
         emailsSecundarios: [],
         telefone: "",
@@ -292,6 +295,7 @@ export function Pessoas() {
         tipoPessoa: pessoa.tipo_pessoa,
         documento: pessoa.documento,
         razaoSocial: pessoa.razao_social || "",
+        cnae: "",
         emailGeral: pessoa.email_geral || "",
         emailsSecundarios: pessoa.emails_secundarios || [],
         telefone: pessoa.telefone || "",
@@ -317,6 +321,7 @@ export function Pessoas() {
         tipoPessoa: "",
         documento: "",
         razaoSocial: "",
+        cnae: "",
         emailGeral: "",
         emailsSecundarios: [],
         telefone: "",
@@ -454,6 +459,43 @@ export function Pessoas() {
                   </div>
                 </div>
               </div>
+
+              {/* Linha Razão Social e CNAE (apenas para Pessoa Jurídica) */}
+              {formData.tipoPessoa === "juridica" && (
+                <div className={styles.formGrid2Col}>
+                  <div>
+                    <label htmlFor="razaoSocial" className={styles.formLabel}>
+                      Razão Social
+                    </label>
+                    <Input
+                      id="razaoSocial"
+                      type="text"
+                      className={styles.formInput}
+                      value={formData.razaoSocial}
+                      onChange={(e) => handleInputChange("razaoSocial", e.target.value)}
+                      placeholder="Razão social da empresa"
+                      uppercase
+                      blockSpecialChars
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="cnae" className={styles.formLabel}>
+                      CNAE
+                    </label>
+                    <Input
+                      id="cnae"
+                      type="text"
+                      className={styles.formInput}
+                      value={formData.cnae}
+                      onChange={(e) => handleInputChange("cnae", e.target.value)}
+                      mask="cnae"
+                      validateCNAE={true}
+                      placeholder="0000-0/00"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Segunda linha - E-mail Geral, E-mails Secundários e Telefone */}
               <div className={styles.formGrid}>

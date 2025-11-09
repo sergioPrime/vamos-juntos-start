@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export type MaskType = 'cpf' | 'cnpj' | 'phone' | 'mobile' | 'cep' | 'currency' | 'none';
+export type MaskType = 'cpf' | 'cnpj' | 'phone' | 'mobile' | 'cep' | 'currency' | 'cnae' | 'none';
 
 interface MaskConfig {
   mask: string;
@@ -38,6 +38,11 @@ const maskConfigs: Record<MaskType, MaskConfig | null> = {
     mask: 'R$ #',
     placeholder: 'R$ 0,00',
     maxLength: 19, // R$ 999.999.999,99
+  },
+  cnae: {
+    mask: '####-#/##',
+    placeholder: '0000-0/00',
+    maxLength: 10,
   },
   none: null,
 };
@@ -247,6 +252,31 @@ export const useMask = (maskType: MaskType = 'none') => {
     return true;
   };
 
+  const validateCNAE = (cnae: string): boolean => {
+    const numbers = cnae.replace(/\D/g, '');
+    
+    if (numbers.length !== 7) return false;
+
+    // Extrair os dígitos
+    const digits = numbers.substring(0, 6);
+    const dv = parseInt(numbers.charAt(6));
+
+    // Pesos para o cálculo: 2, 3, 4, 5, 6, 7, 8, 9
+    const weights = [2, 3, 4, 5, 6, 7, 8, 9];
+    let sum = 0;
+
+    // Calcular soma ponderada
+    for (let i = 0; i < 6; i++) {
+      sum += parseInt(digits.charAt(i)) * weights[i];
+    }
+
+    // Calcular o dígito verificador
+    const remainder = sum % 11;
+    const calculatedDV = remainder < 2 ? 0 : 11 - remainder;
+
+    return calculatedDV === dv;
+  };
+
   const searchAddressByCEP = async (cep: string): Promise<{
     logradouro: string;
     bairro: string;
@@ -285,6 +315,7 @@ export const useMask = (maskType: MaskType = 'none') => {
     detectPhoneType,
     validateCPF,
     validateCNPJ,
+    validateCNAE,
     searchAddressByCEP,
     getCurrencyValue,
   };

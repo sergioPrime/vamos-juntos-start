@@ -24,7 +24,7 @@ const SalesCategoriesForm = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const { currentOrg } = useOrganization();
-  const isEdit = !!id;
+  const isEdit = id && id !== 'novo';
 
   const [formData, setFormData] = useState<SalesCategoryFormData>({
     name: "",

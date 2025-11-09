@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { UserPlus } from "lucide-react"
+import { UserPlus, Search } from "lucide-react"
 import { usePessoas } from "@/hooks/usePessoas"
 import { useOrganization } from "@/hooks/useOrganization"
 import { useAuth } from "@/hooks/useAuth"
+import { useViaCep } from "@/hooks/useViaCep"
+import { useMask } from "@/hooks/useMask"
 import { toast } from "sonner"
 
 interface QuickCustomerDialogProps {
@@ -19,6 +21,8 @@ export function QuickCustomerDialog({ open, onOpenChange }: QuickCustomerDialogP
   const { createPessoa } = usePessoas()
   const { currentOrg } = useOrganization()
   const { user } = useAuth()
+  const { searchCep, loading: cepLoading } = useViaCep()
+  const { detectDocumentType, detectPhoneType } = useMask()
   const [loading, setLoading] = useState(false)
 
   const [formData, setFormData] = useState({
@@ -38,6 +42,28 @@ export function QuickCustomerDialog({ open, onOpenChange }: QuickCustomerDialogP
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
+
+  const handleCepSearch = async () => {
+    if (!formData.cep) {
+      toast.error('Digite um CEP para buscar')
+      return
+    }
+    
+    const result = await searchCep(formData.cep)
+    if (result) {
+      setFormData(prev => ({
+        ...prev,
+        logradouro: result.logradouro,
+        bairro: result.bairro,
+        cidade: result.localidade,
+        uf: result.uf,
+        complemento: result.complemento || prev.complemento
+      }))
+    }
+  }
+
+  const documentMask = formData.documento ? detectDocumentType(formData.documento) : 'cpf'
+  const phoneMask = formData.telefone ? detectPhoneType(formData.telefone) : 'mobile'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -132,6 +158,8 @@ export function QuickCustomerDialog({ open, onOpenChange }: QuickCustomerDialogP
                 onChange={(e) => handleInputChange("documento", e.target.value)}
                 placeholder=""
                 className="h-9 bg-background border-input"
+                mask={documentMask}
+                validateDocument
               />
             </div>
             <div className="col-span-9 space-y-1.5">
@@ -174,6 +202,7 @@ export function QuickCustomerDialog({ open, onOpenChange }: QuickCustomerDialogP
                 onChange={(e) => handleInputChange("telefone", e.target.value)}
                 placeholder=""
                 className="h-9 bg-background border-input"
+                mask={phoneMask}
               />
             </div>
           </div>
@@ -184,13 +213,27 @@ export function QuickCustomerDialog({ open, onOpenChange }: QuickCustomerDialogP
               <Label htmlFor="cep" className="text-sm font-semibold text-foreground">
                 CEP
               </Label>
-              <Input
-                id="cep"
-                value={formData.cep}
-                onChange={(e) => handleInputChange("cep", e.target.value)}
-                placeholder=""
-                className="h-9 bg-background border-input"
-              />
+              <div className="flex items-center gap-1">
+                <Input
+                  id="cep"
+                  value={formData.cep}
+                  onChange={(e) => handleInputChange("cep", e.target.value)}
+                  placeholder=""
+                  className="h-9 bg-background border-input"
+                  mask="cep"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={handleCepSearch}
+                  disabled={cepLoading}
+                  title="Buscar CEP"
+                  className="h-9 w-9 flex-shrink-0"
+                >
+                  <Search className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             <div className="col-span-7 space-y-1.5">
               <Label htmlFor="logradouro" className="text-sm font-semibold text-foreground">

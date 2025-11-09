@@ -17,6 +17,7 @@ import { usePessoas, type Pessoa } from "@/hooks/usePessoas"
 import { useOrganization } from "@/hooks/useOrganization"
 import { useAuth } from "@/hooks/useAuth"
 import { useMask } from "@/hooks/useMask"
+import { useViaCep } from "@/hooks/useViaCep"
 
 interface PessoaFormData {
   nomeFantasia: string
@@ -32,6 +33,13 @@ interface PessoaFormData {
   vendedorPadrao: string
   transportadoraPadrao: string
   rotulos: string[]
+  cep: string
+  logradouro: string
+  numero: string
+  complemento: string
+  bairro: string
+  cidade: string
+  uf: string
 }
 
 const rotulosDisponiveis = [
@@ -54,6 +62,7 @@ export function Pessoas() {
   const { currentOrg: currentOrganization } = useOrganization()
   const { user } = useAuth()
   const { detectDocumentType, detectPhoneType } = useMask()
+  const { searchCep, loading: cepLoading } = useViaCep()
   
   const [formData, setFormData] = useState<PessoaFormData>({
     nomeFantasia: "",
@@ -68,7 +77,14 @@ export function Pessoas() {
     bloquearNotificacoesWhatsapp: false,
     vendedorPadrao: "",
     transportadoraPadrao: "",
-    rotulos: []
+    rotulos: [],
+    cep: "",
+    logradouro: "",
+    numero: "",
+    complemento: "",
+    bairro: "",
+    cidade: "",
+    uf: ""
   })
 
   const [newEmailSecundario, setNewEmailSecundario] = useState("")
@@ -130,6 +146,25 @@ export function Pessoas() {
     }))
   }
 
+  const handleCepSearch = async () => {
+    if (!formData.cep) {
+      toast.error('Digite um CEP para buscar')
+      return
+    }
+    
+    const result = await searchCep(formData.cep)
+    if (result) {
+      setFormData(prev => ({
+        ...prev,
+        logradouro: result.logradouro,
+        bairro: result.bairro,
+        cidade: result.localidade,
+        uf: result.uf,
+        complemento: result.complemento || prev.complemento
+      }))
+    }
+  }
+
   const handleKeyPress = (e: React.KeyboardEvent, action: () => void) => {
     if (e.key === "Enter") {
       e.preventDefault()
@@ -175,10 +210,10 @@ export function Pessoas() {
         tipo_pessoa: formData.tipoPessoa as 'fisica' | 'juridica',
         documento: formData.documento,
         codigo: undefined,
-        endereco: undefined,
-        cidade: undefined,
-        uf: undefined,
-        cep: undefined,
+        endereco: formData.logradouro ? `${formData.logradouro}${formData.numero ? ', ' + formData.numero : ''}${formData.complemento ? ' - ' + formData.complemento : ''}${formData.bairro ? ' - ' + formData.bairro : ''}` : undefined,
+        cidade: formData.cidade || undefined,
+        uf: formData.uf || undefined,
+        cep: formData.cep ? formData.cep.replace(/\D/g, '') : undefined,
         email_geral: formData.emailGeral || undefined,
         emails_secundarios: formData.emailsSecundarios.length > 0 ? formData.emailsSecundarios : undefined,
         telefone: formData.telefone || undefined,
@@ -215,7 +250,14 @@ export function Pessoas() {
         bloquearNotificacoesWhatsapp: false,
         vendedorPadrao: "",
         transportadoraPadrao: "",
-        rotulos: []
+        rotulos: [],
+        cep: "",
+        logradouro: "",
+        numero: "",
+        complemento: "",
+        bairro: "",
+        cidade: "",
+        uf: ""
       })
       setEditingPessoa(null)
       setActiveTab("listagem")
@@ -258,7 +300,14 @@ export function Pessoas() {
         bloquearNotificacoesWhatsapp: pessoa.bloquear_notificacoes_whatsapp || false,
         vendedorPadrao: pessoa.vendedor_padrao || "",
         transportadoraPadrao: pessoa.transportadora_padrao || "",
-        rotulos: pessoa.rotulos || []
+        rotulos: pessoa.rotulos || [],
+        cep: pessoa.cep || "",
+        logradouro: "",
+        numero: "",
+        complemento: "",
+        bairro: "",
+        cidade: pessoa.cidade || "",
+        uf: pessoa.uf || ""
       })
     } else {
       // Creating new pessoa
@@ -276,7 +325,14 @@ export function Pessoas() {
         bloquearNotificacoesWhatsapp: false,
         vendedorPadrao: "",
         transportadoraPadrao: "",
-        rotulos: []
+        rotulos: [],
+        cep: "",
+        logradouro: "",
+        numero: "",
+        complemento: "",
+        bairro: "",
+        cidade: "",
+        uf: ""
       })
     }
     setActiveTab("dados")
@@ -525,7 +581,154 @@ export function Pessoas() {
                 </div>
               </div>
 
-              {/* Quarta linha - Vendedor Padrão e Transportadora Padrão */}
+              {/* Quarta linha - CEP, Logradouro, Número */}
+              <div className={styles.formGrid}>
+                <div>
+                  <label htmlFor="cep" className={styles.formLabel}>
+                    CEP
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="cep"
+                      type="text"
+                      className={styles.formInput}
+                      value={formData.cep}
+                      onChange={(e) => handleInputChange("cep", e.target.value)}
+                      mask="cep"
+                    />
+                    <button 
+                      type="button" 
+                      className={styles.searchButton}
+                      onClick={handleCepSearch}
+                      disabled={cepLoading}
+                      title="Buscar CEP"
+                    >
+                      <Search className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="logradouro" className={styles.formLabel}>
+                    Logradouro
+                  </label>
+                  <Input
+                    id="logradouro"
+                    type="text"
+                    className={styles.formInput}
+                    value={formData.logradouro}
+                    onChange={(e) => handleInputChange("logradouro", e.target.value)}
+                    uppercase
+                    blockSpecialChars
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="numero" className={styles.formLabel}>
+                    Número
+                  </label>
+                  <Input
+                    id="numero"
+                    type="text"
+                    className={styles.formInput}
+                    value={formData.numero}
+                    onChange={(e) => handleInputChange("numero", e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* Quinta linha - Complemento, Bairro, Cidade, UF */}
+              <div className={styles.formGrid}>
+                <div>
+                  <label htmlFor="complemento" className={styles.formLabel}>
+                    Complemento
+                  </label>
+                  <Input
+                    id="complemento"
+                    type="text"
+                    className={styles.formInput}
+                    value={formData.complemento}
+                    onChange={(e) => handleInputChange("complemento", e.target.value)}
+                    uppercase
+                    blockSpecialChars
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="bairro" className={styles.formLabel}>
+                    Bairro
+                  </label>
+                  <Input
+                    id="bairro"
+                    type="text"
+                    className={styles.formInput}
+                    value={formData.bairro}
+                    onChange={(e) => handleInputChange("bairro", e.target.value)}
+                    uppercase
+                    blockSpecialChars
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="cidade" className={styles.formLabel}>
+                    Cidade
+                  </label>
+                  <Input
+                    id="cidade"
+                    type="text"
+                    className={styles.formInput}
+                    value={formData.cidade}
+                    onChange={(e) => handleInputChange("cidade", e.target.value)}
+                    uppercase
+                    blockSpecialChars
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="uf" className={styles.formLabel}>
+                    UF
+                  </label>
+                  <Select 
+                    value={formData.uf} 
+                    onValueChange={(value) => handleInputChange("uf", value)}
+                  >
+                    <SelectTrigger className={styles.formSelect}>
+                      <SelectValue placeholder="UF" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="AC">AC</SelectItem>
+                      <SelectItem value="AL">AL</SelectItem>
+                      <SelectItem value="AP">AP</SelectItem>
+                      <SelectItem value="AM">AM</SelectItem>
+                      <SelectItem value="BA">BA</SelectItem>
+                      <SelectItem value="CE">CE</SelectItem>
+                      <SelectItem value="DF">DF</SelectItem>
+                      <SelectItem value="ES">ES</SelectItem>
+                      <SelectItem value="GO">GO</SelectItem>
+                      <SelectItem value="MA">MA</SelectItem>
+                      <SelectItem value="MT">MT</SelectItem>
+                      <SelectItem value="MS">MS</SelectItem>
+                      <SelectItem value="MG">MG</SelectItem>
+                      <SelectItem value="PA">PA</SelectItem>
+                      <SelectItem value="PB">PB</SelectItem>
+                      <SelectItem value="PR">PR</SelectItem>
+                      <SelectItem value="PE">PE</SelectItem>
+                      <SelectItem value="PI">PI</SelectItem>
+                      <SelectItem value="RJ">RJ</SelectItem>
+                      <SelectItem value="RN">RN</SelectItem>
+                      <SelectItem value="RS">RS</SelectItem>
+                      <SelectItem value="RO">RO</SelectItem>
+                      <SelectItem value="RR">RR</SelectItem>
+                      <SelectItem value="SC">SC</SelectItem>
+                      <SelectItem value="SP">SP</SelectItem>
+                      <SelectItem value="SE">SE</SelectItem>
+                      <SelectItem value="TO">TO</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Sexta linha - Vendedor Padrão e Transportadora Padrão */}
               <div className={styles.formGrid2Col}>
                 <div>
                   <label htmlFor="vendedorPadrao" className={styles.formLabel}>

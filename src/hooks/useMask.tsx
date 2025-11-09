@@ -197,6 +197,34 @@ export const useMask = (maskType: MaskType = 'none') => {
     return true;
   };
 
+  const searchAddressByCEP = async (cep: string): Promise<{
+    logradouro: string;
+    bairro: string;
+    localidade: string;
+    uf: string;
+    erro?: boolean;
+  } | null> => {
+    const cleanCEP = removeMask(cep);
+    
+    if (cleanCEP.length !== 8) {
+      return null;
+    }
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cleanCEP}/json/`);
+      const data = await response.json();
+      
+      if (data.erro) {
+        return null;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Erro ao buscar CEP:', error);
+      return null;
+    }
+  };
+
   return {
     maskedValue,
     applyMask,
@@ -207,5 +235,6 @@ export const useMask = (maskType: MaskType = 'none') => {
     detectPhoneType,
     validateCPF,
     validateCNPJ,
+    searchAddressByCEP,
   };
 };

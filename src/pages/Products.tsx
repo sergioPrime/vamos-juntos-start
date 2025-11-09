@@ -191,6 +191,7 @@ const Products = () => {
     message: "",
     suggestedMargin: 0
   })
+  const [showSimulator, setShowSimulator] = useState(false)
 
   // Efeito para cálculo automático de preços
   useEffect(() => {
@@ -394,6 +395,35 @@ const Products = () => {
         title: "Margem Aplicada",
         description: `Margem de lucro ajustada para ${priceAlert.suggestedMargin.toFixed(2)}% para atingir o preço mínimo.`,
       })
+    }
+  }
+
+  // Calcular composição do preço para o simulador
+  const calculatePriceBreakdown = () => {
+    const costBase = formData.cost_price || 0
+    const operationalExpenses = costBase * (formData.operational_expenses || 0) / 100
+    const freight = costBase * (formData.freight_on_purchase || 0) / 100
+    const insurance = costBase * (formData.insurance_on_purchase || 0) / 100
+    const ipi = costBase * (formData.ipi_on_purchase || 0) / 100
+    const icmsSt = costBase * (formData.icms_st_on_purchase || 0) / 100
+    const fcpSt = costBase * (formData.fcp_st_on_purchase || 0) / 100
+    
+    const totalCosts = costBase + operationalExpenses + freight + insurance + ipi + icmsSt + fcpSt
+    const profit = formData.unit_price - totalCosts
+    const profitPercent = totalCosts > 0 ? (profit / totalCosts) * 100 : 0
+    
+    return {
+      costBase,
+      operationalExpenses,
+      freight,
+      insurance,
+      ipi,
+      icmsSt,
+      fcpSt,
+      totalCosts,
+      profit,
+      profitPercent,
+      finalPrice: formData.unit_price
     }
   }
 
@@ -1354,6 +1384,240 @@ const Products = () => {
                               <SelectItem value="stock_balance">Tomar como base custo do saldo em estoque</SelectItem>
                             </SelectContent>
                           </Select>
+                        </div>
+
+                        {/* Simulador Interativo */}
+                        <div className="mt-8">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full justify-between"
+                            onClick={() => setShowSimulator(!showSimulator)}
+                          >
+                            <span className="flex items-center gap-2">
+                              🎯 Simulador Interativo de Precificação
+                            </span>
+                            <ChevronDown className={cn(
+                              "h-4 w-4 transition-transform duration-200",
+                              showSimulator && "rotate-180"
+                            )} />
+                          </Button>
+
+                          {showSimulator && (
+                            <div className="mt-4 p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 rounded-lg border-2 border-blue-200 dark:border-blue-800 animate-fade-in">
+                              <h3 className="text-lg font-semibold mb-4 text-blue-900 dark:text-blue-100">
+                                Visualize o Impacto de Cada Despesa no Preço Final
+                              </h3>
+                              
+                              {/* Resumo Visual */}
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-blue-200 dark:border-blue-700">
+                                  <p className="text-xs text-muted-foreground mb-1">Custo Base</p>
+                                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                                    R$ {calculatePriceBreakdown().costBase.toFixed(2)}
+                                  </p>
+                                </div>
+                                <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-orange-200 dark:border-orange-700">
+                                  <p className="text-xs text-muted-foreground mb-1">Total de Despesas</p>
+                                  <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                                    R$ {(calculatePriceBreakdown().totalCosts - calculatePriceBreakdown().costBase).toFixed(2)}
+                                  </p>
+                                </div>
+                                <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-green-200 dark:border-green-700">
+                                  <p className="text-xs text-muted-foreground mb-1">Lucro Líquido</p>
+                                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                                    R$ {calculatePriceBreakdown().profit.toFixed(2)}
+                                    <span className="text-sm ml-2">({calculatePriceBreakdown().profitPercent.toFixed(1)}%)</span>
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Sliders Interativos */}
+                              <div className="space-y-4 mb-6">
+                                {/* Despesas Operacionais */}
+                                <div className="p-4 bg-white dark:bg-gray-800 rounded-lg">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <Label className="text-sm font-medium">Despesas Operacionais</Label>
+                                    <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                                      {formData.operational_expenses.toFixed(2)}% 
+                                      (R$ {(calculatePriceBreakdown().operationalExpenses).toFixed(2)})
+                                    </span>
+                                  </div>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    step="0.5"
+                                    value={formData.operational_expenses}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, operational_expenses: parseFloat(e.target.value) }))}
+                                    className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer dark:bg-blue-700 slider"
+                                  />
+                                </div>
+
+                                {/* Frete */}
+                                <div className="p-4 bg-white dark:bg-gray-800 rounded-lg">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <Label className="text-sm font-medium">Frete na Compra</Label>
+                                    <span className="text-sm font-bold text-purple-600 dark:text-purple-400">
+                                      {formData.freight_on_purchase.toFixed(2)}% 
+                                      (R$ {(calculatePriceBreakdown().freight).toFixed(2)})
+                                    </span>
+                                  </div>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="30"
+                                    step="0.5"
+                                    value={formData.freight_on_purchase}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, freight_on_purchase: parseFloat(e.target.value) }))}
+                                    className="w-full h-2 bg-purple-200 rounded-lg appearance-none cursor-pointer dark:bg-purple-700 slider"
+                                  />
+                                </div>
+
+                                {/* IPI */}
+                                <div className="p-4 bg-white dark:bg-gray-800 rounded-lg">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <Label className="text-sm font-medium">IPI na Compra</Label>
+                                    <span className="text-sm font-bold text-pink-600 dark:text-pink-400">
+                                      {formData.ipi_on_purchase.toFixed(2)}% 
+                                      (R$ {(calculatePriceBreakdown().ipi).toFixed(2)})
+                                    </span>
+                                  </div>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="30"
+                                    step="0.5"
+                                    value={formData.ipi_on_purchase}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, ipi_on_purchase: parseFloat(e.target.value) }))}
+                                    className="w-full h-2 bg-pink-200 rounded-lg appearance-none cursor-pointer dark:bg-pink-700 slider"
+                                  />
+                                </div>
+
+                                {/* ICMS ST */}
+                                <div className="p-4 bg-white dark:bg-gray-800 rounded-lg">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <Label className="text-sm font-medium">ICMS ST na Compra</Label>
+                                    <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                                      {formData.icms_st_on_purchase.toFixed(2)}% 
+                                      (R$ {(calculatePriceBreakdown().icmsSt).toFixed(2)})
+                                    </span>
+                                  </div>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="30"
+                                    step="0.5"
+                                    value={formData.icms_st_on_purchase}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, icms_st_on_purchase: parseFloat(e.target.value) }))}
+                                    className="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer dark:bg-indigo-700 slider"
+                                  />
+                                </div>
+
+                                {/* Margem de Lucro */}
+                                {autoCalculatePrice && (
+                                  <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 rounded-lg border-2 border-green-300 dark:border-green-700">
+                                    <div className="flex justify-between items-center mb-2">
+                                      <Label className="text-sm font-semibold text-green-800 dark:text-green-200">Margem de Lucro Desejada</Label>
+                                      <span className="text-sm font-bold text-green-700 dark:text-green-300">
+                                        {formData.desired_profit_margin.toFixed(2)}%
+                                      </span>
+                                    </div>
+                                    <input
+                                      type="range"
+                                      min="0"
+                                      max="80"
+                                      step="0.5"
+                                      value={formData.desired_profit_margin}
+                                      onChange={(e) => setFormData(prev => ({ ...prev, desired_profit_margin: parseFloat(e.target.value) }))}
+                                      className="w-full h-3 bg-green-200 rounded-lg appearance-none cursor-pointer dark:bg-green-700 slider"
+                                    />
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Composição do Preço - Barra Visual */}
+                              <div className="p-4 bg-white dark:bg-gray-800 rounded-lg">
+                                <h4 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">
+                                  Composição do Preço Final: R$ {formData.unit_price.toFixed(2)}
+                                </h4>
+                                <div className="space-y-2">
+                                  {/* Custo Base */}
+                                  <div>
+                                    <div className="flex justify-between text-xs mb-1">
+                                      <span>Custo Base</span>
+                                      <span className="font-semibold">R$ {calculatePriceBreakdown().costBase.toFixed(2)}</span>
+                                    </div>
+                                    <div className="h-4 bg-blue-500 rounded transition-all duration-300" 
+                                         style={{ width: `${(calculatePriceBreakdown().costBase / formData.unit_price * 100).toFixed(1)}%` }}>
+                                    </div>
+                                  </div>
+
+                                  {/* Despesas */}
+                                  {calculatePriceBreakdown().operationalExpenses > 0 && (
+                                    <div>
+                                      <div className="flex justify-between text-xs mb-1">
+                                        <span>Desp. Operacionais</span>
+                                        <span className="font-semibold">R$ {calculatePriceBreakdown().operationalExpenses.toFixed(2)}</span>
+                                      </div>
+                                      <div className="h-4 bg-orange-400 rounded transition-all duration-300" 
+                                           style={{ width: `${(calculatePriceBreakdown().operationalExpenses / formData.unit_price * 100).toFixed(1)}%` }}>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {calculatePriceBreakdown().freight > 0 && (
+                                    <div>
+                                      <div className="flex justify-between text-xs mb-1">
+                                        <span>Frete</span>
+                                        <span className="font-semibold">R$ {calculatePriceBreakdown().freight.toFixed(2)}</span>
+                                      </div>
+                                      <div className="h-4 bg-purple-400 rounded transition-all duration-300" 
+                                           style={{ width: `${(calculatePriceBreakdown().freight / formData.unit_price * 100).toFixed(1)}%` }}>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {calculatePriceBreakdown().ipi > 0 && (
+                                    <div>
+                                      <div className="flex justify-between text-xs mb-1">
+                                        <span>IPI</span>
+                                        <span className="font-semibold">R$ {calculatePriceBreakdown().ipi.toFixed(2)}</span>
+                                      </div>
+                                      <div className="h-4 bg-pink-400 rounded transition-all duration-300" 
+                                           style={{ width: `${(calculatePriceBreakdown().ipi / formData.unit_price * 100).toFixed(1)}%` }}>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {calculatePriceBreakdown().icmsSt > 0 && (
+                                    <div>
+                                      <div className="flex justify-between text-xs mb-1">
+                                        <span>ICMS ST</span>
+                                        <span className="font-semibold">R$ {calculatePriceBreakdown().icmsSt.toFixed(2)}</span>
+                                      </div>
+                                      <div className="h-4 bg-indigo-400 rounded transition-all duration-300" 
+                                           style={{ width: `${(calculatePriceBreakdown().icmsSt / formData.unit_price * 100).toFixed(1)}%` }}>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Lucro */}
+                                  {calculatePriceBreakdown().profit > 0 && (
+                                    <div>
+                                      <div className="flex justify-between text-xs mb-1">
+                                        <span className="font-semibold">Lucro</span>
+                                        <span className="font-bold text-green-600">R$ {calculatePriceBreakdown().profit.toFixed(2)} ({calculatePriceBreakdown().profitPercent.toFixed(1)}%)</span>
+                                      </div>
+                                      <div className="h-4 bg-green-500 rounded transition-all duration-300" 
+                                           style={{ width: `${(calculatePriceBreakdown().profit / formData.unit_price * 100).toFixed(1)}%` }}>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </CardContent>
                     </Card>

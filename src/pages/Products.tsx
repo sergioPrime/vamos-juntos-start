@@ -23,6 +23,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+import { CompetitorPriceScraper } from "@/components/products/CompetitorPriceScraper"
 
 interface Product {
   id: string
@@ -186,6 +187,7 @@ const Products = () => {
   
   const [autoCalculatePrice, setAutoCalculatePrice] = useState(true)
   const [showCompetitorDialog, setShowCompetitorDialog] = useState(false)
+  const [showScraperDialog, setShowScraperDialog] = useState(false)
   const [newCompetitor, setNewCompetitor] = useState({ name: "", price: 0, url: "" })
 
   // Estados para valores mascarados
@@ -1736,14 +1738,27 @@ const Products = () => {
                                 <span className="flex items-center gap-2">
                                   🎯 Análise de Concorrência
                                 </span>
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  onClick={() => setShowCompetitorDialog(true)}
-                                  className="bg-purple-600 hover:bg-purple-700"
-                                >
-                                  + Adicionar Concorrente
-                                </Button>
+                                <div className="flex gap-2">
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={() => setShowScraperDialog(true)}
+                                    variant="outline"
+                                    className="border-purple-300 hover:bg-purple-50 dark:border-purple-700 dark:hover:bg-purple-950"
+                                  >
+                                    <Search className="h-4 w-4 mr-1" />
+                                    Buscar Automaticamente
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={() => setShowCompetitorDialog(true)}
+                                    className="bg-purple-600 hover:bg-purple-700"
+                                  >
+                                    <Plus className="h-4 w-4 mr-1" />
+                                    Adicionar Manual
+                                  </Button>
+                                </div>
                               </CardTitle>
                             </CardHeader>
                             <CardContent className="pt-6">
@@ -1853,6 +1868,14 @@ const Products = () => {
                             </CardContent>
                           </Card>
                         </div>
+
+                        {/* Scraper de Preços Automático */}
+                        <CompetitorPriceScraper
+                          open={showScraperDialog}
+                          onOpenChange={setShowScraperDialog}
+                          productName={formData.name}
+                          onAddCompetitor={addCompetitor}
+                        />
 
                         {/* Dialog para adicionar concorrente */}
                         <Dialog open={showCompetitorDialog} onOpenChange={setShowCompetitorDialog}>

@@ -212,6 +212,13 @@ const Products = () => {
   const [showScraperDialog, setShowScraperDialog] = useState(false)
   const [newCompetitor, setNewCompetitor] = useState({ name: "", price: 0, url: "" })
 
+  // Estados para validação fiscal
+  const [fiscalErrors, setFiscalErrors] = useState({
+    ncm: "",
+    cfop: "",
+    cest: "",
+  })
+
   // Estados para valores mascarados
   const [maskedCostPrice, setMaskedCostPrice] = useState("")
   const [maskedUnitPrice, setMaskedUnitPrice] = useState("")
@@ -364,6 +371,49 @@ const Products = () => {
     }
   }
 
+  // Funções de validação fiscal inline
+  const validateNCM = (value: string) => {
+    if (!value) {
+      return "NCM é obrigatório"
+    }
+    if (value.length !== 8) {
+      return "NCM deve ter exatamente 8 dígitos"
+    }
+    return ""
+  }
+
+  const validateCFOP = (value: string) => {
+    if (value && value.length !== 4) {
+      return "CFOP deve ter exatamente 4 dígitos"
+    }
+    return ""
+  }
+
+  const validateCEST = (value: string) => {
+    if (value && value.length !== 7) {
+      return "CEST deve ter exatamente 7 dígitos"
+    }
+    return ""
+  }
+
+  const handleNCMChange = (value: string) => {
+    const numericValue = value.replace(/\D/g, '').slice(0, 8)
+    setFormData(prev => ({ ...prev, codigo_ncm: numericValue }))
+    setFiscalErrors(prev => ({ ...prev, ncm: validateNCM(numericValue) }))
+  }
+
+  const handleCFOPChange = (value: string) => {
+    const numericValue = value.replace(/\D/g, '').slice(0, 4)
+    setFormData(prev => ({ ...prev, cfop_padrao: numericValue }))
+    setFiscalErrors(prev => ({ ...prev, cfop: validateCFOP(numericValue) }))
+  }
+
+  const handleCESTChange = (value: string) => {
+    const numericValue = value.replace(/\D/g, '').slice(0, 7)
+    setFormData(prev => ({ ...prev, codigo_cest: numericValue }))
+    setFiscalErrors(prev => ({ ...prev, cest: validateCEST(numericValue) }))
+  }
+
   const resetForm = () => {
     setFormData({
       name: "",
@@ -428,6 +478,7 @@ const Products = () => {
     setActiveTab("dados")
     setAutoCalculatePrice(true)
     setPriceAlert({ show: false, message: "", suggestedMargin: 0 })
+    setFiscalErrors({ ncm: "", cfop: "", cest: "" })
     setEditingProduct(null)
   }
 
@@ -675,6 +726,67 @@ const Products = () => {
       })
       return
     }
+
+    // Validações dos campos fiscais obrigatórios
+    const errors = { ncm: "", cfop: "", cest: "" }
+    let hasErrors = false
+
+    // Validar Grupo Tributário (obrigatório)
+    if (!formData.grupo_tributario?.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Grupo Tributário é obrigatório.",
+        variant: "destructive",
+      })
+      setActiveTab("fiscal")
+      return
+    }
+
+    // Validar NCM (obrigatório e deve ter 8 dígitos)
+    if (!formData.codigo_ncm?.trim()) {
+      errors.ncm = "Código NCM é obrigatório"
+      hasErrors = true
+    } else if (formData.codigo_ncm.length !== 8) {
+      errors.ncm = "NCM deve ter exatamente 8 dígitos"
+      hasErrors = true
+    }
+
+    // Validar CFOP (se preenchido, deve ter 4 dígitos)
+    if (formData.cfop_padrao && formData.cfop_padrao.length !== 4) {
+      errors.cfop = "CFOP deve ter exatamente 4 dígitos"
+      hasErrors = true
+    }
+
+    // Validar CEST (se preenchido, deve ter 7 dígitos)
+    if (formData.codigo_cest && formData.codigo_cest.length !== 7) {
+      errors.cest = "CEST deve ter exatamente 7 dígitos"
+      hasErrors = true
+    }
+
+    // Validar Unidade Comercial (obrigatório)
+    if (!formData.unidade_comercial?.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Unidade Comercial é obrigatória.",
+        variant: "destructive",
+      })
+      setActiveTab("fiscal")
+      return
+    }
+
+    if (hasErrors) {
+      setFiscalErrors(errors)
+      toast({
+        title: "Erro de validação fiscal",
+        description: "Corrija os erros nos campos fiscais antes de salvar.",
+        variant: "destructive",
+      })
+      setActiveTab("fiscal")
+      return
+    }
+
+    // Limpar erros se passou nas validações
+    setFiscalErrors({ ncm: "", cfop: "", cest: "" })
 
     try {
       const productData = {
@@ -2036,12 +2148,15 @@ const Products = () => {
                               type="text"
                               maxLength={4}
                               value={formData.cfop_padrao}
-                              onChange={(e) => {
-                                const value = e.target.value.replace(/\D/g, '')
-                                setFormData(prev => ({ ...prev, cfop_padrao: value }))
-                              }}
+                              onChange={(e) => handleCFOPChange(e.target.value)}
                               placeholder="0000"
+                              className={cn(fiscalErrors.cfop && "border-red-500")}
                             />
+                            {fiscalErrors.cfop && (
+                              <p className="text-xs text-red-600 flex items-center gap-1">
+                                ⚠️ {fiscalErrors.cfop}
+                              </p>
+                            )}
                           </div>
 
                           <div className="space-y-2">
@@ -2051,12 +2166,15 @@ const Products = () => {
                               type="text"
                               maxLength={8}
                               value={formData.codigo_ncm}
-                              onChange={(e) => {
-                                const value = e.target.value.replace(/\D/g, '')
-                                setFormData(prev => ({ ...prev, codigo_ncm: value }))
-                              }}
+                              onChange={(e) => handleNCMChange(e.target.value)}
                               placeholder="00000000"
+                              className={cn(fiscalErrors.ncm && "border-red-500")}
                             />
+                            {fiscalErrors.ncm && (
+                              <p className="text-xs text-red-600 flex items-center gap-1">
+                                ⚠️ {fiscalErrors.ncm}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </CardContent>
@@ -2078,12 +2196,15 @@ const Products = () => {
                               type="text"
                               maxLength={7}
                               value={formData.codigo_cest}
-                              onChange={(e) => {
-                                const value = e.target.value.replace(/\D/g, '')
-                                setFormData(prev => ({ ...prev, codigo_cest: value }))
-                              }}
+                              onChange={(e) => handleCESTChange(e.target.value)}
                               placeholder="0000000"
+                              className={cn(fiscalErrors.cest && "border-red-500")}
                             />
+                            {fiscalErrors.cest && (
+                              <p className="text-xs text-red-600 flex items-center gap-1">
+                                ⚠️ {fiscalErrors.cest}
+                              </p>
+                            )}
                           </div>
 
                           <div className="space-y-2">

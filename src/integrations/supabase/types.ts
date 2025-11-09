@@ -4230,12 +4230,13 @@ export type Database = {
       stock_integrity_check: {
         Row: {
           calculated_stock: number | null
-          difference: number | null
+          declared_stock: number | null
           id: string | null
+          movements_count: number | null
           name: string | null
-          registered_stock: number | null
-          sku: string | null
-          status: string | null
+          status_check: string | null
+          stock_difference: number | null
+          system_code: string | null
         }
         Relationships: []
       }

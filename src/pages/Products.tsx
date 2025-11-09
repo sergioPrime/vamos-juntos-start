@@ -182,15 +182,20 @@ const Products = () => {
   const [maskedCostPrice, setMaskedCostPrice] = useState("")
   const [maskedUnitPrice, setMaskedUnitPrice] = useState("")
   const [activeTab, setActiveTab] = useState("dados")
-  const [priceAlert, setPriceAlert] = useState<{ show: boolean; message: string }>({ 
+  const [priceAlert, setPriceAlert] = useState<{ 
+    show: boolean
+    message: string
+    suggestedMargin: number
+  }>({ 
     show: false, 
-    message: "" 
+    message: "",
+    suggestedMargin: 0
   })
 
   // Efeito para cálculo automático de preços
   useEffect(() => {
     if (!autoCalculatePrice) {
-      setPriceAlert({ show: false, message: "" })
+      setPriceAlert({ show: false, message: "", suggestedMargin: 0 })
       return
     }
 
@@ -225,18 +230,26 @@ const Products = () => {
     const minimumPrice = formData.minimum_sale_price || 0
     if (minimumPrice > 0 && calculatedPrice < minimumPrice) {
       const difference = minimumPrice - calculatedPrice
+      
+      // Calcular margem de lucro necessária para atingir o preço mínimo
+      // Fórmula: Margem = (1 - Custo/PreçoMínimo) * 100
+      const suggestedMargin = costWithAdditions > 0 
+        ? ((1 - costWithAdditions / minimumPrice) * 100) 
+        : 0
+      
       setPriceAlert({
         show: true,
-        message: `⚠️ Preço calculado (R$ ${calculatedPrice.toFixed(2)}) está R$ ${difference.toFixed(2)} abaixo do preço mínimo!`
+        message: `⚠️ Preço calculado (R$ ${calculatedPrice.toFixed(2)}) está R$ ${difference.toFixed(2)} abaixo do preço mínimo!`,
+        suggestedMargin: parseFloat(suggestedMargin.toFixed(2))
       })
       
       toast({
         title: "Atenção: Preço Abaixo do Mínimo",
-        description: `O preço de venda calculado (R$ ${calculatedPrice.toFixed(2)}) está abaixo do preço mínimo configurado (R$ ${minimumPrice.toFixed(2)}). Diferença: R$ ${difference.toFixed(2)}`,
+        description: `O preço de venda calculado (R$ ${calculatedPrice.toFixed(2)}) está abaixo do preço mínimo configurado (R$ ${minimumPrice.toFixed(2)}). Diferença: R$ ${difference.toFixed(2)}. Margem sugerida: ${suggestedMargin.toFixed(2)}%`,
         variant: "destructive",
       })
     } else {
-      setPriceAlert({ show: false, message: "" })
+      setPriceAlert({ show: false, message: "", suggestedMargin: 0 })
     }
 
     setFormData(prev => ({
@@ -366,8 +379,22 @@ const Products = () => {
     setMaskedUnitPrice("")
     setActiveTab("dados")
     setAutoCalculatePrice(true)
-    setPriceAlert({ show: false, message: "" })
+    setPriceAlert({ show: false, message: "", suggestedMargin: 0 })
     setEditingProduct(null)
+  }
+
+  const applySuggestedMargin = () => {
+    if (priceAlert.suggestedMargin > 0) {
+      setFormData(prev => ({ 
+        ...prev, 
+        desired_profit_margin: priceAlert.suggestedMargin 
+      }))
+      
+      toast({
+        title: "Margem Aplicada",
+        description: `Margem de lucro ajustada para ${priceAlert.suggestedMargin.toFixed(2)}% para atingir o preço mínimo.`,
+      })
+    }
   }
 
   const openForm = (product?: Product) => {
@@ -963,7 +990,7 @@ const Products = () => {
 
                         {/* Alerta de preço abaixo do mínimo */}
                         {priceAlert.show && (
-                          <div className="mb-6 p-4 bg-red-50 dark:bg-red-950 rounded-lg border-2 border-red-500 animate-pulse">
+                          <div className="mb-6 p-4 bg-red-50 dark:bg-red-950 rounded-lg border-2 border-red-500">
                             <div className="flex items-start gap-3">
                               <div className="flex-shrink-0 w-8 h-8 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
                                 <span className="text-red-600 dark:text-red-400 text-lg font-bold">⚠️</span>
@@ -977,8 +1004,31 @@ const Products = () => {
                                   configurado (R$ {formData.minimum_sale_price.toFixed(2)}). 
                                   <span className="font-semibold"> Diferença: R$ {(formData.minimum_sale_price - formData.unit_price).toFixed(2)}</span>
                                 </p>
-                                <p className="text-red-600 dark:text-red-400 text-xs mt-2">
-                                  💡 Dica: Aumente a margem de lucro desejada ou reduza as despesas operacionais para alcançar o preço mínimo.
+                                
+                                {/* Sugestão de margem */}
+                                <div className="mt-3 p-3 bg-blue-100 dark:bg-blue-900 rounded-md border border-blue-300 dark:border-blue-700">
+                                  <p className="text-blue-800 dark:text-blue-200 text-sm font-semibold mb-2">
+                                    💡 Sugestão Automática:
+                                  </p>
+                                  <p className="text-blue-700 dark:text-blue-300 text-sm mb-3">
+                                    Para atingir o preço mínimo de R$ {formData.minimum_sale_price.toFixed(2)}, 
+                                    a margem de lucro precisa ser de <span className="font-bold text-lg">{priceAlert.suggestedMargin.toFixed(2)}%</span>
+                                    {formData.desired_profit_margin > 0 && (
+                                      <span> (atual: {formData.desired_profit_margin.toFixed(2)}%)</span>
+                                    )}
+                                  </p>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={applySuggestedMargin}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                                  >
+                                    Aplicar Margem Sugerida ({priceAlert.suggestedMargin.toFixed(2)}%)
+                                  </Button>
+                                </div>
+
+                                <p className="text-red-600 dark:text-red-400 text-xs mt-3">
+                                  ⚙️ Outras opções: Aumente a margem de lucro manualmente ou reduza as despesas operacionais.
                                 </p>
                               </div>
                             </div>

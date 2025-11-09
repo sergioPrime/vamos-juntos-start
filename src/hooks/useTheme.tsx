@@ -28,9 +28,15 @@ export function ThemeProvider({
   storageKey = 'vamos-juntos-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  )
+  const [theme, setTheme] = useState<Theme>(() => {
+    const stored = localStorage.getItem(storageKey) as Theme
+    // Sempre inicia com dark se não houver valor salvo
+    if (!stored) {
+      localStorage.setItem(storageKey, 'dark')
+      return 'dark'
+    }
+    return stored
+  })
 
   useEffect(() => {
     const root = window.document.documentElement

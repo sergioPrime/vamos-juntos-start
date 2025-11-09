@@ -5,6 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +38,8 @@ const SalesCategories = () => {
   const { currentOrg } = useOrganization();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<SalesCategory | null>(null);
   const [visibleColumns, setVisibleColumns] = useState({
     name: true,
     moves_stock: true,
@@ -54,6 +66,19 @@ const SalesCategories = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Verificar se a categoria está vinculada a operações fiscais
+      const { data: linkedOperations, error: checkError } = await supabase
+        .from('fiscal_operations')
+        .select('id')
+        .eq('sales_category_id', id)
+        .limit(1);
+
+      if (checkError) throw checkError;
+
+      if (linkedOperations && linkedOperations.length > 0) {
+        throw new Error('Esta categoria de vendas não pode ser excluída pois está vinculada a operações fiscais ativas. Desative-a ou remova os vínculos primeiro.');
+      }
+
       const { error } = await supabase
         .from('sales_categories')
         .update({ is_active: false })
@@ -64,9 +89,11 @@ const SalesCategories = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sales-categories'] });
       toast.success("Categoria removida com sucesso!");
+      setShowDeleteDialog(false);
+      setSelectedCategory(null);
     },
-    onError: () => {
-      toast.error("Erro ao remover categoria");
+    onError: (error: Error) => {
+      toast.error(error.message || "Erro ao remover categoria");
     },
   });
 
@@ -74,10 +101,9 @@ const SalesCategories = () => {
     category.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDelete = (id: string) => {
-    if (window.confirm("Tem certeza que deseja remover esta categoria?")) {
-      deleteMutation.mutate(id);
-    }
+  const handleDelete = () => {
+    if (!selectedCategory) return;
+    deleteMutation.mutate(selectedCategory.id);
   };
 
   const columns = [
@@ -204,7 +230,10 @@ const SalesCategories = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleDelete(category.id)}
+                            onClick={() => {
+                              setSelectedCategory(category);
+                              setShowDeleteDialog(true);
+                            }}
                             disabled={deleteMutation.isPending}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -219,6 +248,24 @@ const SalesCategories = () => {
           </table>
         </div>
       </Card>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja remover a categoria "{selectedCategory?.name}"?
+              Esta ação marcará a categoria como inativa e ela não aparecerá mais nas listagens.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={deleteMutation.isPending}>
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

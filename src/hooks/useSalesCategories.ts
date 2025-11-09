@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "./useOrganization";
+import { toast } from "sonner";
 
 export interface SalesCategory {
   id: string;
@@ -77,15 +78,33 @@ export function useSalesCategories() {
 
   const deleteSalesCategory = async (id: string) => {
     try {
+      // Verificar se a categoria está vinculada a operações fiscais
+      const { data: linkedOperations, error: checkError } = await supabase
+        .from('fiscal_operations')
+        .select('id')
+        .eq('sales_category_id', id)
+        .limit(1);
+
+      if (checkError) throw checkError;
+
+      if (linkedOperations && linkedOperations.length > 0) {
+        toast.error('Esta categoria de vendas não pode ser excluída pois está vinculada a operações fiscais ativas. Desative-a ou remova os vínculos primeiro.');
+        throw new Error('Categoria de vendas vinculada a operações fiscais');
+      }
+
       const { error } = await supabase
         .from("sales_categories")
         .update({ is_active: false })
         .eq("id", id);
 
       if (error) throw error;
+      toast.success('Categoria de vendas removida com sucesso');
       await loadSalesCategories();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting sales category:", error);
+      if (error.message && !error.message.includes('Categoria de vendas vinculada')) {
+        toast.error('Erro ao remover categoria');
+      }
       throw error;
     }
   };

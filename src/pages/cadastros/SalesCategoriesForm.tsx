@@ -151,6 +151,7 @@ const SalesCategoriesForm = () => {
               onChange={(e) => handleInputChange('name', e.target.value)}
               placeholder="Digite o nome da categoria"
               required
+              uppercase
             />
           </div>
 

@@ -335,13 +335,14 @@ export function Pessoas() {
                   <label htmlFor="nomeFantasia" className={styles.formLabel}>
                     Nome Fantasia <span className={styles.requiredAsterisk}>*</span>
                   </label>
-                  <input
+                  <Input
                     id="nomeFantasia"
                     type="text"
                     className={styles.formInput}
                     value={formData.nomeFantasia}
                     onChange={(e) => handleInputChange("nomeFantasia", e.target.value)}
                     placeholder="Nome fantasia da pessoa"
+                    uppercase
                   />
                 </div>
 
@@ -519,13 +520,14 @@ export function Pessoas() {
                   <label htmlFor="vendedorPadrao" className={styles.formLabel}>
                     Vendedor Padrão
                   </label>
-                  <input
+                  <Input
                     id="vendedorPadrao"
                     type="text"
                     className={styles.formInput}
                     value={formData.vendedorPadrao}
                     onChange={(e) => handleInputChange("vendedorPadrao", e.target.value)}
                     placeholder="Nome do vendedor"
+                    uppercase
                   />
                 </div>
 
@@ -533,13 +535,14 @@ export function Pessoas() {
                   <label htmlFor="transportadoraPadrao" className={styles.formLabel}>
                     Transportadora Padrão
                   </label>
-                  <input
+                  <Input
                     id="transportadoraPadrao"
                     type="text"
                     className={styles.formInput}
                     value={formData.transportadoraPadrao}
                     onChange={(e) => handleInputChange("transportadoraPadrao", e.target.value)}
                     placeholder="Nome da transportadora"
+                    uppercase
                   />
                 </div>
               </div>

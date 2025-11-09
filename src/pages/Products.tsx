@@ -531,7 +531,7 @@ const Products = () => {
                     <label htmlFor="name" className={styles.formLabel}>
                       Nome do Produto <span className={styles.requiredAsterisk}>*</span>
                     </label>
-                    <input
+                    <Input
                       id="name"
                       type="text"
                       className={styles.formInput}
@@ -539,6 +539,7 @@ const Products = () => {
                       onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                       placeholder="Digite o nome do produto"
                       required
+                      uppercase
                     />
                   </div>
                   
@@ -605,15 +606,16 @@ const Products = () => {
                     <label htmlFor="sku" className={styles.formLabel}>
                       Código do Produto (SKU) <span className={styles.requiredAsterisk}>*</span>
                     </label>
-                    <input
+                    <Input
                       id="sku"
                       type="text"
                       className={styles.formInput}
                       value={formData.sku}
-                      onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value.toUpperCase() }))}
+                      onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value }))}
                       placeholder="Código alfanumérico"
                       required
                       style={{ fontFamily: 'monospace' }}
+                      uppercase
                     />
                   </div>
                   
@@ -621,13 +623,14 @@ const Products = () => {
                     <label htmlFor="brand" className={styles.formLabel}>
                       Marca
                     </label>
-                    <input
+                    <Input
                       id="brand"
                       type="text"
                       className={styles.formInput}
                       value={formData.brand}
                       onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
                       placeholder="Digite a marca"
+                      uppercase
                     />
                   </div>
                 </div>
@@ -638,13 +641,14 @@ const Products = () => {
                     <label htmlFor="model" className={styles.formLabel}>
                       Modelo
                     </label>
-                    <input
+                    <Input
                       id="model"
                       type="text"
                       className={styles.formInput}
                       value={formData.model}
                       onChange={(e) => setFormData(prev => ({ ...prev, model: e.target.value }))}
                       placeholder="Digite o modelo"
+                      uppercase
                     />
                   </div>
                   

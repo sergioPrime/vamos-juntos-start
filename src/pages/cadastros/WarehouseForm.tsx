@@ -230,6 +230,7 @@ export default function WarehouseForm() {
                   placeholder=""
                   className="text-sm h-10 border-gray-300"
                   required
+                  uppercase
                 />
               </div>
 

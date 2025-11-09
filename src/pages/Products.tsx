@@ -54,6 +54,25 @@ interface Product {
   updated_at: string
   org_id: string
   owner_id: string
+  // Campos de precificação
+  operational_expenses?: number
+  cost_with_additions?: number
+  representation_commission?: number
+  freight_on_purchase?: number
+  insurance_on_purchase?: number
+  minimum_sale_price?: number
+  seller_commission_amount?: number
+  seller_commission_percent?: number
+  ipi_on_purchase?: number
+  icms_on_purchase?: number
+  mva_profit_amount?: number
+  mva_profit_percent?: number
+  assembly_fee_amount?: number
+  assembly_fee_percent?: number
+  icms_st_on_purchase?: number
+  fcp_st_on_purchase?: number
+  last_purchase_value?: number
+  cost_calculation_method?: string
 }
 
 interface Supplier {
@@ -135,11 +154,31 @@ const Products = () => {
     weight: 0,
     dimensions: "",
     active: true,
+    // Campos de precificação
+    operational_expenses: 0,
+    cost_with_additions: 0,
+    representation_commission: 0,
+    freight_on_purchase: 0,
+    insurance_on_purchase: 0,
+    minimum_sale_price: 0,
+    seller_commission_amount: 0,
+    seller_commission_percent: 0,
+    ipi_on_purchase: 0,
+    icms_on_purchase: 0,
+    mva_profit_amount: 0,
+    mva_profit_percent: 0,
+    assembly_fee_amount: 0,
+    assembly_fee_percent: 0,
+    icms_st_on_purchase: 0,
+    fcp_st_on_purchase: 0,
+    last_purchase_value: 0,
+    cost_calculation_method: "nfe_rules",
   })
 
   // Estados para valores mascarados
   const [maskedCostPrice, setMaskedCostPrice] = useState("")
   const [maskedUnitPrice, setMaskedUnitPrice] = useState("")
+  const [activeTab, setActiveTab] = useState("dados")
 
   useEffect(() => {
     if (currentOrg?.id) {
@@ -220,9 +259,28 @@ const Products = () => {
       weight: 0,
       dimensions: "",
       active: true,
+      operational_expenses: 0,
+      cost_with_additions: 0,
+      representation_commission: 0,
+      freight_on_purchase: 0,
+      insurance_on_purchase: 0,
+      minimum_sale_price: 0,
+      seller_commission_amount: 0,
+      seller_commission_percent: 0,
+      ipi_on_purchase: 0,
+      icms_on_purchase: 0,
+      mva_profit_amount: 0,
+      mva_profit_percent: 0,
+      assembly_fee_amount: 0,
+      assembly_fee_percent: 0,
+      icms_st_on_purchase: 0,
+      fcp_st_on_purchase: 0,
+      last_purchase_value: 0,
+      cost_calculation_method: "nfe_rules",
     })
     setMaskedCostPrice("")
     setMaskedUnitPrice("")
+    setActiveTab("dados")
     setEditingProduct(null)
   }
 
@@ -254,6 +312,24 @@ const Products = () => {
         weight: product.weight || 0,
         dimensions: product.dimensions || "",
         active: product.active,
+        operational_expenses: product.operational_expenses || 0,
+        cost_with_additions: product.cost_with_additions || 0,
+        representation_commission: product.representation_commission || 0,
+        freight_on_purchase: product.freight_on_purchase || 0,
+        insurance_on_purchase: product.insurance_on_purchase || 0,
+        minimum_sale_price: product.minimum_sale_price || 0,
+        seller_commission_amount: product.seller_commission_amount || 0,
+        seller_commission_percent: product.seller_commission_percent || 0,
+        ipi_on_purchase: product.ipi_on_purchase || 0,
+        icms_on_purchase: product.icms_on_purchase || 0,
+        mva_profit_amount: product.mva_profit_amount || 0,
+        mva_profit_percent: product.mva_profit_percent || 0,
+        assembly_fee_amount: product.assembly_fee_amount || 0,
+        assembly_fee_percent: product.assembly_fee_percent || 0,
+        icms_st_on_purchase: product.icms_st_on_purchase || 0,
+        fcp_st_on_purchase: product.fcp_st_on_purchase || 0,
+        last_purchase_value: product.last_purchase_value || 0,
+        cost_calculation_method: product.cost_calculation_method || "nfe_rules",
       })
       // Aplicar máscara aos preços
       setMaskedCostPrice(applyMask((product.cost_price * 100).toString(), 'currency'))
@@ -511,28 +587,24 @@ const Products = () => {
         <div className="flex-1 overflow-auto" style={{ backgroundColor: '#FAFAFA' }}>
           <div className="max-w-[1400px] mx-auto px-6 py-6">
             <form onSubmit={handleSubmit}>
-              {/* Tabs customizadas */}
-              <div className="mb-6">
-                <div className="border-b" style={{ borderColor: '#EEEEEE' }}>
-                  <div className="flex">
-                    <button 
-                      type="button"
-                      className={`${styles.tabTrigger} ${styles.tabTriggerActive}`}
-                      style={{ marginRight: '2px' }}
-                    >
-                      Dados
-                    </button>
-                    <button 
-                      type="button"
-                      className={styles.tabTrigger}
-                      disabled
-                      style={{ opacity: 0.5, cursor: 'not-allowed' }}
-                    >
-                      Outros (Em breve)
-                    </button>
-                  </div>
-                </div>
-              </div>
+              {/* Tabs */}
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
+                <TabsList className="bg-transparent border-b border-[#EEEEEE] rounded-none w-full justify-start h-auto p-0">
+                  <TabsTrigger 
+                    value="dados"
+                    className="data-[state=active]:bg-white data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none pb-3"
+                  >
+                    Dados
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="precificacao"
+                    className="data-[state=active]:bg-white data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none pb-3"
+                  >
+                    Precificação
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="dados" className="mt-0">
 
               {/* Formulário */}
               <div className={styles.formContainer}>
@@ -779,22 +851,26 @@ const Products = () => {
                   </div>
                 </div>
 
-                {/* Accordion para Custos e Precificação */}
-                <div className="mt-6">
-                  <Accordion type="single" collapsible className="w-full border rounded-lg">
-                    <AccordionItem value="pricing">
-                      <AccordionTrigger className="px-4">Custos e Precificação</AccordionTrigger>
-                      <AccordionContent className="px-4 pb-4">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                </div>
+
+                </TabsContent>
+
+                <TabsContent value="precificacao" className="mt-0">
+                  <div className={styles.formContainer}>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Custos e Precificação</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {/* Linha 1 */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                           <div className="space-y-2">
-                            <Label htmlFor="cost_price">Preço de Custo</Label>
+                            <Label htmlFor="cost_price">Preço de Custo (R$) <span className="text-red-500">*</span></Label>
                             <Input
                               id="cost_price"
                               type="text"
                               value={maskedCostPrice}
-                              onChange={(e) => {
-                                setMaskedCostPrice(e.target.value)
-                              }}
+                              onChange={(e) => setMaskedCostPrice(e.target.value)}
                               onValueChange={(unmasked) => {
                                 const value = getCurrencyValue(applyMask(unmasked, 'currency'))
                                 setFormData(prev => ({ ...prev, cost_price: value }))
@@ -805,60 +881,260 @@ const Products = () => {
                           </div>
                           
                           <div className="space-y-2">
-                            <Label htmlFor="unit_price">Preço de Venda</Label>
+                            <Label htmlFor="operational_expenses">Desp. Operacionais (%)</Label>
+                            <Input
+                              id="operational_expenses"
+                              type="number"
+                              value={formData.operational_expenses}
+                              onChange={(e) => setFormData(prev => ({ ...prev, operational_expenses: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0"
+                              step="0.01"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="cost_with_additions">Preço de custo com Acréscimos</Label>
+                            <Input
+                              id="cost_with_additions"
+                              type="text"
+                              value={formData.cost_with_additions.toFixed(2)}
+                              disabled
+                              className="bg-muted"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="representation_commission">Comissão Representação (%)</Label>
+                            <Input
+                              id="representation_commission"
+                              type="number"
+                              value={formData.representation_commission}
+                              onChange={(e) => setFormData(prev => ({ ...prev, representation_commission: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0"
+                              step="0.01"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Linha 2 */}
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="freight_on_purchase">Frete pago na Compra (%)</Label>
+                            <Input
+                              id="freight_on_purchase"
+                              type="number"
+                              value={formData.freight_on_purchase}
+                              onChange={(e) => setFormData(prev => ({ ...prev, freight_on_purchase: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0"
+                              step="0.01"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="insurance_on_purchase">Seguro pago na Compra (%)</Label>
+                            <Input
+                              id="insurance_on_purchase"
+                              type="number"
+                              value={formData.insurance_on_purchase}
+                              onChange={(e) => setFormData(prev => ({ ...prev, insurance_on_purchase: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0"
+                              step="0.01"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="minimum_sale_price">Preço Mínimo Para Venda (R$)</Label>
+                            <Input
+                              id="minimum_sale_price"
+                              type="number"
+                              value={formData.minimum_sale_price}
+                              onChange={(e) => setFormData(prev => ({ ...prev, minimum_sale_price: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0"
+                              step="0.01"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="seller_commission_amount">Comissão Vendedor (R$)</Label>
+                            <Input
+                              id="seller_commission_amount"
+                              type="number"
+                              value={formData.seller_commission_amount}
+                              onChange={(e) => setFormData(prev => ({ ...prev, seller_commission_amount: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0"
+                              step="0.01"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="seller_commission_percent">Comissão Vendedor (%)</Label>
+                            <Input
+                              id="seller_commission_percent"
+                              type="number"
+                              value={formData.seller_commission_percent}
+                              onChange={(e) => setFormData(prev => ({ ...prev, seller_commission_percent: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0"
+                              step="0.01"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Linha 3 */}
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="ipi_on_purchase">IPI pago na Compra (%)</Label>
+                            <Input
+                              id="ipi_on_purchase"
+                              type="number"
+                              value={formData.ipi_on_purchase}
+                              onChange={(e) => setFormData(prev => ({ ...prev, ipi_on_purchase: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0"
+                              step="0.01"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="icms_on_purchase">ICMS pago na Compra (%)</Label>
+                            <Input
+                              id="icms_on_purchase"
+                              type="number"
+                              value={formData.icms_on_purchase}
+                              onChange={(e) => setFormData(prev => ({ ...prev, icms_on_purchase: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0"
+                              step="0.01"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="mva_profit_amount">(MVA) Lucro R$</Label>
+                            <Input
+                              id="mva_profit_amount"
+                              type="number"
+                              value={formData.mva_profit_amount}
+                              onChange={(e) => setFormData(prev => ({ ...prev, mva_profit_amount: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0"
+                              step="0.01"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="mva_profit_percent">(MVA) Lucro %</Label>
+                            <Input
+                              id="mva_profit_percent"
+                              type="number"
+                              value={formData.mva_profit_percent}
+                              onChange={(e) => setFormData(prev => ({ ...prev, mva_profit_percent: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0"
+                              step="0.01"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="assembly_fee_amount">Taxa Montagem (R$)</Label>
+                            <Input
+                              id="assembly_fee_amount"
+                              type="number"
+                              value={formData.assembly_fee_amount}
+                              onChange={(e) => setFormData(prev => ({ ...prev, assembly_fee_amount: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0"
+                              step="0.01"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Linha 4 */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="assembly_fee_percent">Taxa Montagem (%)</Label>
+                            <Input
+                              id="assembly_fee_percent"
+                              type="number"
+                              value={formData.assembly_fee_percent}
+                              onChange={(e) => setFormData(prev => ({ ...prev, assembly_fee_percent: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0"
+                              step="0.01"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="icms_st_on_purchase">ICMS ST pago na Compra (%)</Label>
+                            <Input
+                              id="icms_st_on_purchase"
+                              type="number"
+                              value={formData.icms_st_on_purchase}
+                              onChange={(e) => setFormData(prev => ({ ...prev, icms_st_on_purchase: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0"
+                              step="0.01"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="fcp_st_on_purchase">FCP ST pago na Compra (%)</Label>
+                            <Input
+                              id="fcp_st_on_purchase"
+                              type="number"
+                              value={formData.fcp_st_on_purchase}
+                              onChange={(e) => setFormData(prev => ({ ...prev, fcp_st_on_purchase: parseFloat(e.target.value) || 0 }))}
+                              placeholder="0"
+                              step="0.01"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="unit_price" className="text-green-600 font-semibold">Preço de Venda (R$) — Fixado</Label>
                             <Input
                               id="unit_price"
                               type="text"
                               value={maskedUnitPrice}
-                              onChange={(e) => {
-                                setMaskedUnitPrice(e.target.value)
-                              }}
+                              onChange={(e) => setMaskedUnitPrice(e.target.value)}
                               onValueChange={(unmasked) => {
                                 const value = getCurrencyValue(applyMask(unmasked, 'currency'))
                                 setFormData(prev => ({ ...prev, unit_price: value }))
                               }}
                               mask="currency"
                               placeholder="R$ 0,00"
-                            />
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label htmlFor="stock_quantity">Quantidade em Estoque</Label>
-                            <Input
-                              id="stock_quantity"
-                              type="number"
-                              value={formData.stock_quantity}
-                              onChange={(e) => setFormData(prev => ({ ...prev, stock_quantity: parseInt(e.target.value) || 0 }))}
-                              placeholder="0"
-                            />
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label htmlFor="min_stock_level">Estoque Mínimo</Label>
-                            <Input
-                              id="min_stock_level"
-                              type="number"
-                              value={formData.min_stock_level}
-                              onChange={(e) => setFormData(prev => ({ ...prev, min_stock_level: parseInt(e.target.value) || 0 }))}
-                              placeholder="0"
-                            />
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label htmlFor="unit">Unidade</Label>
-                            <Input
-                              id="unit"
-                              value={formData.unit}
-                              onChange={(e) => setFormData(prev => ({ ...prev, unit: e.target.value }))}
-                              placeholder="un"
+                              className="border-green-600"
                             />
                           </div>
                         </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                </div>
-              </div>
+
+                        {/* Linha 5 */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="last_purchase_value">Valor última compra (R$)</Label>
+                            <Input
+                              id="last_purchase_value"
+                              type="number"
+                              value={formData.last_purchase_value}
+                              disabled
+                              className="bg-muted"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Dropdown Forma de Cálculo */}
+                        <div className="mt-6">
+                          <Label htmlFor="cost_calculation_method">Forma de Cálculo Automático do Custo do Produto</Label>
+                          <Select 
+                            value={formData.cost_calculation_method} 
+                            onValueChange={(value) => setFormData(prev => ({ ...prev, cost_calculation_method: value }))}
+                          >
+                            <SelectTrigger className="mt-2">
+                              <SelectValue placeholder="Selecione o método de cálculo" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="nfe_rules">Aplicar regras das configurações da NFe</SelectItem>
+                              <SelectItem value="historical_average">Tomar como base a média histórica</SelectItem>
+                              <SelectItem value="last_entry">Tomar como base a última nota de entrada</SelectItem>
+                              <SelectItem value="stock_balance">Tomar como base custo do saldo em estoque</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </form>
           </div>
         </div>

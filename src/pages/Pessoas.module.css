@@ -179,6 +179,7 @@
 .formInput,
 .formSelect {
   background-color: #FFFFFF;
+  color: #333333;
   border: 1px solid #DDDDDD;
   border-radius: 4px;
   padding: 8px 12px;

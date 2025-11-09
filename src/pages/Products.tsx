@@ -859,254 +859,271 @@ const Products = () => {
                 </TabsList>
 
                 <TabsContent value="dados" className="mt-0">
+                  <div className="space-y-6 p-6">
+                    
+                    {/* Card: Informações Básicas */}
+                    <Card>
+                      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950">
+                        <CardTitle className="flex items-center gap-2">
+                          📦 Informações Básicas do Produto
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="name">Nome do Produto <span className="text-red-500">*</span></Label>
+                            <Input
+                              id="name"
+                              type="text"
+                              value={formData.name}
+                              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                              placeholder="Digite o nome do produto"
+                              required
+                              uppercase
+                              blockSpecialChars
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="product_type">Tipo do Produto <span className="text-red-500">*</span></Label>
+                            <Select 
+                              value={formData.product_type} 
+                              onValueChange={(value) => setFormData(prev => ({ ...prev, product_type: value }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o tipo" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {PRODUCT_TYPES.map((type) => (
+                                  <SelectItem key={type.value} value={type.value}>
+                                    {type.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
 
-              {/* Formulário */}
-              <div className={styles.formContainer}>
-                {/* Primeira linha - Nome, Tipo e Gênero */}
-                <div className={styles.formGrid}>
-                  <div>
-                    <label htmlFor="name" className={styles.formLabel}>
-                      Nome do Produto <span className={styles.requiredAsterisk}>*</span>
-                    </label>
-                    <Input
-                      id="name"
-                      type="text"
-                      className={styles.formInput}
-                      value={formData.name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Digite o nome do produto"
-                      required
-                      uppercase
-                      blockSpecialChars
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="product_type" className={styles.formLabel}>
-                      Tipo do Produto <span className={styles.requiredAsterisk}>*</span>
-                    </label>
-                    <Select 
-                      value={formData.product_type} 
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, product_type: value }))}
-                    >
-                      <SelectTrigger className={styles.formSelect}>
-                        <SelectValue placeholder="Selecione o tipo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PRODUCT_TYPES.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="product_genre">Tipo/Gênero <span className="text-red-500">*</span></Label>
+                            <Select 
+                              value={formData.product_genre} 
+                              onValueChange={(value) => setFormData(prev => ({ ...prev, product_genre: value }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o tipo/gênero" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {PRODUCT_GENRES.map((genre) => (
+                                  <SelectItem key={genre.value} value={genre.value}>
+                                    {genre.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                  <div>
-                    <label htmlFor="product_genre" className={styles.formLabel}>
-                      Tipo/Gênero <span className={styles.requiredAsterisk}>*</span>
-                    </label>
-                    <Select 
-                      value={formData.product_genre} 
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, product_genre: value }))}
-                    >
-                      <SelectTrigger className={styles.formSelect}>
-                        <SelectValue placeholder="Selecione o tipo/gênero" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PRODUCT_GENRES.map((genre) => (
-                          <SelectItem key={genre.value} value={genre.value}>
-                            {genre.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                    {/* Card: Códigos e Identificação */}
+                    <Card>
+                      <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950">
+                        <CardTitle className="flex items-center gap-2">
+                          🏷️ Códigos e Identificação
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="system_code">Código do Sistema</Label>
+                            <Input
+                              id="system_code"
+                              type="text"
+                              value={formData.system_code || ''}
+                              disabled
+                              placeholder="Auto-gerado"
+                              className="bg-muted"
+                            />
+                          </div>
 
-                {/* Segunda linha - Código Sistema, Código Produto e Marca */}
-                <div className={styles.formGrid}>
-                  <div>
-                    <label htmlFor="system_code" className={styles.formLabel}>
-                      Código do Sistema
-                    </label>
-                    <input
-                      id="system_code"
-                      type="text"
-                      className={`${styles.formInput} ${styles.formInputDisabled}`}
-                      value={formData.system_code || ''}
-                      disabled
-                      placeholder="Auto-gerado"
-                    />
-                  </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="sku">Código do Produto (SKU) <span className="text-red-500">*</span></Label>
+                            <Input
+                              id="sku"
+                              type="text"
+                              value={formData.sku}
+                              onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value }))}
+                              placeholder="Código alfanumérico"
+                              required
+                              style={{ fontFamily: 'monospace' }}
+                              uppercase
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="brand">Marca</Label>
+                            <Input
+                              id="brand"
+                              type="text"
+                              value={formData.brand}
+                              onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
+                              placeholder="Digite a marca"
+                              uppercase
+                              blockSpecialChars
+                            />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                  <div>
-                    <label htmlFor="sku" className={styles.formLabel}>
-                      Código do Produto (SKU) <span className={styles.requiredAsterisk}>*</span>
-                    </label>
-                    <Input
-                      id="sku"
-                      type="text"
-                      className={styles.formInput}
-                      value={formData.sku}
-                      onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value }))}
-                      placeholder="Código alfanumérico"
-                      required
-                      style={{ fontFamily: 'monospace' }}
-                      uppercase
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="brand" className={styles.formLabel}>
-                      Marca
-                    </label>
-                    <Input
-                      id="brand"
-                      type="text"
-                      className={styles.formInput}
-                      value={formData.brand}
-                      onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
-                      placeholder="Digite a marca"
-                      uppercase
-                      blockSpecialChars
-                    />
-                  </div>
-                </div>
+                    {/* Card: Características do Produto */}
+                    <Card>
+                      <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950">
+                        <CardTitle className="flex items-center gap-2">
+                          ⚙️ Características do Produto
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="model">Modelo</Label>
+                            <Input
+                              id="model"
+                              type="text"
+                              value={formData.model}
+                              onChange={(e) => setFormData(prev => ({ ...prev, model: e.target.value }))}
+                              placeholder="Digite o modelo"
+                              uppercase
+                              blockSpecialChars
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="validity_days">Validade (dias)</Label>
+                            <Input
+                              id="validity_days"
+                              type="number"
+                              value={formData.validity_days}
+                              onChange={(e) => setFormData(prev => ({ ...prev, validity_days: parseInt(e.target.value) || 0 }))}
+                              placeholder="0"
+                            />
+                          </div>
 
-                {/* Terceira linha - Modelo, Validade e Vendido Por */}
-                <div className={styles.formGrid}>
-                  <div>
-                    <label htmlFor="model" className={styles.formLabel}>
-                      Modelo
-                    </label>
-                    <Input
-                      id="model"
-                      type="text"
-                      className={styles.formInput}
-                      value={formData.model}
-                      onChange={(e) => setFormData(prev => ({ ...prev, model: e.target.value }))}
-                      placeholder="Digite o modelo"
-                      uppercase
-                      blockSpecialChars
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="validity_days" className={styles.formLabel}>
-                      Validade (dias)
-                    </label>
-                    <input
-                      id="validity_days"
-                      type="number"
-                      className={styles.formInput}
-                      value={formData.validity_days}
-                      onChange={(e) => setFormData(prev => ({ ...prev, validity_days: parseInt(e.target.value) || 0 }))}
-                      placeholder="0"
-                    />
-                  </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="sale_unit">Produto é vendido por</Label>
+                            <Select 
+                              value={formData.sale_unit} 
+                              onValueChange={(value) => setFormData(prev => ({ ...prev, sale_unit: value }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione a unidade" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {SALE_UNITS.map((unit) => (
+                                  <SelectItem key={unit.value} value={unit.value}>
+                                    {unit.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                  <div>
-                    <label htmlFor="sale_unit" className={styles.formLabel}>
-                      Produto é vendido por
-                    </label>
-                    <Select 
-                      value={formData.sale_unit} 
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, sale_unit: value }))}
-                    >
-                      <SelectTrigger className={styles.formSelect}>
-                        <SelectValue placeholder="Selecione a unidade" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SALE_UNITS.map((unit) => (
-                          <SelectItem key={unit.value} value={unit.value}>
-                            {unit.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                    {/* Card: Fornecedor */}
+                    <Card>
+                      <CardHeader className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950">
+                        <CardTitle className="flex items-center gap-2">
+                          🏭 Fornecedor Padrão
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="supplier_code">Código Fornecedor Padrão</Label>
+                            <Input
+                              id="supplier_code"
+                              type="text"
+                              value={formData.supplier_code}
+                              disabled
+                              placeholder=""
+                              className="bg-muted"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="supplier_id">Fornecedor Padrão</Label>
+                            <div className="flex items-center gap-2">
+                              <Select 
+                                value={formData.supplier_id} 
+                                onValueChange={(value) => setFormData(prev => ({ ...prev, supplier_id: value }))}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione o fornecedor" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {suppliers.map((supplier) => (
+                                    <SelectItem key={supplier.id} value={supplier.id}>
+                                      {supplier.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Button 
+                                type="button" 
+                                size="icon"
+                                variant="outline"
+                                title="Editar fornecedor"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                {/* Quarta linha - Código Fornecedor Padrão e Fornecedor Padrão */}
-                <div className={styles.formGrid2Col}>
-                  <div>
-                    <label htmlFor="supplier_code" className={styles.formLabel}>
-                      Código Fornecedor Padrão
-                    </label>
-                    <input
-                      id="supplier_code"
-                      type="text"
-                      className={`${styles.formInput} ${styles.formInputDisabled}`}
-                      value={formData.supplier_code}
-                      disabled
-                      placeholder=""
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="supplier_id" className={styles.formLabel}>
-                      Fornecedor Padrão
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <Select 
-                        value={formData.supplier_id} 
-                        onValueChange={(value) => setFormData(prev => ({ ...prev, supplier_id: value }))}
-                      >
-                        <SelectTrigger className={styles.formSelect}>
-                          <SelectValue placeholder="Selecione o fornecedor" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {suppliers.map((supplier) => (
-                            <SelectItem key={supplier.id} value={supplier.id}>
-                              {supplier.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <button 
-                        type="button" 
-                        className={styles.iconButton}
-                        title="Editar fornecedor"
-                      >
-                        <Edit className="w-3 h-3" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                    {/* Card: Configurações de Visibilidade */}
+                    <Card>
+                      <CardHeader className="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950 dark:to-blue-950">
+                        <CardTitle className="flex items-center gap-2">
+                          👁️ Configurações de Visibilidade
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="flex items-center space-x-2 p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                            <Switch
+                              id="inactive"
+                              checked={formData.inactive}
+                              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, inactive: checked }))}
+                            />
+                            <Label htmlFor="inactive" className="cursor-pointer">Cadastro Inativo</Label>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2 p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                            <Switch
+                              id="hide_in_sales"
+                              checked={formData.hide_in_sales}
+                              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, hide_in_sales: checked }))}
+                            />
+                            <Label htmlFor="hide_in_sales" className="cursor-pointer">Ocultar nas Vendas</Label>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2 p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                            <Switch
+                              id="visible_in_catalog"
+                              checked={formData.visible_in_catalog}
+                              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, visible_in_catalog: checked }))}
+                            />
+                            <Label htmlFor="visible_in_catalog" className="cursor-pointer">Visível no Catálogo</Label>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                {/* Switches */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="inactive"
-                      checked={formData.inactive}
-                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, inactive: checked }))}
-                    />
-                    <Label htmlFor="inactive">Cadastro Inativo</Label>
                   </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="hide_in_sales"
-                      checked={formData.hide_in_sales}
-                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, hide_in_sales: checked }))}
-                    />
-                    <Label htmlFor="hide_in_sales">Ocultar nas Vendas</Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="visible_in_catalog"
-                      checked={formData.visible_in_catalog}
-                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, visible_in_catalog: checked }))}
-                    />
-                    <Label htmlFor="visible_in_catalog">Visível no Catálogo</Label>
-                  </div>
-                </div>
-
-                </div>
-
                 </TabsContent>
 
                 <TabsContent value="precificacao" className="mt-0">

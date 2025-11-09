@@ -6,6 +6,7 @@ interface CategoryData {
   name: string;
   value: number;
   color: string;
+  [key: string]: any;
 }
 
 interface CategoryBreakdownChartProps {

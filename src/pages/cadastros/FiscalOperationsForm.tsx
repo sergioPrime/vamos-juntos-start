@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select';
 import { useFiscalOperations, FiscalOperation, CFOPCode } from '@/hooks/useFiscalOperations';
 import { useTaxGroups } from '@/hooks/useTaxGroups';
+import { useSalesCategories } from '@/hooks/useSalesCategories';
 import { toast } from 'sonner';
 
 const BRAZILIAN_STATES = [
@@ -30,11 +31,12 @@ export default function FiscalOperationsForm() {
   const { id } = useParams();
   const { fiscalOperations, createFiscalOperation, updateFiscalOperation } = useFiscalOperations();
   const { taxGroups } = useTaxGroups();
+  const { salesCategories } = useSalesCategories();
   const [loading, setLoading] = useState(false);
   const [currentCFOP, setCurrentCFOP] = useState({ code: '', description: '' });
   
   const [formData, setFormData] = useState<Partial<FiscalOperation>>({
-    operation_name: '',
+    sales_category_id: '',
     tax_group_id: '',
     destination_state: '',
     pis_situation: '07 - Operação Isenta da Contribuição',
@@ -71,7 +73,7 @@ export default function FiscalOperationsForm() {
   }, [id, fiscalOperations]);
 
   const handleSave = async () => {
-    if (!formData.operation_name || !formData.tax_group_id || !formData.destination_state) {
+    if (!formData.sales_category_id || !formData.tax_group_id || !formData.destination_state) {
       toast.error('Preencha todos os campos obrigatórios');
       return;
     }
@@ -146,13 +148,24 @@ export default function FiscalOperationsForm() {
             <TabsContent value="base" className="space-y-4">
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
-                  <Label htmlFor="operation_name">Operação *</Label>
-                  <Input
-                    id="operation_name"
-                    value={formData.operation_name}
-                    onChange={(e) => setFormData({ ...formData, operation_name: e.target.value })}
-                    placeholder="Ex: Venda, Transferência"
-                  />
+                  <Label htmlFor="sales_category_id">Operação *</Label>
+                  <Select
+                    value={formData.sales_category_id}
+                    onValueChange={(value) => setFormData({ ...formData, sales_category_id: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {salesCategories
+                        .filter((c) => c.is_active && c.visible_in_fiscal_operations)
+                        .map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="tax_group_id">Grupo Tributário *</Label>

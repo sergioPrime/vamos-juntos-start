@@ -319,7 +319,7 @@ export default function FinancialDashboard() {
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="amount"
-                        label={({ category, value }) => `${category}: ${formatCurrency(value)}`}
+                        label={({ category, value }: any) => `${category}: ${formatCurrency(Number(value) || 0)}`}
                       >
                         {revenueByCategory.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
@@ -348,7 +348,7 @@ export default function FinancialDashboard() {
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="amount"
-                        label={({ category, value }) => `${category}: ${formatCurrency(value)}`}
+                        label={({ category, value }: any) => `${category}: ${formatCurrency(Number(value) || 0)}`}
                       >
                         {expensesByCategory.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />

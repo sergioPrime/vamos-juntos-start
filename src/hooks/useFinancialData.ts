@@ -25,6 +25,7 @@ interface CategoryData {
   amount: number
   count: number
   color?: string
+  [key: string]: any
 }
 
 export function useFinancialData() {

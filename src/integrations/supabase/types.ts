@@ -1695,6 +1695,7 @@ export type Database = {
           operation_name: string
           org_id: string
           pis_situation: string
+          sales_category_id: string | null
           show_icms_st_on_invoice: boolean | null
           sum_ipi_on_base: boolean | null
           tax_group_id: string
@@ -1727,6 +1728,7 @@ export type Database = {
           operation_name: string
           org_id: string
           pis_situation: string
+          sales_category_id?: string | null
           show_icms_st_on_invoice?: boolean | null
           sum_ipi_on_base?: boolean | null
           tax_group_id: string
@@ -1759,6 +1761,7 @@ export type Database = {
           operation_name?: string
           org_id?: string
           pis_situation?: string
+          sales_category_id?: string | null
           show_icms_st_on_invoice?: boolean | null
           sum_ipi_on_base?: boolean | null
           tax_group_id?: string
@@ -1770,6 +1773,13 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fiscal_operations_sales_category_id_fkey"
+            columns: ["sales_category_id"]
+            isOneToOne: false
+            referencedRelation: "sales_categories"
             referencedColumns: ["id"]
           },
           {

@@ -114,7 +114,15 @@ const SalesCategoriesForm = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">
+            {isEdit ? 'Editar Categoria' : 'Nova Categoria'}
+          </h1>
+          <p className="text-muted-foreground">
+            {isEdit ? 'Edite os dados da categoria de vendas' : 'Cadastre uma nova categoria de vendas'}
+          </p>
+        </div>
+        <div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -123,22 +131,14 @@ const SalesCategoriesForm = () => {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {isEdit ? 'Editar Categoria' : 'Nova Categoria'}
-            </h1>
-            <p className="text-muted-foreground">
-              {isEdit ? 'Edite os dados da categoria de vendas' : 'Cadastre uma nova categoria de vendas'}
-            </p>
-          </div>
+          <Button 
+            onClick={handleSubmit}
+            disabled={saveMutation.isPending}
+          >
+            <Save className="mr-2 h-4 w-4" />
+            Salvar
+          </Button>
         </div>
-        <Button 
-          onClick={handleSubmit}
-          disabled={saveMutation.isPending}
-        >
-          <Save className="mr-2 h-4 w-4" />
-          Salvar
-        </Button>
       </div>
 
       <Card className="p-6">

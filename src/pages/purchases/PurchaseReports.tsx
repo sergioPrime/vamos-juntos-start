@@ -28,6 +28,7 @@ interface RequestsByStatus {
   status: string
   count: number
   percentage: number
+  [key: string]: any
 }
 
 interface RequestsByPriority {

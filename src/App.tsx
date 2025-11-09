@@ -675,6 +675,24 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
+          <Route path="/cadastros/categorias-vendas" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <SalesCategories />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cadastros/categorias-vendas/:id" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <SalesCategoriesForm />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
 
           {/* Fiscal routes */}
           <Route path="/fiscal/nfe" element={

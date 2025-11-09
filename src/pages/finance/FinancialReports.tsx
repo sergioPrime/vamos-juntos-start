@@ -514,7 +514,7 @@ export default function FinancialReports() {
                           cy="50%"
                           outerRadius={80}
                           dataKey="amount"
-                          label={({ category, amount }) => `${category}: ${formatCurrency(amount)}`}
+                          label={({ category, amount }: any) => `${category}: ${formatCurrency(Number(amount) || 0)}`}
                         >
                           {revenueByCategory.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color || `hsl(${index * 45}, 70%, 50%)`} />

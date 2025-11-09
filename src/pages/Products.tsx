@@ -25,6 +25,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { cn } from "@/lib/utils"
 import { CompetitorPriceScraper } from "@/components/products/CompetitorPriceScraper"
 import { NCMSearchDialog } from "@/components/products/NCMSearchDialog"
+import { useTaxGroups } from "@/hooks/useTaxGroups"
 
 interface Product {
   id: string
@@ -81,6 +82,7 @@ interface Product {
   market_price_max?: number
   last_market_check?: string
   // Campos fiscais
+  tax_group_id?: string
   grupo_tributario?: string
   cfop_padrao?: string
   codigo_ncm?: string
@@ -134,6 +136,7 @@ const Products = () => {
   const { currentOrg, loading: orgLoading } = useOrganization()
   const { toast } = useToast()
   const { getCurrencyValue, applyMask } = useMask()
+  const { taxGroups } = useTaxGroups()
   
   const [products, setProducts] = useState<Product[]>([])
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
@@ -196,6 +199,7 @@ const Products = () => {
     market_price_min: 0,
     market_price_max: 0,
     // Campos fiscais
+    tax_group_id: "",
     grupo_tributario: "",
     cfop_padrao: "",
     codigo_ncm: "",
@@ -468,6 +472,7 @@ const Products = () => {
       competitor_prices: [],
       market_price_min: 0,
       market_price_max: 0,
+      tax_group_id: "",
       grupo_tributario: "",
       cfop_padrao: "",
       codigo_ncm: "",
@@ -673,6 +678,7 @@ const Products = () => {
         competitor_prices: product.competitor_prices || [],
         market_price_min: product.market_price_min || 0,
         market_price_max: product.market_price_max || 0,
+        tax_group_id: (product as any).tax_group_id || "",
         grupo_tributario: (product as any).grupo_tributario || "",
         cfop_padrao: (product as any).cfop_padrao || "",
         codigo_ncm: (product as any).codigo_ncm || "",
@@ -738,7 +744,7 @@ const Products = () => {
     let hasErrors = false
 
     // Validar Grupo Tributário (obrigatório)
-    if (!formData.grupo_tributario?.trim()) {
+    if (!formData.tax_group_id?.trim()) {
       toast({
         title: "Campo obrigatório",
         description: "Grupo Tributário é obrigatório.",
@@ -2137,14 +2143,22 @@ const Products = () => {
                       <CardContent className="pt-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="grupo_tributario">Grupo Tributário <span className="text-primary">*</span></Label>
-                            <Input
-                              id="grupo_tributario"
-                              type="text"
-                              value={formData.grupo_tributario}
-                              onChange={(e) => setFormData(prev => ({ ...prev, grupo_tributario: e.target.value }))}
-                              placeholder="Digite o grupo tributário"
-                            />
+                            <Label htmlFor="tax_group_id">Grupo Tributário <span className="text-primary">*</span></Label>
+                            <Select
+                              value={formData.tax_group_id}
+                              onValueChange={(value) => setFormData(prev => ({ ...prev, tax_group_id: value }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o grupo tributário" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {taxGroups.filter(g => g.is_active).map((group) => (
+                                  <SelectItem key={group.id} value={group.id}>
+                                    {group.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
                           
                           <div className="space-y-2">

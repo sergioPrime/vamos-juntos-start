@@ -2659,6 +2659,7 @@ export type Database = {
           supplier_code: string | null
           supplier_id: string | null
           system_code: string | null
+          tax_group_id: string | null
           track_stock: boolean
           unit: string | null
           unit_id: string | null
@@ -2718,6 +2719,7 @@ export type Database = {
           supplier_code?: string | null
           supplier_id?: string | null
           system_code?: string | null
+          tax_group_id?: string | null
           track_stock?: boolean
           unit?: string | null
           unit_id?: string | null
@@ -2777,6 +2779,7 @@ export type Database = {
           supplier_code?: string | null
           supplier_id?: string | null
           system_code?: string | null
+          tax_group_id?: string | null
           track_stock?: boolean
           unit?: string | null
           unit_id?: string | null
@@ -2788,7 +2791,15 @@ export type Database = {
           visible_in_catalog?: boolean | null
           weight?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_tax_group_id_fkey"
+            columns: ["tax_group_id"]
+            isOneToOne: false
+            referencedRelation: "tax_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

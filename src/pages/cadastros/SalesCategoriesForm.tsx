@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { supabase } from "@/integrations/supabase/client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface SalesCategoryFormData {
@@ -24,6 +24,7 @@ const SalesCategoriesForm = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const { currentOrg } = useOrganization();
+  const queryClient = useQueryClient();
   const isEdit = id && id !== 'novo';
 
   const [formData, setFormData] = useState<SalesCategoryFormData>({
@@ -84,6 +85,7 @@ const SalesCategoriesForm = () => {
       }
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sales-categories'] });
       toast.success(`Categoria ${isEdit ? 'atualizada' : 'criada'} com sucesso!`);
       navigate('/cadastros/categorias-vendas');
     },

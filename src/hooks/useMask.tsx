@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export type MaskType = 'cpf' | 'cnpj' | 'phone' | 'mobile' | 'cep' | 'none';
+export type MaskType = 'cpf' | 'cnpj' | 'phone' | 'mobile' | 'cep' | 'currency' | 'none';
 
 interface MaskConfig {
   mask: string;
@@ -34,6 +34,11 @@ const maskConfigs: Record<MaskType, MaskConfig | null> = {
     placeholder: '00000-000',
     maxLength: 9,
   },
+  currency: {
+    mask: 'R$ #',
+    placeholder: 'R$ 0,00',
+    maxLength: 19, // R$ 999.999.999,99
+  },
   none: null,
 };
 
@@ -43,6 +48,11 @@ export const useMask = (maskType: MaskType = 'none') => {
   const applyMask = (value: string, type: MaskType = maskType): string => {
     if (type === 'none' || !maskConfigs[type]) {
       return value;
+    }
+
+    // Tratamento especial para moeda
+    if (type === 'currency') {
+      return applyCurrencyMask(value);
     }
 
     // Remove tudo que não é número
@@ -70,7 +80,47 @@ export const useMask = (maskType: MaskType = 'none') => {
     return masked;
   };
 
-  const removeMask = (value: string): string => {
+  const applyCurrencyMask = (value: string): string => {
+    // Remove tudo que não é número
+    let numbers = value.replace(/\D/g, '');
+    
+    if (!numbers || numbers.length === 0) {
+      return '';
+    }
+
+    // Converte para número com centavos
+    const numberValue = parseInt(numbers) / 100;
+    
+    // Formata com separadores brasileiros
+    const formatted = numberValue.toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+    return `R$ ${formatted}`;
+  };
+
+  const removeCurrencyMask = (value: string): string => {
+    // Remove R$, pontos e vírgula, retorna apenas números com centavos
+    const numbers = value.replace(/[^\d]/g, '');
+    if (!numbers) return '0';
+    
+    // Retorna o valor em centavos como string
+    return numbers;
+  };
+
+  const getCurrencyValue = (maskedValue: string): number => {
+    // Converte valor mascarado para número decimal
+    const numbers = maskedValue.replace(/[^\d]/g, '');
+    if (!numbers) return 0;
+    
+    return parseInt(numbers) / 100;
+  };
+
+  const removeMask = (value: string, type: MaskType = maskType): string => {
+    if (type === 'currency') {
+      return removeCurrencyMask(value);
+    }
     return value.replace(/\D/g, '');
   };
 
@@ -236,5 +286,6 @@ export const useMask = (maskType: MaskType = 'none') => {
     validateCPF,
     validateCNPJ,
     searchAddressByCEP,
+    getCurrencyValue,
   };
 };

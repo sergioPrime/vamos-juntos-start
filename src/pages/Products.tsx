@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
+import { useMask } from "@/hooks/useMask"
 import { usePermissionGuard } from "@/hooks/usePermissionGuard"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -95,6 +96,7 @@ const Products = () => {
   const { user } = useAuth()
   const { currentOrg, loading: orgLoading } = useOrganization()
   const { toast } = useToast()
+  const { getCurrencyValue, applyMask } = useMask()
   
   const [products, setProducts] = useState<Product[]>([])
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
@@ -134,6 +136,10 @@ const Products = () => {
     dimensions: "",
     active: true,
   })
+
+  // Estados para valores mascarados
+  const [maskedCostPrice, setMaskedCostPrice] = useState("")
+  const [maskedUnitPrice, setMaskedUnitPrice] = useState("")
 
   useEffect(() => {
     if (currentOrg?.id) {
@@ -215,6 +221,8 @@ const Products = () => {
       dimensions: "",
       active: true,
     })
+    setMaskedCostPrice("")
+    setMaskedUnitPrice("")
     setEditingProduct(null)
   }
 
@@ -247,6 +255,9 @@ const Products = () => {
         dimensions: product.dimensions || "",
         active: product.active,
       })
+      // Aplicar máscara aos preços
+      setMaskedCostPrice(applyMask((product.cost_price * 100).toString(), 'currency'))
+      setMaskedUnitPrice(applyMask((product.unit_price * 100).toString(), 'currency'))
     } else {
       resetForm()
     }
@@ -779,11 +790,17 @@ const Products = () => {
                             <Label htmlFor="cost_price">Preço de Custo</Label>
                             <Input
                               id="cost_price"
-                              type="number"
-                              step="0.01"
-                              value={formData.cost_price}
-                              onChange={(e) => setFormData(prev => ({ ...prev, cost_price: parseFloat(e.target.value) || 0 }))}
-                              placeholder="0.00"
+                              type="text"
+                              value={maskedCostPrice}
+                              onChange={(e) => {
+                                setMaskedCostPrice(e.target.value)
+                              }}
+                              onValueChange={(unmasked) => {
+                                const value = getCurrencyValue(applyMask(unmasked, 'currency'))
+                                setFormData(prev => ({ ...prev, cost_price: value }))
+                              }}
+                              mask="currency"
+                              placeholder="R$ 0,00"
                             />
                           </div>
                           
@@ -791,11 +808,17 @@ const Products = () => {
                             <Label htmlFor="unit_price">Preço de Venda</Label>
                             <Input
                               id="unit_price"
-                              type="number"
-                              step="0.01"
-                              value={formData.unit_price}
-                              onChange={(e) => setFormData(prev => ({ ...prev, unit_price: parseFloat(e.target.value) || 0 }))}
-                              placeholder="0.00"
+                              type="text"
+                              value={maskedUnitPrice}
+                              onChange={(e) => {
+                                setMaskedUnitPrice(e.target.value)
+                              }}
+                              onValueChange={(unmasked) => {
+                                const value = getCurrencyValue(applyMask(unmasked, 'currency'))
+                                setFormData(prev => ({ ...prev, unit_price: value }))
+                              }}
+                              mask="currency"
+                              placeholder="R$ 0,00"
                             />
                           </div>
                           

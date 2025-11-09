@@ -21,7 +21,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const [lastInvalidChar, setLastInvalidChar] = React.useState<string | null>(null)
     const [documentValidation, setDocumentValidation] = React.useState<{ isValid: boolean; message: string } | null>(null)
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       let value = e.target.value
       const target = e.target
       const start = target.selectionStart
@@ -34,12 +34,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         
         // Chamar onValueChange com valor sem máscara
         if (onValueChange) {
-          onValueChange(removeMask(value))
+          onValueChange(removeMask(value, mask))
         }
       }
 
-      // Validar caracteres especiais
-      if (blockSpecialChars || allowedChars) {
+      // Validar caracteres especiais (não aplicar para campos com máscara de moeda)
+      if ((blockSpecialChars || allowedChars) && mask !== 'currency') {
         const invalidCharsRegex = allowedChars || /[<>\/\\:*?"'|]/g
         const invalidChars = value.match(invalidCharsRegex)
         
@@ -102,8 +102,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       // Atualizar o valor do input
       target.value = value
       
-      // Restaurar posição do cursor
-      if (start !== null && end !== null && !mask) {
+      // Restaurar posição do cursor (não aplicar para moeda pois a máscara reposiciona)
+      if (start !== null && end !== null && mask !== 'currency') {
         target.setSelectionRange(start, end)
       }
       

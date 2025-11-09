@@ -26,6 +26,7 @@ interface PessoaFormData {
   razaoSocial: string
   cnae: string
   inscricaoEstadual: string
+  cnh: string
   emailGeral: string
   emailsSecundarios: string[]
   telefone: string
@@ -73,6 +74,7 @@ export function Pessoas() {
     razaoSocial: "",
     cnae: "",
     inscricaoEstadual: "",
+    cnh: "",
     emailGeral: "",
     emailsSecundarios: [],
     telefone: "",
@@ -248,6 +250,7 @@ export function Pessoas() {
         razaoSocial: "",
         cnae: "",
         inscricaoEstadual: "",
+        cnh: "",
         emailGeral: "",
         emailsSecundarios: [],
         telefone: "",
@@ -300,6 +303,7 @@ export function Pessoas() {
         razaoSocial: pessoa.razao_social || "",
         cnae: "",
         inscricaoEstadual: "",
+        cnh: "",
         emailGeral: pessoa.email_geral || "",
         emailsSecundarios: pessoa.emails_secundarios || [],
         telefone: pessoa.telefone || "",
@@ -327,6 +331,7 @@ export function Pessoas() {
         razaoSocial: "",
         cnae: "",
         inscricaoEstadual: "",
+        cnh: "",
         emailGeral: "",
         emailsSecundarios: [],
         telefone: "",
@@ -464,6 +469,28 @@ export function Pessoas() {
                   </div>
                 </div>
               </div>
+
+              {/* Campo CNH (apenas para Pessoa Física) */}
+              {formData.tipoPessoa === "fisica" && (
+                <div className={styles.formGrid}>
+                  <div>
+                    <label htmlFor="cnh" className={styles.formLabel}>
+                      CNH - Carteira Nacional de Habilitação
+                    </label>
+                    <Input
+                      id="cnh"
+                      type="text"
+                      className={styles.formInput}
+                      value={formData.cnh}
+                      onChange={(e) => handleInputChange("cnh", e.target.value)}
+                      mask="cnh"
+                      validateCNH={true}
+                      placeholder="00000000000"
+                      maxLength={11}
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Linha Razão Social e CNAE (apenas para Pessoa Jurídica) */}
               {formData.tipoPessoa === "juridica" && (

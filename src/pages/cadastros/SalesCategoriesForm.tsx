@@ -152,6 +152,7 @@ const SalesCategoriesForm = () => {
               placeholder="Digite o nome da categoria"
               required
               uppercase
+              blockSpecialChars
             />
           </div>
 

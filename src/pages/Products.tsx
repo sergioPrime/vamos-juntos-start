@@ -540,6 +540,7 @@ const Products = () => {
                       placeholder="Digite o nome do produto"
                       required
                       uppercase
+                      blockSpecialChars
                     />
                   </div>
                   
@@ -631,6 +632,7 @@ const Products = () => {
                       onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
                       placeholder="Digite a marca"
                       uppercase
+                      blockSpecialChars
                     />
                   </div>
                 </div>
@@ -649,6 +651,7 @@ const Products = () => {
                       onChange={(e) => setFormData(prev => ({ ...prev, model: e.target.value }))}
                       placeholder="Digite o modelo"
                       uppercase
+                      blockSpecialChars
                     />
                   </div>
                   

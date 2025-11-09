@@ -433,6 +433,7 @@ export default function PriceTablesForm() {
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     placeholder="Ex: Tabela Varejo"
                     uppercase
+                    blockSpecialChars
                   />
                 </div>
 

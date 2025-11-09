@@ -343,6 +343,7 @@ export function Pessoas() {
                     onChange={(e) => handleInputChange("nomeFantasia", e.target.value)}
                     placeholder="Nome fantasia da pessoa"
                     uppercase
+                    blockSpecialChars
                   />
                 </div>
 
@@ -528,6 +529,7 @@ export function Pessoas() {
                     onChange={(e) => handleInputChange("vendedorPadrao", e.target.value)}
                     placeholder="Nome do vendedor"
                     uppercase
+                    blockSpecialChars
                   />
                 </div>
 
@@ -543,6 +545,7 @@ export function Pessoas() {
                     onChange={(e) => handleInputChange("transportadoraPadrao", e.target.value)}
                     placeholder="Nome da transportadora"
                     uppercase
+                    blockSpecialChars
                   />
                 </div>
               </div>

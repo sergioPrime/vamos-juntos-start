@@ -231,6 +231,7 @@ export default function WarehouseForm() {
                   className="text-sm h-10 border-gray-300"
                   required
                   uppercase
+                  blockSpecialChars
                 />
               </div>
 

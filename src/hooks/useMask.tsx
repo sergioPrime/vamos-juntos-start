@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export type MaskType = 'cpf' | 'cnpj' | 'phone' | 'mobile' | 'cep' | 'currency' | 'cnae' | 'none';
+export type MaskType = 'cpf' | 'cnpj' | 'phone' | 'mobile' | 'cep' | 'currency' | 'cnae' | 'creditCard' | 'none';
 
 interface MaskConfig {
   mask: string;
@@ -44,11 +44,85 @@ const maskConfigs: Record<MaskType, MaskConfig | null> = {
     placeholder: '0000-0/00',
     maxLength: 10,
   },
+  creditCard: {
+    mask: '#### #### #### ####',
+    placeholder: '0000 0000 0000 0000',
+    maxLength: 19,
+  },
   none: null,
 };
 
 export const useMask = (maskType: MaskType = 'none') => {
   const [maskedValue, setMaskedValue] = useState('');
+  const [cardBrand, setCardBrand] = useState<string>('');
+
+  const detectCardBrand = (cardNumber: string): { brand: string; mask: string; maxLength: number } => {
+    const numbers = cardNumber.replace(/\D/g, '');
+    
+    // Visa: começa com 4
+    if (/^4/.test(numbers)) {
+      return { brand: 'Visa', mask: '#### #### #### ####', maxLength: 19 };
+    }
+    
+    // Mastercard: começa com 51-55 ou 2221-2720
+    if (/^(5[1-5]|222[1-9]|22[3-9]|2[3-6]|27[01]|2720)/.test(numbers)) {
+      return { brand: 'Mastercard', mask: '#### #### #### ####', maxLength: 19 };
+    }
+    
+    // American Express: começa com 34 ou 37
+    if (/^3[47]/.test(numbers)) {
+      return { brand: 'Amex', mask: '#### ###### #####', maxLength: 17 };
+    }
+    
+    // Diners Club: começa com 36 ou 38 ou 300-305
+    if (/^(36|38|30[0-5])/.test(numbers)) {
+      return { brand: 'Diners', mask: '#### ###### ####', maxLength: 16 };
+    }
+    
+    // Discover: começa com 6011, 622126-622925, 644-649, ou 65
+    if (/^(6011|65|64[4-9]|622)/.test(numbers)) {
+      return { brand: 'Discover', mask: '#### #### #### ####', maxLength: 19 };
+    }
+    
+    // Elo: começa com 4011, 4312, 4389, 4514, 4573, 5041, 5066, 5067, 509, 6277, 6362, 6363, 650, 6516, 6550
+    if (/^(4011|4312|4389|4514|4573|5041|5066|5067|509|6277|6362|6363|650|6516|6550)/.test(numbers)) {
+      return { brand: 'Elo', mask: '#### #### #### ####', maxLength: 19 };
+    }
+    
+    // Hipercard: começa com 38 ou 60
+    if (/^(38|60)/.test(numbers)) {
+      return { brand: 'Hipercard', mask: '#### #### #### ####', maxLength: 19 };
+    }
+    
+    // Default
+    return { brand: 'Unknown', mask: '#### #### #### ####', maxLength: 19 };
+  };
+
+  const applyCreditCardMask = (value: string): string => {
+    const numbers = value.replace(/\D/g, '');
+    
+    if (!numbers || numbers.length === 0) {
+      setCardBrand('');
+      return '';
+    }
+
+    const { brand, mask } = detectCardBrand(numbers);
+    setCardBrand(brand);
+
+    let masked = '';
+    let numberIndex = 0;
+
+    for (let i = 0; i < mask.length && numberIndex < numbers.length; i++) {
+      if (mask[i] === '#') {
+        masked += numbers[numberIndex];
+        numberIndex++;
+      } else {
+        masked += mask[i];
+      }
+    }
+
+    return masked;
+  };
 
   const applyMask = (value: string, type: MaskType = maskType): string => {
     if (type === 'none' || !maskConfigs[type]) {
@@ -58,6 +132,11 @@ export const useMask = (maskType: MaskType = 'none') => {
     // Tratamento especial para moeda
     if (type === 'currency') {
       return applyCurrencyMask(value);
+    }
+
+    // Tratamento especial para cartão de crédito
+    if (type === 'creditCard') {
+      return applyCreditCardMask(value);
     }
 
     // Remove tudo que não é número
@@ -277,6 +356,33 @@ export const useMask = (maskType: MaskType = 'none') => {
     return calculatedDV === dv;
   };
 
+  // Validação de cartão de crédito usando algoritmo de Luhn
+  const validateCreditCard = (cardNumber: string): boolean => {
+    const numbers = cardNumber.replace(/\D/g, '');
+    
+    if (numbers.length < 13 || numbers.length > 19) return false;
+
+    let sum = 0;
+    let isEven = false;
+
+    // Percorre o número de trás para frente
+    for (let i = numbers.length - 1; i >= 0; i--) {
+      let digit = parseInt(numbers[i]);
+
+      if (isEven) {
+        digit *= 2;
+        if (digit > 9) {
+          digit -= 9;
+        }
+      }
+
+      sum += digit;
+      isEven = !isEven;
+    }
+
+    return sum % 10 === 0;
+  };
+
   const searchAddressByCEP = async (cep: string): Promise<{
     logradouro: string;
     bairro: string;
@@ -316,7 +422,10 @@ export const useMask = (maskType: MaskType = 'none') => {
     validateCPF,
     validateCNPJ,
     validateCNAE,
+    validateCreditCard,
     searchAddressByCEP,
     getCurrencyValue,
+    cardBrand,
+    detectCardBrand,
   };
 };

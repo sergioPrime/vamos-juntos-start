@@ -15,18 +15,21 @@ export interface InputProps extends React.ComponentProps<"input"> {
   validateDocument?: boolean
   validateCNAE?: boolean
   validateIE?: boolean
+  validateCreditCard?: boolean
   uf?: string
+  onCardBrandDetected?: (brand: string) => void
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, uppercase = false, blockSpecialChars = false, allowedChars, mask, onChange, onValueChange, validateDocument = false, validateCNAE = false, validateIE = false, uf, ...props }, ref) => {
+  ({ className, type, uppercase = false, blockSpecialChars = false, allowedChars, mask, onChange, onValueChange, validateDocument = false, validateCNAE = false, validateIE = false, validateCreditCard = false, uf, onCardBrandDetected, ...props }, ref) => {
     const { toast } = useToast()
-    const { applyMask, removeMask, getConfig, detectDocumentType, validateCPF, validateCNPJ, validateCNAE: validateCNAEFn } = useMask(mask)
+    const { applyMask, removeMask, getConfig, detectDocumentType, validateCPF, validateCNPJ, validateCNAE: validateCNAEFn, validateCreditCard: validateCreditCardFn, cardBrand, detectCardBrand } = useMask(mask)
     const { applyIEMask, validateIE: validateIEFn, getIEConfig } = useInscricaoEstadual()
     const [lastInvalidChar, setLastInvalidChar] = React.useState<string | null>(null)
     const [documentValidation, setDocumentValidation] = React.useState<{ isValid: boolean; message: string } | null>(null)
     const [cnaeValidation, setCnaeValidation] = React.useState<{ isValid: boolean; message: string } | null>(null)
     const [ieValidation, setIeValidation] = React.useState<{ isValid: boolean; message: string } | null>(null)
+    const [cardValidation, setCardValidation] = React.useState<{ isValid: boolean; message: string; brand: string } | null>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       let value = e.target.value
@@ -178,6 +181,43 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         }
       }
 
+      // Validar cartão de crédito se necessário
+      if (validateCreditCard && value.length > 0) {
+        const numbers = value.replace(/\D/g, '')
+        const { brand } = detectCardBrand(value)
+        
+        // Notificar bandeira detectada
+        if (onCardBrandDetected && brand !== 'Unknown') {
+          onCardBrandDetected(brand)
+        }
+        
+        if (numbers.length >= 13) {
+          const isValid = validateCreditCardFn(value)
+          
+          if (isValid) {
+            setCardValidation({
+              isValid: true,
+              message: `Cartão ${brand} válido`,
+              brand
+            })
+          } else {
+            setCardValidation({
+              isValid: false,
+              message: 'Número de cartão inválido - verifique os dígitos',
+              brand
+            })
+          }
+        } else if (numbers.length > 0) {
+          setCardValidation({
+            isValid: false,
+            message: `Digite o número completo do cartão (${brand})`,
+            brand
+          })
+        } else {
+          setCardValidation(null)
+        }
+      }
+
       // Atualizar o valor do input
       target.value = value
       
@@ -207,7 +247,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             validateCNAE && cnaeValidation && cnaeValidation.isValid && "border-green-500 focus-visible:ring-green-500",
             validateIE && ieValidation && !ieValidation.isValid && "border-destructive focus-visible:ring-destructive",
             validateIE && ieValidation && ieValidation.isValid && "border-green-500 focus-visible:ring-green-500",
-            (validateDocument || validateCNAE || validateIE) && "pr-10",
+            validateCreditCard && cardValidation && !cardValidation.isValid && "border-destructive focus-visible:ring-destructive",
+            validateCreditCard && cardValidation && cardValidation.isValid && "border-green-500 focus-visible:ring-green-500",
+            (validateDocument || validateCNAE || validateIE || validateCreditCard) && "pr-10",
             className
           )}
           ref={ref}
@@ -262,6 +304,33 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 {ieValidation.message}
               </p>
             )}
+          </>
+        )}
+        {validateCreditCard && cardValidation && (
+          <>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {cardValidation.isValid ? (
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+              ) : (
+                <AlertCircle className="h-5 w-5 text-destructive" />
+              )}
+            </div>
+            <div className="mt-1 flex items-center justify-between">
+              {!cardValidation.isValid ? (
+                <p className="text-xs text-destructive">
+                  {cardValidation.message}
+                </p>
+              ) : (
+                <p className="text-xs text-green-600 font-medium">
+                  {cardValidation.message}
+                </p>
+              )}
+              {cardValidation.brand !== 'Unknown' && (
+                <span className="text-xs font-semibold text-primary">
+                  {cardValidation.brand}
+                </span>
+              )}
+            </div>
           </>
         )}
       </div>

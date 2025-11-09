@@ -4,6 +4,7 @@ import { AlertCircle, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { useMask, type MaskType } from "@/hooks/useMask"
+import { useInscricaoEstadual, type UF } from "@/hooks/useInscricaoEstadual"
 
 export interface InputProps extends React.ComponentProps<"input"> {
   uppercase?: boolean
@@ -13,15 +14,19 @@ export interface InputProps extends React.ComponentProps<"input"> {
   onValueChange?: (value: string) => void
   validateDocument?: boolean
   validateCNAE?: boolean
+  validateIE?: boolean
+  uf?: string
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, uppercase = false, blockSpecialChars = false, allowedChars, mask, onChange, onValueChange, validateDocument = false, validateCNAE = false, ...props }, ref) => {
+  ({ className, type, uppercase = false, blockSpecialChars = false, allowedChars, mask, onChange, onValueChange, validateDocument = false, validateCNAE = false, validateIE = false, uf, ...props }, ref) => {
     const { toast } = useToast()
     const { applyMask, removeMask, getConfig, detectDocumentType, validateCPF, validateCNPJ, validateCNAE: validateCNAEFn } = useMask(mask)
+    const { applyIEMask, validateIE: validateIEFn, getIEConfig } = useInscricaoEstadual()
     const [lastInvalidChar, setLastInvalidChar] = React.useState<string | null>(null)
     const [documentValidation, setDocumentValidation] = React.useState<{ isValid: boolean; message: string } | null>(null)
     const [cnaeValidation, setCnaeValidation] = React.useState<{ isValid: boolean; message: string } | null>(null)
+    const [ieValidation, setIeValidation] = React.useState<{ isValid: boolean; message: string } | null>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       let value = e.target.value
@@ -37,6 +42,16 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         // Chamar onValueChange com valor sem máscara
         if (onValueChange) {
           onValueChange(removeMask(value, mask))
+        }
+      }
+
+      // Aplicar máscara de IE se validateIE estiver ativo
+      if (validateIE && uf) {
+        value = applyIEMask(value, uf as UF)
+        target.value = value
+        
+        if (onValueChange) {
+          onValueChange(value.replace(/\D/g, ''))
         }
       }
 
@@ -129,6 +144,40 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         }
       }
 
+      // Validar IE se necessário
+      if (validateIE && value.length > 0 && uf) {
+        const numbers = value.replace(/\D/g, '')
+        const ieConfig = getIEConfig(uf as UF)
+        
+        if (value.toUpperCase() === 'ISENTO') {
+          setIeValidation({
+            isValid: true,
+            message: 'Isento de Inscrição Estadual'
+          })
+        } else if (ieConfig && numbers.length === ieConfig.length) {
+          const isValid = validateIEFn(value, uf as UF)
+          
+          if (isValid) {
+            setIeValidation({
+              isValid: true,
+              message: `IE ${uf} válida`
+            })
+          } else {
+            setIeValidation({
+              isValid: false,
+              message: `IE inválida para ${uf} - verifique os dígitos`
+            })
+          }
+        } else if (numbers.length > 0) {
+          setIeValidation({
+            isValid: false,
+            message: `Digite a IE completa (${ieConfig?.length || '?'} dígitos)`
+          })
+        } else {
+          setIeValidation(null)
+        }
+      }
+
       // Atualizar o valor do input
       target.value = value
       
@@ -143,6 +192,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     }
 
     const maskConfig = mask ? getConfig(mask) : null
+    const ieConfig = validateIE && uf ? getIEConfig(uf as UF) : null
 
     return (
       <div className="relative w-full">
@@ -155,13 +205,15 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             validateDocument && documentValidation && documentValidation.isValid && "border-green-500 focus-visible:ring-green-500",
             validateCNAE && cnaeValidation && !cnaeValidation.isValid && "border-destructive focus-visible:ring-destructive",
             validateCNAE && cnaeValidation && cnaeValidation.isValid && "border-green-500 focus-visible:ring-green-500",
-            (validateDocument || validateCNAE) && "pr-10",
+            validateIE && ieValidation && !ieValidation.isValid && "border-destructive focus-visible:ring-destructive",
+            validateIE && ieValidation && ieValidation.isValid && "border-green-500 focus-visible:ring-green-500",
+            (validateDocument || validateCNAE || validateIE) && "pr-10",
             className
           )}
           ref={ref}
           onChange={handleChange}
-          maxLength={maskConfig?.maxLength}
-          placeholder={maskConfig?.placeholder || props.placeholder}
+          maxLength={maskConfig?.maxLength || ieConfig?.mask.length}
+          placeholder={maskConfig?.placeholder || ieConfig?.mask || props.placeholder}
           {...props}
         />
         {validateDocument && documentValidation && (
@@ -192,6 +244,22 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {!cnaeValidation.isValid && (
               <p className="mt-1 text-xs text-destructive">
                 {cnaeValidation.message}
+              </p>
+            )}
+          </>
+        )}
+        {validateIE && ieValidation && (
+          <>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {ieValidation.isValid ? (
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+              ) : (
+                <AlertCircle className="h-5 w-5 text-destructive" />
+              )}
+            </div>
+            {!ieValidation.isValid && (
+              <p className="mt-1 text-xs text-destructive">
+                {ieValidation.message}
               </p>
             )}
           </>

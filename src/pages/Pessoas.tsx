@@ -25,6 +25,7 @@ interface PessoaFormData {
   documento: string
   razaoSocial: string
   cnae: string
+  inscricaoEstadual: string
   emailGeral: string
   emailsSecundarios: string[]
   telefone: string
@@ -71,6 +72,7 @@ export function Pessoas() {
     documento: "",
     razaoSocial: "",
     cnae: "",
+    inscricaoEstadual: "",
     emailGeral: "",
     emailsSecundarios: [],
     telefone: "",
@@ -245,6 +247,7 @@ export function Pessoas() {
         documento: "",
         razaoSocial: "",
         cnae: "",
+        inscricaoEstadual: "",
         emailGeral: "",
         emailsSecundarios: [],
         telefone: "",
@@ -296,6 +299,7 @@ export function Pessoas() {
         documento: pessoa.documento,
         razaoSocial: pessoa.razao_social || "",
         cnae: "",
+        inscricaoEstadual: "",
         emailGeral: pessoa.email_geral || "",
         emailsSecundarios: pessoa.emails_secundarios || [],
         telefone: pessoa.telefone || "",
@@ -322,6 +326,7 @@ export function Pessoas() {
         documento: "",
         razaoSocial: "",
         cnae: "",
+        inscricaoEstadual: "",
         emailGeral: "",
         emailsSecundarios: [],
         telefone: "",
@@ -462,7 +467,7 @@ export function Pessoas() {
 
               {/* Linha Razão Social e CNAE (apenas para Pessoa Jurídica) */}
               {formData.tipoPessoa === "juridica" && (
-                <div className={styles.formGrid2Col}>
+                <div className={styles.formGrid}>
                   <div>
                     <label htmlFor="razaoSocial" className={styles.formLabel}>
                       Razão Social
@@ -493,6 +498,28 @@ export function Pessoas() {
                       validateCNAE={true}
                       placeholder="0000-0/00"
                     />
+                  </div>
+
+                  <div>
+                    <label htmlFor="inscricaoEstadual" className={styles.formLabel}>
+                      Inscrição Estadual
+                    </label>
+                    <Input
+                      id="inscricaoEstadual"
+                      type="text"
+                      className={styles.formInput}
+                      value={formData.inscricaoEstadual}
+                      onChange={(e) => handleInputChange("inscricaoEstadual", e.target.value)}
+                      validateIE={true}
+                      uf={formData.uf}
+                      placeholder="Digite a IE ou ISENTO"
+                      disabled={!formData.uf}
+                    />
+                    {!formData.uf && (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Selecione a UF primeiro
+                      </p>
+                    )}
                   </div>
                 </div>
               )}

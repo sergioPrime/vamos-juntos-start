@@ -73,6 +73,11 @@ interface Product {
   fcp_st_on_purchase?: number
   last_purchase_value?: number
   cost_calculation_method?: string
+  // Análise de concorrência
+  competitor_prices?: { name: string; price: number; url?: string }[]
+  market_price_min?: number
+  market_price_max?: number
+  last_market_check?: string
 }
 
 interface Supplier {
@@ -174,9 +179,14 @@ const Products = () => {
     last_purchase_value: 0,
     cost_calculation_method: "nfe_rules",
     desired_profit_margin: 0,
+    competitor_prices: [],
+    market_price_min: 0,
+    market_price_max: 0,
   })
   
   const [autoCalculatePrice, setAutoCalculatePrice] = useState(true)
+  const [showCompetitorDialog, setShowCompetitorDialog] = useState(false)
+  const [newCompetitor, setNewCompetitor] = useState({ name: "", price: 0, url: "" })
 
   // Estados para valores mascarados
   const [maskedCostPrice, setMaskedCostPrice] = useState("")
@@ -375,6 +385,9 @@ const Products = () => {
       last_purchase_value: 0,
       cost_calculation_method: "nfe_rules",
       desired_profit_margin: 0,
+      competitor_prices: [],
+      market_price_min: 0,
+      market_price_max: 0,
     })
     setMaskedCostPrice("")
     setMaskedUnitPrice("")
@@ -382,6 +395,98 @@ const Products = () => {
     setAutoCalculatePrice(true)
     setPriceAlert({ show: false, message: "", suggestedMargin: 0 })
     setEditingProduct(null)
+  }
+
+  const addCompetitor = () => {
+    if (newCompetitor.name && newCompetitor.price > 0) {
+      const updatedCompetitors = [...(formData.competitor_prices || []), { ...newCompetitor }]
+      
+      // Recalcular min e max
+      const prices = updatedCompetitors.map(c => c.price)
+      const minPrice = Math.min(...prices)
+      const maxPrice = Math.max(...prices)
+      
+      setFormData(prev => ({
+        ...prev,
+        competitor_prices: updatedCompetitors,
+        market_price_min: minPrice,
+        market_price_max: maxPrice,
+      }))
+      
+      setNewCompetitor({ name: "", price: 0, url: "" })
+      setShowCompetitorDialog(false)
+      
+      toast({
+        title: "Concorrente Adicionado",
+        description: `${newCompetitor.name} - R$ ${newCompetitor.price.toFixed(2)}`,
+      })
+    }
+  }
+
+  const removeCompetitor = (index: number) => {
+    const updatedCompetitors = formData.competitor_prices?.filter((_, i) => i !== index) || []
+    
+    // Recalcular min e max
+    if (updatedCompetitors.length > 0) {
+      const prices = updatedCompetitors.map(c => c.price)
+      const minPrice = Math.min(...prices)
+      const maxPrice = Math.max(...prices)
+      
+      setFormData(prev => ({
+        ...prev,
+        competitor_prices: updatedCompetitors,
+        market_price_min: minPrice,
+        market_price_max: maxPrice,
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        competitor_prices: [],
+        market_price_min: 0,
+        market_price_max: 0,
+      }))
+    }
+  }
+
+  const getCompetitiveAnalysis = () => {
+    const myPrice = formData.unit_price
+    const minPrice = formData.market_price_min || 0
+    const maxPrice = formData.market_price_max || 0
+    const avgPrice = formData.competitor_prices && formData.competitor_prices.length > 0
+      ? formData.competitor_prices.reduce((sum, c) => sum + c.price, 0) / formData.competitor_prices.length
+      : 0
+    
+    if (minPrice === 0 || maxPrice === 0) {
+      return { status: "no_data", message: "", color: "" }
+    }
+    
+    const tolerance = 0.05 // 5% de tolerância
+    
+    if (myPrice < minPrice * (1 - tolerance)) {
+      const diff = ((minPrice - myPrice) / minPrice * 100).toFixed(1)
+      return {
+        status: "too_low",
+        message: `Seu preço está ${diff}% abaixo do menor preço de mercado. Você pode estar perdendo margem!`,
+        color: "text-orange-600 dark:text-orange-400"
+      }
+    } else if (myPrice > maxPrice * (1 + tolerance)) {
+      const diff = ((myPrice - maxPrice) / maxPrice * 100).toFixed(1)
+      return {
+        status: "too_high",
+        message: `Seu preço está ${diff}% acima do maior preço de mercado. Pode dificultar vendas!`,
+        color: "text-red-600 dark:text-red-400"
+      }
+    } else {
+      const position = avgPrice > 0 
+        ? myPrice < avgPrice ? "abaixo" : myPrice > avgPrice ? "acima" : "igual"
+        : ""
+      const diff = avgPrice > 0 ? Math.abs(((myPrice - avgPrice) / avgPrice * 100)).toFixed(1) : "0"
+      return {
+        status: "competitive",
+        message: `Preço competitivo! ${diff}% ${position} da média de mercado (R$ ${avgPrice.toFixed(2)})`,
+        color: "text-green-600 dark:text-green-400"
+      }
+    }
   }
 
   const applySuggestedMargin = () => {
@@ -474,6 +579,9 @@ const Products = () => {
         last_purchase_value: product.last_purchase_value || 0,
         cost_calculation_method: product.cost_calculation_method || "nfe_rules",
         desired_profit_margin: (product as any).desired_profit_margin || 0,
+        competitor_prices: product.competitor_prices || [],
+        market_price_min: product.market_price_min || 0,
+        market_price_max: product.market_price_max || 0,
       })
       // Aplicar máscara aos preços
       setMaskedCostPrice(applyMask((product.cost_price * 100).toString(), 'currency'))
@@ -1619,6 +1727,192 @@ const Products = () => {
                             </div>
                           )}
                         </div>
+
+                        {/* Análise de Concorrência */}
+                        <div className="mt-8">
+                          <Card className="border-2 border-purple-200 dark:border-purple-800">
+                            <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950">
+                              <CardTitle className="flex items-center justify-between">
+                                <span className="flex items-center gap-2">
+                                  🎯 Análise de Concorrência
+                                </span>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  onClick={() => setShowCompetitorDialog(true)}
+                                  className="bg-purple-600 hover:bg-purple-700"
+                                >
+                                  + Adicionar Concorrente
+                                </Button>
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-6">
+                              {/* Status Competitivo */}
+                              {formData.competitor_prices && formData.competitor_prices.length > 0 && (
+                                <div className={cn(
+                                  "p-4 rounded-lg mb-6 border-2 animate-fade-in",
+                                  getCompetitiveAnalysis().status === "competitive" 
+                                    ? "bg-green-50 dark:bg-green-950 border-green-300 dark:border-green-700"
+                                    : getCompetitiveAnalysis().status === "too_high"
+                                    ? "bg-red-50 dark:bg-red-950 border-red-300 dark:border-red-700"
+                                    : "bg-orange-50 dark:bg-orange-950 border-orange-300 dark:border-orange-700"
+                                )}>
+                                  <div className="flex items-start gap-3">
+                                    <div className="text-2xl">
+                                      {getCompetitiveAnalysis().status === "competitive" ? "✅" : "⚠️"}
+                                    </div>
+                                    <div>
+                                      <h4 className="font-semibold mb-1">
+                                        {getCompetitiveAnalysis().status === "competitive" 
+                                          ? "Preço Competitivo" 
+                                          : getCompetitiveAnalysis().status === "too_high"
+                                          ? "Preço Acima do Mercado"
+                                          : "Preço Abaixo do Mercado"}
+                                      </h4>
+                                      <p className={cn("text-sm", getCompetitiveAnalysis().color)}>
+                                        {getCompetitiveAnalysis().message}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Resumo de Preços */}
+                              {formData.competitor_prices && formData.competitor_prices.length > 0 && (
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                                  <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-700">
+                                    <p className="text-xs text-muted-foreground mb-1">Seu Preço</p>
+                                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                                      R$ {formData.unit_price.toFixed(2)}
+                                    </p>
+                                  </div>
+                                  <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-700">
+                                    <p className="text-xs text-muted-foreground mb-1">Menor Preço</p>
+                                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                                      R$ {formData.market_price_min.toFixed(2)}
+                                    </p>
+                                  </div>
+                                  <div className="p-4 bg-orange-50 dark:bg-orange-950 rounded-lg border border-orange-200 dark:border-orange-700">
+                                    <p className="text-xs text-muted-foreground mb-1">Maior Preço</p>
+                                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                                      R$ {formData.market_price_max.toFixed(2)}
+                                    </p>
+                                  </div>
+                                  <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg border border-purple-200 dark:border-purple-700">
+                                    <p className="text-xs text-muted-foreground mb-1">Preço Médio</p>
+                                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                                      R$ {(formData.competitor_prices.reduce((sum, c) => sum + c.price, 0) / formData.competitor_prices.length).toFixed(2)}
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Lista de Concorrentes */}
+                              {formData.competitor_prices && formData.competitor_prices.length > 0 ? (
+                                <div className="space-y-2">
+                                  <h4 className="text-sm font-semibold mb-3">Concorrentes Cadastrados</h4>
+                                  {formData.competitor_prices.map((competitor, index) => (
+                                    <div key={index} className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                      <div className="flex-1">
+                                        <p className="font-medium">{competitor.name}</p>
+                                        <p className="text-sm text-muted-foreground">
+                                          R$ {competitor.price.toFixed(2)}
+                                          {competitor.url && (
+                                            <a href={competitor.url} target="_blank" rel="noopener noreferrer" className="ml-2 text-blue-600 hover:underline text-xs">
+                                              Ver produto
+                                            </a>
+                                          )}
+                                        </p>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Badge variant={
+                                          competitor.price < formData.unit_price ? "default" : 
+                                          competitor.price > formData.unit_price ? "destructive" : "secondary"
+                                        }>
+                                          {competitor.price < formData.unit_price ? "Mais caro que você" : 
+                                           competitor.price > formData.unit_price ? "Mais barato que você" : "Mesmo preço"}
+                                        </Badge>
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={() => removeCompetitor(index)}
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-center py-8 text-muted-foreground">
+                                  <p>Nenhum concorrente cadastrado ainda.</p>
+                                  <p className="text-sm mt-2">Adicione concorrentes para ver análise de preços de mercado.</p>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        {/* Dialog para adicionar concorrente */}
+                        <Dialog open={showCompetitorDialog} onOpenChange={setShowCompetitorDialog}>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Adicionar Concorrente</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="competitor-name">Nome do Concorrente *</Label>
+                                <Input
+                                  id="competitor-name"
+                                  value={newCompetitor.name}
+                                  onChange={(e) => setNewCompetitor(prev => ({ ...prev, name: e.target.value }))}
+                                  placeholder="Ex: Mercado Livre, Amazon, Concorrente X"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="competitor-price">Preço do Produto *</Label>
+                                <Input
+                                  id="competitor-price"
+                                  type="number"
+                                  step="0.01"
+                                  value={newCompetitor.price}
+                                  onChange={(e) => setNewCompetitor(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                                  placeholder="0.00"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="competitor-url">URL (opcional)</Label>
+                                <Input
+                                  id="competitor-url"
+                                  type="url"
+                                  value={newCompetitor.url}
+                                  onChange={(e) => setNewCompetitor(prev => ({ ...prev, url: e.target.value }))}
+                                  placeholder="https://..."
+                                />
+                              </div>
+                              <div className="flex gap-2 justify-end">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setShowCompetitorDialog(false)
+                                    setNewCompetitor({ name: "", price: 0, url: "" })
+                                  }}
+                                >
+                                  Cancelar
+                                </Button>
+                                <Button
+                                  type="button"
+                                  onClick={addCompetitor}
+                                  disabled={!newCompetitor.name || newCompetitor.price <= 0}
+                                >
+                                  Adicionar
+                                </Button>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </CardContent>
                     </Card>
                   </div>

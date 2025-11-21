@@ -14,6 +14,7 @@ import { AnimationProvider } from "./contexts/AnimationContext";
 import { ThemeProvider } from "./hooks/useTheme";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { SuperAdminRoute } from "./components/auth/SuperAdminRoute";
+import { AuthErrorBoundary } from "./components/auth/AuthErrorBoundary";
 import { lazy, Suspense } from "react";
 import { LoadingWrapper } from "./components/animations/LoadingWrapper";
 
@@ -99,13 +100,14 @@ const queryClient = new QueryClient({
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="dark" storageKey="vamos-juntos-theme">
-      <AuthProvider>
-        <OrganizationProvider>
-          <SubscriptionProvider>
-            <SidebarConfigProvider>
-              <AnimationProvider>
-                <TooltipProvider>
-                  <NotificationProvider>
+      <AuthErrorBoundary>
+        <AuthProvider>
+          <OrganizationProvider>
+            <SubscriptionProvider>
+              <SidebarConfigProvider>
+                <AnimationProvider>
+                  <TooltipProvider>
+                    <NotificationProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -746,6 +748,7 @@ const App = () => (
           </SubscriptionProvider>
         </OrganizationProvider>
       </AuthProvider>
+      </AuthErrorBoundary>
     </ThemeProvider>
   </QueryClientProvider>
 );

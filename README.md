@@ -61,4 +61,19 @@ npm run dev
 
 ---
 
+## 🔄 CI/CD Pipeline
+
+✅ **Integração Contínua Configurada**
+
+- Testes automáticos em cada PR
+- Cobertura mínima: 70%
+- Lint e Type Check obrigatórios
+- Build validation
+- Security audit (npm audit + Snyk)
+- Codecov integration
+
+**Branch Protection:** Main branch protegida com aprovação obrigatória + CI passando.
+
+---
+
 **Desenvolvido com ❤️ pela equipe Prime ERP**

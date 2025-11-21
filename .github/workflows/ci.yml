@@ -148,7 +148,7 @@ jobs:
 
       - name: Archive coverage reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: coverage-report
           path: coverage/
@@ -198,7 +198,7 @@ jobs:
           fi
 
       - name: Archive build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: build-artifacts
           path: dist/

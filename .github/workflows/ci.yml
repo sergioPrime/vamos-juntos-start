@@ -1,0 +1,273 @@
+name: CI - Tests & Quality
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Cancela runs anteriores se um novo push for feito
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Job 1: Lint e Type Check
+  lint-and-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: false
+
+      - name: Run TypeScript check
+        run: npx tsc --noEmit
+        continue-on-error: false
+
+  # Job 2: Testes Unitários e de Integração
+  test:
+    name: Tests & Coverage
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+        env:
+          CI: true
+
+      - name: Check coverage thresholds
+        run: |
+          echo "Verificando cobertura mínima..."
+          npm run test:coverage -- --reporter=json --reporter=text | tee coverage-summary.txt
+          
+          # Extrai métricas de cobertura
+          LINES=$(grep -oP 'Lines\s*:\s*\K[\d.]+' coverage-summary.txt || echo "0")
+          STATEMENTS=$(grep -oP 'Statements\s*:\s*\K[\d.]+' coverage-summary.txt || echo "0")
+          FUNCTIONS=$(grep -oP 'Functions\s*:\s*\K[\d.]+' coverage-summary.txt || echo "0")
+          BRANCHES=$(grep -oP 'Branches\s*:\s*\K[\d.]+' coverage-summary.txt || echo "0")
+          
+          echo "📊 Cobertura de Testes:"
+          echo "  Lines: ${LINES}%"
+          echo "  Statements: ${STATEMENTS}%"
+          echo "  Functions: ${FUNCTIONS}%"
+          echo "  Branches: ${BRANCHES}%"
+          
+          # Thresholds mínimos
+          MIN_COVERAGE=70
+          
+          # Verifica se atende aos requisitos
+          if (( $(echo "$LINES < $MIN_COVERAGE" | bc -l) )); then
+            echo "❌ FALHOU: Cobertura de linhas (${LINES}%) está abaixo do mínimo (${MIN_COVERAGE}%)"
+            exit 1
+          fi
+          
+          if (( $(echo "$STATEMENTS < $MIN_COVERAGE" | bc -l) )); then
+            echo "❌ FALHOU: Cobertura de statements (${STATEMENTS}%) está abaixo do mínimo (${MIN_COVERAGE}%)"
+            exit 1
+          fi
+          
+          if (( $(echo "$FUNCTIONS < $MIN_COVERAGE" | bc -l) )); then
+            echo "❌ FALHOU: Cobertura de funções (${FUNCTIONS}%) está abaixo do mínimo (${MIN_COVERAGE}%)"
+            exit 1
+          fi
+          
+          if (( $(echo "$BRANCHES < $MIN_COVERAGE" | bc -l) )); then
+            echo "❌ FALHOU: Cobertura de branches (${BRANCHES}%) está abaixo do mínimo (${MIN_COVERAGE}%)"
+            exit 1
+          fi
+          
+          echo "✅ PASSOU: Cobertura atende aos requisitos mínimos!"
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+      - name: Comment PR with coverage
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let coverage = 'Coverage report not available';
+            
+            try {
+              const coverageFile = fs.readFileSync('./coverage-summary.txt', 'utf8');
+              coverage = '```\n' + coverageFile + '\n```';
+            } catch (error) {
+              console.log('Could not read coverage file');
+            }
+            
+            const comment = `## 📊 Test Coverage Report
+            
+            ${coverage}
+            
+            🔍 Cobertura mínima exigida: **70%**
+            
+            ${process.env.COVERAGE_PASSED === 'true' ? '✅ Todos os thresholds foram atingidos!' : '⚠️ Verifique se a cobertura atende aos requisitos'}
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Archive coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+
+  # Job 3: Build Check
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          CI: true
+
+      - name: Check build size
+        run: |
+          echo "📦 Verificando tamanho do build..."
+          du -sh dist/
+          
+          # Tamanho máximo permitido (em KB)
+          MAX_SIZE=5000
+          DIST_SIZE=$(du -sk dist/ | cut -f1)
+          
+          echo "Tamanho atual: ${DIST_SIZE}KB"
+          echo "Tamanho máximo: ${MAX_SIZE}KB"
+          
+          if [ $DIST_SIZE -gt $MAX_SIZE ]; then
+            echo "⚠️ AVISO: Build está maior que o recomendado"
+            echo "Considere otimizar o bundle"
+          else
+            echo "✅ Tamanho do build está adequado"
+          fi
+
+      - name: Archive build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist/
+          retention-days: 7
+
+  # Job 4: Security Audit
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Run npm audit
+        run: |
+          npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Run security scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+  # Job 5: Status Check Final
+  status-check:
+    name: CI Status Check
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck, test, build, security]
+    if: always()
+    
+    steps:
+      - name: Check all jobs status
+        run: |
+          echo "🔍 Verificando status de todos os jobs..."
+          
+          if [[ "${{ needs.lint-and-typecheck.result }}" != "success" ]]; then
+            echo "❌ Lint/TypeCheck falhou"
+            exit 1
+          fi
+          
+          if [[ "${{ needs.test.result }}" != "success" ]]; then
+            echo "❌ Testes falharam"
+            exit 1
+          fi
+          
+          if [[ "${{ needs.build.result }}" != "success" ]]; then
+            echo "❌ Build falhou"
+            exit 1
+          fi
+          
+          echo "✅ Todos os checks passaram com sucesso!"
+          echo "🚀 Pronto para merge!"
+
+      - name: Success notification
+        if: success()
+        run: |
+          echo "::notice title=CI Passou::Todos os checks de qualidade passaram! ✅"
+
+      - name: Failure notification
+        if: failure()
+        run: |
+          echo "::error title=CI Falhou::Um ou mais checks de qualidade falharam. Verifique os logs acima. ❌"

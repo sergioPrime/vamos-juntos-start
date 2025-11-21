@@ -1,0 +1,64 @@
+name: Coverage Report
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Executa todo dia às 6h UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  coverage-report:
+    name: Generate Coverage Report
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: Generate coverage badge
+        uses: cicirello/jacoco-badge-generator@v2
+        with:
+          badges-directory: badges
+          generate-branches-badge: true
+          generate-summary: true
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
+
+      - name: Create coverage summary
+        run: |
+          echo "# 📊 Coverage Report - $(date)" > coverage-summary.md
+          echo "" >> coverage-summary.md
+          cat coverage/coverage-summary.txt >> coverage-summary.md
+          
+          echo "" >> coverage-summary.md
+          echo "## Histórico" >> coverage-summary.md
+          echo "- Data: $(date)" >> coverage-summary.md
+          echo "- Commit: ${{ github.sha }}" >> coverage-summary.md
+          echo "- Branch: ${{ github.ref_name }}" >> coverage-summary.md
+
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add badges/ coverage-summary.md
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update coverage badges [skip ci]" && git push)

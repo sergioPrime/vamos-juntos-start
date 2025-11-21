@@ -1,0 +1,121 @@
+name: PR Quality Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-validation:
+    name: Validate PR
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Tipos permitidos
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          # Escopos permitidos (opcional)
+          scopes: |
+            auth
+            finance
+            inventory
+            sales
+            crm
+            ui
+            config
+          requireScope: false
+
+      - name: Check PR size
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const additions = pr.additions;
+            const deletions = pr.deletions;
+            const changedFiles = pr.changed_files;
+            
+            console.log(`📊 Estatísticas do PR:`);
+            console.log(`  Adições: ${additions}`);
+            console.log(`  Deleções: ${deletions}`);
+            console.log(`  Arquivos alterados: ${changedFiles}`);
+            
+            // Limites recomendados
+            const MAX_ADDITIONS = 500;
+            const MAX_FILES = 15;
+            
+            let warnings = [];
+            
+            if (additions > MAX_ADDITIONS) {
+              warnings.push(`⚠️ PR tem ${additions} adições (recomendado: <${MAX_ADDITIONS})`);
+            }
+            
+            if (changedFiles > MAX_FILES) {
+              warnings.push(`⚠️ PR altera ${changedFiles} arquivos (recomendado: <${MAX_FILES})`);
+            }
+            
+            if (warnings.length > 0) {
+              const comment = `## ⚠️ PR Grande Detectado\n\n${warnings.join('\n')}\n\n**Recomendação:** Considere dividir este PR em PRs menores para facilitar a revisão.\n\nPRs menores são:\n- ✅ Mais fáceis de revisar\n- ✅ Mais rápidos de aprovar\n- ✅ Menos propensos a conflitos\n- ✅ Mais fáceis de reverter se necessário`;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } else {
+              console.log('✅ Tamanho do PR está adequado');
+            }
+
+      - name: Check for TODO/FIXME
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            
+            let todos = [];
+            
+            for (const file of files) {
+              if (file.patch) {
+                const lines = file.patch.split('\n');
+                lines.forEach((line, index) => {
+                  if (line.startsWith('+') && (line.includes('TODO') || line.includes('FIXME'))) {
+                    todos.push(`${file.filename}:${index + 1} - ${line.trim()}`);
+                  }
+                });
+              }
+            }
+            
+            if (todos.length > 0) {
+              const comment = `## 📝 TODOs/FIXMEs Detectados\n\n${todos.map(t => `- \`${t}\``).join('\n')}\n\n**Ação Requerida:** Por favor, resolva os TODOs/FIXMEs ou crie issues para rastreá-los.`;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+
+      - name: Label PR based on changes
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml

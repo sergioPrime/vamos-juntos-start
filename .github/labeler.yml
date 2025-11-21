@@ -1,0 +1,84 @@
+# Configuração de labels automáticos para PRs
+
+# Autenticação e Segurança
+'area: auth':
+  - 'src/hooks/useAuth.tsx'
+  - 'src/components/auth/**/*'
+  - 'src/hooks/usePermission*.tsx'
+
+# Financeiro
+'area: finance':
+  - 'src/components/finance/**/*'
+  - 'src/pages/finance/**/*'
+  - 'src/hooks/useFinancial*.tsx'
+
+# Estoque
+'area: inventory':
+  - 'src/components/inventory/**/*'
+  - 'src/pages/inventory/**/*'
+  - 'src/hooks/*Stock*.tsx'
+  - 'src/hooks/*Lot*.tsx'
+
+# Vendas
+'area: sales':
+  - 'src/components/orders/**/*'
+  - 'src/components/quotes/**/*'
+  - 'src/pages/Orders*.tsx'
+  - 'src/pages/Quotes*.tsx'
+
+# CRM
+'area: crm':
+  - 'src/components/crm/**/*'
+  - 'src/pages/crm/**/*'
+  - 'src/hooks/*CRM*.tsx'
+
+# UI/UX
+'area: ui':
+  - 'src/components/ui/**/*'
+  - 'src/index.css'
+  - 'tailwind.config.ts'
+
+# Testes
+'area: tests':
+  - 'src/**/__tests__/**/*'
+  - 'src/**/*.test.tsx'
+  - 'src/**/*.test.ts'
+  - 'vitest.config.ts'
+
+# Documentação
+'area: docs':
+  - '**/*.md'
+  - 'docs/**/*'
+
+# Configuração
+'area: config':
+  - '.github/**/*'
+  - 'vite.config.ts'
+  - 'tsconfig*.json'
+  - 'package.json'
+
+# Tamanho do PR
+'size: XS':
+  - any: ['**/*']
+    all:
+      - changed-files: ['1-10']
+
+'size: S':
+  - any: ['**/*']
+    all:
+      - changed-files: ['11-30']
+
+'size: M':
+  - any: ['**/*']
+    all:
+      - changed-files: ['31-100']
+
+'size: L':
+  - any: ['**/*']
+    all:
+      - changed-files: ['101-500']
+
+'size: XL':
+  - any: ['**/*']
+    all:
+      - changed-files: ['>500']

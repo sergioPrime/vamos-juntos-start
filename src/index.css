@@ -86,6 +86,61 @@
   }
   100% {
     background-position: calc(200px + 100%) 0;
+  /* Skip Links - visível apenas no foco */
+  .skip-links {
+    position: relative;
+    z-index: 9999;
+  }
+
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    padding: 8px 16px;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 0 0 4px 0;
+    transition: top 0.2s ease-in-out;
+  }
+
+  .skip-link:focus {
+    top: 0;
+  }
+
+  /* Screen Reader Only */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Focus Visible - destaque para navegação por teclado */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.1);
+  }
+
+  /* Remove outline padrão (focus-visible já gerencia) */
+  *:focus:not(:focus-visible) {
+    outline: none;
   }
 }
 

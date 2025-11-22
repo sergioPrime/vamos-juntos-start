@@ -40,7 +40,7 @@ export function useNFeInutilizations() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setInutilizations(data || []);
+      setInutilizations((data || []) as NFeInutilization[]);
     } catch (error: any) {
       console.error('Erro ao carregar inutilizações:', error);
       toast.error('Erro ao carregar inutilizações');

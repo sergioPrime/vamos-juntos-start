@@ -57,7 +57,7 @@ export default function NFeActionsMenu({
   };
 
   const handleConsultarStatus = () => {
-    toast.info("Consultando status na SEFAZ...");
+    setStatusDialogOpen(true);
   };
 
   const handleManifestacao = () => {

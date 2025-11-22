@@ -639,6 +639,7 @@ export default function NFeForm() {
           onOpenChange={setProductDialogOpen}
           onSave={handleSaveProduct}
           product={editingProduct}
+          clienteUF={formData.cliente_uf}
         />
       </div>
     </div>

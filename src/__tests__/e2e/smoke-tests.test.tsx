@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderWithProviders, screen } from '@/test/utils/renderWithProviders';
-import { Dashboard } from '@/pages/Dashboard';
-import { Products } from '@/pages/Products';
-import { Lancamentos } from '@/pages/finance/Lancamentos';
+import Dashboard from '@/pages/Dashboard';
+import Products from '@/pages/Products';
+import Lancamentos from '@/pages/finance/Lancamentos';
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({

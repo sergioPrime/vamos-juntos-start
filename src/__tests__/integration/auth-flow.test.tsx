@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderWithProviders, screen, userEvent, waitFor } from '@/test/utils/renderWithProviders';
-import { Auth } from '@/pages/Auth';
+import Auth from '@/pages/Auth';
 import { supabase } from '@/integrations/supabase/client';
 
 vi.mock('@/integrations/supabase/client');

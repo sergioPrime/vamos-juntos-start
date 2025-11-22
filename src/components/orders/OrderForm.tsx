@@ -109,10 +109,35 @@ const OrderForm = () => {
     }
   }, [id])
 
-  const generateOrderNumber = () => {
-    // Generate sequential number starting from 1
-    const nextNumber = "1" // In a real implementation, this would come from the database
-    setFormData(prev => ({ ...prev, number: nextNumber }))
+  const generateOrderNumber = async () => {
+    if (!currentOrg?.id) return
+    
+    try {
+      // Buscar o maior número existente
+      const { data, error } = await supabase
+        .from('orders')
+        .select('order_number')
+        .eq('org_id', currentOrg.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+      
+      if (error) throw error
+      
+      let nextNumber = 1
+      if (data && data.length > 0 && data[0].order_number) {
+        const lastNumber = parseInt(data[0].order_number) || 0
+        nextNumber = lastNumber + 1
+      }
+      
+      setFormData(prev => ({ ...prev, number: nextNumber.toString() }))
+    } catch (error) {
+      console.error('Error generating order number:', error)
+      toast({
+        title: "Erro",
+        description: "Não foi possível gerar o número do pedido.",
+        variant: "destructive"
+      })
+    }
   }
 
   const loadOrder = async (orderId: string) => {
@@ -132,7 +157,7 @@ const OrderForm = () => {
     }
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!currentOrg?.id) {
       toast({
         title: "Erro",
@@ -142,11 +167,88 @@ const OrderForm = () => {
       return
     }
 
-    // Save order implementation
-    toast({
-      title: "Pedido salvo",
-      description: "Pedido salvo com sucesso."
-    })
+    // Validação básica
+    if (!formData.customer_id) {
+      toast({
+        title: "Validação",
+        description: "Selecione um cliente.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (formData.order_items.length === 0) {
+      toast({
+        title: "Validação",
+        description: "Adicione pelo menos um item ao pedido.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setLoading(true)
+    
+    try {
+      // 1. Salvar pedido
+      const orderData = {
+        org_id: currentOrg.id,
+        order_number: formData.number,
+        status: formData.status,
+        order_type: formData.order_type,
+        customer_id: formData.customer_id,
+        subtotal: formData.subtotal,
+        discount_amount: formData.discount_amount,
+        tax_amount: formData.tax_amount,
+        total_amount: formData.total_amount,
+        payment_status: formData.payment_status,
+        payment_method: formData.payment_method,
+        delivery_date: formData.delivery_date,
+        notes: formData.notes,
+        order_date: new Date().toISOString(),
+        created_by: user?.id
+      }
+
+      const { data: savedOrder, error: orderError } = await supabase
+        .from('orders')
+        .insert(orderData)
+        .select()
+        .single()
+
+      if (orderError) throw orderError
+
+      // 2. Salvar itens do pedido
+      const orderItemsData = formData.order_items.map(item => ({
+        order_id: savedOrder.id,
+        product_id: item.product_id,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        total_price: item.total_price,
+        discount_amount: item.discount_amount || 0
+      }))
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItemsData)
+
+      if (itemsError) throw itemsError
+
+      toast({
+        title: "Pedido salvo",
+        description: `Pedido #${formData.number} salvo com sucesso.`
+      })
+
+      // Redirecionar para listagem
+      navigate('/orders')
+    } catch (error) {
+      console.error('Error saving order:', error)
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar o pedido. Tente novamente.",
+        variant: "destructive"
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   function addNewItem() {

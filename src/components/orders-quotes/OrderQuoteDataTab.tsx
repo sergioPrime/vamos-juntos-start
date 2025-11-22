@@ -110,14 +110,30 @@ export function OrderQuoteDataTab({ formData, onUpdateFormData, onCalculateTotal
   }, [formData.items])
 
   const loadCustomers = async () => {
+    if (!currentOrg?.id) return
+    
     try {
-      // Mock data for now
-      setCustomers([
-        { id: '1', name: 'Cliente Exemplo 1' },
-        { id: '2', name: 'Cliente Exemplo 2' }
-      ])
+      const { data, error } = await supabase
+        .from('pessoas')
+        .select('id, nome_fantasia, documento, telefone, email')
+        .eq('org_id', currentOrg.id)
+        .eq('tipo', 'cliente')
+        .eq('is_active', true)
+        .order('nome_fantasia')
+
+      if (error) throw error
+      
+      setCustomers(data?.map(p => ({
+        id: p.id,
+        name: p.nome_fantasia
+      })) || [])
     } catch (error) {
       console.error('Error loading customers:', error)
+      toast({
+        title: "Erro ao carregar clientes",
+        description: "Não foi possível carregar a lista de clientes.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -146,14 +162,31 @@ export function OrderQuoteDataTab({ formData, onUpdateFormData, onCalculateTotal
   }
 
   const loadProducts = async () => {
+    if (!currentOrg?.id) return
+    
     try {
-      // Mock data for now
-      setProducts([
-        { id: '1', name: 'Produto Exemplo 1', unit_price: 100.00 },
-        { id: '2', name: 'Serviço Exemplo 1', unit_price: 200.00 }
-      ])
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, nome, preco_venda, sku, tipo, estoque_atual')
+        .eq('org_id', currentOrg.id)
+        .eq('is_active', true)
+        .order('nome')
+
+      if (error) throw error
+      
+      setProducts(data?.map(p => ({
+        id: p.id,
+        name: p.nome,
+        unit_price: p.preco_venda,
+        genre: p.tipo
+      })) || [])
     } catch (error) {
       console.error('Error loading products:', error)
+      toast({
+        title: "Erro ao carregar produtos",
+        description: "Não foi possível carregar a lista de produtos.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -193,7 +226,7 @@ export function OrderQuoteDataTab({ formData, onUpdateFormData, onCalculateTotal
     product.name.toLowerCase().includes(searchProduct.toLowerCase())
   )
 
-  const addItem = () => {
+  const addItem = async () => {
     if (!selectedProduct || newItemQuantity <= 0) {
       toast({
         title: "Erro de validação",

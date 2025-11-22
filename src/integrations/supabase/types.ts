@@ -1700,6 +1700,113 @@ export type Database = {
         }
         Relationships: []
       }
+      fiscal_config: {
+        Row: {
+          ambiente: string
+          bairro: string
+          cep: string
+          certificate_expires_at: string | null
+          certificate_password_encrypted: string | null
+          certificate_pfx: string | null
+          cnae: string | null
+          cnpj: string
+          codigo_municipio: string
+          company_id: string | null
+          complemento: string | null
+          created_at: string
+          email: string | null
+          id: string
+          inscricao_estadual: string
+          inscricao_municipal: string | null
+          is_active: boolean
+          logradouro: string
+          municipio: string
+          nome_fantasia: string | null
+          numero: string
+          org_id: string
+          proximo_numero_nfe: number
+          razao_social: string
+          regime_tributario: string
+          serie_nfe: string
+          telefone: string | null
+          uf: string
+          uf_emitente: string
+          updated_at: string
+        }
+        Insert: {
+          ambiente?: string
+          bairro: string
+          cep: string
+          certificate_expires_at?: string | null
+          certificate_password_encrypted?: string | null
+          certificate_pfx?: string | null
+          cnae?: string | null
+          cnpj: string
+          codigo_municipio: string
+          company_id?: string | null
+          complemento?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          inscricao_estadual: string
+          inscricao_municipal?: string | null
+          is_active?: boolean
+          logradouro: string
+          municipio: string
+          nome_fantasia?: string | null
+          numero: string
+          org_id: string
+          proximo_numero_nfe?: number
+          razao_social: string
+          regime_tributario: string
+          serie_nfe?: string
+          telefone?: string | null
+          uf: string
+          uf_emitente: string
+          updated_at?: string
+        }
+        Update: {
+          ambiente?: string
+          bairro?: string
+          cep?: string
+          certificate_expires_at?: string | null
+          certificate_password_encrypted?: string | null
+          certificate_pfx?: string | null
+          cnae?: string | null
+          cnpj?: string
+          codigo_municipio?: string
+          company_id?: string | null
+          complemento?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          inscricao_estadual?: string
+          inscricao_municipal?: string | null
+          is_active?: boolean
+          logradouro?: string
+          municipio?: string
+          nome_fantasia?: string | null
+          numero?: string
+          org_id?: string
+          proximo_numero_nfe?: number
+          razao_social?: string
+          regime_tributario?: string
+          serie_nfe?: string
+          telefone?: string | null
+          uf?: string
+          uf_emitente?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscal_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fiscal_nfe: {
         Row: {
           base_calculo_icms: number | null
@@ -2374,6 +2481,53 @@ export type Database = {
             columns: ["tax_group_id"]
             isOneToOne: false
             referencedRelation: "tax_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fiscal_sefaz_logs: {
+        Row: {
+          created_at: string
+          id: string
+          nfe_id: string | null
+          operation_type: string
+          org_id: string
+          protocolo: string | null
+          request_xml: string | null
+          response_xml: string | null
+          status_code: string | null
+          status_message: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nfe_id?: string | null
+          operation_type: string
+          org_id: string
+          protocolo?: string | null
+          request_xml?: string | null
+          response_xml?: string | null
+          status_code?: string | null
+          status_message?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nfe_id?: string | null
+          operation_type?: string
+          org_id?: string
+          protocolo?: string | null
+          request_xml?: string | null
+          response_xml?: string | null
+          status_code?: string | null
+          status_message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscal_sefaz_logs_nfe_id_fkey"
+            columns: ["nfe_id"]
+            isOneToOne: false
+            referencedRelation: "fiscal_nfe"
             referencedColumns: ["id"]
           },
         ]

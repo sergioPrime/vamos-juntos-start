@@ -22,7 +22,7 @@ import {
 import { toast } from "sonner";
 
 interface NFeActionsMenuProps {
-  status: "autorizada" | "cancelada" | "pendente" | "rejeitada";
+  status: "autorizada" | "cancelada" | "pendente" | "rejeitada" | "rascunho";
   chaveAcesso: string;
   onView: () => void;
 }
@@ -127,6 +127,13 @@ export default function NFeActionsMenu({
           <DropdownMenuItem onClick={handleConsultarStatus}>
             <AlertTriangle className="mr-2 h-4 w-4" />
             Ver Motivo da Rejeição
+          </DropdownMenuItem>
+        )}
+
+        {status === "rascunho" && (
+          <DropdownMenuItem onClick={onView}>
+            <FileText className="mr-2 h-4 w-4" />
+            Editar Rascunho
           </DropdownMenuItem>
         )}
 

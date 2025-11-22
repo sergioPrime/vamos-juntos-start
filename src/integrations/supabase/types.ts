@@ -842,6 +842,39 @@ export type Database = {
         }
         Relationships: []
       }
+      codigos_classificacao_tributaria: {
+        Row: {
+          aplicacao: string | null
+          artigo_lc_214: string | null
+          codigo: string
+          created_at: string | null
+          descricao: string
+          id: string
+          tipo_tributo: string
+          updated_at: string | null
+        }
+        Insert: {
+          aplicacao?: string | null
+          artigo_lc_214?: string | null
+          codigo: string
+          created_at?: string | null
+          descricao: string
+          id?: string
+          tipo_tributo: string
+          updated_at?: string | null
+        }
+        Update: {
+          aplicacao?: string | null
+          artigo_lc_214?: string | null
+          codigo?: string
+          created_at?: string | null
+          descricao?: string
+          id?: string
+          tipo_tributo?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           address: string | null
@@ -1670,8 +1703,12 @@ export type Database = {
       fiscal_operations: {
         Row: {
           additional_info: string | null
+          aplica_ibs_cbs: boolean | null
+          aplica_imposto_seletivo: boolean | null
           calculate_base_inside: boolean | null
+          cbs_aliquota: number | null
           cfop_codes: Json | null
+          codigo_classificacao_tributaria: string | null
           cofins_situation: string
           created_at: string
           created_by: string
@@ -1682,6 +1719,8 @@ export type Database = {
           ex_tipi_suframa: string | null
           fcp_rate: number | null
           fiscal_benefit: string | null
+          ibs_municipal_aliquota: number | null
+          ibs_uf_aliquota: number | null
           icms_situation: string | null
           id: string
           internal_icms_rate: number | null
@@ -1692,6 +1731,7 @@ export type Database = {
           ipi_rate_suframa: number | null
           ipi_situation_general: string | null
           ipi_situation_suframa: string | null
+          is_aliquota: number | null
           operation_name: string
           org_id: string
           pis_situation: string
@@ -1703,8 +1743,12 @@ export type Database = {
         }
         Insert: {
           additional_info?: string | null
+          aplica_ibs_cbs?: boolean | null
+          aplica_imposto_seletivo?: boolean | null
           calculate_base_inside?: boolean | null
+          cbs_aliquota?: number | null
           cfop_codes?: Json | null
+          codigo_classificacao_tributaria?: string | null
           cofins_situation: string
           created_at?: string
           created_by: string
@@ -1715,6 +1759,8 @@ export type Database = {
           ex_tipi_suframa?: string | null
           fcp_rate?: number | null
           fiscal_benefit?: string | null
+          ibs_municipal_aliquota?: number | null
+          ibs_uf_aliquota?: number | null
           icms_situation?: string | null
           id?: string
           internal_icms_rate?: number | null
@@ -1725,6 +1771,7 @@ export type Database = {
           ipi_rate_suframa?: number | null
           ipi_situation_general?: string | null
           ipi_situation_suframa?: string | null
+          is_aliquota?: number | null
           operation_name: string
           org_id: string
           pis_situation: string
@@ -1736,8 +1783,12 @@ export type Database = {
         }
         Update: {
           additional_info?: string | null
+          aplica_ibs_cbs?: boolean | null
+          aplica_imposto_seletivo?: boolean | null
           calculate_base_inside?: boolean | null
+          cbs_aliquota?: number | null
           cfop_codes?: Json | null
+          codigo_classificacao_tributaria?: string | null
           cofins_situation?: string
           created_at?: string
           created_by?: string
@@ -1748,6 +1799,8 @@ export type Database = {
           ex_tipi_suframa?: string | null
           fcp_rate?: number | null
           fiscal_benefit?: string | null
+          ibs_municipal_aliquota?: number | null
+          ibs_uf_aliquota?: number | null
           icms_situation?: string | null
           id?: string
           internal_icms_rate?: number | null
@@ -1758,6 +1811,7 @@ export type Database = {
           ipi_rate_suframa?: number | null
           ipi_situation_general?: string | null
           ipi_situation_suframa?: string | null
+          is_aliquota?: number | null
           operation_name?: string
           org_id?: string
           pis_situation?: string
@@ -2024,6 +2078,554 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nfe: {
+        Row: {
+          aliquota_cbs: number | null
+          aliquota_ibs_municipal: number | null
+          aliquota_ibs_uf: number | null
+          aliquota_is: number | null
+          bc_icms: number | null
+          chave_acesso: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string
+          data_autorizacao: string | null
+          data_cancelamento: string | null
+          data_emissao: string
+          data_prevista_entrega: string | null
+          data_saida_entrada: string | null
+          destinatario_bairro: string
+          destinatario_cep: string
+          destinatario_cidade: string
+          destinatario_complemento: string | null
+          destinatario_cpf_cnpj: string
+          destinatario_email: string | null
+          destinatario_endereco: string
+          destinatario_id: string | null
+          destinatario_ie: string | null
+          destinatario_nome: string
+          destinatario_numero: string
+          destinatario_telefone: string | null
+          destinatario_uf: string
+          finalidade: string
+          id: string
+          informacoes_complementares: string | null
+          informacoes_fisco: string | null
+          modelo: string
+          motivo_cancelamento: string | null
+          motivo_rejeicao: string | null
+          municipio_fato_gerador_ibs: string | null
+          natureza_operacao: string
+          numero: number
+          numero_protocolo: string | null
+          order_id: string | null
+          org_id: string
+          percentual_redutor_compra_gov: number | null
+          protocolo_cancelamento: string | null
+          serie: string
+          status: string
+          tipo_ente_governamental: string | null
+          tipo_nf_credito: string | null
+          tipo_nf_debito: string | null
+          tipo_operacao: string
+          tipo_operacao_governamental: string | null
+          updated_at: string
+          valor_bc_cbs: number | null
+          valor_bc_ibs_municipal: number | null
+          valor_bc_ibs_uf: number | null
+          valor_bc_is: number | null
+          valor_cbs: number | null
+          valor_cofins: number | null
+          valor_desconto: number | null
+          valor_frete: number | null
+          valor_ibs_municipal: number | null
+          valor_ibs_uf: number | null
+          valor_icms: number | null
+          valor_icms_st: number | null
+          valor_ipi: number | null
+          valor_is: number | null
+          valor_outras_despesas: number | null
+          valor_pis: number | null
+          valor_produtos: number
+          valor_seguro: number | null
+          valor_total: number
+          valor_total_cbs: number | null
+          valor_total_ibs: number | null
+          valor_total_is: number | null
+          xml_autorizado: string | null
+          xml_gerado: string | null
+        }
+        Insert: {
+          aliquota_cbs?: number | null
+          aliquota_ibs_municipal?: number | null
+          aliquota_ibs_uf?: number | null
+          aliquota_is?: number | null
+          bc_icms?: number | null
+          chave_acesso?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by: string
+          data_autorizacao?: string | null
+          data_cancelamento?: string | null
+          data_emissao?: string
+          data_prevista_entrega?: string | null
+          data_saida_entrada?: string | null
+          destinatario_bairro: string
+          destinatario_cep: string
+          destinatario_cidade: string
+          destinatario_complemento?: string | null
+          destinatario_cpf_cnpj: string
+          destinatario_email?: string | null
+          destinatario_endereco: string
+          destinatario_id?: string | null
+          destinatario_ie?: string | null
+          destinatario_nome: string
+          destinatario_numero: string
+          destinatario_telefone?: string | null
+          destinatario_uf: string
+          finalidade?: string
+          id?: string
+          informacoes_complementares?: string | null
+          informacoes_fisco?: string | null
+          modelo?: string
+          motivo_cancelamento?: string | null
+          motivo_rejeicao?: string | null
+          municipio_fato_gerador_ibs?: string | null
+          natureza_operacao?: string
+          numero: number
+          numero_protocolo?: string | null
+          order_id?: string | null
+          org_id: string
+          percentual_redutor_compra_gov?: number | null
+          protocolo_cancelamento?: string | null
+          serie?: string
+          status?: string
+          tipo_ente_governamental?: string | null
+          tipo_nf_credito?: string | null
+          tipo_nf_debito?: string | null
+          tipo_operacao?: string
+          tipo_operacao_governamental?: string | null
+          updated_at?: string
+          valor_bc_cbs?: number | null
+          valor_bc_ibs_municipal?: number | null
+          valor_bc_ibs_uf?: number | null
+          valor_bc_is?: number | null
+          valor_cbs?: number | null
+          valor_cofins?: number | null
+          valor_desconto?: number | null
+          valor_frete?: number | null
+          valor_ibs_municipal?: number | null
+          valor_ibs_uf?: number | null
+          valor_icms?: number | null
+          valor_icms_st?: number | null
+          valor_ipi?: number | null
+          valor_is?: number | null
+          valor_outras_despesas?: number | null
+          valor_pis?: number | null
+          valor_produtos?: number
+          valor_seguro?: number | null
+          valor_total?: number
+          valor_total_cbs?: number | null
+          valor_total_ibs?: number | null
+          valor_total_is?: number | null
+          xml_autorizado?: string | null
+          xml_gerado?: string | null
+        }
+        Update: {
+          aliquota_cbs?: number | null
+          aliquota_ibs_municipal?: number | null
+          aliquota_ibs_uf?: number | null
+          aliquota_is?: number | null
+          bc_icms?: number | null
+          chave_acesso?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string
+          data_autorizacao?: string | null
+          data_cancelamento?: string | null
+          data_emissao?: string
+          data_prevista_entrega?: string | null
+          data_saida_entrada?: string | null
+          destinatario_bairro?: string
+          destinatario_cep?: string
+          destinatario_cidade?: string
+          destinatario_complemento?: string | null
+          destinatario_cpf_cnpj?: string
+          destinatario_email?: string | null
+          destinatario_endereco?: string
+          destinatario_id?: string | null
+          destinatario_ie?: string | null
+          destinatario_nome?: string
+          destinatario_numero?: string
+          destinatario_telefone?: string | null
+          destinatario_uf?: string
+          finalidade?: string
+          id?: string
+          informacoes_complementares?: string | null
+          informacoes_fisco?: string | null
+          modelo?: string
+          motivo_cancelamento?: string | null
+          motivo_rejeicao?: string | null
+          municipio_fato_gerador_ibs?: string | null
+          natureza_operacao?: string
+          numero?: number
+          numero_protocolo?: string | null
+          order_id?: string | null
+          org_id?: string
+          percentual_redutor_compra_gov?: number | null
+          protocolo_cancelamento?: string | null
+          serie?: string
+          status?: string
+          tipo_ente_governamental?: string | null
+          tipo_nf_credito?: string | null
+          tipo_nf_debito?: string | null
+          tipo_operacao?: string
+          tipo_operacao_governamental?: string | null
+          updated_at?: string
+          valor_bc_cbs?: number | null
+          valor_bc_ibs_municipal?: number | null
+          valor_bc_ibs_uf?: number | null
+          valor_bc_is?: number | null
+          valor_cbs?: number | null
+          valor_cofins?: number | null
+          valor_desconto?: number | null
+          valor_frete?: number | null
+          valor_ibs_municipal?: number | null
+          valor_ibs_uf?: number | null
+          valor_icms?: number | null
+          valor_icms_st?: number | null
+          valor_ipi?: number | null
+          valor_is?: number | null
+          valor_outras_despesas?: number | null
+          valor_pis?: number | null
+          valor_produtos?: number
+          valor_seguro?: number | null
+          valor_total?: number
+          valor_total_cbs?: number | null
+          valor_total_ibs?: number | null
+          valor_total_is?: number | null
+          xml_autorizado?: string | null
+          xml_gerado?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfe_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_destinatario_id_fkey"
+            columns: ["destinatario_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "sales_integrity_check"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nfe_items: {
+        Row: {
+          cbs_aliquota: number | null
+          cbs_base_calculo: number | null
+          cbs_indicador_doacao: string | null
+          cbs_percentual_devolucao: number | null
+          cbs_percentual_diferimento: number | null
+          cbs_percentual_reducao: number | null
+          cbs_valor: number | null
+          cbs_valor_devolucao: number | null
+          cbs_valor_diferido: number | null
+          cest: string | null
+          cfop: string
+          classificacao_subapuracao_zfm: string | null
+          codigo_classificacao_tributaria: string | null
+          codigo_produto: string
+          cofins_aliquota: number | null
+          cofins_bc: number | null
+          cofins_cst: string
+          cofins_valor: number | null
+          created_at: string
+          cst_ibs_cbs: string | null
+          descricao: string
+          ibs_cbs_monofasico: boolean | null
+          ibs_cbs_percentual_retencao: number | null
+          ibs_cbs_valor_retido: number | null
+          ibs_mun_aliquota: number | null
+          ibs_mun_base_calculo: number | null
+          ibs_mun_percentual_devolucao: number | null
+          ibs_mun_percentual_diferimento: number | null
+          ibs_mun_percentual_reducao: number | null
+          ibs_mun_valor: number | null
+          ibs_mun_valor_devolucao: number | null
+          ibs_mun_valor_diferido: number | null
+          ibs_uf_aliquota: number | null
+          ibs_uf_base_calculo: number | null
+          ibs_uf_percentual_devolucao: number | null
+          ibs_uf_percentual_diferimento: number | null
+          ibs_uf_percentual_reducao: number | null
+          ibs_uf_valor: number | null
+          ibs_uf_valor_devolucao: number | null
+          ibs_uf_valor_diferido: number | null
+          icms_aliquota: number | null
+          icms_bc: number | null
+          icms_cst: string
+          icms_modalidade_bc: string | null
+          icms_origem: string
+          icms_st_aliquota: number | null
+          icms_st_bc: number | null
+          icms_st_valor: number | null
+          icms_valor: number | null
+          id: string
+          indicador_bem_movel_usado: string | null
+          informacoes_adicionais: string | null
+          ipi_aliquota: number | null
+          ipi_bc: number | null
+          ipi_cst: string | null
+          ipi_valor: number | null
+          is_aliquota: number | null
+          is_base_calculo: number | null
+          is_codigo_classificacao: string | null
+          is_cst: string | null
+          is_quantidade_tributavel: number | null
+          is_unidade_medida: string | null
+          is_valor: number | null
+          item_numero: number
+          ncm: string
+          nfe_id: string
+          org_id: string
+          pis_aliquota: number | null
+          pis_bc: number | null
+          pis_cst: string
+          pis_valor: number | null
+          product_id: string | null
+          quantidade: number
+          unidade: string
+          updated_at: string
+          valor_desconto: number | null
+          valor_frete: number | null
+          valor_outras_despesas: number | null
+          valor_seguro: number | null
+          valor_total: number
+          valor_unitario: number
+        }
+        Insert: {
+          cbs_aliquota?: number | null
+          cbs_base_calculo?: number | null
+          cbs_indicador_doacao?: string | null
+          cbs_percentual_devolucao?: number | null
+          cbs_percentual_diferimento?: number | null
+          cbs_percentual_reducao?: number | null
+          cbs_valor?: number | null
+          cbs_valor_devolucao?: number | null
+          cbs_valor_diferido?: number | null
+          cest?: string | null
+          cfop: string
+          classificacao_subapuracao_zfm?: string | null
+          codigo_classificacao_tributaria?: string | null
+          codigo_produto: string
+          cofins_aliquota?: number | null
+          cofins_bc?: number | null
+          cofins_cst: string
+          cofins_valor?: number | null
+          created_at?: string
+          cst_ibs_cbs?: string | null
+          descricao: string
+          ibs_cbs_monofasico?: boolean | null
+          ibs_cbs_percentual_retencao?: number | null
+          ibs_cbs_valor_retido?: number | null
+          ibs_mun_aliquota?: number | null
+          ibs_mun_base_calculo?: number | null
+          ibs_mun_percentual_devolucao?: number | null
+          ibs_mun_percentual_diferimento?: number | null
+          ibs_mun_percentual_reducao?: number | null
+          ibs_mun_valor?: number | null
+          ibs_mun_valor_devolucao?: number | null
+          ibs_mun_valor_diferido?: number | null
+          ibs_uf_aliquota?: number | null
+          ibs_uf_base_calculo?: number | null
+          ibs_uf_percentual_devolucao?: number | null
+          ibs_uf_percentual_diferimento?: number | null
+          ibs_uf_percentual_reducao?: number | null
+          ibs_uf_valor?: number | null
+          ibs_uf_valor_devolucao?: number | null
+          ibs_uf_valor_diferido?: number | null
+          icms_aliquota?: number | null
+          icms_bc?: number | null
+          icms_cst: string
+          icms_modalidade_bc?: string | null
+          icms_origem?: string
+          icms_st_aliquota?: number | null
+          icms_st_bc?: number | null
+          icms_st_valor?: number | null
+          icms_valor?: number | null
+          id?: string
+          indicador_bem_movel_usado?: string | null
+          informacoes_adicionais?: string | null
+          ipi_aliquota?: number | null
+          ipi_bc?: number | null
+          ipi_cst?: string | null
+          ipi_valor?: number | null
+          is_aliquota?: number | null
+          is_base_calculo?: number | null
+          is_codigo_classificacao?: string | null
+          is_cst?: string | null
+          is_quantidade_tributavel?: number | null
+          is_unidade_medida?: string | null
+          is_valor?: number | null
+          item_numero: number
+          ncm: string
+          nfe_id: string
+          org_id: string
+          pis_aliquota?: number | null
+          pis_bc?: number | null
+          pis_cst: string
+          pis_valor?: number | null
+          product_id?: string | null
+          quantidade: number
+          unidade: string
+          updated_at?: string
+          valor_desconto?: number | null
+          valor_frete?: number | null
+          valor_outras_despesas?: number | null
+          valor_seguro?: number | null
+          valor_total: number
+          valor_unitario: number
+        }
+        Update: {
+          cbs_aliquota?: number | null
+          cbs_base_calculo?: number | null
+          cbs_indicador_doacao?: string | null
+          cbs_percentual_devolucao?: number | null
+          cbs_percentual_diferimento?: number | null
+          cbs_percentual_reducao?: number | null
+          cbs_valor?: number | null
+          cbs_valor_devolucao?: number | null
+          cbs_valor_diferido?: number | null
+          cest?: string | null
+          cfop?: string
+          classificacao_subapuracao_zfm?: string | null
+          codigo_classificacao_tributaria?: string | null
+          codigo_produto?: string
+          cofins_aliquota?: number | null
+          cofins_bc?: number | null
+          cofins_cst?: string
+          cofins_valor?: number | null
+          created_at?: string
+          cst_ibs_cbs?: string | null
+          descricao?: string
+          ibs_cbs_monofasico?: boolean | null
+          ibs_cbs_percentual_retencao?: number | null
+          ibs_cbs_valor_retido?: number | null
+          ibs_mun_aliquota?: number | null
+          ibs_mun_base_calculo?: number | null
+          ibs_mun_percentual_devolucao?: number | null
+          ibs_mun_percentual_diferimento?: number | null
+          ibs_mun_percentual_reducao?: number | null
+          ibs_mun_valor?: number | null
+          ibs_mun_valor_devolucao?: number | null
+          ibs_mun_valor_diferido?: number | null
+          ibs_uf_aliquota?: number | null
+          ibs_uf_base_calculo?: number | null
+          ibs_uf_percentual_devolucao?: number | null
+          ibs_uf_percentual_diferimento?: number | null
+          ibs_uf_percentual_reducao?: number | null
+          ibs_uf_valor?: number | null
+          ibs_uf_valor_devolucao?: number | null
+          ibs_uf_valor_diferido?: number | null
+          icms_aliquota?: number | null
+          icms_bc?: number | null
+          icms_cst?: string
+          icms_modalidade_bc?: string | null
+          icms_origem?: string
+          icms_st_aliquota?: number | null
+          icms_st_bc?: number | null
+          icms_st_valor?: number | null
+          icms_valor?: number | null
+          id?: string
+          indicador_bem_movel_usado?: string | null
+          informacoes_adicionais?: string | null
+          ipi_aliquota?: number | null
+          ipi_bc?: number | null
+          ipi_cst?: string | null
+          ipi_valor?: number | null
+          is_aliquota?: number | null
+          is_base_calculo?: number | null
+          is_codigo_classificacao?: string | null
+          is_cst?: string | null
+          is_quantidade_tributavel?: number | null
+          is_unidade_medida?: string | null
+          is_valor?: number | null
+          item_numero?: number
+          ncm?: string
+          nfe_id?: string
+          org_id?: string
+          pis_aliquota?: number | null
+          pis_bc?: number | null
+          pis_cst?: string
+          pis_valor?: number | null
+          product_id?: string | null
+          quantidade?: number
+          unidade?: string
+          updated_at?: string
+          valor_desconto?: number | null
+          valor_frete?: number | null
+          valor_outras_despesas?: number | null
+          valor_seguro?: number | null
+          valor_total?: number
+          valor_unitario?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfe_items_nfe_id_fkey"
+            columns: ["nfe_id"]
+            isOneToOne: false
+            referencedRelation: "nfe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_items_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "stock_integrity_check"
             referencedColumns: ["id"]
           },
         ]
@@ -2654,6 +3256,7 @@ export type Database = {
           minimum_sale_price: number | null
           model: string | null
           name: string
+          ncm_code: string | null
           operational_expenses_percent: number | null
           org_id: string
           owner_id: string
@@ -2714,6 +3317,7 @@ export type Database = {
           minimum_sale_price?: number | null
           model?: string | null
           name: string
+          ncm_code?: string | null
           operational_expenses_percent?: number | null
           org_id: string
           owner_id: string
@@ -2774,6 +3378,7 @@ export type Database = {
           minimum_sale_price?: number | null
           model?: string | null
           name?: string
+          ncm_code?: string | null
           operational_expenses_percent?: number | null
           org_id?: string
           owner_id?: string
@@ -3212,6 +3817,65 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      reforma_tributaria_config: {
+        Row: {
+          aliquota_cbs_padrao: number | null
+          aliquota_ibs_municipal_padrao: number | null
+          aliquota_ibs_uf_padrao: number | null
+          ano_transicao: number
+          created_at: string | null
+          data_inicio_obrigatoriedade: string
+          habilitar_ibs_cbs: boolean | null
+          habilitar_imposto_seletivo: boolean | null
+          id: string
+          org_id: string
+          percentual_aplicacao_novo: number | null
+          percentual_reducao_antigo: number | null
+          regime_tributario: string
+          updated_at: string | null
+        }
+        Insert: {
+          aliquota_cbs_padrao?: number | null
+          aliquota_ibs_municipal_padrao?: number | null
+          aliquota_ibs_uf_padrao?: number | null
+          ano_transicao: number
+          created_at?: string | null
+          data_inicio_obrigatoriedade: string
+          habilitar_ibs_cbs?: boolean | null
+          habilitar_imposto_seletivo?: boolean | null
+          id?: string
+          org_id: string
+          percentual_aplicacao_novo?: number | null
+          percentual_reducao_antigo?: number | null
+          regime_tributario: string
+          updated_at?: string | null
+        }
+        Update: {
+          aliquota_cbs_padrao?: number | null
+          aliquota_ibs_municipal_padrao?: number | null
+          aliquota_ibs_uf_padrao?: number | null
+          ano_transicao?: number
+          created_at?: string | null
+          data_inicio_obrigatoriedade?: string
+          habilitar_ibs_cbs?: boolean | null
+          habilitar_imposto_seletivo?: boolean | null
+          id?: string
+          org_id?: string
+          percentual_aplicacao_novo?: number | null
+          percentual_reducao_antigo?: number | null
+          regime_tributario?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reforma_tributaria_config_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sales_categories: {
         Row: {
@@ -4257,6 +4921,22 @@ export type Database = {
         Args: { notes?: string; request_id: string; reviewer_id: string }
         Returns: undefined
       }
+      calcular_ibs_cbs_is: {
+        Args: {
+          p_aliquota_cbs: number
+          p_aliquota_ibs_mun: number
+          p_aliquota_ibs_uf: number
+          p_aliquota_is?: number
+          p_valor_base: number
+        }
+        Returns: {
+          cbs_valor: number
+          ibs_mun_valor: number
+          ibs_uf_valor: number
+          is_valor: number
+          valor_total_tributos: number
+        }[]
+      }
       calculate_installment_charges: {
         Args: { p_installment_id: string; p_payment_date?: string }
         Returns: {
@@ -4269,6 +4949,7 @@ export type Database = {
           original_amount: number
         }[]
       }
+      calculate_nfe_totals: { Args: { p_nfe_id: string }; Returns: undefined }
       check_low_stock_alert: {
         Args: never
         Returns: {
@@ -4354,6 +5035,10 @@ export type Database = {
         Returns: number
       }
       generate_next_entry_code: { Args: { p_org_id: string }; Returns: number }
+      generate_next_nfe_number: {
+        Args: { p_org_id: string; p_serie?: string }
+        Returns: number
+      }
       generate_next_order_number: {
         Args: { p_org_id: string }
         Returns: number

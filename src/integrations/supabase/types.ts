@@ -3228,6 +3228,60 @@ export type Database = {
           },
         ]
       }
+      nfe_eventos: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          data_evento: string
+          descricao: string
+          id: string
+          nfe_id: string
+          org_id: string
+          protocolo: string | null
+          tipo_evento: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          data_evento?: string
+          descricao: string
+          id?: string
+          nfe_id: string
+          org_id: string
+          protocolo?: string | null
+          tipo_evento: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          data_evento?: string
+          descricao?: string
+          id?: string
+          nfe_id?: string
+          org_id?: string
+          protocolo?: string | null
+          tipo_evento?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfe_eventos_nfe_id_fkey"
+            columns: ["nfe_id"]
+            isOneToOne: false
+            referencedRelation: "nfe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_eventos_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nfe_items: {
         Row: {
           cbs_aliquota: number | null

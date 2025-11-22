@@ -182,6 +182,25 @@ const Orders = () => {
     }
   }
 
+  const handleCancelOrder = (order: Order) => {
+    setOrderToCancel(order)
+    setIsCancelDialogOpen(true)
+  }
+
+  const confirmCancelOrder = async () => {
+    if (!orderToCancel) return
+
+    try {
+      await cancelOrderFn(orderToCancel.id, cancelReason)
+      setIsCancelDialogOpen(false)
+      setCancelReason("")
+      setOrderToCancel(null)
+      loadOrders()
+    } catch (error) {
+      // Error already handled by hook
+    }
+  }
+
   const filteredOrders = orders.filter(order => {
     const matchesSearch = order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.customers?.name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -342,13 +361,33 @@ const Orders = () => {
                       <Eye className="mr-2 h-4 w-4" />
                       Detalhes
                     </Button>
+                    {order.status === 'draft' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/orders/${order.id}`)}
+                      >
+                        <Edit className="mr-2 h-4 w-4" />
+                        Editar
+                      </Button>
+                    )}
                     {order.status === 'confirmed' && order.payment_status === 'pending' && (
                       <Button
                         size="sm"
                         onClick={() => completeOrder(order)}
                       >
                         <Zap className="mr-2 h-4 w-4" />
-                        Finalizar Pedido
+                        Finalizar
+                      </Button>
+                    )}
+                    {(order.status === 'draft' || order.status === 'confirmed') && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleCancelOrder(order)}
+                      >
+                        <X className="mr-2 h-4 w-4" />
+                        Cancelar
                       </Button>
                     )}
                   </div>
@@ -440,6 +479,39 @@ const Orders = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Cancel Order Dialog */}
+      <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancelar Pedido</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja cancelar o pedido {orderToCancel?.order_number}? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 my-4">
+            <Label htmlFor="cancel-reason">Motivo do cancelamento (opcional)</Label>
+            <Textarea
+              id="cancel-reason"
+              placeholder="Digite o motivo do cancelamento..."
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              rows={3}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setCancelReason("")
+              setOrderToCancel(null)
+            }}>
+              Voltar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmCancelOrder} className="bg-destructive hover:bg-destructive/90">
+              Confirmar Cancelamento
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

@@ -7430,6 +7430,54 @@ export type Database = {
           total_discount: number
         }[]
       }
+      stock_entry_atomic: {
+        Args: {
+          p_created_by?: string
+          p_entry_type?: string
+          p_lot_id?: string
+          p_notes?: string
+          p_org_id: string
+          p_product_id: string
+          p_quantity: number
+          p_reason?: string
+          p_reference_document?: string
+          p_supplier_id?: string
+          p_total_cost?: number
+          p_unit_cost?: number
+          p_warehouse_id: string
+        }
+        Returns: Json
+      }
+      stock_exit_with_validation: {
+        Args: {
+          p_created_by?: string
+          p_destination?: string
+          p_exit_type?: string
+          p_lot_id?: string
+          p_notes?: string
+          p_org_id: string
+          p_product_id: string
+          p_quantity: number
+          p_reason?: string
+          p_reference_document?: string
+          p_warehouse_id: string
+        }
+        Returns: Json
+      }
+      stock_transfer_atomic: {
+        Args: {
+          p_created_by?: string
+          p_lot_id?: string
+          p_notes?: string
+          p_org_id: string
+          p_product_id: string
+          p_quantity: number
+          p_reason?: string
+          p_warehouse_from: string
+          p_warehouse_to: string
+        }
+        Returns: Json
+      }
       unsettle_installment: {
         Args: { p_installment_id: string }
         Returns: boolean

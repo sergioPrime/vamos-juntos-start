@@ -195,7 +195,7 @@ export function useBusinessAlerts() {
       }
 
       if (nfseList && nfseList.length > 0) {
-        const totalRejectedAmount = nfseList.reduce((sum, nfse) => sum + (nfse.valor_total || 0), 0)
+        const totalRejectedAmount = nfseList.reduce((sum, nfse) => sum + (nfse.valor_servicos || 0), 0)
         
         return [{
           id: 'rejected_nfse',

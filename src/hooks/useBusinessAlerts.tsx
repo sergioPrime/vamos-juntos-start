@@ -183,16 +183,16 @@ export function useBusinessAlerts() {
     if (!currentOrg?.id) return []
 
     try {
+      // @ts-ignore - Type inference issue with Supabase complex joins
       const result = await supabase
         .from('nfse')
         .select('id, numero, valor_servicos, discriminacao')
         .eq('org_id', currentOrg.id)
         .eq('rejeitada', true)
-        .returns<any[]>()
 
       if (result.error) throw result.error
 
-      const nfseList = result.data || []
+      const nfseList = (result.data || []) as any[]
 
       if (nfseList.length > 0) {
         const totalRejectedAmount = nfseList.reduce((sum: number, nfse: any) => sum + (nfse.valor_servicos || 0), 0)

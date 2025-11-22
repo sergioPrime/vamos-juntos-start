@@ -1714,8 +1714,13 @@ export type Database = {
           company_id: string | null
           complemento: string | null
           created_at: string
+          csc_homologacao: string | null
+          csc_id_homologacao: number | null
+          csc_id_producao: number | null
+          csc_producao: string | null
           email: string | null
           id: string
+          impressora_padrao: string | null
           inscricao_estadual: string
           inscricao_municipal: string | null
           is_active: boolean
@@ -1724,11 +1729,14 @@ export type Database = {
           nome_fantasia: string | null
           numero: string
           org_id: string
+          proximo_numero_nfce: number | null
           proximo_numero_nfe: number
           razao_social: string
           regime_tributario: string
+          serie_nfce: string | null
           serie_nfe: string
           telefone: string | null
+          token_contingencia: string | null
           uf: string
           uf_emitente: string
           updated_at: string
@@ -1746,8 +1754,13 @@ export type Database = {
           company_id?: string | null
           complemento?: string | null
           created_at?: string
+          csc_homologacao?: string | null
+          csc_id_homologacao?: number | null
+          csc_id_producao?: number | null
+          csc_producao?: string | null
           email?: string | null
           id?: string
+          impressora_padrao?: string | null
           inscricao_estadual: string
           inscricao_municipal?: string | null
           is_active?: boolean
@@ -1756,11 +1769,14 @@ export type Database = {
           nome_fantasia?: string | null
           numero: string
           org_id: string
+          proximo_numero_nfce?: number | null
           proximo_numero_nfe?: number
           razao_social: string
           regime_tributario: string
+          serie_nfce?: string | null
           serie_nfe?: string
           telefone?: string | null
+          token_contingencia?: string | null
           uf: string
           uf_emitente: string
           updated_at?: string
@@ -1778,8 +1794,13 @@ export type Database = {
           company_id?: string | null
           complemento?: string | null
           created_at?: string
+          csc_homologacao?: string | null
+          csc_id_homologacao?: number | null
+          csc_id_producao?: number | null
+          csc_producao?: string | null
           email?: string | null
           id?: string
+          impressora_padrao?: string | null
           inscricao_estadual?: string
           inscricao_municipal?: string | null
           is_active?: boolean
@@ -1788,11 +1809,14 @@ export type Database = {
           nome_fantasia?: string | null
           numero?: string
           org_id?: string
+          proximo_numero_nfce?: number | null
           proximo_numero_nfe?: number
           razao_social?: string
           regime_tributario?: string
+          serie_nfce?: string | null
           serie_nfe?: string
           telefone?: string | null
+          token_contingencia?: string | null
           uf?: string
           uf_emitente?: string
           updated_at?: string
@@ -3177,6 +3201,93 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "stock_integrity_check"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nfce_transmission_logs: {
+        Row: {
+          ambiente: string | null
+          created_at: string
+          duration_ms: number | null
+          error_code: string | null
+          error_message: string | null
+          id: string
+          ip_address: string | null
+          nfce_id: string | null
+          operation_type: string
+          org_id: string
+          protocol: string | null
+          request_json: Json | null
+          request_timestamp: string
+          request_xml: string | null
+          response_json: Json | null
+          response_timestamp: string | null
+          response_xml: string | null
+          sefaz_message: string | null
+          status_code: string | null
+          success: boolean
+          user_agent: string | null
+        }
+        Insert: {
+          ambiente?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          nfce_id?: string | null
+          operation_type: string
+          org_id: string
+          protocol?: string | null
+          request_json?: Json | null
+          request_timestamp?: string
+          request_xml?: string | null
+          response_json?: Json | null
+          response_timestamp?: string | null
+          response_xml?: string | null
+          sefaz_message?: string | null
+          status_code?: string | null
+          success?: boolean
+          user_agent?: string | null
+        }
+        Update: {
+          ambiente?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          nfce_id?: string | null
+          operation_type?: string
+          org_id?: string
+          protocol?: string | null
+          request_json?: Json | null
+          request_timestamp?: string
+          request_xml?: string | null
+          response_json?: Json | null
+          response_timestamp?: string | null
+          response_xml?: string | null
+          sefaz_message?: string | null
+          status_code?: string | null
+          success?: boolean
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfce_transmission_logs_nfce_id_fkey"
+            columns: ["nfce_id"]
+            isOneToOne: false
+            referencedRelation: "nfce"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfce_transmission_logs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -6676,6 +6787,7 @@ export type Database = {
           reorder_point: number
         }[]
       }
+      cleanup_old_nfce_logs: { Args: never; Returns: undefined }
       create_blockchain_alert: {
         Args: {
           p_alert_type: string
@@ -6945,6 +7057,13 @@ export type Database = {
       validate_hierarchy_cycle: {
         Args: { new_id: string; new_parent_id: string; table_name: string }
         Returns: boolean
+      }
+      validate_nfce_emission: {
+        Args: { p_org_id: string }
+        Returns: {
+          errors: string[]
+          is_valid: boolean
+        }[]
       }
     }
     Enums: {

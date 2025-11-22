@@ -140,12 +140,6 @@ const OrderForm = () => {
     }
   }
 
-  const generateOrderNumber = () => {
-    // Generate sequential number starting from 1
-    const nextNumber = "1" // In a real implementation, this would come from the database
-    setFormData(prev => ({ ...prev, number: nextNumber }))
-  }
-
   const loadOrder = async (orderId: string) => {
     // Implementation to load order from database
     setLoading(true)

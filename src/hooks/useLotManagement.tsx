@@ -284,6 +284,112 @@ export function useLotManagement() {
     }
   }, [])
 
+  // Suggest lot following FIFO principle
+  const suggestLotFIFO = useCallback(async (
+    productId: string,
+    warehouseId?: string,
+    requiredQuantity?: number
+  ): Promise<any[]> => {
+    if (!currentOrg?.id) return []
+
+    try {
+      const { data, error } = await supabase.rpc('suggest_lot_fifo', {
+        p_org_id: currentOrg.id,
+        p_product_id: productId,
+        p_warehouse_id: warehouseId || null,
+        p_required_quantity: requiredQuantity || null
+      })
+
+      if (error) {
+        console.error('Error suggesting FIFO lot:', error)
+        return []
+      }
+
+      return data || []
+    } catch (error) {
+      console.error('Error suggesting FIFO lot:', error)
+      return []
+    }
+  }, [currentOrg?.id])
+
+  // Validate if lot selection follows FIFO
+  const validateLotFIFO = useCallback(async (
+    productId: string,
+    lotId: string,
+    warehouseId?: string
+  ): Promise<any> => {
+    if (!currentOrg?.id) return null
+
+    try {
+      const { data, error } = await supabase.rpc('validate_lot_fifo', {
+        p_org_id: currentOrg.id,
+        p_product_id: productId,
+        p_lot_id: lotId,
+        p_warehouse_id: warehouseId || null
+      })
+
+      if (error) {
+        console.error('Error validating FIFO:', error)
+        return null
+      }
+
+      return data
+    } catch (error) {
+      console.error('Error validating FIFO:', error)
+      return null
+    }
+  }, [currentOrg?.id])
+
+  // Get expiring lots alert with severity
+  const getExpiringLotsAlert = useCallback(async (daysThreshold: number = 30): Promise<any[]> => {
+    if (!currentOrg?.id) return []
+
+    try {
+      const { data, error } = await supabase.rpc('get_expiring_lots_alert', {
+        p_org_id: currentOrg.id,
+        p_days_threshold: daysThreshold
+      })
+
+      if (error) {
+        console.error('Error getting expiring lots alert:', error)
+        return []
+      }
+
+      return data || []
+    } catch (error) {
+      console.error('Error getting expiring lots alert:', error)
+      return []
+    }
+  }, [currentOrg?.id])
+
+  // Auto-allocate lots for required quantity
+  const autoAllocateLots = useCallback(async (
+    productId: string,
+    requiredQuantity: number,
+    warehouseId?: string
+  ): Promise<any[]> => {
+    if (!currentOrg?.id) return []
+
+    try {
+      const { data, error } = await supabase.rpc('auto_allocate_lots', {
+        p_org_id: currentOrg.id,
+        p_product_id: productId,
+        p_required_quantity: requiredQuantity,
+        p_warehouse_id: warehouseId || null
+      })
+
+      if (error) {
+        console.error('Error auto-allocating lots:', error)
+        throw error
+      }
+
+      return data || []
+    } catch (error) {
+      console.error('Error auto-allocating lots:', error)
+      throw error
+    }
+  }, [currentOrg?.id])
+
   return {
     createLot,
     getAvailableLots,

@@ -3019,6 +3019,7 @@ export type Database = {
           minimum_sale_price: number | null
           model: string | null
           name: string
+          ncm_code: string | null
           operational_expenses_percent: number | null
           org_id: string
           owner_id: string
@@ -3079,6 +3080,7 @@ export type Database = {
           minimum_sale_price?: number | null
           model?: string | null
           name: string
+          ncm_code?: string | null
           operational_expenses_percent?: number | null
           org_id: string
           owner_id: string
@@ -3139,6 +3141,7 @@ export type Database = {
           minimum_sale_price?: number | null
           model?: string | null
           name?: string
+          ncm_code?: string | null
           operational_expenses_percent?: number | null
           org_id?: string
           owner_id?: string

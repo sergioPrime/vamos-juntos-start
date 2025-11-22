@@ -267,19 +267,6 @@ export default function NFeForm() {
       console.error(error);
     }
   };
-        toast.error("Adicione produtos à nota");
-        return;
-      }
-
-      // Aqui você implementaria a integração com a SEFAZ
-      toast.success("NFe enviada para autorização!");
-      
-      navigate("/fiscal/nfe");
-    } catch (error) {
-      toast.error("Erro ao emitir NFe");
-      console.error(error);
-    }
-  };
 
   return (
     <div className="container-comfortable">

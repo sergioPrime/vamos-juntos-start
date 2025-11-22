@@ -184,6 +184,24 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
+          <Route path="/finance/cobrancas" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Cobrancas />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/finance/relatorios" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <RelatoriosAvancados />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
           <Route path="/charges" element={
             <ProtectedRoute>
               <AppLayout>

@@ -184,28 +184,6 @@ export function useBusinessAlerts() {
     // NFSe table not implemented yet
     return []
   }, [currentOrg?.id])
-        
-        return [{
-          id: 'rejected_nfse',
-          type: 'rejected_nfse' as const,
-          severity: 'high' as const,
-          title: 'NFSe rejeitadas',
-          description: `${nfseList.length} NFSe rejeitada(s) totalizando R$ ${totalRejectedAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-          action_label: 'Ver NFSe',
-          action_route: '/nfse',
-          amount: totalRejectedAmount,
-          count: nfseList.length,
-          created_at: new Date().toISOString(),
-          resolved: false
-        }]
-      }
-
-      return []
-    } catch (error) {
-      console.error('Error checking rejected NFSe:', error)
-      return []
-    }
-  }, [currentOrg?.id])
 
   // Check for pending orders
   const checkPendingOrders = useCallback(async () => {

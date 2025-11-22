@@ -65,7 +65,8 @@ export default function NFeActionsMenu({
   };
 
   return (
-    <DropdownMenu>
+    <>
+      <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm">
           <MoreVertical className="h-4 w-4" />
@@ -138,5 +139,28 @@ export default function NFeActionsMenu({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+
+    {/* Dialogs */}
+    {nfeId && nfeNumero && chaveAcesso && (
+      <>
+        <NFeCancelDialog
+          open={showCancelDialog}
+          onOpenChange={setShowCancelDialog}
+          nfeId={nfeId}
+          nfeNumero={nfeNumero}
+          chaveAcesso={chaveAcesso}
+          onSuccess={handleDialogSuccess}
+        />
+        <NFeCorrectDialog
+          open={showCorrectDialog}
+          onOpenChange={setShowCorrectDialog}
+          nfeId={nfeId}
+          nfeNumero={nfeNumero}
+          chaveAcesso={chaveAcesso}
+          onSuccess={handleDialogSuccess}
+        />
+      </>
+    )}
+    </>
   );
 }

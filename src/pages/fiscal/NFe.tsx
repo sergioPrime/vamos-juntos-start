@@ -39,6 +39,12 @@ export default function NFe() {
   const [statusFilter, setStatusFilter] = useState<string>("todos");
   const [dateFilter, setDateFilter] = useState<string>("todos");
 
+  // Função para recarregar os dados
+  const handleReload = () => {
+    // Em produção, aqui seria feita a chamada para buscar os dados atualizados
+    window.location.reload();
+  };
+
   // Dados mockados para demonstração
   const [nfeList] = useState<NFe[]>([
     {
@@ -234,7 +240,10 @@ export default function NFe() {
                       <NFeActionsMenu
                         status={nfe.status}
                         chaveAcesso={nfe.chave_acesso}
+                        nfeId={nfe.id}
+                        nfeNumero={nfe.numero}
                         onView={() => navigate(`/fiscal/nfe/${nfe.id}`)}
+                        onUpdate={handleReload}
                       />
                     </TableCell>
                   </TableRow>

@@ -1,13 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useBankAccounts } from '@/hooks/useBankAccounts';
-import { useBankReconciliation, BankTransaction } from '@/hooks/useBankReconciliation';
+import { useBankReconciliation } from '@/hooks/useBankReconciliation';
 import { formatCurrency } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -15,119 +14,62 @@ import {
   Upload,
   CheckCircle2,
   XCircle,
-  Search,
-  FileDown,
   TrendingUp,
   TrendingDown,
-  Loader2,
-  AlertCircle
+  Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-import { useOrganization } from '@/hooks/useOrganization';
-import { ReconciliationMatchDialog } from './ReconciliationMatchDialog';
 
-export function BankReconciliationPanel() {
+export function EnhancedBankReconciliation() {
   const { accounts } = useBankAccounts();
-  const { currentOrg } = useOrganization();
+  const [selectedAccount, setSelectedAccount] = useState<string>('');
+  
   const {
     loading,
-    importExtract,
-    getReconciliationStats,
-    unreconcileTransaction
-  } = useBankReconciliation();
-
-  const [selectedAccount, setSelectedAccount] = useState<string>('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [transactions, setTransactions] = useState<BankTransaction[]>([]);
-  const [stats, setStats] = useState<any>(null);
-  const [loadingTransactions, setLoadingTransactions] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<BankTransaction | null>(null);
-  const [showMatchDialog, setShowMatchDialog] = useState(false);
-
-  useEffect(() => {
-    if (selectedAccount) {
-      loadTransactions();
-      loadStats();
-    }
-  }, [selectedAccount, startDate, endDate]);
-
-  const loadTransactions = async () => {
-    if (!selectedAccount || !currentOrg?.id) return;
-
-    setLoadingTransactions(true);
-    try {
-      let query = supabase
-        .from('bank_transactions')
-        .select('*')
-        .eq('org_id', currentOrg.id)
-        .eq('bank_account_id', selectedAccount)
-        .order('transaction_date', { ascending: false });
-
-      if (startDate) query = query.gte('transaction_date', startDate);
-      if (endDate) query = query.lte('transaction_date', endDate);
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      setTransactions(data || []);
-    } catch (error) {
-      console.error('Erro ao carregar transações:', error);
-      toast.error('Erro ao carregar transações');
-    } finally {
-      setLoadingTransactions(false);
-    }
-  };
-
-  const loadStats = async () => {
-    if (!selectedAccount) return;
-    const data = await getReconciliationStats(selectedAccount, startDate, endDate);
-    setStats(data);
-  };
+    bankTransactions,
+    unmatchedEntries,
+    matchTransaction,
+    unmatchTransaction,
+    importOFX,
+    importCSV,
+    getStats
+  } = useBankReconciliation(selectedAccount);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !selectedAccount) return;
 
-    const success = await importExtract(selectedAccount, file);
-    if (success) {
-      loadTransactions();
-      loadStats();
+    const fileName = file.name.toLowerCase();
+    let success = false;
+
+    if (fileName.endsWith('.ofx')) {
+      success = await importOFX(file);
+    } else if (fileName.endsWith('.csv')) {
+      success = await importCSV(file);
+    } else {
+      toast.error('Formato não suportado. Use arquivos OFX ou CSV');
     }
 
     // Clear input
     event.target.value = '';
   };
 
-  const handleUnreconcile = async (transactionId: string) => {
-    const success = await unreconcileTransaction(transactionId);
-    if (success) {
-      loadTransactions();
-      loadStats();
-    }
-  };
-
-  const handleOpenMatchDialog = (transaction: BankTransaction) => {
-    setSelectedTransaction(transaction);
-    setShowMatchDialog(true);
-  };
-
-  const pendingTransactions = transactions.filter(t => !t.reconciled);
-  const reconciledTransactions = transactions.filter(t => t.reconciled);
+  const stats = selectedAccount ? getStats() : null;
+  const pendingTransactions = bankTransactions.filter(t => !t.matched);
+  const matchedTransactions = bankTransactions.filter(t => t.matched);
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Conciliação Bancária</CardTitle>
+          <CardTitle>Conciliação Bancária Avançada</CardTitle>
           <CardDescription>
-            Importe extratos e concilie com seus lançamentos financeiros
+            Importe extratos bancários e concilie automaticamente com seus lançamentos
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="md:col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
               <Label htmlFor="bank-account">Conta Bancária</Label>
               <Select value={selectedAccount} onValueChange={setSelectedAccount}>
                 <SelectTrigger id="bank-account">
@@ -143,50 +85,30 @@ export function BankReconciliationPanel() {
               </Select>
             </div>
 
-            <div>
-              <Label htmlFor="start-date">Data Inicial</Label>
-              <Input
-                id="start-date"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="end-date">Data Final</Label>
-              <Input
-                id="end-date"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </div>
+            {selectedAccount && (
+              <div>
+                <Label htmlFor="file-upload" className="cursor-pointer">
+                  <Button asChild disabled={loading}>
+                    <span>
+                      {loading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Upload className="mr-2 h-4 w-4" />
+                      )}
+                      Importar Extrato (OFX/CSV)
+                    </span>
+                  </Button>
+                </Label>
+                <Input
+                  id="file-upload"
+                  type="file"
+                  accept=".ofx,.csv"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
+              </div>
+            )}
           </div>
-
-          {selectedAccount && (
-            <div className="mt-4">
-              <Label htmlFor="file-upload" className="cursor-pointer">
-                <Button asChild disabled={loading}>
-                  <span>
-                    {loading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Upload className="mr-2 h-4 w-4" />
-                    )}
-                    Importar Extrato (OFX ou CSV)
-                  </span>
-                </Button>
-              </Label>
-              <Input
-                id="file-upload"
-                type="file"
-                accept=".ofx,.csv"
-                className="hidden"
-                onChange={handleFileUpload}
-              />
-            </div>
-          )}
         </CardContent>
       </Card>
 
@@ -195,20 +117,20 @@ export function BankReconciliationPanel() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-2xl font-bold">{stats.total_transactions}</div>
-              <p className="text-xs text-muted-foreground">Total de Transações</p>
+              <p className="text-xs text-muted-foreground">Total</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="pt-6">
-              <div className="text-2xl font-bold text-success">{stats.reconciled_count}</div>
+              <div className="text-2xl font-bold text-success">{stats.matched_count}</div>
               <p className="text-xs text-muted-foreground">Conciliadas</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="pt-6">
-              <div className="text-2xl font-bold text-warning">{stats.pending_count}</div>
+              <div className="text-2xl font-bold text-warning">{stats.unmatched_count}</div>
               <p className="text-xs text-muted-foreground">Pendentes</p>
             </CardContent>
           </Card>
@@ -241,13 +163,13 @@ export function BankReconciliationPanel() {
                 <TabsTrigger value="pending">
                   Pendentes ({pendingTransactions.length})
                 </TabsTrigger>
-                <TabsTrigger value="reconciled">
-                  Conciliadas ({reconciledTransactions.length})
+                <TabsTrigger value="matched">
+                  Conciliadas ({matchedTransactions.length})
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="pending" className="space-y-4 mt-4">
-                {loadingTransactions ? (
+                {loading ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                   </div>
@@ -272,8 +194,7 @@ export function BankReconciliationPanel() {
                         <div className="flex-1 min-w-0">
                           <div className="font-medium truncate">{transaction.description}</div>
                           <div className="text-sm text-muted-foreground">
-                            {format(new Date(transaction.transaction_date), "dd/MM/yyyy", { locale: ptBR })}
-                            {transaction.document_number && ` • Doc: ${transaction.document_number}`}
+                            {format(new Date(transaction.date), "dd/MM/yyyy", { locale: ptBR })}
                           </div>
                         </div>
 
@@ -286,31 +207,46 @@ export function BankReconciliationPanel() {
                         </div>
                       </div>
 
-                      <Button
-                        size="sm"
-                        onClick={() => handleOpenMatchDialog(transaction)}
-                        className="ml-4 flex-shrink-0"
-                      >
-                        <Search className="h-4 w-4 mr-2" />
-                        Conciliar
-                      </Button>
+                      <div className="ml-4 flex-shrink-0">
+                        {unmatchedEntries.length > 0 && (
+                          <Select
+                            onValueChange={(entryId) => matchTransaction(transaction.id, entryId)}
+                          >
+                            <SelectTrigger className="w-[180px]">
+                              <SelectValue placeholder="Conciliar com..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {unmatchedEntries
+                                .filter(e =>
+                                  (e.entry_type === 'receivable' && transaction.type === 'credit') ||
+                                  (e.entry_type === 'payable' && transaction.type === 'debit')
+                                )
+                                .map((entry) => (
+                                  <SelectItem key={entry.id} value={entry.id}>
+                                    {entry.description} - {formatCurrency(entry.amount)}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
                     </div>
                   ))
                 )}
               </TabsContent>
 
-              <TabsContent value="reconciled" className="space-y-4 mt-4">
-                {loadingTransactions ? (
+              <TabsContent value="matched" className="space-y-4 mt-4">
+                {loading ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                   </div>
-                ) : reconciledTransactions.length === 0 ? (
+                ) : matchedTransactions.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    <AlertCircle className="h-12 w-12 mx-auto mb-4" />
-                    <p>Nenhuma transação conciliada neste período</p>
+                    <XCircle className="h-12 w-12 mx-auto mb-4" />
+                    <p>Nenhuma transação conciliada ainda</p>
                   </div>
                 ) : (
-                  reconciledTransactions.map((transaction) => (
+                  matchedTransactions.map((transaction) => (
                     <div
                       key={transaction.id}
                       className="flex items-center justify-between p-4 border rounded-lg bg-success/5 border-success/20"
@@ -319,13 +255,9 @@ export function BankReconciliationPanel() {
                         <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
 
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium truncate">{transaction.description}</span>
-                            <Badge className="bg-success text-success-foreground">Conciliada</Badge>
-                          </div>
+                          <div className="font-medium truncate">{transaction.description}</div>
                           <div className="text-sm text-muted-foreground">
-                            {format(new Date(transaction.transaction_date), "dd/MM/yyyy", { locale: ptBR })}
-                            {transaction.reconciled_at && ` • Conciliada em ${format(new Date(transaction.reconciled_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}`}
+                            {format(new Date(transaction.date), "dd/MM/yyyy", { locale: ptBR })}
                           </div>
                         </div>
 
@@ -341,7 +273,7 @@ export function BankReconciliationPanel() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleUnreconcile(transaction.id)}
+                        onClick={() => unmatchTransaction(transaction.id)}
                         className="ml-4 flex-shrink-0"
                       >
                         <XCircle className="h-4 w-4 mr-2" />
@@ -354,20 +286,6 @@ export function BankReconciliationPanel() {
             </Tabs>
           </CardContent>
         </Card>
-      )}
-
-      {selectedTransaction && (
-        <ReconciliationMatchDialog
-          transaction={selectedTransaction}
-          open={showMatchDialog}
-          onOpenChange={setShowMatchDialog}
-          onSuccess={() => {
-            setShowMatchDialog(false);
-            setSelectedTransaction(null);
-            loadTransactions();
-            loadStats();
-          }}
-        />
       )}
     </div>
   );

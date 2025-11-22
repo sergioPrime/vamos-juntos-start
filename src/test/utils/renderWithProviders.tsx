@@ -46,4 +46,3 @@ export function renderWithProviders(
 // Re-export everything from React Testing Library
 export * from '@testing-library/react';
 export { default as userEvent } from '@testing-library/user-event';
-export { screen, waitFor } from '@testing-library/react';

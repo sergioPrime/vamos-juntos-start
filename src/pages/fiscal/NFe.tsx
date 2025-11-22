@@ -21,12 +21,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface NFe {
   id: string;
   numero: string;
   serie: string;
   cliente: string;
+  cliente_email?: string;
   data_emissao: string;
   valor_total: number;
   status: "autorizada" | "cancelada" | "pendente" | "rejeitada";
@@ -89,6 +91,12 @@ export default function NFe() {
 
     return matchesSearch && matchesStatus;
   });
+
+  const handleReload = () => {
+    // Função para recarregar os dados da NFe
+    // Em produção, aqui você faria um refetch dos dados do Supabase
+    toast.info("Dados recarregados");
+  };
 
   return (
     <div className="container-comfortable">

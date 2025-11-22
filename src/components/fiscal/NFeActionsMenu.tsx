@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,18 +21,32 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
+import NFeCancelDialog from "./NFeCancelDialog";
+import NFeCorrectDialog from "./NFeCorrectDialog";
+import NFeStatusDialog from "./NFeStatusDialog";
+import NFeManifestDialog from "./NFeManifestDialog";
 
 interface NFeActionsMenuProps {
   status: "autorizada" | "cancelada" | "pendente" | "rejeitada";
   chaveAcesso: string;
+  nfeId: string;
+  nfeNumero: string;
   onView: () => void;
+  onUpdate?: () => void;
 }
 
 export default function NFeActionsMenu({
   status,
   chaveAcesso,
+  nfeId,
+  nfeNumero,
   onView,
+  onUpdate,
 }: NFeActionsMenuProps) {
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [correctDialogOpen, setCorrectDialogOpen] = useState(false);
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [manifestDialogOpen, setManifestDialogOpen] = useState(false);
   const handleDownloadXML = () => {
     toast.success("Download do XML iniciado");
   };
@@ -49,19 +64,19 @@ export default function NFeActionsMenu({
   };
 
   const handleCancel = () => {
-    toast.info("Abrindo formulário de cancelamento");
+    setCancelDialogOpen(true);
   };
 
   const handleCartaCorrecao = () => {
-    toast.info("Abrindo Carta de Correção Eletrônica");
+    setCorrectDialogOpen(true);
   };
 
   const handleConsultarStatus = () => {
-    toast.info("Consultando status na SEFAZ...");
+    setStatusDialogOpen(true);
   };
 
   const handleManifestacao = () => {
-    toast.info("Abrindo Manifestação do Destinatário");
+    setManifestDialogOpen(true);
   };
 
   return (
@@ -137,6 +152,42 @@ export default function NFeActionsMenu({
           Manifestação do Destinatário
         </DropdownMenuItem>
       </DropdownMenuContent>
+
+      <NFeCancelDialog
+        open={cancelDialogOpen}
+        onOpenChange={setCancelDialogOpen}
+        nfeId={nfeId}
+        nfeNumero={nfeNumero}
+        chaveAcesso={chaveAcesso}
+        onSuccess={onUpdate}
+      />
+
+      <NFeCorrectDialog
+        open={correctDialogOpen}
+        onOpenChange={setCorrectDialogOpen}
+        nfeId={nfeId}
+        nfeNumero={nfeNumero}
+        chaveAcesso={chaveAcesso}
+        onSuccess={onUpdate}
+      />
+
+      <NFeStatusDialog
+        open={statusDialogOpen}
+        onOpenChange={setStatusDialogOpen}
+        nfeId={nfeId}
+        nfeNumero={nfeNumero}
+        chaveAcesso={chaveAcesso}
+        onSuccess={onUpdate}
+      />
+
+      <NFeManifestDialog
+        open={manifestDialogOpen}
+        onOpenChange={setManifestDialogOpen}
+        nfeId={nfeId}
+        nfeNumero={nfeNumero}
+        chaveAcesso={chaveAcesso}
+        onSuccess={onUpdate}
+      />
     </DropdownMenu>
   );
 }

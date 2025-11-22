@@ -354,18 +354,18 @@ export default function NFeForm() {
             <div>
               <h2 className="title-md mb-4">Dados do Destinatário</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="col-span-full">
-                  <Label htmlFor="cliente_nome" className="required">
-                    Cliente
-                  </Label>
-                  <Input
-                    id="cliente_nome"
-                    name="cliente_nome"
-                    value={formData.cliente_nome}
-                    onChange={handleInputChange}
-                    placeholder="Selecione ou busque o cliente"
-                  />
-                </div>
+              <div className="col-span-full">
+                <Label htmlFor="cliente_nome" className="required">
+                  Cliente
+                </Label>
+                <ComboboxAsync
+                  value={formData.cliente_id}
+                  onValueChange={handleClienteChange}
+                  searchFunction={searchClientes}
+                  placeholder="Busque por nome ou CPF/CNPJ..."
+                  emptyText="Nenhum cliente encontrado"
+                />
+              </div>
 
                 <div>
                   <Label htmlFor="cliente_cpf_cnpj" className="required">

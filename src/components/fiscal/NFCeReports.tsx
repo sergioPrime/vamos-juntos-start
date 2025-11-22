@@ -46,7 +46,7 @@ export function NFCeReports() {
   }, [currentOrg?.id, startDate, endDate]);
 
   const loadSummary = async () => {
-    if (!organization?.id) return;
+    if (!currentOrg?.id) return;
 
     try {
       const start = startOfDay(new Date(startDate));
@@ -55,7 +55,7 @@ export function NFCeReports() {
       const { data, error } = await supabase
         .from('nfce')
         .select('status, valor_total')
-        .eq('org_id', organization.id)
+        .eq('org_id', currentOrg.id)
         .gte('data_emissao', start.toISOString())
         .lte('data_emissao', end.toISOString());
 

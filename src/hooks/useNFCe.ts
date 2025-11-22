@@ -75,7 +75,7 @@ export function useNFCe() {
       const { data, error } = await supabase
         .from('nfce')
         .select('*')
-        .eq('org_id', currentOrg)
+        .eq('org_id', currentOrg.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

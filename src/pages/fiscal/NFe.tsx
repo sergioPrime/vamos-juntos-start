@@ -41,6 +41,11 @@ export default function NFe() {
   const [dateFilter, setDateFilter] = useState<string>("todos");
   const [inutilizacaoDialogOpen, setInutilizacaoDialogOpen] = useState(false);
 
+  // Função para recarregar os dados
+  const handleReload = () => {
+    window.location.reload();
+  };
+
   // Dados mockados para demonstração
   const [nfeList] = useState<NFe[]>([
     {

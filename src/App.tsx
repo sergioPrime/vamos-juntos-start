@@ -24,7 +24,6 @@ const Lancamentos = lazy(() => import("./pages/finance/Lancamentos"));
 const Boletos = lazy(() => import("./pages/finance/Boletos"));
 const FinancialReports = lazy(() => import("./pages/finance/FinancialReports"));
 const FinancialDashboard = lazy(() => import("./pages/FinancialDashboard"));
-const Cobrancas = lazy(() => import("./pages/finance/Cobrancas"));
 const RelatoriosAvancados = lazy(() => import("./pages/finance/RelatoriosAvancados"));
 const Charges = lazy(() => import("./pages/Charges"));
 const NFSe = lazy(() => import("./pages/NFSe"));

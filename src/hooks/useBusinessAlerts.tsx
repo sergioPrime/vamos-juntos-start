@@ -182,28 +182,7 @@ export function useBusinessAlerts() {
   const checkRejectedNFSe = useCallback(async (): Promise<Alert[]> => {
     // Temporarily disabled due to type mismatch
     return []
-        
-        return [{
-          id: 'rejected_nfse',
-          type: 'rejected_nfse' as const,
-          severity: 'high' as const,
-          title: 'NFSe rejeitadas',
-          description: `${nfseList.length} NFSe rejeitada(s) totalizando R$ ${totalRejectedAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-          action_label: 'Ver NFSe',
-          action_route: '/nfse',
-          amount: totalRejectedAmount,
-          count: nfseList.length,
-          created_at: new Date().toISOString(),
-          resolved: false
-        }]
-      }
-
-      return []
-    } catch (error) {
-      console.error('Error checking rejected NFSe:', error)
-      return []
-    }
-  }, [currentOrg?.id])
+  }, [currentOrg])
 
   // Check for pending orders
   const checkPendingOrders = useCallback(async () => {

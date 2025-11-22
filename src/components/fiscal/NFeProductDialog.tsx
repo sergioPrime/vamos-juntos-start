@@ -17,6 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ComboboxAsync } from "@/components/ui/combobox-async";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
+import { toast } from "sonner";
 
 interface NFeProduct {
   id: string;
@@ -51,7 +55,9 @@ export default function NFeProductDialog({
   onOpenChange,
   onSave,
   product,
+  clienteUF = "SP",
 }: NFeProductDialogProps) {
+  const { currentOrg } = useOrganization();
   const [formData, setFormData] = useState<NFeProduct>({
     id: "",
     codigo: "",

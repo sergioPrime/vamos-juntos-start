@@ -725,6 +725,15 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
+          <Route path="/fiscal/nfe/relatorios" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <FiscalReports />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
           
           {/* Admin routes */}
           <Route path="/admin/dashboard" element={

@@ -12,92 +12,201 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Send, Plus, Eye } from "lucide-react";
+import { ArrowLeft, Save, Send } from "lucide-react";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import NFeProductsTable from "@/components/fiscal/NFeProductsTable";
 import NFeProductDialog from "@/components/fiscal/NFeProductDialog";
+import { ComboboxAsync } from "@/components/ui/combobox-async";
+import { useNFe } from "@/hooks/useNFe";
+import { useNFeItems } from "@/hooks/useNFeItems";
+import { useAsyncSearch } from "@/hooks/useAsyncSearch";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
+
+const UF_BRASILEIRAS = [
+  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
+  "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
+  "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+];
 
 export default function NFeForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
   const isEditing = !!id;
+  const { currentOrganization } = useOrganization();
 
-  // Dados vindos do PDV
+  const { createNFe, updateNFe, getNFeById } = useNFe();
+  const { items: nfeItems, addItem, updateItem, removeItem, loadItems } = useNFeItems(id || "");
+  const { searchPessoas } = useAsyncSearch();
+
   const fromOrder = location.state?.fromOrder || false;
   const orderData = location.state?.orderData;
   const orderItems = location.state?.orderItems || [];
 
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
-
-  // Inicializar produtos vindos do pedido (se houver)
-  const initialProducts = orderItems.map((item: any) => ({
-    id: item.product_id,
-    codigo: item.product_sku || item.product_id.substring(0, 8),
-    descricao: item.product_name,
-    ncm: "00000000",
-    cfop: "5102",
-    unidade: "UN",
-    quantidade: item.quantity.toString(),
-    valor_unitario: item.unit_price.toFixed(2),
-    valor_total: item.total_price.toFixed(2),
-    // Tributos
-    icms_cst: "00",
-    icms_base: item.total_price.toFixed(2),
-    icms_aliquota: "0.00",
-    icms_valor: "0.00",
-    ipi_cst: "99",
-    ipi_aliquota: "0.00",
-    ipi_valor: "0.00",
-    pis_cst: "01",
-    pis_aliquota: "0.00",
-    pis_valor: "0.00",
-    cofins_cst: "01",
-    cofins_aliquota: "0.00",
-    cofins_valor: "0.00",
-  }));
+  const [loading, setLoading] = useState(false);
+  const [produtos, setProdutos] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
-    // Dados do Destinatário
-    cliente_id: "",
-    cliente_nome: "",
-    cliente_cpf_cnpj: "",
-    cliente_ie: "",
-    cliente_endereco: "",
-    cliente_numero: "",
-    cliente_bairro: "",
-    cliente_cidade: "",
-    cliente_uf: "",
-    cliente_cep: "",
+    // Cliente
+    customer_id: "",
+    customer_name: "",
+    customer_document: "",
+    customer_ie: "",
+    customer_address: "",
+    customer_number: "",
+    customer_district: "",
+    customer_city: "",
+    customer_state: "",
+    customer_zip: "",
 
-    // Dados da NFe
-    natureza_operacao: "VENDA",
-    tipo_operacao: "1", // 1=Saída
-    finalidade: "1", // 1=Normal
-    serie: "1",
-    
-    // Produtos/Serviços
-    produtos: initialProducts,
+    // Operação
+    operation_nature: "VENDA",
+    operation_type: "1",
+    purpose: "1",
+    series: "1",
 
-    // Valores Totalizadores
-    bc_icms: "0.00",
-    valor_icms: "0.00",
-    valor_frete: "0.00",
-    valor_seguro: "0.00",
-    valor_desconto: "0.00",
-    valor_outras_despesas: "0.00",
-    valor_ipi: "0.00",
-    valor_pis: "0.00",
-    valor_cofins: "0.00",
-    valor_produtos: orderData?.subtotal?.toFixed(2) || "0.00",
-    valor_total: orderData?.total_amount?.toFixed(2) || "0.00",
+    // Totais
+    icms_base: "0.00",
+    icms_total: "0.00",
+    freight_total: "0.00",
+    insurance_total: "0.00",
+    discount_total: "0.00",
+    other_expenses: "0.00",
+    ipi_total: "0.00",
+    pis_total: "0.00",
+    cofins_total: "0.00",
+    products_total: "0.00",
+    nfe_total: "0.00",
 
-    // Informações Adicionais
-    informacoes_complementares: "",
-    informacoes_fisco: "",
+    // Informações adicionais
+    additional_info: "",
+    tax_info: "",
   });
+
+  // Carregar NFe se estiver editando
+  useEffect(() => {
+    if (isEditing && id) {
+      loadNFe();
+    }
+  }, [id, isEditing]);
+
+  // Inicializar com dados do pedido
+  useEffect(() => {
+    if (fromOrder && orderData) {
+      loadOrderData();
+    }
+  }, [fromOrder, orderData]);
+
+  const loadNFe = async () => {
+    try {
+      setLoading(true);
+      const nfe = await getNFeById(id!);
+      if (nfe) {
+        setFormData({
+          customer_id: nfe.customer_id || "",
+          customer_name: nfe.customer_name || "",
+          customer_document: nfe.customer_document || "",
+          customer_ie: nfe.customer_ie || "",
+          customer_address: nfe.customer_address || "",
+          customer_number: nfe.customer_number || "",
+          customer_district: nfe.customer_district || "",
+          customer_city: nfe.customer_city || "",
+          customer_state: nfe.customer_state || "",
+          customer_zip: nfe.customer_zip || "",
+          operation_nature: nfe.operation_nature || "VENDA",
+          operation_type: nfe.operation_type || "1",
+          purpose: nfe.purpose || "1",
+          series: nfe.series || "1",
+          icms_base: nfe.icms_base?.toString() || "0.00",
+          icms_total: nfe.icms_total?.toString() || "0.00",
+          freight_total: nfe.freight_total?.toString() || "0.00",
+          insurance_total: nfe.insurance_total?.toString() || "0.00",
+          discount_total: nfe.discount_total?.toString() || "0.00",
+          other_expenses: nfe.other_expenses?.toString() || "0.00",
+          ipi_total: nfe.ipi_total?.toString() || "0.00",
+          pis_total: nfe.pis_total?.toString() || "0.00",
+          cofins_total: nfe.cofins_total?.toString() || "0.00",
+          products_total: nfe.products_total?.toString() || "0.00",
+          nfe_total: nfe.nfe_total?.toString() || "0.00",
+          additional_info: nfe.additional_info || "",
+          tax_info: nfe.tax_info || "",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao carregar NFe:", error);
+      toast.error("Erro ao carregar NFe");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadOrderData = async () => {
+    if (!orderData) return;
+
+    // Carregar dados do cliente
+    if (orderData.customer_id) {
+      const { data: pessoa } = await supabase
+        .from("pessoas")
+        .select("*")
+        .eq("id", orderData.customer_id)
+        .single();
+
+      if (pessoa) {
+        setFormData((prev) => ({
+          ...prev,
+          customer_id: pessoa.id,
+          customer_name: pessoa.nome,
+          customer_document: pessoa.cpf_cnpj || "",
+          customer_ie: pessoa.inscricao_estadual || "",
+          customer_address: pessoa.endereco || "",
+          customer_number: pessoa.numero || "",
+          customer_district: pessoa.bairro || "",
+          customer_city: pessoa.cidade || "",
+          customer_state: pessoa.estado || "",
+          customer_zip: pessoa.cep || "",
+        }));
+      }
+    }
+
+    // Carregar produtos do pedido
+    const mappedProducts = await Promise.all(
+      orderItems.map(async (item: any) => {
+        const { data: product } = await supabase
+          .from("products")
+          .select("*")
+          .eq("id", item.product_id)
+          .single();
+
+        return {
+          id: crypto.randomUUID(),
+          product_id: item.product_id,
+          codigo: product?.sku || item.product_id.substring(0, 8),
+          descricao: item.product_name,
+          ncm: product?.ncm || "00000000",
+          cfop: "5102",
+          unidade: product?.unit || "UN",
+          quantidade: item.quantity,
+          valor_unitario: item.unit_price,
+          valor_total: item.total_price,
+          icms_aliquota: 0,
+          icms_valor: 0,
+          ipi_aliquota: 0,
+          ipi_valor: 0,
+          pis_aliquota: 0,
+          pis_valor: 0,
+          cofins_aliquota: 0,
+          cofins_valor: 0,
+        };
+      })
+    );
+
+    setProdutos(mappedProducts);
+    updateTotals(mappedProducts);
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -108,6 +217,35 @@ export default function NFeForm() {
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCustomerSelect = async (customerId: string) => {
+    try {
+      const { data: pessoa } = await supabase
+        .from("pessoas")
+        .select("*")
+        .eq("id", customerId)
+        .single();
+
+      if (pessoa) {
+        setFormData((prev) => ({
+          ...prev,
+          customer_id: pessoa.id,
+          customer_name: pessoa.nome,
+          customer_document: pessoa.cpf_cnpj || "",
+          customer_ie: pessoa.inscricao_estadual || "",
+          customer_address: pessoa.endereco || "",
+          customer_number: pessoa.numero || "",
+          customer_district: pessoa.bairro || "",
+          customer_city: pessoa.cidade || "",
+          customer_state: pessoa.estado || "",
+          customer_zip: pessoa.cep || "",
+        }));
+      }
+    } catch (error) {
+      console.error("Erro ao carregar cliente:", error);
+      toast.error("Erro ao carregar dados do cliente");
+    }
   };
 
   const handleAddProduct = () => {
@@ -122,35 +260,33 @@ export default function NFeForm() {
 
   const handleSaveProduct = (product: any) => {
     if (editingProduct) {
-      // Editar produto existente
-      const updatedProducts = formData.produtos.map((p) =>
+      const updatedProducts = produtos.map((p) =>
         p.id === product.id ? product : p
       );
-      setFormData((prev) => ({ ...prev, produtos: updatedProducts }));
+      setProdutos(updatedProducts);
+      updateTotals(updatedProducts);
     } else {
-      // Adicionar novo produto
-      setFormData((prev) => ({
-        ...prev,
-        produtos: [...prev.produtos, product],
-      }));
+      const newProducts = [...produtos, product];
+      setProdutos(newProducts);
+      updateTotals(newProducts);
     }
-    updateTotals(formData.produtos);
   };
 
-  const handleRemoveProduct = (id: string) => {
-    const updatedProducts = formData.produtos.filter((p) => p.id !== id);
-    setFormData((prev) => ({ ...prev, produtos: updatedProducts }));
+  const handleRemoveProduct = (productId: string) => {
+    const updatedProducts = produtos.filter((p) => p.id !== productId);
+    setProdutos(updatedProducts);
     updateTotals(updatedProducts);
   };
 
-  const updateTotals = (produtos: any[]) => {
-    const totals = produtos.reduce(
+  const updateTotals = (products: any[]) => {
+    const totals = products.reduce(
       (acc, product) => {
-        acc.valor_produtos += product.valor_total;
-        acc.valor_icms += product.icms_valor;
-        acc.valor_ipi += product.ipi_valor;
-        acc.valor_pis += product.pis_valor;
-        acc.valor_cofins += product.cofins_valor;
+        acc.valor_produtos += parseFloat(product.valor_total) || 0;
+        acc.valor_icms += parseFloat(product.icms_valor) || 0;
+        acc.valor_ipi += parseFloat(product.ipi_valor) || 0;
+        acc.valor_pis += parseFloat(product.pis_valor) || 0;
+        acc.valor_cofins += parseFloat(product.cofins_valor) || 0;
+        acc.bc_icms += parseFloat(product.valor_total) || 0;
         return acc;
       },
       {
@@ -159,83 +295,156 @@ export default function NFeForm() {
         valor_ipi: 0,
         valor_pis: 0,
         valor_cofins: 0,
+        bc_icms: 0,
       }
     );
 
     const valor_total =
       totals.valor_produtos +
       totals.valor_ipi +
-      parseFloat(formData.valor_frete || "0") +
-      parseFloat(formData.valor_seguro || "0") +
-      parseFloat(formData.valor_outras_despesas || "0") -
-      parseFloat(formData.valor_desconto || "0");
+      parseFloat(formData.freight_total || "0") +
+      parseFloat(formData.insurance_total || "0") +
+      parseFloat(formData.other_expenses || "0") -
+      parseFloat(formData.discount_total || "0");
 
     setFormData((prev) => ({
       ...prev,
-      valor_produtos: totals.valor_produtos.toFixed(2),
-      valor_icms: totals.valor_icms.toFixed(2),
-      valor_ipi: totals.valor_ipi.toFixed(2),
-      valor_pis: totals.valor_pis.toFixed(2),
-      valor_cofins: totals.valor_cofins.toFixed(2),
-      bc_icms: totals.valor_produtos.toFixed(2),
-      valor_total: valor_total.toFixed(2),
+      products_total: totals.valor_produtos.toFixed(2),
+      icms_total: totals.valor_icms.toFixed(2),
+      icms_base: totals.bc_icms.toFixed(2),
+      ipi_total: totals.valor_ipi.toFixed(2),
+      pis_total: totals.valor_pis.toFixed(2),
+      cofins_total: totals.valor_cofins.toFixed(2),
+      nfe_total: valor_total.toFixed(2),
     }));
   };
 
-  // Calcular totais ao carregar produtos do pedido
-  useEffect(() => {
-    if (initialProducts.length > 0) {
-      updateTotals(formData.produtos);
-    }
-  }, []);
-
   const handleSave = async () => {
     try {
-      // Validações básicas
-      if (!formData.cliente_nome) {
+      if (!formData.customer_id) {
         toast.error("Selecione um cliente");
         return;
       }
 
-      // Aqui você implementaria a lógica de salvar
+      if (produtos.length === 0) {
+        toast.error("Adicione pelo menos um produto");
+        return;
+      }
+
+      setLoading(true);
+
+      const nfeData = {
+        customer_id: formData.customer_id,
+        customer_name: formData.customer_name,
+        customer_document: formData.customer_document,
+        customer_ie: formData.customer_ie || null,
+        customer_address: formData.customer_address,
+        customer_number: formData.customer_number,
+        customer_district: formData.customer_district,
+        customer_city: formData.customer_city,
+        customer_state: formData.customer_state,
+        customer_zip: formData.customer_zip,
+        operation_nature: formData.operation_nature,
+        operation_type: formData.operation_type,
+        purpose: formData.purpose,
+        series: formData.series,
+        icms_base: parseFloat(formData.icms_base),
+        icms_total: parseFloat(formData.icms_total),
+        freight_total: parseFloat(formData.freight_total),
+        insurance_total: parseFloat(formData.insurance_total),
+        discount_total: parseFloat(formData.discount_total),
+        other_expenses: parseFloat(formData.other_expenses),
+        ipi_total: parseFloat(formData.ipi_total),
+        pis_total: parseFloat(formData.pis_total),
+        cofins_total: parseFloat(formData.cofins_total),
+        products_total: parseFloat(formData.products_total),
+        nfe_total: parseFloat(formData.nfe_total),
+        additional_info: formData.additional_info || null,
+        tax_info: formData.tax_info || null,
+        status: "rascunho",
+      };
+
+      let nfeId = id;
+
+      if (isEditing) {
+        await updateNFe(id!, nfeData);
+      } else {
+        const newNFe = await createNFe(nfeData);
+        nfeId = newNFe.id;
+      }
+
+      // Salvar itens
+      for (const produto of produtos) {
+        const itemData = {
+          nfe_id: nfeId!,
+          product_id: produto.product_id,
+          product_code: produto.codigo,
+          product_description: produto.descricao,
+          ncm: produto.ncm,
+          cfop: produto.cfop,
+          unit: produto.unidade,
+          quantity: produto.quantidade,
+          unit_price: produto.valor_unitario,
+          total_price: produto.valor_total,
+          icms_rate: produto.icms_aliquota,
+          icms_value: produto.icms_valor,
+          ipi_rate: produto.ipi_aliquota,
+          ipi_value: produto.ipi_valor,
+          pis_rate: produto.pis_aliquota,
+          pis_value: produto.pis_valor,
+          cofins_rate: produto.cofins_aliquota,
+          cofins_value: produto.cofins_valor,
+        };
+
+        await addItem(itemData);
+      }
+
       toast.success(
-        isEditing ? "NFe salva com sucesso!" : "NFe criada com sucesso!"
+        isEditing ? "NFe atualizada com sucesso!" : "NFe criada com sucesso!"
       );
-      
       navigate("/fiscal/nfe");
     } catch (error) {
+      console.error("Erro ao salvar NFe:", error);
       toast.error("Erro ao salvar NFe");
-      console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleEmit = async () => {
     try {
-      // Validações antes de emitir
-      if (!formData.cliente_nome) {
+      if (!formData.customer_id) {
         toast.error("Selecione um cliente");
         return;
       }
 
-      if (parseFloat(formData.valor_produtos) <= 0) {
-        toast.error("Adicione produtos à nota");
+      if (produtos.length === 0) {
+        toast.error("Adicione pelo menos um produto");
         return;
       }
 
-      // Aqui você implementaria a integração com a SEFAZ
-      toast.success("NFe enviada para autorização!");
-      
-      navigate("/fiscal/nfe");
+      // Primeiro salva
+      await handleSave();
+
+      // TODO: Implementar integração com SEFAZ
+      toast.info("Funcionalidade de autorização será implementada em breve");
     } catch (error) {
+      console.error("Erro ao emitir NFe:", error);
       toast.error("Erro ao emitir NFe");
-      console.error(error);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="container-comfortable flex items-center justify-center min-h-[400px]">
+        <p className="text-muted-foreground">Carregando...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container-comfortable">
       <div className="flex flex-col gap-6">
-        {/* Header com botões fixos no topo direito */}
         <div className="flex justify-between items-start">
           <div>
             <h1 className="title-xl">
@@ -247,10 +456,9 @@ export default function NFeForm() {
               )}
             </h1>
             <p className="text-muted-foreground mt-2">
-              {fromOrder 
+              {fromOrder
                 ? "Verifique e complete os dados para emissão da nota fiscal"
-                : "Preencha os dados para emissão da nota fiscal"
-              }
+                : "Preencha os dados para emissão da nota fiscal"}
             </p>
           </div>
           <div className="flex gap-2">
@@ -265,6 +473,7 @@ export default function NFeForm() {
             <Button
               variant="outline"
               onClick={handleSave}
+              disabled={loading}
               className="gap-2"
             >
               <Save className="h-4 w-4" />
@@ -273,126 +482,127 @@ export default function NFeForm() {
           </div>
         </div>
 
-        {/* Formulário */}
         <Card className="bg-level-2">
           <div className="space-y-6">
-            {/* Seção: Dados do Destinatário */}
+            {/* Dados do Destinatário */}
             <div>
               <h2 className="title-md mb-4">Dados do Destinatário</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="col-span-full">
-                  <Label htmlFor="cliente_nome" className="required">
+                  <Label htmlFor="customer_id" className="required">
                     Cliente
                   </Label>
-                  <Input
-                    id="cliente_nome"
-                    name="cliente_nome"
-                    value={formData.cliente_nome}
-                    onChange={handleInputChange}
-                    placeholder="Selecione ou busque o cliente"
+                  <ComboboxAsync
+                    value={formData.customer_id}
+                    onValueChange={handleCustomerSelect}
+                    searchFunction={(query) => searchPessoas(query, "cliente")}
+                    placeholder="Busque o cliente..."
+                    emptyText="Nenhum cliente encontrado"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="cliente_cpf_cnpj" className="required">
+                  <Label htmlFor="customer_document" className="required">
                     CPF/CNPJ
                   </Label>
                   <Input
-                    id="cliente_cpf_cnpj"
-                    name="cliente_cpf_cnpj"
-                    value={formData.cliente_cpf_cnpj}
+                    id="customer_document"
+                    name="customer_document"
+                    value={formData.customer_document}
                     onChange={handleInputChange}
+                    readOnly
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="cliente_ie">Inscrição Estadual</Label>
+                  <Label htmlFor="customer_ie">Inscrição Estadual</Label>
                   <Input
-                    id="cliente_ie"
-                    name="cliente_ie"
-                    value={formData.cliente_ie}
+                    id="customer_ie"
+                    name="customer_ie"
+                    value={formData.customer_ie}
                     onChange={handleInputChange}
                   />
                 </div>
 
                 <div className="col-span-full md:col-span-2">
-                  <Label htmlFor="cliente_endereco" className="required">
+                  <Label htmlFor="customer_address" className="required">
                     Endereço
                   </Label>
                   <Input
-                    id="cliente_endereco"
-                    name="cliente_endereco"
-                    value={formData.cliente_endereco}
+                    id="customer_address"
+                    name="customer_address"
+                    value={formData.customer_address}
                     onChange={handleInputChange}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="cliente_numero" className="required">
+                  <Label htmlFor="customer_number" className="required">
                     Número
                   </Label>
                   <Input
-                    id="cliente_numero"
-                    name="cliente_numero"
-                    value={formData.cliente_numero}
+                    id="customer_number"
+                    name="customer_number"
+                    value={formData.customer_number}
                     onChange={handleInputChange}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="cliente_bairro" className="required">
+                  <Label htmlFor="customer_district" className="required">
                     Bairro
                   </Label>
                   <Input
-                    id="cliente_bairro"
-                    name="cliente_bairro"
-                    value={formData.cliente_bairro}
+                    id="customer_district"
+                    name="customer_district"
+                    value={formData.customer_district}
                     onChange={handleInputChange}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="cliente_cidade" className="required">
+                  <Label htmlFor="customer_city" className="required">
                     Cidade
                   </Label>
                   <Input
-                    id="cliente_cidade"
-                    name="cliente_cidade"
-                    value={formData.cliente_cidade}
+                    id="customer_city"
+                    name="customer_city"
+                    value={formData.customer_city}
                     onChange={handleInputChange}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="cliente_uf" className="required">
+                  <Label htmlFor="customer_state" className="required">
                     UF
                   </Label>
                   <Select
-                    value={formData.cliente_uf}
+                    value={formData.customer_state}
                     onValueChange={(value) =>
-                      handleSelectChange("cliente_uf", value)
+                      handleSelectChange("customer_state", value)
                     }
                   >
-                    <SelectTrigger id="cliente_uf">
+                    <SelectTrigger id="customer_state">
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="SP">SP</SelectItem>
-                      <SelectItem value="RJ">RJ</SelectItem>
-                      <SelectItem value="MG">MG</SelectItem>
-                      {/* Adicionar outros estados */}
+                      {UF_BRASILEIRAS.map((uf) => (
+                        <SelectItem key={uf} value={uf}>
+                          {uf}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div>
-                  <Label htmlFor="cliente_cep" className="required">
+                  <Label htmlFor="customer_zip" className="required">
                     CEP
                   </Label>
                   <Input
-                    id="cliente_cep"
-                    name="cliente_cep"
-                    value={formData.cliente_cep}
+                    id="customer_zip"
+                    name="customer_zip"
+                    value={formData.customer_zip}
                     onChange={handleInputChange}
                   />
                 </div>
@@ -401,33 +611,33 @@ export default function NFeForm() {
 
             <Separator />
 
-            {/* Seção: Dados da NFe */}
+            {/* Dados da Operação */}
             <div>
               <h2 className="title-md mb-4">Dados da Operação</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
-                  <Label htmlFor="natureza_operacao" className="required">
+                  <Label htmlFor="operation_nature" className="required">
                     Natureza da Operação
                   </Label>
                   <Input
-                    id="natureza_operacao"
-                    name="natureza_operacao"
-                    value={formData.natureza_operacao}
+                    id="operation_nature"
+                    name="operation_nature"
+                    value={formData.operation_nature}
                     onChange={handleInputChange}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="tipo_operacao" className="required">
+                  <Label htmlFor="operation_type" className="required">
                     Tipo de Operação
                   </Label>
                   <Select
-                    value={formData.tipo_operacao}
+                    value={formData.operation_type}
                     onValueChange={(value) =>
-                      handleSelectChange("tipo_operacao", value)
+                      handleSelectChange("operation_type", value)
                     }
                   >
-                    <SelectTrigger id="tipo_operacao">
+                    <SelectTrigger id="operation_type">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -438,16 +648,16 @@ export default function NFeForm() {
                 </div>
 
                 <div>
-                  <Label htmlFor="finalidade" className="required">
+                  <Label htmlFor="purpose" className="required">
                     Finalidade
                   </Label>
                   <Select
-                    value={formData.finalidade}
+                    value={formData.purpose}
                     onValueChange={(value) =>
-                      handleSelectChange("finalidade", value)
+                      handleSelectChange("purpose", value)
                     }
                   >
-                    <SelectTrigger id="finalidade">
+                    <SelectTrigger id="purpose">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -460,13 +670,13 @@ export default function NFeForm() {
                 </div>
 
                 <div>
-                  <Label htmlFor="serie" className="required">
+                  <Label htmlFor="series" className="required">
                     Série
                   </Label>
                   <Input
-                    id="serie"
-                    name="serie"
-                    value={formData.serie}
+                    id="series"
+                    name="series"
+                    value={formData.series}
                     onChange={handleInputChange}
                   />
                 </div>
@@ -475,106 +685,149 @@ export default function NFeForm() {
 
             <Separator />
 
-            {/* Seção: Produtos */}
+            {/* Produtos */}
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h2 className="title-md">Produtos/Serviços</h2>
                 <Button onClick={handleAddProduct} size="sm" className="gap-2">
-                  <Plus className="h-4 w-4" />
                   Adicionar Produto
                 </Button>
               </div>
               <NFeProductsTable
-                products={formData.produtos}
+                products={produtos}
                 onRemove={handleRemoveProduct}
                 onEdit={handleEditProduct}
-                onUpdateTotals={() => updateTotals(formData.produtos)}
+                onUpdateTotals={() => updateTotals(produtos)}
               />
             </div>
 
             <Separator />
 
-            {/* Seção: Totais */}
+            {/* Totais */}
             <div>
               <h2 className="title-md mb-4">Totais da NFe</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <div>
-                  <Label htmlFor="valor_produtos">Valor Produtos</Label>
+                  <Label>Base ICMS</Label>
                   <Input
-                    id="valor_produtos"
-                    name="valor_produtos"
-                    type="number"
-                    step="0.01"
-                    value={formData.valor_produtos}
-                    onChange={handleInputChange}
-                    className="font-mono"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="valor_desconto">Desconto</Label>
-                  <Input
-                    id="valor_desconto"
-                    name="valor_desconto"
-                    type="number"
-                    step="0.01"
-                    value={formData.valor_desconto}
-                    onChange={handleInputChange}
-                    className="font-mono"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="valor_frete">Frete</Label>
-                  <Input
-                    id="valor_frete"
-                    name="valor_frete"
-                    type="number"
-                    step="0.01"
-                    value={formData.valor_frete}
-                    onChange={handleInputChange}
-                    className="font-mono"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="valor_seguro">Seguro</Label>
-                  <Input
-                    id="valor_seguro"
-                    name="valor_seguro"
-                    type="number"
-                    step="0.01"
-                    value={formData.valor_seguro}
-                    onChange={handleInputChange}
-                    className="font-mono"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="valor_outras_despesas">Outras Despesas</Label>
-                  <Input
-                    id="valor_outras_despesas"
-                    name="valor_outras_despesas"
-                    type="number"
-                    step="0.01"
-                    value={formData.valor_outras_despesas}
-                    onChange={handleInputChange}
-                    className="font-mono"
-                  />
-                </div>
-
-                <div className="col-span-2 md:col-span-1">
-                  <Label htmlFor="valor_total" className="font-bold">
-                    Valor Total
-                  </Label>
-                  <Input
-                    id="valor_total"
-                    name="valor_total"
-                    type="number"
-                    step="0.01"
-                    value={formData.valor_total}
+                    value={new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(parseFloat(formData.icms_base))}
                     readOnly
-                    className="font-mono font-bold bg-muted"
+                    className="font-mono bg-muted"
+                  />
+                </div>
+
+                <div>
+                  <Label>Valor ICMS</Label>
+                  <Input
+                    value={new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(parseFloat(formData.icms_total))}
+                    readOnly
+                    className="font-mono bg-muted"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="freight_total">Valor Frete</Label>
+                  <Input
+                    id="freight_total"
+                    name="freight_total"
+                    type="number"
+                    step="0.01"
+                    value={formData.freight_total}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      updateTotals(produtos);
+                    }}
+                    className="font-mono"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="insurance_total">Valor Seguro</Label>
+                  <Input
+                    id="insurance_total"
+                    name="insurance_total"
+                    type="number"
+                    step="0.01"
+                    value={formData.insurance_total}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      updateTotals(produtos);
+                    }}
+                    className="font-mono"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="discount_total">Valor Desconto</Label>
+                  <Input
+                    id="discount_total"
+                    name="discount_total"
+                    type="number"
+                    step="0.01"
+                    value={formData.discount_total}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      updateTotals(produtos);
+                    }}
+                    className="font-mono"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="other_expenses">Outras Despesas</Label>
+                  <Input
+                    id="other_expenses"
+                    name="other_expenses"
+                    type="number"
+                    step="0.01"
+                    value={formData.other_expenses}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      updateTotals(produtos);
+                    }}
+                    className="font-mono"
+                  />
+                </div>
+
+                <div>
+                  <Label>Valor IPI</Label>
+                  <Input
+                    value={new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(parseFloat(formData.ipi_total))}
+                    readOnly
+                    className="font-mono bg-muted"
+                  />
+                </div>
+
+                <div>
+                  <Label>Valor Produtos</Label>
+                  <Input
+                    value={new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(parseFloat(formData.products_total))}
+                    readOnly
+                    className="font-mono bg-muted"
+                  />
+                </div>
+
+                <div className="col-span-full">
+                  <Label className="text-lg">Total da NFe</Label>
+                  <Input
+                    value={new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(parseFloat(formData.nfe_total))}
+                    readOnly
+                    className="font-mono font-bold text-lg bg-primary/10"
                   />
                 </div>
               </div>
@@ -582,35 +835,33 @@ export default function NFeForm() {
 
             <Separator />
 
-            {/* Seção: Informações Adicionais */}
+            {/* Informações Adicionais */}
             <div>
               <h2 className="title-md mb-4">Informações Adicionais</h2>
-              <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-4">
                 <div>
-                  <Label htmlFor="informacoes_complementares">
+                  <Label htmlFor="additional_info">
                     Informações Complementares
                   </Label>
                   <Textarea
-                    id="informacoes_complementares"
-                    name="informacoes_complementares"
-                    value={formData.informacoes_complementares}
+                    id="additional_info"
+                    name="additional_info"
+                    value={formData.additional_info}
                     onChange={handleInputChange}
-                    placeholder="Informações de interesse do contribuinte"
                     rows={3}
+                    placeholder="Informações de interesse do contribuinte"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="informacoes_fisco">
-                    Informações ao Fisco
-                  </Label>
+                  <Label htmlFor="tax_info">Informações ao Fisco</Label>
                   <Textarea
-                    id="informacoes_fisco"
-                    name="informacoes_fisco"
-                    value={formData.informacoes_fisco}
+                    id="tax_info"
+                    name="tax_info"
+                    value={formData.tax_info}
                     onChange={handleInputChange}
-                    placeholder="Informações de interesse do fisco"
                     rows={3}
+                    placeholder="Informações de interesse do fisco"
                   />
                 </div>
               </div>
@@ -618,29 +869,37 @@ export default function NFeForm() {
           </div>
         </Card>
 
-        {/* Botões de ação no rodapé */}
-        <div className="flex justify-end gap-2 sticky bottom-4 bg-background/95 backdrop-blur-sm p-4 rounded-lg border">
-          <Button variant="outline" onClick={() => navigate("/fiscal/nfe")}>
+        {/* Botões de Ação */}
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            onClick={() => navigate("/fiscal/nfe")}
+            disabled={loading}
+          >
             Cancelar
           </Button>
-          <Button variant="outline" onClick={handleSave}>
-            <Save className="h-4 w-4 mr-2" />
+          <Button
+            variant="outline"
+            onClick={handleSave}
+            disabled={loading}
+            className="gap-2"
+          >
+            <Save className="h-4 w-4" />
             Salvar Rascunho
           </Button>
-          <Button onClick={handleEmit}>
-            <Send className="h-4 w-4 mr-2" />
+          <Button onClick={handleEmit} disabled={loading} className="gap-2">
+            <Send className="h-4 w-4" />
             Emitir NFe
           </Button>
         </div>
-
-        {/* Dialog de Produtos */}
-        <NFeProductDialog
-          open={productDialogOpen}
-          onOpenChange={setProductDialogOpen}
-          onSave={handleSaveProduct}
-          product={editingProduct}
-        />
       </div>
+
+      <NFeProductDialog
+        open={productDialogOpen}
+        onOpenChange={setProductDialogOpen}
+        onSave={handleSaveProduct}
+        product={editingProduct}
+      />
     </div>
   );
 }

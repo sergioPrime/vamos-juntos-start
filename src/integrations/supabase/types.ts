@@ -3282,6 +3282,62 @@ export type Database = {
           },
         ]
       }
+      nfe_inutilizacao: {
+        Row: {
+          ano: string
+          created_at: string
+          created_by: string
+          data_inutilizacao: string | null
+          id: string
+          justificativa: string
+          numero_final: number
+          numero_inicial: number
+          org_id: string
+          protocolo: string | null
+          serie: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          ano: string
+          created_at?: string
+          created_by: string
+          data_inutilizacao?: string | null
+          id?: string
+          justificativa: string
+          numero_final: number
+          numero_inicial: number
+          org_id: string
+          protocolo?: string | null
+          serie: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          ano?: string
+          created_at?: string
+          created_by?: string
+          data_inutilizacao?: string | null
+          id?: string
+          justificativa?: string
+          numero_final?: number
+          numero_inicial?: number
+          org_id?: string
+          protocolo?: string | null
+          serie?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfe_inutilizacao_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nfe_items: {
         Row: {
           cbs_aliquota: number | null

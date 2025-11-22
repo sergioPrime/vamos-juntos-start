@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { FileText, Plus, Search, Download, Eye, Filter } from "lucide-react";
 import NFeActionsMenu from "@/components/fiscal/NFeActionsMenu";
+import { NFeAuthorizeButton } from "@/components/fiscal/NFeAuthorizeButton";
 import {
   Select,
   SelectContent,
@@ -231,11 +232,19 @@ export default function NFe() {
                     </TableCell>
                     <TableCell>{getStatusBadge(nfe.status)}</TableCell>
                     <TableCell className="text-right">
-                      <NFeActionsMenu
-                        status={nfe.status}
-                        chaveAcesso={nfe.chave_acesso}
-                        onView={() => navigate(`/fiscal/nfe/${nfe.id}`)}
-                      />
+                      <div className="flex items-center justify-end gap-2">
+                        <NFeAuthorizeButton
+                          nfeId={nfe.id}
+                          currentStatus={nfe.status}
+                        />
+                        <NFeActionsMenu
+                          status={nfe.status}
+                          chaveAcesso={nfe.chave_acesso}
+                          nfeId={nfe.id}
+                          nfeNumero={nfe.numero}
+                          onView={() => navigate(`/fiscal/nfe/${nfe.id}`)}
+                        />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))

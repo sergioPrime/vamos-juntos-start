@@ -22,8 +22,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { usePrintDANFE } from "@/hooks/usePrintDANFE";
-import { NFeCancelDialog } from "./NFeCancelDialog";
-import { NFeCCeDialog } from "./NFeCCeDialog";
+import { NFeCancelDialog } from "@/components/fiscal/NFeCancelDialog";
+import { NFeCCeDialog } from "@/components/fiscal/NFeCCeDialog";
 
 interface NFeActionsMenuProps {
   nfeId: string;

@@ -45,7 +45,7 @@ describe('useOrganization', () => {
     // Wait for the hook to settle
     await new Promise(resolve => setTimeout(resolve, 100));
     
-    expect(result.current.organization).toEqual(mockOrg);
+    expect(result.current.currentOrg).toEqual(mockOrg);
   });
 
   it('deve retornar null quando não há usuário autenticado', async () => {
@@ -60,7 +60,7 @@ describe('useOrganization', () => {
 
     await new Promise(resolve => setTimeout(resolve, 100));
     
-    expect(result.current.organization).toBeNull();
+    expect(result.current.currentOrg).toBeNull();
   });
 
   it('deve indicar loading durante busca', () => {
@@ -101,7 +101,7 @@ describe('useOrganization', () => {
 
     await new Promise(resolve => setTimeout(resolve, 100));
     
-    expect(result.current.organization).toBeNull();
+    expect(result.current.currentOrg).toBeNull();
     expect(result.current.loading).toBe(false);
   });
 });

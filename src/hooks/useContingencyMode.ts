@@ -34,7 +34,7 @@ export function useContingencyMode() {
     if (!currentOrg?.id) return
 
     try {
-      const { count, error } = await supabase
+      const { count, error } = await (supabase as any)
         .from('nfce_contingencia_queue')
         .select('*', { count: 'exact', head: true })
         .eq('org_id', currentOrg.id)
@@ -138,7 +138,7 @@ export function useContingencyMode() {
 
     try {
       // Buscar itens não sincronizados
-      const { data: queue, error: queueError } = await supabase
+      const { data: queue, error: queueError } = await (supabase as any)
         .from('nfce_contingencia_queue')
         .select('*, nfce:nfce_id(*)')
         .eq('org_id', currentOrg.id)
@@ -166,7 +166,7 @@ export function useContingencyMode() {
         // Simular envio para SEFAZ
         // Em produção, chamar o edge function de emissão
         
-        await supabase
+        await (supabase as any)
           .from('nfce_contingencia_queue')
           .update({ 
             sincronizado: true,
@@ -175,7 +175,7 @@ export function useContingencyMode() {
           })
           .eq('id', item.id)
 
-        await supabase
+        await (supabase as any)
           .from('nfce')
           .update({ 
             sincronizado: true,

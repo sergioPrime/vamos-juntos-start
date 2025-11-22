@@ -115,7 +115,6 @@ export function usePurchases() {
       const { data: purchase, error: purchaseError } = await supabase
         .from('purchases')
         .insert({
-          org_id: currentOrg.id,
           purchase_number: purchaseNumber,
           supplier_id: data.supplier_id,
           status: 'pending',

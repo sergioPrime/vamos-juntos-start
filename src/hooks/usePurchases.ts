@@ -153,17 +153,19 @@ export function usePurchases() {
       const { id, items, ...updateData } = input
 
       // Calculate new totals if items provided
+      let updateFields: any = { ...updateData }
       if (items) {
         const subtotal = items.reduce((sum, item) => 
           sum + (item.total_price || item.quantity * item.unit_price), 0
         )
-        updateData.subtotal = subtotal
+        updateFields.subtotal = subtotal
+        updateFields.total_amount = subtotal
       }
 
       // Update purchase
       const { data: purchase, error: purchaseError } = await supabase
         .from('purchases')
-        .update(updateData as any)
+        .update(updateFields)
         .eq('id', id)
         .select()
         .single()

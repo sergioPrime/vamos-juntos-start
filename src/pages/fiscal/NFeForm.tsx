@@ -12,11 +12,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Send, Plus, Eye } from "lucide-react";
+import { ArrowLeft, Save, Send, Plus, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import NFeProductsTable from "@/components/fiscal/NFeProductsTable";
 import NFeProductDialog from "@/components/fiscal/NFeProductDialog";
+import { CustomerSearchDialog } from "@/components/fiscal/CustomerSearchDialog";
+import { ProductSearchDialog } from "@/components/fiscal/ProductSearchDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
 
 export default function NFeForm() {
   const navigate = useNavigate();

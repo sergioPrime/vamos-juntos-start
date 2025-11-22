@@ -12,7 +12,7 @@ interface Product {
   name: string
   sku: string | null
   unit: string
-  sale_price: number
+  selling_price: number
 }
 
 interface ProductSearchDialogProps {
@@ -41,7 +41,7 @@ export function ProductSearchDialog({
       setIsLoading(true)
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, sku, unit, sale_price')
+        .select('id, name, sku, unit, selling_price')
         .eq('active', true)
         .order('name')
         .limit(50)
@@ -115,7 +115,7 @@ export function ProductSearchDialog({
                         {new Intl.NumberFormat('pt-BR', {
                           style: 'currency',
                           currency: 'BRL'
-                        }).format(product.sale_price)}
+                        }).format(product.selling_price)}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button

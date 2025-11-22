@@ -30,7 +30,7 @@ interface TaxBreakdown {
 }
 
 export function useFiscalMetrics(startDate?: Date, endDate?: Date) {
-  const { organization } = useOrganization();
+  const { currentOrg } = useOrganization();
   const [metrics, setMetrics] = useState<FiscalMetrics>({
     totalNFes: 0,
     totalFaturamento: 0,
@@ -48,13 +48,13 @@ export function useFiscalMetrics(startDate?: Date, endDate?: Date) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (organization?.id) {
+    if (currentOrg?.id) {
       loadMetrics();
     }
-  }, [organization?.id, startDate, endDate]);
+  }, [currentOrg?.id, startDate, endDate]);
 
   const loadMetrics = async () => {
-    if (!organization?.id) return;
+    if (!currentOrg?.id) return;
 
     setLoading(true);
     try {
@@ -65,7 +65,7 @@ export function useFiscalMetrics(startDate?: Date, endDate?: Date) {
       let query = supabase
         .from('nfe')
         .select('*')
-        .eq('org_id', organization.id)
+        .eq('org_id', currentOrg.id)
         .gte('data_emissao', format(start, 'yyyy-MM-dd'))
         .lte('data_emissao', format(end, 'yyyy-MM-dd'));
 

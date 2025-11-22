@@ -115,7 +115,7 @@ export default function PurchaseDetails() {
           </CardHeader>
           <CardContent>
             <p className="font-medium">
-              {purchase.pessoas?.razao_social || purchase.pessoas?.nome || 'N/A'}
+              {purchase?.pessoas?.razao_social || purchase?.pessoas?.nome_fantasia || 'N/A'}
             </p>
           </CardContent>
         </Card>
@@ -161,7 +161,7 @@ export default function PurchaseDetails() {
               {items.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>
-                    {item.product_name || item.products?.descricao}
+                    {item.product_name}
                   </TableCell>
                   <TableCell className="text-center">{item.quantity}</TableCell>
                   <TableCell className="text-right">

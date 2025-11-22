@@ -26,7 +26,9 @@ export default function PurchaseForm() {
   const { id } = useParams()
   const { createPurchase, updatePurchase, usePurchaseDetails, isCreating, isUpdating } = usePurchases()
   const { data: purchaseData } = usePurchaseDetails(id)
-  const { pessoas: suppliers } = usePessoas('fornecedor')
+  const { pessoas } = usePessoas()
+  
+  const suppliers = pessoas?.filter(p => p.tipo === 'fornecedor')
   
   const [supplierId, setSupplierId] = useState("")
   const [notes, setNotes] = useState("")
@@ -170,7 +172,7 @@ export default function PurchaseForm() {
                 <SelectContent>
                   {suppliers?.map((supplier) => (
                     <SelectItem key={supplier.id} value={supplier.id}>
-                      {supplier.razao_social || supplier.nome}
+                      {supplier.razao_social || supplier.nome_fantasia}
                     </SelectItem>
                   ))}
                 </SelectContent>

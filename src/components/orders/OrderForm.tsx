@@ -104,10 +104,41 @@ const OrderForm = () => {
   useEffect(() => {
     if (id && id !== 'new') {
       loadOrder(id)
-    } else {
+    } else if (currentOrg?.id) {
       generateOrderNumber()
     }
-  }, [id])
+  }, [id, currentOrg])
+
+  const generateOrderNumber = async () => {
+    if (!currentOrg?.id) return
+    
+    try {
+      // Buscar o maior número existente
+      const { data, error } = await supabase
+        .from('orders')
+        .select('order_number')
+        .eq('org_id', currentOrg.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+      
+      if (error) throw error
+      
+      let nextNumber = 1
+      if (data && data.length > 0 && data[0].order_number) {
+        const lastNumber = parseInt(data[0].order_number) || 0
+        nextNumber = lastNumber + 1
+      }
+      
+      setFormData(prev => ({ ...prev, number: nextNumber.toString() }))
+    } catch (error) {
+      console.error('Error generating order number:', error)
+      toast({
+        title: "Erro",
+        description: "Não foi possível gerar o número do pedido.",
+        variant: "destructive"
+      })
+    }
+  }
 
   const generateOrderNumber = () => {
     // Generate sequential number starting from 1

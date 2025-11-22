@@ -111,16 +111,21 @@ export function usePurchases() {
 
       const purchaseNumber = `PC${String((count || 0) + 1).padStart(6, '0')}`
 
-      // Create purchase (org_id will be set by RLS policy/trigger)
+      // Create purchase
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+      
       const { data: purchase, error: purchaseError } = await supabase
         .from('purchases')
         .insert([{
+          org_id: currentOrg.id,
           purchase_number: purchaseNumber,
           supplier_id: data.supplier_id,
           status: 'pending',
           subtotal: subtotal,
           total_amount: totalAmount,
-          notes: data.notes || ''
+          notes: data.notes || '',
+          created_by: user.id
         }])
         .select()
         .single()

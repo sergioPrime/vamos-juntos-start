@@ -263,6 +263,42 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
+          <Route path="/purchases" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Purchases />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/purchases/dashboard" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <PurchaseDashboard />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/purchases/new" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <PurchaseForm />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/purchases/:id" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <PurchaseDetails />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
           <Route path="/purchases/requests" element={
             <ProtectedRoute>
               <AppLayout>

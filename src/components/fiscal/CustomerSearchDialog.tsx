@@ -7,24 +7,10 @@ import { supabase } from "@/integrations/supabase/client"
 import { Search, Plus } from "lucide-react"
 import { toast } from "sonner"
 
-interface Customer {
-  id: string
-  razao_social: string
-  documento: string
-  email_geral: string | null
-  telefones: string[] | null
-  logradouro: string | null
-  numero_endereco: string | null
-  bairro: string | null
-  cidade: string | null
-  uf: string | null
-  cep: string
-}
-
 interface CustomerSearchDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSelectCustomer: (customer: Customer) => void
+  onSelectCustomer: (customer: any) => void
 }
 
 export function CustomerSearchDialog({
@@ -33,7 +19,7 @@ export function CustomerSearchDialog({
   onSelectCustomer
 }: CustomerSearchDialogProps) {
   const [searchTerm, setSearchTerm] = useState("")
-  const [customers, setCustomers] = useState<Customer[]>([])
+  const [customers, setCustomers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -50,7 +36,7 @@ export function CustomerSearchDialog({
         .select('*')
         .eq('tipo', 'cliente')
         .eq('ativo', true)
-        .order('nome')
+        .order('razao_social')
         .limit(50)
 
       if (error) throw error
@@ -64,12 +50,12 @@ export function CustomerSearchDialog({
   }
 
   const filteredCustomers = customers.filter(customer =>
-    customer.razao_social.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.razao_social?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.documento?.includes(searchTerm) ||
     customer.email_geral?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const handleSelectCustomer = (customer: Customer) => {
+  const handleSelectCustomer = (customer: any) => {
     onSelectCustomer(customer)
     onOpenChange(false)
     setSearchTerm("")

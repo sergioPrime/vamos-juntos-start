@@ -191,14 +191,13 @@ export default function NFeForm() {
 
   const validateForm = (): boolean => {
     // Validar destinatário
-    if (!formData.destinatario_id) {
+    if (!formData.cliente_nome || formData.cliente_nome.trim() === "") {
       toast.error("Selecione um destinatário");
       return false;
     }
 
-    // Validar empresa
-    if (!formData.company_id) {
-      toast.error("Selecione uma empresa emitente");
+    if (!formData.cliente_cpf_cnpj || formData.cliente_cpf_cnpj.trim() === "") {
+      toast.error("Informe o CPF/CNPJ do destinatário");
       return false;
     }
 
@@ -211,16 +210,6 @@ export default function NFeForm() {
     // Validar dados da NFe
     if (!formData.natureza_operacao || formData.natureza_operacao.trim() === "") {
       toast.error("Informe a natureza da operação");
-      return false;
-    }
-
-    if (!formData.data_emissao) {
-      toast.error("Informe a data de emissão");
-      return false;
-    }
-
-    if (!formData.data_saida) {
-      toast.error("Informe a data de saída");
       return false;
     }
 

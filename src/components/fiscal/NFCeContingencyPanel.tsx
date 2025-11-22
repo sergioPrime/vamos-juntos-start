@@ -19,7 +19,7 @@ import {
 import { NFCeContingencyQueue } from './NFCeContingencyQueue';
 
 export function NFCeContingencyPanel() {
-  const { currentOrganization } = useOrganization();
+  const { organization } = useOrganization();
   const {
     isContingencyActive,
     contingencyQueue,
@@ -35,23 +35,23 @@ export function NFCeContingencyPanel() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (currentOrganization?.id) {
-      checkContingencyStatus(currentOrganization.id);
-      loadContingencyQueue(currentOrganization.id);
+    if (organization?.id) {
+      checkContingencyStatus(organization.id);
+      loadContingencyQueue(organization.id);
     }
-  }, [currentOrganization?.id]);
+  }, [organization?.id]);
 
   const handleActivate = async () => {
-    if (!currentOrganization?.id) return;
+    if (!organization?.id) return;
     if (!reason.trim() || reason.length < 15) {
       return;
     }
 
     setIsLoading(true);
     try {
-      await activateContingency(currentOrganization.id, reason);
+      await activateContingency(organization.id, reason);
       setReason('');
-      await loadContingencyQueue(currentOrganization.id);
+      await loadContingencyQueue(organization.id);
     } catch (error) {
       console.error('Erro ao ativar contingência:', error);
     } finally {
@@ -60,12 +60,12 @@ export function NFCeContingencyPanel() {
   };
 
   const handleDeactivate = async () => {
-    if (!currentOrganization?.id) return;
+    if (!organization?.id) return;
 
     setIsLoading(true);
     try {
-      await deactivateContingency(currentOrganization.id);
-      await loadContingencyQueue(currentOrganization.id);
+      await deactivateContingency(organization.id);
+      await loadContingencyQueue(organization.id);
     } catch (error) {
       console.error('Erro ao desativar contingência:', error);
     } finally {
@@ -74,18 +74,18 @@ export function NFCeContingencyPanel() {
   };
 
   const handleTransmitAll = async () => {
-    if (!currentOrganization?.id) return;
+    if (!organization?.id) return;
 
     try {
-      await transmitAllFromQueue(currentOrganization.id);
+      await transmitAllFromQueue(organization.id);
     } catch (error) {
       console.error('Erro ao transmitir fila:', error);
     }
   };
 
   const handleRefresh = () => {
-    if (currentOrganization?.id) {
-      loadContingencyQueue(currentOrganization.id);
+    if (organization?.id) {
+      loadContingencyQueue(organization.id);
     }
   };
 

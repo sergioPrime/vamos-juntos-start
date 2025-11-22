@@ -7,8 +7,10 @@ interface ContingencyItem {
   nfce_data: any;
   created_at: string;
   retry_count: number;
-  status: 'pending' | 'transmitting' | 'transmitted' | 'failed';
-  error_message?: string;
+  status: string;
+  error_message: string | null;
+  transmitted_at: string | null;
+  last_retry_at: string | null;
 }
 
 export function useNFCeContingency() {
@@ -144,7 +146,7 @@ export function useNFCeContingency() {
 
       // Tentar transmitir
       const { data, error } = await supabase.functions.invoke('emit-nfce', {
-        body: item.nfce_data
+        body: JSON.parse(JSON.stringify(item.nfce_data))
       });
 
       if (error) throw error;
@@ -159,9 +161,10 @@ export function useNFCeContingency() {
           })
           .eq('id', itemId);
 
+        const nfceData = item.nfce_data as any;
         toast({
           title: "NFC-e transmitida",
-          description: `NFC-e ${item.nfce_data.numero} transmitida com sucesso.`,
+          description: `NFC-e ${nfceData?.numero || ''} transmitida com sucesso.`,
         });
 
         return { success: true, data };
@@ -172,12 +175,19 @@ export function useNFCeContingency() {
       console.error('Erro ao transmitir da fila:', error);
 
       // Incrementar contador de tentativas
+      const { data: currentItem } = await supabase
+        .from('nfce_contingency_queue')
+        .select('retry_count')
+        .eq('id', itemId)
+        .single();
+      
       await supabase
         .from('nfce_contingency_queue')
         .update({ 
           status: 'failed',
-          retry_count: supabase.rpc('increment', { row_id: itemId }),
-          error_message: error.message
+          retry_count: (currentItem?.retry_count || 0) + 1,
+          error_message: error.message,
+          last_retry_at: new Date().toISOString()
         })
         .eq('id', itemId);
 

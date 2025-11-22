@@ -25,7 +25,7 @@ import {
 import { format, startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
 
 export function NFCeReports() {
-  const { currentOrganization } = useOrganization();
+  const { organization } = useOrganization();
   const [startDate, setStartDate] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
   const [endDate, setEndDate] = useState(format(endOfMonth(new Date()), 'yyyy-MM-dd'));
   const [reportType, setReportType] = useState('summary');
@@ -40,13 +40,13 @@ export function NFCeReports() {
   });
 
   useEffect(() => {
-    if (currentOrganization?.id) {
+    if (organization?.id) {
       loadSummary();
     }
-  }, [currentOrganization?.id, startDate, endDate]);
+  }, [organization?.id, startDate, endDate]);
 
   const loadSummary = async () => {
-    if (!currentOrganization?.id) return;
+    if (!organization?.id) return;
 
     try {
       const start = startOfDay(new Date(startDate));
@@ -55,7 +55,7 @@ export function NFCeReports() {
       const { data, error } = await supabase
         .from('nfce')
         .select('status, valor_total')
-        .eq('org_id', currentOrganization.id)
+        .eq('org_id', organization.id)
         .gte('data_emissao', start.toISOString())
         .lte('data_emissao', end.toISOString());
 
@@ -82,7 +82,7 @@ export function NFCeReports() {
   };
 
   const handleGenerateReport = async () => {
-    if (!currentOrganization?.id) return;
+    if (!organization?.id) return;
 
     setIsGenerating(true);
     try {
@@ -92,7 +92,7 @@ export function NFCeReports() {
       const { data, error } = await supabase
         .from('nfce')
         .select('*')
-        .eq('org_id', currentOrganization.id)
+        .eq('org_id', organization.id)
         .gte('data_emissao', start.toISOString())
         .lte('data_emissao', end.toISOString())
         .order('data_emissao', { ascending: false });

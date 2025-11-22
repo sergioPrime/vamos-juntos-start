@@ -28,8 +28,10 @@ interface ContingencyItem {
   nfce_data: any;
   created_at: string;
   retry_count: number;
-  status: 'pending' | 'transmitting' | 'transmitted' | 'failed';
-  error_message?: string;
+  status: string;
+  error_message: string | null;
+  transmitted_at: string | null;
+  last_retry_at: string | null;
 }
 
 interface NFCeContingencyQueueProps {

@@ -9,7 +9,6 @@ export interface CachedProduct {
   stock_quantity: number
   min_stock_level: number | null
   active: boolean
-  sale_price: number | null
   has_lot_control: boolean
   has_serial_control: boolean
 }
@@ -32,7 +31,7 @@ export function useProductCache() {
 
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, sku, stock_quantity, min_stock_level, active, sale_price, has_lot_control, has_serial_control')
+        .select('id, name, sku, stock_quantity, min_stock_level, active, has_lot_control, has_serial_control')
         .eq('org_id', currentOrg.id)
         .eq('active', true)
         .order('name')

@@ -39,7 +39,7 @@ export function usePaginatedQuery<T = any>({
       const to = from + pageSize - 1
 
       let query = supabase
-        .from(table)
+        .from(table as any)
         .select(select, { count: 'exact' })
         .range(from, to)
         .order(orderBy, { ascending: orderAsc })
@@ -47,7 +47,7 @@ export function usePaginatedQuery<T = any>({
       // Aplica filtros
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
-          query = query.eq(key, value)
+          query = query.eq(key, value) as any
         }
       })
 
@@ -76,14 +76,14 @@ export function usePaginatedQuery<T = any>({
       const to = from + pageSize - 1
 
       let query = supabase
-        .from(table)
+        .from(table as any)
         .select(select)
         .range(from, to)
         .order(orderBy, { ascending: orderAsc })
 
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
-          query = query.eq(key, value)
+          query = query.eq(key, value) as any
         }
       })
 

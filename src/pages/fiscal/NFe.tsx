@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Plus, Search, Download, Eye, Filter } from "lucide-react";
+import { FileText, Plus, Search, Loader2 } from "lucide-react";
 import NFeActionsMenu from "@/components/fiscal/NFeActionsMenu";
 import {
   Select,
@@ -21,74 +21,60 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-interface NFe {
-  id: string;
-  numero: string;
-  serie: string;
-  cliente: string;
-  data_emissao: string;
-  valor_total: number;
-  status: "autorizada" | "cancelada" | "pendente" | "rejeitada";
-  chave_acesso: string;
-}
+import { useNFe } from "@/hooks/useNFe";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function NFe() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("todos");
-  const [dateFilter, setDateFilter] = useState<string>("todos");
+  const { nfeList, isLoading } = useNFe();
 
-  // Dados mockados para demonstração
-  const [nfeList] = useState<NFe[]>([
-    {
-      id: "1",
-      numero: "000001",
-      serie: "1",
-      cliente: "Cliente Exemplo LTDA",
-      data_emissao: "2025-01-15",
-      valor_total: 1500.00,
-      status: "autorizada",
-      chave_acesso: "35250112345678000100550010000000011234567890",
-    },
-    {
-      id: "2",
-      numero: "000002",
-      serie: "1",
-      cliente: "Empresa ABC S.A.",
-      data_emissao: "2025-01-16",
-      valor_total: 2300.50,
-      status: "autorizada",
-      chave_acesso: "35250112345678000100550010000000021234567891",
-    },
-  ]);
-
-  const getStatusBadge = (status: NFe["status"]) => {
-    const variants = {
+  const getStatusBadge = (status: string | null) => {
+    const variants: Record<string, any> = {
       autorizada: "default",
       cancelada: "destructive",
       pendente: "secondary",
       rejeitada: "destructive",
+      rascunho: "outline",
     };
 
+    const statusText = status || "rascunho";
     return (
-      <Badge variant={variants[status] as any}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+      <Badge variant={variants[statusText] || "outline"}>
+        {statusText.charAt(0).toUpperCase() + statusText.slice(1)}
       </Badge>
     );
   };
 
-  const filteredNFes = nfeList.filter((nfe) => {
-    const matchesSearch =
-      nfe.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      nfe.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      nfe.chave_acesso.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredNFes = useMemo(() => {
+    return nfeList.filter((nfe) => {
+      const clienteName = nfe.pessoas?.nome || "";
+      const numero = nfe.numero?.toString() || "";
+      const chave = nfe.chave_acesso || "";
 
-    const matchesStatus =
-      statusFilter === "todos" || nfe.status === statusFilter;
+      const matchesSearch =
+        numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        clienteName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        chave.toLowerCase().includes(searchTerm.toLowerCase());
 
-    return matchesSearch && matchesStatus;
-  });
+      const matchesStatus =
+        statusFilter === "todos" || nfe.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [nfeList, searchTerm, statusFilter]);
+
+  const stats = useMemo(() => {
+    return {
+      total: nfeList.length,
+      autorizadas: nfeList.filter((n) => n.status === "autorizada").length,
+      pendentes: nfeList.filter((n) => n.status === "pendente" || n.status === "rascunho").length,
+      valorTotal: nfeList
+        .filter((n) => n.status === "autorizada")
+        .reduce((acc, n) => acc + (n.valor_total || 0), 0),
+    };
+  }, [nfeList]);
 
   return (
     <div className="container-comfortable">
@@ -159,18 +145,18 @@ export default function NFe() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
               <div>
                 <p className="text-xs text-muted-foreground">Total de Notas</p>
-                <p className="text-2xl font-bold">{nfeList.length}</p>
+                <p className="text-2xl font-bold">{stats.total}</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Autorizadas</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {nfeList.filter((n) => n.status === "autorizada").length}
+                  {stats.autorizadas}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Pendentes</p>
                 <p className="text-2xl font-bold text-yellow-600">
-                  {nfeList.filter((n) => n.status === "pendente").length}
+                  {stats.pendentes}
                 </p>
               </div>
               <div>
@@ -179,11 +165,7 @@ export default function NFe() {
                   {new Intl.NumberFormat("pt-BR", {
                     style: "currency",
                     currency: "BRL",
-                  }).format(
-                    nfeList
-                      .filter((n) => n.status === "autorizada")
-                      .reduce((acc, n) => acc + n.valor_total, 0)
-                  )}
+                  }).format(stats.valorTotal)}
                 </p>
               </div>
             </div>
@@ -205,7 +187,19 @@ export default function NFe() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredNFes.length === 0 ? (
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-8" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                  </TableRow>
+                ))
+              ) : filteredNFes.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={7}
@@ -217,23 +211,28 @@ export default function NFe() {
               ) : (
                 filteredNFes.map((nfe) => (
                   <TableRow key={nfe.id}>
-                    <TableCell className="font-medium">{nfe.numero}</TableCell>
-                    <TableCell>{nfe.serie}</TableCell>
-                    <TableCell>{nfe.cliente}</TableCell>
+                    <TableCell className="font-medium">
+                      {nfe.numero || "-"}
+                    </TableCell>
+                    <TableCell>{nfe.serie || "1"}</TableCell>
+                    <TableCell>{nfe.pessoas?.nome || "Cliente não identificado"}</TableCell>
                     <TableCell>
-                      {new Date(nfe.data_emissao).toLocaleDateString("pt-BR")}
+                      {nfe.data_emissao 
+                        ? new Date(nfe.data_emissao).toLocaleDateString("pt-BR")
+                        : "-"
+                      }
                     </TableCell>
                     <TableCell className="font-mono">
                       {new Intl.NumberFormat("pt-BR", {
                         style: "currency",
                         currency: "BRL",
-                      }).format(nfe.valor_total)}
+                      }).format(nfe.valor_total || 0)}
                     </TableCell>
                     <TableCell>{getStatusBadge(nfe.status)}</TableCell>
                     <TableCell className="text-right">
                       <NFeActionsMenu
-                        status={nfe.status}
-                        chaveAcesso={nfe.chave_acesso}
+                        status={nfe.status || "rascunho"}
+                        chaveAcesso={nfe.chave_acesso || ""}
                         onView={() => navigate(`/fiscal/nfe/${nfe.id}`)}
                       />
                     </TableCell>

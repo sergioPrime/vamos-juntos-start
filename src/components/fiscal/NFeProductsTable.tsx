@@ -51,9 +51,14 @@ export default function NFeProductsTable({
         acc.ipi += product.ipi_valor;
         acc.pis += product.pis_valor;
         acc.cofins += product.cofins_valor;
+        // Novos impostos da Reforma Tributária 2026
+        acc.ibs += (product as any).ibs_uf_valor || 0;
+        acc.ibs += (product as any).ibs_mun_valor || 0;
+        acc.cbs += (product as any).cbs_valor || 0;
+        acc.is += (product as any).is_valor || 0;
         return acc;
       },
-      { produtos: 0, icms: 0, ipi: 0, pis: 0, cofins: 0 }
+      { produtos: 0, icms: 0, ipi: 0, pis: 0, cofins: 0, ibs: 0, cbs: 0, is: 0 }
     );
   };
 
@@ -139,33 +144,63 @@ export default function NFeProductsTable({
       </div>
 
       {/* Resumo de Impostos */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 bg-muted/50 p-4 rounded-lg">
-        <div>
-          <p className="text-xs text-muted-foreground">Valor Produtos</p>
-          <p className="font-mono font-bold text-lg">
-            {formatCurrency(totals.produtos)}
-          </p>
+      <div className="space-y-2">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 bg-muted/50 p-4 rounded-lg">
+          <div>
+            <p className="text-xs text-muted-foreground">Valor Produtos</p>
+            <p className="font-mono font-bold text-lg">
+              {formatCurrency(totals.produtos)}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">ICMS</p>
+            <p className="font-mono font-semibold">
+              {formatCurrency(totals.icms)}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">IPI</p>
+            <p className="font-mono font-semibold">{formatCurrency(totals.ipi)}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">PIS</p>
+            <p className="font-mono font-semibold">{formatCurrency(totals.pis)}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">COFINS</p>
+            <p className="font-mono font-semibold">
+              {formatCurrency(totals.cofins)}
+            </p>
+          </div>
         </div>
-        <div>
-          <p className="text-xs text-muted-foreground">ICMS</p>
-          <p className="font-mono font-semibold">
-            {formatCurrency(totals.icms)}
-          </p>
-        </div>
-        <div>
-          <p className="text-xs text-muted-foreground">IPI</p>
-          <p className="font-mono font-semibold">{formatCurrency(totals.ipi)}</p>
-        </div>
-        <div>
-          <p className="text-xs text-muted-foreground">PIS</p>
-          <p className="font-mono font-semibold">{formatCurrency(totals.pis)}</p>
-        </div>
-        <div>
-          <p className="text-xs text-muted-foreground">COFINS</p>
-          <p className="font-mono font-semibold">
-            {formatCurrency(totals.cofins)}
-          </p>
-        </div>
+        
+        {/* Impostos da Reforma Tributária 2026 */}
+        {(totals.ibs > 0 || totals.cbs > 0 || totals.is > 0) && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-primary/5 p-4 rounded-lg border-2 border-primary/20">
+            <div className="col-span-2 md:col-span-1">
+              <p className="text-xs text-muted-foreground font-semibold">Reforma 2026</p>
+              <p className="text-xs text-primary">Novos Impostos</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">IBS (Total)</p>
+              <p className="font-mono font-semibold text-primary">
+                {formatCurrency(totals.ibs)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">CBS</p>
+              <p className="font-mono font-semibold text-primary">
+                {formatCurrency(totals.cbs)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">IS (Seletivo)</p>
+              <p className="font-mono font-semibold text-primary">
+                {formatCurrency(totals.is)}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

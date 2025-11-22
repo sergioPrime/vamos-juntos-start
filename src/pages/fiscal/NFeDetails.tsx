@@ -80,8 +80,8 @@ export default function NFeDetails() {
 
       if (itemsError) throw itemsError
 
-      setNfe(nfeData)
-      setItems(itemsData || [])
+      setNfe(nfeData as any)
+      setItems(itemsData as any || [])
     } catch (error) {
       console.error('Error loading NFe details:', error)
       toast.error('Erro ao carregar detalhes da NFe')

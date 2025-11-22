@@ -163,13 +163,13 @@ export default function NFeForm() {
       cliente_id: customer.id,
       cliente_nome: customer.razao_social || "",
       cliente_cpf_cnpj: customer.documento || "",
-      cliente_ie: customer.inscricao_estadual || "",
-      cliente_endereco: customer.endereco || "",
+      cliente_ie: "",
+      cliente_endereco: "",
       cliente_numero: "",
-      cliente_bairro: customer.bairro || "",
+      cliente_bairro: "",
       cliente_cidade: customer.cidade || "",
       cliente_uf: customer.uf || "",
-      cliente_cep: customer.cep || "",
+      cliente_cep: "",
     }));
   };
 
@@ -720,6 +720,20 @@ export default function NFeForm() {
           onOpenChange={setProductDialogOpen}
           onSave={handleSaveProduct}
           product={editingProduct}
+        />
+
+        {/* Dialog de Busca de Cliente */}
+        <CustomerSearchDialog
+          open={customerSearchOpen}
+          onOpenChange={setCustomerSearchOpen}
+          onSelectCustomer={handleSelectCustomer}
+        />
+
+        {/* Dialog de Busca de Produto */}
+        <ProductSearchDialog
+          open={productSearchOpen}
+          onOpenChange={setProductSearchOpen}
+          onSelectProduct={handleSelectProduct}
         />
       </div>
     </div>

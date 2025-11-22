@@ -13,10 +13,6 @@ interface Customer {
   email_geral: string | null;
   cidade: string | null;
   uf: string | null;
-  endereco: string | null;
-  bairro: string | null;
-  cep: string | null;
-  inscricao_estadual: string | null;
 }
 
 interface CustomerSearchDialogProps {
@@ -39,7 +35,7 @@ export function CustomerSearchDialog({
       setLoading(true);
       let query = supabase
         .from("pessoas")
-        .select("id, razao_social, documento, email_geral, cidade, uf, endereco, bairro, cep, inscricao_estadual")
+        .select("id, razao_social, documento, email_geral, cidade, uf")
         .eq("tipo", "cliente");
 
       if (search) {

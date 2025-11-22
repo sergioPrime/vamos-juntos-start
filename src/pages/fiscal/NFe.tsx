@@ -39,6 +39,10 @@ export default function NFe() {
   const [statusFilter, setStatusFilter] = useState<string>("todos");
   const [dateFilter, setDateFilter] = useState<string>("todos");
 
+  const handleReload = () => {
+    window.location.reload();
+  };
+
   // Dados mockados para demonstração
   const [nfeList] = useState<NFe[]>([
     {

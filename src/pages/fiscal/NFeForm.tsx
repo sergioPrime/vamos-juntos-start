@@ -33,31 +33,50 @@ export default function NFeForm() {
   const [editingProduct, setEditingProduct] = useState<any>(null);
 
   // Inicializar produtos vindos do pedido (se houver)
-  const initialProducts = orderItems.map((item: any) => ({
-    id: item.product_id,
-    codigo: item.product_sku || item.product_id.substring(0, 8),
-    descricao: item.product_name,
-    ncm: "00000000",
-    cfop: "5102",
-    unidade: "UN",
-    quantidade: item.quantity.toString(),
-    valor_unitario: item.unit_price.toFixed(2),
-    valor_total: item.total_price.toFixed(2),
-    // Tributos
-    icms_cst: "00",
-    icms_base: item.total_price.toFixed(2),
-    icms_aliquota: "0.00",
-    icms_valor: "0.00",
-    ipi_cst: "99",
-    ipi_aliquota: "0.00",
-    ipi_valor: "0.00",
-    pis_cst: "01",
-    pis_aliquota: "0.00",
-    pis_valor: "0.00",
-    cofins_cst: "01",
-    cofins_aliquota: "0.00",
-    cofins_valor: "0.00",
-  }));
+  const loadProductsWithNCM = async () => {
+    if (orderItems.length === 0) return [];
+
+    const productIds = orderItems.map((item: any) => item.product_id);
+    const { data: products } = await supabase
+      .from("products")
+      .select("id, ncm_code")
+      .in("id", productIds);
+
+    return orderItems.map((item: any) => {
+      const product = products?.find((p) => p.id === item.product_id);
+      return {
+        id: item.product_id,
+        codigo: item.product_sku || item.product_id.substring(0, 8),
+        descricao: item.product_name,
+        ncm: product?.ncm_code || "00000000",
+        cfop: "5102",
+        unidade: "UN",
+        quantidade: item.quantity.toString(),
+        valor_unitario: item.unit_price.toFixed(2),
+        valor_total: item.total_price.toFixed(2),
+        // Tributos
+        icms_cst: "00",
+        icms_base: item.total_price.toFixed(2),
+        icms_aliquota: "0.00",
+        icms_valor: "0.00",
+        ipi_cst: "99",
+        ipi_aliquota: "0.00",
+        ipi_valor: "0.00",
+        pis_cst: "01",
+        pis_aliquota: "0.00",
+        pis_valor: "0.00",
+        cofins_cst: "01",
+        cofins_aliquota: "0.00",
+        cofins_valor: "0.00",
+      };
+    });
+  };
+
+  const [initialProducts, setInitialProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    loadProductsWithNCM().then(setInitialProducts);
+  }, []);
 
   const [formData, setFormData] = useState({
     // Dados do Destinatário

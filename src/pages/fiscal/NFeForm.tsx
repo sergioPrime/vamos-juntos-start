@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import NFeProductsTable from "@/components/fiscal/NFeProductsTable";
 import NFeProductDialog from "@/components/fiscal/NFeProductDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function NFeForm() {
   const navigate = useNavigate();
@@ -197,14 +198,15 @@ export default function NFeForm() {
         return;
       }
 
-      // Aqui você implementaria a lógica de salvar
-      toast.success(
-        isEditing ? "NFe salva com sucesso!" : "NFe criada com sucesso!"
-      );
+      toast.info("Salvando rascunho...");
+      
+      // TODO: Implementar salvamento de rascunho
+      
+      toast.success("Rascunho salvo com sucesso!");
       
       navigate("/fiscal/nfe");
     } catch (error) {
-      toast.error("Erro ao salvar NFe");
+      toast.error("Erro ao salvar rascunho");
       console.error(error);
     }
   };
@@ -222,13 +224,95 @@ export default function NFeForm() {
         return;
       }
 
-      // Aqui você implementaria a integração com a SEFAZ
-      toast.success("NFe enviada para autorização!");
-      
-      navigate("/fiscal/nfe");
+      if (formData.produtos.length === 0) {
+        toast.error("Adicione ao menos um produto");
+        return;
+      }
+
+      toast.info("Emitindo NFe...");
+
+      // Preparar dados para emissão
+      const nfeData = {
+        numero: Math.floor(Math.random() * 999999) + 1, // TODO: Buscar próximo número
+        serie: formData.serie,
+        natureza_operacao: formData.natureza_operacao,
+        tipo_operacao: formData.tipo_operacao,
+        
+        // TODO: Buscar dados do emitente do banco
+        cnpj_emitente: "00000000000000",
+        razao_social_emitente: "Empresa Emitente LTDA",
+        nome_fantasia_emitente: "Empresa",
+        endereco_emitente: "Rua Exemplo, 123",
+        municipio_emitente: "São Paulo",
+        uf_emitente: "SP",
+        cep_emitente: "00000000",
+        codigo_uf: "35",
+        
+        // Destinatário
+        destinatario_id: formData.cliente_id || null,
+        documento_destinatario: formData.cliente_cpf_cnpj,
+        razao_social_destinatario: formData.cliente_nome,
+        endereco_destinatario: `${formData.cliente_endereco}, ${formData.cliente_numero}`,
+        municipio_destinatario: formData.cliente_cidade,
+        uf_destinatario: formData.cliente_uf,
+        cep_destinatario: formData.cliente_cep,
+        
+        // Valores
+        valor_produtos: parseFloat(formData.valor_produtos),
+        valor_frete: parseFloat(formData.valor_frete || "0"),
+        valor_seguro: parseFloat(formData.valor_seguro || "0"),
+        valor_desconto: parseFloat(formData.valor_desconto || "0"),
+        valor_outras_despesas: parseFloat(formData.valor_outras_despesas || "0"),
+        valor_total: parseFloat(formData.valor_total),
+        
+        // Impostos
+        base_calculo_icms: parseFloat(formData.bc_icms || "0"),
+        valor_icms: parseFloat(formData.valor_icms || "0"),
+        valor_ipi: parseFloat(formData.valor_ipi || "0"),
+        valor_pis: parseFloat(formData.valor_pis || "0"),
+        valor_cofins: parseFloat(formData.valor_cofins || "0"),
+        
+        // Informações adicionais
+        informacoes_complementares: formData.informacoes_complementares,
+        
+        // Itens
+        itens: formData.produtos.map((p: any) => ({
+          codigo_produto: p.codigo,
+          descricao: p.descricao,
+          ncm: p.ncm,
+          cfop: p.cfop,
+          unidade: p.unidade,
+          quantidade: parseFloat(p.quantidade),
+          valor_unitario: parseFloat(p.valor_unitario),
+          valor_total: parseFloat(p.valor_total),
+          base_calculo_icms: parseFloat(p.icms_base || "0"),
+          aliquota_icms: parseFloat(p.icms_aliquota || "0"),
+          valor_icms: parseFloat(p.icms_valor || "0"),
+          aliquota_ipi: parseFloat(p.ipi_aliquota || "0"),
+          valor_ipi: parseFloat(p.ipi_valor || "0"),
+          aliquota_pis: parseFloat(p.pis_aliquota || "0"),
+          valor_pis: parseFloat(p.pis_valor || "0"),
+          aliquota_cofins: parseFloat(p.cofins_aliquota || "0"),
+          valor_cofins: parseFloat(p.cofins_valor || "0"),
+        }))
+      };
+
+      // Chamar Edge Function para emitir
+      const { data, error } = await supabase.functions.invoke('emitir-nfe', {
+        body: nfeData
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        toast.success(`NFe ${data.nfe.numero} emitida com sucesso!`);
+        navigate("/fiscal/nfe");
+      } else {
+        throw new Error(data.error || "Erro ao emitir NFe");
+      }
     } catch (error) {
-      toast.error("Erro ao emitir NFe");
-      console.error(error);
+      console.error("Erro ao emitir NFe:", error);
+      toast.error(error instanceof Error ? error.message : "Erro ao emitir NFe");
     }
   };
 

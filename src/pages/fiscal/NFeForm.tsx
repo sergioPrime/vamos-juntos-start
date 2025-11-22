@@ -211,7 +211,7 @@ export default function NFeForm() {
           product_id: item.product_id,
           codigo: product?.sku || item.product_id.substring(0, 8),
           descricao: item.product_name,
-          ncm: product?.ncm_code || "00000000",
+          ncm: "00000000", // TODO: Buscar NCM do grupo de impostos do produto
           cfop: "5102",
           unidade: product?.unit || "UN",
           quantidade: item.quantity,
@@ -419,9 +419,10 @@ export default function NFeForm() {
       }
 
       // Salvar itens
-      const itemsToInsert = produtos.map((produto) => ({
+      const itemsToInsert = produtos.map((produto, index) => ({
         org_id: currentOrg.id,
         nfe_id: nfeId!,
+        item_numero: index + 1,
         product_id: produto.product_id,
         codigo_produto: produto.codigo,
         descricao: produto.descricao,

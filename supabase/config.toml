@@ -2,3 +2,12 @@ project_id = "wrdyffwjlylgxfbxbztf"
 
 [functions.search-ncm]
 verify_jwt = false
+
+[functions.emit-nfce]
+verify_jwt = true
+
+[functions.cancel-nfce]
+verify_jwt = true
+
+[functions.query-nfce-status]
+verify_jwt = true

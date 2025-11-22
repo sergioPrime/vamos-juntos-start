@@ -6,19 +6,10 @@ import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface Customer {
-  id: string;
-  razao_social: string | null;
-  documento: string | null;
-  email_geral: string | null;
-  cidade: string | null;
-  uf: string | null;
-}
-
 interface CustomerSearchDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSelectCustomer: (customer: Customer) => void;
+  onSelectCustomer: (customer: any) => void;
 }
 
 export function CustomerSearchDialog({
@@ -33,19 +24,25 @@ export function CustomerSearchDialog({
   const searchCustomers = async () => {
     try {
       setLoading(true);
-      let query = supabase
+      
+      const query = supabase
         .from("pessoas")
-        .select("id, razao_social, documento, email_geral, cidade, uf")
+        .select("*")
         .eq("tipo", "cliente");
 
-      if (search) {
-        query = query.or(`razao_social.ilike.%${search}%,documento.ilike.%${search}%`);
+      const queryWithSearch = search 
+        ? query.or(`razao_social.ilike.%${search}%,documento.ilike.%${search}%`)
+        : query;
+
+      const { data, error } = await queryWithSearch.limit(20);
+
+      if (error) {
+        console.error("Erro ao buscar clientes:", error);
+        toast.error("Erro ao buscar clientes");
+        return;
       }
-
-      const { data, error } = await query.limit(20);
-
-      if (error) throw error;
-      setCustomers((data as any[]) || []);
+      
+      setCustomers(data || []);
     } catch (error) {
       console.error("Erro ao buscar clientes:", error);
       toast.error("Erro ao buscar clientes");
@@ -60,7 +57,7 @@ export function CustomerSearchDialog({
     }
   }, [open]);
 
-  const handleSelect = (customer: Customer) => {
+  const handleSelect = (customer: any) => {
     onSelectCustomer(customer);
     onOpenChange(false);
   };

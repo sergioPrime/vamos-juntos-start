@@ -210,33 +210,34 @@ export default function NFeForm() {
       }
 
       // Salvar NFe como rascunho
+      const nfeInsertData: any = {
+        org_id: currentOrg.id,
+        numero: 0,
+        serie: formData.serie,
+        natureza_operacao: formData.natureza_operacao,
+        tipo_operacao: parseInt(formData.tipo_operacao),
+        finalidade: parseInt(formData.finalidade),
+        destinatario_nome: formData.cliente_nome,
+        destinatario_cpf_cnpj: formData.cliente_cpf_cnpj,
+        destinatario_endereco: formData.cliente_endereco,
+        destinatario_numero: formData.cliente_numero,
+        destinatario_bairro: formData.cliente_bairro,
+        destinatario_cidade: formData.cliente_cidade,
+        destinatario_uf: formData.cliente_uf,
+        destinatario_cep: formData.cliente_cep,
+        valor_produtos: parseFloat(formData.valor_produtos),
+        valor_frete: parseFloat(formData.valor_frete || "0"),
+        valor_seguro: parseFloat(formData.valor_seguro || "0"),
+        valor_desconto: parseFloat(formData.valor_desconto || "0"),
+        valor_total: parseFloat(formData.valor_total),
+        informacoes_complementares: formData.informacoes_complementares,
+        status: "rascunho",
+        created_by: currentOrg.id,
+      };
+
       const { data: nfeData, error: nfeError } = await supabase
         .from("nfe")
-        // @ts-ignore - org_id exists in database
-        .insert({
-          org_id: currentOrg.id,
-          numero: 0, // Será gerado pelo trigger
-          serie: formData.serie,
-          natureza_operacao: formData.natureza_operacao,
-          tipo_operacao: parseInt(formData.tipo_operacao),
-          finalidade: parseInt(formData.finalidade),
-          destinatario_nome: formData.cliente_nome,
-          destinatario_cpf_cnpj: formData.cliente_cpf_cnpj,
-          destinatario_endereco: formData.cliente_endereco,
-          destinatario_numero: formData.cliente_numero,
-          destinatario_bairro: formData.cliente_bairro,
-          destinatario_cidade: formData.cliente_cidade,
-          destinatario_uf: formData.cliente_uf,
-          destinatario_cep: formData.cliente_cep,
-          valor_produtos: parseFloat(formData.valor_produtos),
-          valor_frete: parseFloat(formData.valor_frete || "0"),
-          valor_seguro: parseFloat(formData.valor_seguro || "0"),
-          valor_desconto: parseFloat(formData.valor_desconto || "0"),
-          valor_total: parseFloat(formData.valor_total),
-          informacoes_complementares: formData.informacoes_complementares,
-          status: "rascunho",
-          created_by: currentOrg.id,
-        })
+        .insert(nfeInsertData)
         .select()
         .single();
 

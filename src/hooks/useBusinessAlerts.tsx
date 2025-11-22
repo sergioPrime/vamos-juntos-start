@@ -178,8 +178,12 @@ export function useBusinessAlerts() {
     }
   }, [currentOrg?.id])
 
-  // Check for rejected NFSe
+  // Check for rejected NFSe - COMENTADO: Tabela nfse não tem a estrutura esperada
+  // TODO: Reativar quando a tabela nfse for configurada corretamente
   const checkRejectedNFSe = useCallback(async () => {
+    return []
+    
+    /* CÓDIGO ORIGINAL COMENTADO DEVIDO A INCOMPATIBILIDADE COM TABELA
     if (!currentOrg?.id) return []
 
     try {
@@ -208,6 +212,7 @@ export function useBusinessAlerts() {
           resolved: false
         }]
       }
+    */
 
       return []
     } catch (error) {

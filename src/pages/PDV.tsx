@@ -20,6 +20,7 @@ import { AbrirCaixaDialog } from "@/components/pdv/AbrirCaixaDialog"
 import { CaixaClosedScreen } from "@/components/pdv/CaixaClosedScreen"
 import { QuickProductDialog } from "@/components/pdv/QuickProductDialog"
 import { EmitirNFeDialog } from "@/components/pdv/EmitirNFeDialog"
+import { EmitirNFCeDialog } from "@/components/pdv/EmitirNFCeDialog"
 import { usePermissionCheck } from "@/hooks/usePermissionCheck"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { useFiscalIntegration } from "@/hooks/useFiscalIntegration"
@@ -93,8 +94,9 @@ const PDV = () => {
   const [barcodeBuffer, setBarcodeBuffer] = useState("")
   const [lastKeyTime, setLastKeyTime] = useState(0)
   
-  // NFe emission states
+  // NFe/NFCe emission states
   const [isEmitirNFeDialogOpen, setIsEmitirNFeDialogOpen] = useState(false)
+  const [isEmitirNFCeDialogOpen, setIsEmitirNFCeDialogOpen] = useState(false)
   const [lastCompletedOrder, setLastCompletedOrder] = useState<any>(null)
   
   // Cash register states
@@ -766,8 +768,11 @@ const PDV = () => {
 
       console.log('[PDV] Venda finalizada com sucesso!')
       
-      // Salvar pedido para possível emissão de NFe
-      setLastCompletedOrder(order)
+      // Salvar pedido para possível emissão de NFe/NFCe
+      setLastCompletedOrder({
+        ...order,
+        items: orderItems
+      })
       
       // Clear cart and close payment dialog
       clearCart()
@@ -777,8 +782,8 @@ const PDV = () => {
       // Reload products to update stock
       loadProducts()
 
-      // Abrir dialog para perguntar sobre emissão de NFe
-      setIsEmitirNFeDialogOpen(true)
+      // Abrir dialog para emissão de NFC-e (cupom fiscal)
+      setIsEmitirNFCeDialogOpen(true)
 
     } catch (error) {
       console.error('Error processing sale:', error)
@@ -1283,6 +1288,32 @@ const PDV = () => {
           })
         }}
       />
+
+      {/* Emitir NFC-e Dialog */}
+      {lastCompletedOrder && (
+        <EmitirNFCeDialog
+          open={isEmitirNFCeDialogOpen}
+          onOpenChange={(open) => {
+            setIsEmitirNFCeDialogOpen(open)
+            if (!open) {
+              toast({
+                title: "Venda finalizada",
+                description: `Pedido ${lastCompletedOrder?.order_number} criado com sucesso.`,
+              })
+              setLastCompletedOrder(null)
+            }
+          }}
+          orderId={lastCompletedOrder.id}
+          orderData={{
+            total: lastCompletedOrder.total_amount,
+            customer: selectedCustomer ? {
+              name: selectedCustomer.name,
+              document: selectedCustomer.document
+            } : undefined,
+            items: lastCompletedOrder.items || []
+          }}
+        />
+      )}
 
     </div>
     </div>

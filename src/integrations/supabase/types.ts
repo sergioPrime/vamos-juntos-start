@@ -1807,6 +1807,42 @@ export type Database = {
           },
         ]
       }
+      fiscal_email_templates: {
+        Row: {
+          assunto: string
+          created_at: string
+          id: string
+          is_active: boolean
+          is_default: boolean
+          mensagem_padrao: string
+          nome: string
+          org_id: string
+          updated_at: string
+        }
+        Insert: {
+          assunto: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          mensagem_padrao: string
+          nome: string
+          org_id: string
+          updated_at?: string
+        }
+        Update: {
+          assunto?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          mensagem_padrao?: string
+          nome?: string
+          org_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fiscal_nfe: {
         Row: {
           base_calculo_icms: number | null

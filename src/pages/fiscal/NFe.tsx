@@ -232,6 +232,9 @@ export default function NFe() {
                     <TableCell>{getStatusBadge(nfe.status)}</TableCell>
                     <TableCell className="text-right">
                       <NFeActionsMenu
+                        nfeId={nfe.id}
+                        nfeNumero={nfe.numero}
+                        orgId=""
                         status={nfe.status}
                         chaveAcesso={nfe.chave_acesso}
                         onView={() => navigate(`/fiscal/nfe/${nfe.id}`)}

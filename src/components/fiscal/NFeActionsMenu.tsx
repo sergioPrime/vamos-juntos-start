@@ -20,6 +20,10 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useState } from "react";
+import { NFeEmailDialog } from "./NFeEmailDialog";
+import { NFeCancelDialog } from "./NFeCancelDialog";
+import { NFeCorrectDialog } from "./NFeCorrectDialog";
 
 interface NFeActionsMenuProps {
   status: "autorizada" | "cancelada" | "pendente" | "rejeitada";
@@ -65,78 +69,101 @@ export default function NFeActionsMenu({
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm">
-          <MoreVertical className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Ações da NFe</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuItem onClick={onView}>
-          <Eye className="mr-2 h-4 w-4" />
-          Visualizar Detalhes
-        </DropdownMenuItem>
-
-        {status === "autorizada" && (
-          <>
-            <DropdownMenuItem onClick={handleDownloadXML}>
-              <Download className="mr-2 h-4 w-4" />
-              Download XML
-            </DropdownMenuItem>
-
-            <DropdownMenuItem onClick={handleDownloadDANFE}>
-              <FileText className="mr-2 h-4 w-4" />
-              Download DANFE
-            </DropdownMenuItem>
-
-            <DropdownMenuItem onClick={handlePrint}>
-              <Printer className="mr-2 h-4 w-4" />
-              Imprimir DANFE
-            </DropdownMenuItem>
-
-            <DropdownMenuItem onClick={handleSendEmail}>
-              <Mail className="mr-2 h-4 w-4" />
-              Enviar por Email
-            </DropdownMenuItem>
-
-            <DropdownMenuSeparator />
-
-            <DropdownMenuItem onClick={handleCartaCorrecao}>
-              <FileText className="mr-2 h-4 w-4" />
-              Carta de Correção
-            </DropdownMenuItem>
-
-            <DropdownMenuItem onClick={handleCancel}>
-              <XCircle className="mr-2 h-4 w-4" />
-              Cancelar NFe
-            </DropdownMenuItem>
-          </>
-        )}
-
-        {status === "pendente" && (
-          <DropdownMenuItem onClick={handleConsultarStatus}>
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Consultar Status
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm">
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuLabel>Ações da NFe</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          
+          <DropdownMenuItem onClick={onView}>
+            <Eye className="mr-2 h-4 w-4" />
+            Visualizar Detalhes
           </DropdownMenuItem>
-        )}
 
-        {status === "rejeitada" && (
-          <DropdownMenuItem onClick={handleConsultarStatus}>
-            <AlertTriangle className="mr-2 h-4 w-4" />
-            Ver Motivo da Rejeição
+          {status === "autorizada" && (
+            <>
+              <DropdownMenuItem onClick={handleDownloadXML}>
+                <Download className="mr-2 h-4 w-4" />
+                Download XML
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={handleDownloadDANFE}>
+                <FileText className="mr-2 h-4 w-4" />
+                Download DANFE
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={handlePrint}>
+                <Printer className="mr-2 h-4 w-4" />
+                Imprimir DANFE
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={() => setShowEmailDialog(true)}>
+                <Mail className="mr-2 h-4 w-4" />
+                Enviar por Email
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem onClick={() => setShowCorrectDialog(true)}>
+                <FileText className="mr-2 h-4 w-4" />
+                Carta de Correção
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={() => setShowCancelDialog(true)}>
+                <XCircle className="mr-2 h-4 w-4" />
+                Cancelar NFe
+              </DropdownMenuItem>
+            </>
+          )}
+
+          {status === "pendente" && (
+            <DropdownMenuItem onClick={handleConsultarStatus}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Consultar Status
+            </DropdownMenuItem>
+          )}
+
+          {status === "rejeitada" && (
+            <DropdownMenuItem onClick={handleConsultarStatus}>
+              <AlertTriangle className="mr-2 h-4 w-4" />
+              Ver Motivo da Rejeição
+            </DropdownMenuItem>
+          )}
+
+          <DropdownMenuSeparator />
+          
+          <DropdownMenuItem onClick={handleManifestacao}>
+            <CheckCircle className="mr-2 h-4 w-4" />
+            Manifestação do Destinatário
           </DropdownMenuItem>
-        )}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuItem onClick={handleManifestacao}>
-          <CheckCircle className="mr-2 h-4 w-4" />
-          Manifestação do Destinatário
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      <NFeEmailDialog
+        nfeId={nfeId}
+        nfeNumero={nfeNumero}
+        open={showEmailDialog}
+        onOpenChange={setShowEmailDialog}
+      />
+
+      <NFeCancelDialog
+        nfeId={nfeId}
+        nfeNumero={nfeNumero}
+        open={showCancelDialog}
+        onOpenChange={setShowCancelDialog}
+      />
+
+      <NFeCorrectDialog
+        nfeId={nfeId}
+        nfeNumero={nfeNumero}
+        open={showCorrectDialog}
+        onOpenChange={setShowCorrectDialog}
+      />
+    </>
   );
 }

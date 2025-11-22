@@ -186,23 +186,6 @@ export function useBusinessAlerts() {
       // NFSe table doesn't exist or has different structure
       // Returning empty array for now
       return []
-        
-        return [{
-          id: 'rejected_nfse',
-          type: 'rejected_nfse' as const,
-          severity: 'high' as const,
-          title: 'NFSe rejeitadas',
-          description: `${nfseList.length} NFSe rejeitada(s) totalizando R$ ${totalRejectedAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-          action_label: 'Ver NFSe',
-          action_route: '/nfse',
-          amount: totalRejectedAmount,
-          count: nfseList.length,
-          created_at: new Date().toISOString(),
-          resolved: false
-        }]
-      }
-
-      return []
     } catch (error) {
       console.error('Error checking rejected NFSe:', error)
       return []

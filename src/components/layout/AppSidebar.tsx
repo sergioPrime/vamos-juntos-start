@@ -41,7 +41,8 @@ const businessItems = [
 ]
 
 const purchaseItems = [
-  { title: "Solicitações", url: "/purchases/requests", icon: ShoppingCart },
+  { title: "Pedidos de Compra", url: "/purchases", icon: ShoppingCart },
+  { title: "Solicitações", url: "/purchases/requests", icon: FileText },
   { title: "Relatórios", url: "/purchases/reports", icon: TrendingUp },
 ]
 

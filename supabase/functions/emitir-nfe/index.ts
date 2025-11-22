@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
     const { data: nfeInserted, error: nfeError } = await supabase
       .from('nfe')
       .insert({
-        organization_id: org_id,
+        org_id: org_id,
         numero: 0, // Será gerado pelo trigger
         serie: nfe_data.serie,
         natureza_operacao: nfe_data.natureza_operacao,
@@ -155,6 +155,7 @@ Deno.serve(async (req) => {
         protocolo_autorizacao: protocoloAutorizacao,
         data_autorizacao: now.toISOString(),
         status: 'autorizada',
+        created_by: org_id,
       })
       .select()
       .single();
@@ -169,7 +170,7 @@ Deno.serve(async (req) => {
     // Inserir itens da NFe
     const itemsToInsert = items.map(item => ({
       nfe_id: nfeInserted.id,
-      organization_id: org_id,
+      org_id: org_id,
       item_numero: item.item_numero,
       codigo_produto: item.codigo_produto,
       descricao: item.descricao,

@@ -213,7 +213,7 @@ export default function NFeForm() {
       const { data: nfeData, error: nfeError } = await supabase
         .from("nfe")
         .insert({
-          organization_id: currentOrg.id,
+          org_id: currentOrg.id,
           numero: 0, // Será gerado pelo trigger
           serie: formData.serie,
           natureza_operacao: formData.natureza_operacao,
@@ -234,6 +234,7 @@ export default function NFeForm() {
           valor_total: parseFloat(formData.valor_total),
           informacoes_complementares: formData.informacoes_complementares,
           status: "rascunho",
+          created_by: currentOrg.id,
         })
         .select()
         .single();
@@ -244,7 +245,7 @@ export default function NFeForm() {
       if (formData.produtos.length > 0) {
         const items = formData.produtos.map((produto: any, index: number) => ({
           nfe_id: nfeData.id,
-          organization_id: currentOrg.id,
+          org_id: currentOrg.id,
           item_numero: index + 1,
           codigo_produto: produto.codigo,
           descricao: produto.descricao,

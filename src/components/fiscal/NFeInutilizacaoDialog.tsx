@@ -28,7 +28,7 @@ export default function NFeInutilizacaoDialog({
   onOpenChange,
   onSuccess,
 }: NFeInutilizacaoDialogProps) {
-  const { currentOrganization } = useOrganization();
+  const { currentOrg } = useOrganization();
   const [serie, setSerie] = useState("1");
   const [numeroInicial, setNumeroInicial] = useState("");
   const [numeroFinal, setNumeroFinal] = useState("");
@@ -64,7 +64,7 @@ export default function NFeInutilizacaoDialog({
       return;
     }
 
-    if (!currentOrganization?.id) {
+    if (!currentOrg?.id) {
       toast.error("Organização não identificada");
       return;
     }
@@ -80,7 +80,7 @@ export default function NFeInutilizacaoDialog({
             numeroInicial: numInicial,
             numeroFinal: numFinal,
             justificativa: justificativa.trim(),
-            orgId: currentOrganization.id,
+            orgId: currentOrg.id,
           },
         }
       );

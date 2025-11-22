@@ -12,8 +12,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Plus, Search, Download, Eye, Filter } from "lucide-react";
+import { FileText, Plus, Search, Download, Eye, Filter, XCircle } from "lucide-react";
 import NFeActionsMenu from "@/components/fiscal/NFeActionsMenu";
+import NFeInutilizacaoDialog from "@/components/fiscal/NFeInutilizacaoDialog";
 import {
   Select,
   SelectContent,
@@ -104,14 +105,25 @@ export default function NFe() {
               Gerencie suas notas fiscais modelo 55
             </p>
           </div>
-          <Button
-            onClick={() => navigate("/fiscal/nfe/new")}
-            size="lg"
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Nova NFe
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setInutilizacaoDialogOpen(true)}
+              size="lg"
+              variant="outline"
+              className="gap-2"
+            >
+              <XCircle className="h-4 w-4" />
+              Inutilizar Numeração
+            </Button>
+            <Button
+              onClick={() => navigate("/fiscal/nfe/new")}
+              size="lg"
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Nova NFe
+            </Button>
+          </div>
         </div>
 
         {/* Filtros */}

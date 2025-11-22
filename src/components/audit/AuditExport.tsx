@@ -48,12 +48,12 @@ export function AuditExport() {
         p_org_id: currentOrg.id,
         p_start_date: startDate.toISOString(),
         p_end_date: endDate.toISOString(),
-      });
+      }) as { data: any[] | null; error: any };
 
       if (error) throw error;
 
       // Converter para CSV
-      if (!data || data.length === 0) {
+      if (!data || !Array.isArray(data) || data.length === 0) {
         toast({
           title: 'Nenhum dado',
           description: 'Não há logs de auditoria no período selecionado',

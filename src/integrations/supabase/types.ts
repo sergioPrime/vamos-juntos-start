@@ -270,6 +270,65 @@ export type Database = {
           },
         ]
       }
+      audit_trail: {
+        Row: {
+          action: string
+          entity_id: string
+          entity_type: string
+          event_timestamp: string
+          field_name: string | null
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          new_value: string | null
+          old_value: string | null
+          org_id: string
+          user_agent: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          entity_id: string
+          entity_type: string
+          event_timestamp?: string
+          field_name?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          new_value?: string | null
+          old_value?: string | null
+          org_id: string
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          entity_id?: string
+          entity_type?: string
+          event_timestamp?: string
+          field_name?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          new_value?: string | null
+          old_value?: string | null
+          org_id?: string
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_trail_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bank_accounts: {
         Row: {
           account_digit: string | null
@@ -6554,10 +6613,13 @@ export type Database = {
           action_type: string
           created_at: string
           id: string
+          ip_address: string | null
           new_data: Json | null
           old_data: Json | null
           org_id: string
           record_id: string
+          request_id: string | null
+          session_id: string | null
           table_name: string
           transaction_type: string
           user_agent: string | null
@@ -6568,10 +6630,13 @@ export type Database = {
           action_type: string
           created_at?: string
           id?: string
+          ip_address?: string | null
           new_data?: Json | null
           old_data?: Json | null
           org_id: string
           record_id: string
+          request_id?: string | null
+          session_id?: string | null
           table_name: string
           transaction_type: string
           user_agent?: string | null
@@ -6582,10 +6647,13 @@ export type Database = {
           action_type?: string
           created_at?: string
           id?: string
+          ip_address?: string | null
           new_data?: Json | null
           old_data?: Json | null
           org_id?: string
           record_id?: string
+          request_id?: string | null
+          session_id?: string | null
           table_name?: string
           transaction_type?: string
           user_agent?: string | null
@@ -6785,6 +6853,27 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      audit_summary: {
+        Row: {
+          action: string | null
+          action_count: number | null
+          audit_date: string | null
+          entity_type: string | null
+          first_action: string | null
+          last_action: string | null
+          org_id: string | null
+          unique_users: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_trail_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       blockchain_statistics: {
         Row: {
@@ -6988,6 +7077,10 @@ export type Database = {
           reorder_point: number
         }[]
       }
+      cleanup_old_audit_logs: {
+        Args: { p_retention_days?: number }
+        Returns: number
+      }
       cleanup_old_nfce_logs: { Args: never; Returns: undefined }
       cleanup_old_notifications: { Args: never; Returns: undefined }
       create_blockchain_alert: {
@@ -7039,6 +7132,20 @@ export type Database = {
       deactivate_nfce_contingency: {
         Args: { p_org_id: string }
         Returns: boolean
+      }
+      export_audit_logs: {
+        Args: { p_end_date: string; p_org_id: string; p_start_date: string }
+        Returns: {
+          action: string
+          entity_id: string
+          entity_type: string
+          event_timestamp: string
+          field_name: string
+          ip_address: string
+          new_value: string
+          old_value: string
+          user_email: string
+        }[]
       }
       generate_blockchain_hash: {
         Args: {
@@ -7110,6 +7217,30 @@ export type Database = {
         Returns: number
       }
       generate_next_system_code: { Args: { p_org_id: string }; Returns: string }
+      get_audit_timeline: {
+        Args: {
+          p_end_date?: string
+          p_entity_id?: string
+          p_entity_type?: string
+          p_limit?: number
+          p_org_id: string
+          p_start_date?: string
+          p_user_id?: string
+        }
+        Returns: {
+          action: string
+          entity_id: string
+          entity_type: string
+          event_timestamp: string
+          field_name: string
+          id: string
+          ip_address: string
+          metadata: Json
+          new_value: string
+          old_value: string
+          user_email: string
+        }[]
+      }
       get_installments_summary: {
         Args: { p_entry_id: string }
         Returns: {
@@ -7209,6 +7340,19 @@ export type Database = {
       is_used_in_financial_entries: {
         Args: { item_id: string; reference_type: string }
         Returns: boolean
+      }
+      log_audit_event: {
+        Args: {
+          p_action: string
+          p_entity_id: string
+          p_entity_type: string
+          p_field_name?: string
+          p_metadata?: Json
+          p_new_value?: string
+          p_old_value?: string
+          p_org_id: string
+        }
+        Returns: string
       }
       mark_all_notifications_as_read: {
         Args: { p_org_id: string }

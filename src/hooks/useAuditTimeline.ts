@@ -11,7 +11,7 @@ export interface AuditTimelineEvent {
   old_value: string | null;
   new_value: string | null;
   user_email: string;
-  timestamp: string;
+  event_timestamp: string;
   ip_address: string | null;
   metadata: Record<string, any>;
 }
@@ -44,14 +44,14 @@ export function useAuditTimeline(params: UseAuditTimelineParams = {}) {
       });
 
       if (error) throw error;
-      return (data || []) as AuditTimelineEvent[];
+      return (data || []) as unknown as AuditTimelineEvent[];
     },
     enabled: !!currentOrg?.id,
   });
 
   // Agrupar eventos por data
   const eventsByDate = events.reduce((acc, event) => {
-    const date = new Date(event.timestamp).toLocaleDateString('pt-BR');
+    const date = new Date(event.event_timestamp).toLocaleDateString('pt-BR');
     if (!acc[date]) {
       acc[date] = [];
     }

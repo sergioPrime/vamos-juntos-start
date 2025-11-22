@@ -133,7 +133,7 @@ export function AuditTimeline(props: AuditTimelineProps) {
                             </div>
                             <div className="flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              {formatDistanceToNow(new Date(event.timestamp), {
+                              {formatDistanceToNow(new Date(event.event_timestamp), {
                                 addSuffix: true,
                                 locale: ptBR,
                               })}

@@ -235,6 +235,7 @@ export default function NFe() {
                         status={nfe.status}
                         chaveAcesso={nfe.chave_acesso}
                         onView={() => navigate(`/fiscal/nfe/${nfe.id}`)}
+                        onRefresh={loadNFes}
                       />
                     </TableCell>
                   </TableRow>

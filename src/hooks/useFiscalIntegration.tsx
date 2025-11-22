@@ -45,11 +45,25 @@ export function useFiscalIntegration() {
 
       if (itemsError) throw itemsError
 
+      // Buscar dados do cliente
+      const { data: customer, error: customerError } = await supabase
+        .from('pessoas')
+        .select('*')
+        .eq('id', order.customer_id)
+        .single()
+
+      if (customerError) {
+        console.warn('Cliente não encontrado:', customerError)
+      }
+
       // Navegar para o formulário de NFe com dados pré-preenchidos
       navigate('/fiscal/nfe/new', {
         state: {
           fromOrder: true,
-          orderData: order,
+          orderData: {
+            ...order,
+            customer: customer
+          },
           orderItems: orderItems
         }
       })

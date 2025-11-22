@@ -3344,6 +3344,81 @@ export type Database = {
           },
         ]
       }
+      nfe_inutilizacoes: {
+        Row: {
+          ano: number
+          chave_inutilizacao: string | null
+          created_at: string | null
+          created_by: string
+          data_inutilizacao: string | null
+          fiscal_config_id: string
+          id: string
+          justificativa: string
+          mensagem_sefaz: string | null
+          modelo: string
+          numero_final: number
+          numero_inicial: number
+          org_id: string
+          protocolo: string | null
+          serie: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          ano: number
+          chave_inutilizacao?: string | null
+          created_at?: string | null
+          created_by: string
+          data_inutilizacao?: string | null
+          fiscal_config_id: string
+          id?: string
+          justificativa: string
+          mensagem_sefaz?: string | null
+          modelo?: string
+          numero_final: number
+          numero_inicial: number
+          org_id: string
+          protocolo?: string | null
+          serie: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          ano?: number
+          chave_inutilizacao?: string | null
+          created_at?: string | null
+          created_by?: string
+          data_inutilizacao?: string | null
+          fiscal_config_id?: string
+          id?: string
+          justificativa?: string
+          mensagem_sefaz?: string | null
+          modelo?: string
+          numero_final?: number
+          numero_inicial?: number
+          org_id?: string
+          protocolo?: string | null
+          serie?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfe_inutilizacoes_fiscal_config_id_fkey"
+            columns: ["fiscal_config_id"]
+            isOneToOne: false
+            referencedRelation: "fiscal_config"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_inutilizacoes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nfe_items: {
         Row: {
           cbs_aliquota: number | null

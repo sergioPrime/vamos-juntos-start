@@ -175,10 +175,7 @@ const Inventory = () => {
         onQuickMovementClick={() => setIsMovementDialogOpen(true)}
       />
 
-      <IntegrationStatus 
-        featureName="Gestão de Estoque"
-        integrationType="inventory"
-      />
+      <IntegrationStatus />
 
       <InventoryStats
         totalProducts={products.length}

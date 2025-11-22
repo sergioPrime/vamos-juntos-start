@@ -1,7 +1,8 @@
 import { Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ResponsiveTable } from "@/components/ui/responsive-table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useNavigate } from "react-router-dom"
 
 interface Product {
@@ -33,75 +34,93 @@ export function InventoryProductsTable({ products }: InventoryProductsTableProps
     return { status: "ok", label: "Normal", variant: "secondary" as const }
   }
 
-  const columns = [
-    {
-      header: "Produto",
-      accessor: (product: Product) => (
-        <div>
-          <div className="font-medium">{product.name}</div>
-          {product.sku && (
-            <div className="text-xs text-muted-foreground">SKU: {product.sku}</div>
-          )}
-        </div>
-      ),
-    },
-    {
-      header: "Categoria",
-      accessor: (product: Product) => product.category || "-",
-    },
-    {
-      header: "Estoque Atual",
-      accessor: (product: Product) => (
-        <div className="text-center">
-          <div className="font-medium">{product.stock_quantity}</div>
-          <div className="text-xs text-muted-foreground">{product.unit}</div>
-        </div>
-      ),
-    },
-    {
-      header: "Estoque Mínimo",
-      accessor: (product: Product) => (
-        <div className="text-center">
-          {product.min_stock_level} {product.unit}
-        </div>
-      ),
-    },
-    {
-      header: "Status",
-      accessor: (product: Product) => {
-        const status = getStockStatus(product)
-        return <Badge variant={status.variant}>{status.label}</Badge>
-      },
-    },
-    {
-      header: "Valor Unitário",
-      accessor: (product: Product) =>
-        new Intl.NumberFormat('pt-BR', {
-          style: 'currency',
-          currency: 'BRL',
-        }).format(product.unit_price),
-    },
-    {
-      header: "Valor Total",
-      accessor: (product: Product) =>
-        new Intl.NumberFormat('pt-BR', {
-          style: 'currency',
-          currency: 'BRL',
-        }).format(product.stock_quantity * product.cost_price),
-    },
-    {
-      header: "Ações",
-      accessor: (product: Product) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate(`/products/${product.id}`)}
-        >
-          <Eye className="h-4 w-4" />
-        </Button>
-      ),
-    },
-  ]
+  if (products.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Produtos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8 text-muted-foreground">
+            Nenhum produto encontrado
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
-  return <ResponsiveTable data={products} columns={columns} />
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Produtos</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Produto</TableHead>
+                <TableHead>Categoria</TableHead>
+                <TableHead className="text-center">Estoque Atual</TableHead>
+                <TableHead className="text-center">Estoque Mínimo</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Valor Unitário</TableHead>
+                <TableHead className="text-right">Valor Total</TableHead>
+                <TableHead>Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {products.map((product) => {
+                const status = getStockStatus(product)
+                return (
+                  <TableRow key={product.id}>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{product.name}</div>
+                        {product.sku && (
+                          <div className="text-xs text-muted-foreground">SKU: {product.sku}</div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>{product.category || "-"}</TableCell>
+                    <TableCell className="text-center">
+                      <div className="font-medium">{product.stock_quantity}</div>
+                      <div className="text-xs text-muted-foreground">{product.unit}</div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {product.min_stock_level} {product.unit}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={status.variant}>{status.label}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                      }).format(product.unit_price)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                      }).format(product.stock_quantity * product.cost_price)}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(`/products/${product.id}`)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
+  )
 }

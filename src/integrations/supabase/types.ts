@@ -2816,6 +2816,7 @@ export type Database = {
           company_id: string | null
           created_at: string
           created_by: string
+          danfe_path: string | null
           data_autorizacao: string | null
           data_cancelamento: string | null
           data_emissao: string
@@ -2882,6 +2883,7 @@ export type Database = {
           valor_total_is: number | null
           xml_autorizado: string | null
           xml_gerado: string | null
+          xml_path: string | null
         }
         Insert: {
           aliquota_cbs?: number | null
@@ -2893,6 +2895,7 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           created_by: string
+          danfe_path?: string | null
           data_autorizacao?: string | null
           data_cancelamento?: string | null
           data_emissao?: string
@@ -2959,6 +2962,7 @@ export type Database = {
           valor_total_is?: number | null
           xml_autorizado?: string | null
           xml_gerado?: string | null
+          xml_path?: string | null
         }
         Update: {
           aliquota_cbs?: number | null
@@ -2970,6 +2974,7 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           created_by?: string
+          danfe_path?: string | null
           data_autorizacao?: string | null
           data_cancelamento?: string | null
           data_emissao?: string
@@ -3036,6 +3041,7 @@ export type Database = {
           valor_total_is?: number | null
           xml_autorizado?: string | null
           xml_gerado?: string | null
+          xml_path?: string | null
         }
         Relationships: [
           {

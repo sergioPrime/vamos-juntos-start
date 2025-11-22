@@ -32,12 +32,72 @@ export default function NFeActionsMenu({
   chaveAcesso,
   onView,
 }: NFeActionsMenuProps) {
-  const handleDownloadXML = () => {
-    toast.success("Download do XML iniciado");
+  const handleDownloadXML = async () => {
+    try {
+      toast.info("Gerando arquivo XML...");
+      
+      const { data, error } = await supabase.functions.invoke("gerar-xml-danfe", {
+        body: {
+          nfeId,
+          tipo: "xml",
+        },
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        throw new Error(data.error || "Erro ao gerar XML");
+      }
+
+      // Download do arquivo
+      const link = document.createElement("a");
+      link.href = data.files.xml.url;
+      link.download = `NFe_${nfeNumero}.xml`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success("Download do XML concluído!");
+    } catch (error: any) {
+      console.error("Erro ao baixar XML:", error);
+      toast.error("Erro ao baixar XML", {
+        description: error.message,
+      });
+    }
   };
 
-  const handleDownloadDANFE = () => {
-    toast.success("Download do DANFE iniciado");
+  const handleDownloadDANFE = async () => {
+    try {
+      toast.info("Gerando DANFE...");
+      
+      const { data, error } = await supabase.functions.invoke("gerar-xml-danfe", {
+        body: {
+          nfeId,
+          tipo: "danfe",
+        },
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        throw new Error(data.error || "Erro ao gerar DANFE");
+      }
+
+      // Download do arquivo
+      const link = document.createElement("a");
+      link.href = data.files.danfe.url;
+      link.download = `DANFE_${nfeNumero}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success("Download do DANFE concluído!");
+    } catch (error: any) {
+      console.error("Erro ao baixar DANFE:", error);
+      toast.error("Erro ao baixar DANFE", {
+        description: error.message,
+      });
+    }
   };
 
   const handleSendEmail = () => {

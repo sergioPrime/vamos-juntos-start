@@ -18,8 +18,6 @@ import { Separator } from "@/components/ui/separator";
 import NFeProductsTable from "@/components/fiscal/NFeProductsTable";
 import NFeProductDialog from "@/components/fiscal/NFeProductDialog";
 import { ComboboxAsync } from "@/components/ui/combobox-async";
-import { useNFe } from "@/hooks/useNFe";
-import { useNFeItems } from "@/hooks/useNFeItems";
 import { useAsyncSearch } from "@/hooks/useAsyncSearch";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrganization } from "@/hooks/useOrganization";
@@ -35,10 +33,7 @@ export default function NFeForm() {
   const location = useLocation();
   const { id } = useParams();
   const isEditing = !!id;
-  const { currentOrganization } = useOrganization();
-
-  const { createNFe, updateNFe, getNFeById } = useNFe();
-  const { items: nfeItems, addItem, updateItem, removeItem, loadItems } = useNFeItems(id || "");
+  const { currentOrg } = useOrganization();
   const { searchPessoas } = useAsyncSearch();
 
   const fromOrder = location.state?.fromOrder || false;
@@ -90,7 +85,7 @@ export default function NFeForm() {
   // Carregar NFe se estiver editando
   useEffect(() => {
     if (isEditing && id) {
-      loadNFe();
+      loadNFeData();
     }
   }, [id, isEditing]);
 
@@ -101,10 +96,17 @@ export default function NFeForm() {
     }
   }, [fromOrder, orderData]);
 
-  const loadNFe = async () => {
+  const loadNFeData = async () => {
     try {
       setLoading(true);
-      const nfe = await getNFeById(id!);
+      const { data: nfe, error } = await supabase
+        .from("nfe")
+        .select("*, nfe_items(*)")
+        .eq("id", id!)
+        .single();
+
+      if (error) throw error;
+
       if (nfe) {
         setFormData({
           customer_id: nfe.customer_id || "",
@@ -135,6 +137,31 @@ export default function NFeForm() {
           additional_info: nfe.additional_info || "",
           tax_info: nfe.tax_info || "",
         });
+
+        // Carregar itens
+        if (nfe.nfe_items) {
+          const items = nfe.nfe_items.map((item: any) => ({
+            id: item.id,
+            product_id: item.product_id,
+            codigo: item.product_code,
+            descricao: item.product_description,
+            ncm: item.ncm,
+            cfop: item.cfop,
+            unidade: item.unit,
+            quantidade: item.quantity,
+            valor_unitario: item.unit_price,
+            valor_total: item.total_price,
+            icms_aliquota: item.icms_rate,
+            icms_valor: item.icms_value,
+            ipi_aliquota: item.ipi_rate,
+            ipi_valor: item.ipi_value,
+            pis_aliquota: item.pis_rate,
+            pis_valor: item.pis_value,
+            cofins_aliquota: item.cofins_rate,
+            cofins_valor: item.cofins_value,
+          }));
+          setProdutos(items);
+        }
       }
     } catch (error) {
       console.error("Erro ao carregar NFe:", error);
@@ -159,14 +186,14 @@ export default function NFeForm() {
         setFormData((prev) => ({
           ...prev,
           customer_id: pessoa.id,
-          customer_name: pessoa.nome,
-          customer_document: pessoa.cpf_cnpj || "",
-          customer_ie: pessoa.inscricao_estadual || "",
-          customer_address: pessoa.endereco || "",
-          customer_number: pessoa.numero || "",
+          customer_name: pessoa.razao_social,
+          customer_document: pessoa.documento || "",
+          customer_ie: pessoa.ie || "",
+          customer_address: pessoa.logradouro || "",
+          customer_number: pessoa.numero_logradouro || "",
           customer_district: pessoa.bairro || "",
           customer_city: pessoa.cidade || "",
-          customer_state: pessoa.estado || "",
+          customer_state: pessoa.uf || "",
           customer_zip: pessoa.cep || "",
         }));
       }
@@ -186,7 +213,7 @@ export default function NFeForm() {
           product_id: item.product_id,
           codigo: product?.sku || item.product_id.substring(0, 8),
           descricao: item.product_name,
-          ncm: product?.ncm || "00000000",
+          ncm: product?.ncm_code || "00000000",
           cfop: "5102",
           unidade: product?.unit || "UN",
           quantidade: item.quantity,
@@ -231,14 +258,14 @@ export default function NFeForm() {
         setFormData((prev) => ({
           ...prev,
           customer_id: pessoa.id,
-          customer_name: pessoa.nome,
-          customer_document: pessoa.cpf_cnpj || "",
-          customer_ie: pessoa.inscricao_estadual || "",
-          customer_address: pessoa.endereco || "",
-          customer_number: pessoa.numero || "",
+          customer_name: pessoa.razao_social,
+          customer_document: pessoa.documento || "",
+          customer_ie: pessoa.ie || "",
+          customer_address: pessoa.logradouro || "",
+          customer_number: pessoa.numero_logradouro || "",
           customer_district: pessoa.bairro || "",
           customer_city: pessoa.cidade || "",
-          customer_state: pessoa.estado || "",
+          customer_state: pessoa.uf || "",
           customer_zip: pessoa.cep || "",
         }));
       }
@@ -333,7 +360,13 @@ export default function NFeForm() {
 
       setLoading(true);
 
-      const nfeData = {
+      if (!currentOrg) {
+        toast.error("Organização não encontrada");
+        return;
+      }
+
+      const nfeData: any = {
+        org_id: currentOrg.id,
         customer_id: formData.customer_id,
         customer_name: formData.customer_name,
         customer_document: formData.customer_document,
@@ -367,37 +400,54 @@ export default function NFeForm() {
       let nfeId = id;
 
       if (isEditing) {
-        await updateNFe(id!, nfeData);
+        const { error } = await supabase
+          .from("nfe")
+          .update(nfeData)
+          .eq("id", id!);
+
+        if (error) throw error;
+
+        // Remover itens antigos
+        await supabase.from("nfe_items").delete().eq("nfe_id", id!);
       } else {
-        const newNFe = await createNFe(nfeData);
+        const { data: newNFe, error } = await supabase
+          .from("nfe")
+          .insert(nfeData)
+          .select()
+          .single();
+
+        if (error) throw error;
         nfeId = newNFe.id;
       }
 
       // Salvar itens
-      for (const produto of produtos) {
-        const itemData = {
-          nfe_id: nfeId!,
-          product_id: produto.product_id,
-          product_code: produto.codigo,
-          product_description: produto.descricao,
-          ncm: produto.ncm,
-          cfop: produto.cfop,
-          unit: produto.unidade,
-          quantity: produto.quantidade,
-          unit_price: produto.valor_unitario,
-          total_price: produto.valor_total,
-          icms_rate: produto.icms_aliquota,
-          icms_value: produto.icms_valor,
-          ipi_rate: produto.ipi_aliquota,
-          ipi_value: produto.ipi_valor,
-          pis_rate: produto.pis_aliquota,
-          pis_value: produto.pis_valor,
-          cofins_rate: produto.cofins_aliquota,
-          cofins_value: produto.cofins_valor,
-        };
+      const itemsToInsert = produtos.map((produto) => ({
+        org_id: currentOrg.id,
+        nfe_id: nfeId!,
+        product_id: produto.product_id,
+        product_code: produto.codigo,
+        product_description: produto.descricao,
+        ncm: produto.ncm,
+        cfop: produto.cfop,
+        unit: produto.unidade,
+        quantity: produto.quantidade,
+        unit_price: produto.valor_unitario,
+        total_price: produto.valor_total,
+        icms_rate: produto.icms_aliquota,
+        icms_value: produto.icms_valor,
+        ipi_rate: produto.ipi_aliquota,
+        ipi_value: produto.ipi_valor,
+        pis_rate: produto.pis_aliquota,
+        pis_value: produto.pis_valor,
+        cofins_rate: produto.cofins_aliquota,
+        cofins_value: produto.cofins_valor,
+      }));
 
-        await addItem(itemData);
-      }
+      const { error: itemsError } = await supabase
+        .from("nfe_items")
+        .insert(itemsToInsert);
+
+      if (itemsError) throw itemsError;
 
       toast.success(
         isEditing ? "NFe atualizada com sucesso!" : "NFe criada com sucesso!"

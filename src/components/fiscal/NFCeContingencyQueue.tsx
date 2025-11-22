@@ -41,13 +41,13 @@ export function NFCeContingencyQueue() {
           {queuedNFCes.map((item) => (
             <TableRow key={item.id}>
               <TableCell className="font-medium">
-                {item.nfce_data?.numero || "-"}
+                {(item.nfce_data as any)?.numero || "-"}
               </TableCell>
               <TableCell>
                 {item.created_at && format(new Date(item.created_at), "dd/MM/yyyy HH:mm")}
               </TableCell>
               <TableCell>
-                {formatCurrency(item.nfce_data?.valor_total || 0)}
+                {formatCurrency((item.nfce_data as any)?.valor_total || 0)}
               </TableCell>
               <TableCell>
                 <Badge variant={item.retry_count > 2 ? "destructive" : "secondary"}>

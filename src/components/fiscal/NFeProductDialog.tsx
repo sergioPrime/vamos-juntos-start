@@ -17,6 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ComboboxAsync } from "@/components/ui/combobox-async";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
+import { toast } from "sonner";
 
 interface NFeProduct {
   id: string;
@@ -51,6 +55,7 @@ export default function NFeProductDialog({
   onSave,
   product,
 }: NFeProductDialogProps) {
+  const { currentOrg } = useOrganization();
   const [formData, setFormData] = useState<NFeProduct>({
     id: "",
     codigo: "",
@@ -127,6 +132,66 @@ export default function NFeProductDialog({
     setFormData({ ...newData, ...calculated });
   };
 
+  // Buscar produtos
+  const searchProdutos = async (query: string) => {
+    if (!currentOrg) return [];
+
+    const { data, error } = await supabase
+      .from("products")
+      .select("id, name, sku, price")
+      .eq("org_id", currentOrg.id)
+      .or(`name.ilike.%${query}%,sku.ilike.%${query}%`)
+      .limit(20);
+
+    if (error) {
+      console.error("Erro ao buscar produtos:", error);
+      return [];
+    }
+
+    return (
+      data?.map((prod) => ({
+        id: prod.id,
+        name: `${prod.name} ${prod.sku ? `- ${prod.sku}` : ""}`,
+        code: prod.sku || "",
+      })) || []
+    );
+  };
+
+  // Carregar dados do produto selecionado
+  const handleProdutoChange = async (produtoId: string) => {
+    if (!produtoId) {
+      setFormData((prev) => ({
+        ...prev,
+        id: "",
+        codigo: "",
+        descricao: "",
+      }));
+      return;
+    }
+
+    const { data: produto, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("id", produtoId)
+      .single();
+
+    if (error) {
+      toast.error("Erro ao carregar dados do produto");
+      return;
+    }
+
+    const newData = {
+      ...formData,
+      id: produto.id,
+      codigo: produto.sku || produto.id.substring(0, 8),
+      descricao: produto.name || "",
+      valor_unitario: produto.price || 0,
+    };
+
+    const calculated = calculateTotals(newData);
+    setFormData({ ...newData, ...calculated });
+  };
+
   const handleSave = () => {
     onSave(formData);
     onOpenChange(false);
@@ -148,9 +213,22 @@ export default function NFeProductDialog({
           </TabsList>
 
           <TabsContent value="produto" className="space-y-4 mt-4">
+            <div>
+              <Label htmlFor="produto" className="required">
+                Produto
+              </Label>
+              <ComboboxAsync
+                value={formData.id}
+                onValueChange={handleProdutoChange}
+                searchFunction={searchProdutos}
+                placeholder="Busque por nome ou código..."
+                emptyText="Nenhum produto encontrado"
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="codigo" className="required">
+                <Label htmlFor="codigo">
                   Código
                 </Label>
                 <Input

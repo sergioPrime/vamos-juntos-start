@@ -2,3 +2,18 @@ project_id = "wrdyffwjlylgxfbxbztf"
 
 [functions.search-ncm]
 verify_jwt = false
+
+[functions.gerar-danfe]
+verify_jwt = false
+
+[functions.consultar-status-nfe]
+verify_jwt = false
+
+[functions.cancelar-nfe]
+verify_jwt = false
+
+[functions.carta-correcao-nfe]
+verify_jwt = false
+
+[functions.enviar-email-nfe]
+verify_jwt = false

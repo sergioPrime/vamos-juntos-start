@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface NFe {
   id: string;
@@ -29,7 +30,7 @@ interface NFe {
   cliente: string;
   data_emissao: string;
   valor_total: number;
-  status: "autorizada" | "cancelada" | "pendente" | "rejeitada";
+  status: "autorizada" | "cancelada" | "pendente" | "rejeitada" | "rascunho";
   chave_acesso: string;
 }
 
@@ -38,6 +39,10 @@ export default function NFe() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("todos");
   const [dateFilter, setDateFilter] = useState<string>("todos");
+
+  const handleEmitNFe = async (nfeId: string) => {
+    toast.info("Funcionalidade de emissão em implementação")
+  }
 
   // Dados mockados para demonstração
   const [nfeList] = useState<NFe[]>([
@@ -69,6 +74,7 @@ export default function NFe() {
       cancelada: "destructive",
       pendente: "secondary",
       rejeitada: "destructive",
+      rascunho: "outline",
     };
 
     return (

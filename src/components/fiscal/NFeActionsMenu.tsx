@@ -24,12 +24,20 @@ import { toast } from "sonner";
 interface NFeActionsMenuProps {
   status: "autorizada" | "cancelada" | "pendente" | "rejeitada";
   chaveAcesso: string;
+  nfeId?: string;
+  nfeNumero?: string;
+  clienteEmail?: string;
+  onUpdate?: () => void;
   onView: () => void;
 }
 
 export default function NFeActionsMenu({
   status,
   chaveAcesso,
+  nfeId,
+  nfeNumero,
+  clienteEmail,
+  onUpdate,
   onView,
 }: NFeActionsMenuProps) {
   const handleDownloadXML = () => {

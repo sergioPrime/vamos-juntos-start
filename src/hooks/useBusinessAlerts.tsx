@@ -182,7 +182,7 @@ export function useBusinessAlerts() {
   const checkRejectedNFSe = useCallback(async (): Promise<Alert[]> => {
     // Temporarily disabled due to type mismatch with nfse table structure
     return []
-  }, [])
+  }, [currentOrg])
 
   // Check for pending orders
   const checkPendingOrders = useCallback(async () => {

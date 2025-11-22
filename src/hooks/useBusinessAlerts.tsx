@@ -183,6 +183,11 @@ export function useBusinessAlerts() {
     if (!currentOrg?.id) return []
 
     try {
+      // NFS-e table structure needs to be updated first
+      // Temporarily disabled until correct column names are available
+      return []
+      
+      /* Original implementation - waiting for table update
       const { data: nfseList, error } = await supabase
         .from('nfse')
         .select('id, number, service_amount, service_description')
@@ -203,6 +208,11 @@ export function useBusinessAlerts() {
           action_label: 'Ver NFSe',
           action_route: '/nfse',
           amount: totalRejectedAmount,
+          count: nfseList.length,
+          timestamp: new Date().toISOString()
+        }]
+      }
+      */
           count: nfseList.length,
           created_at: new Date().toISOString(),
           resolved: false

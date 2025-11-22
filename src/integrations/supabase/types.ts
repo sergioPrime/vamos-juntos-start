@@ -5569,6 +5569,64 @@ export type Database = {
           },
         ]
       }
+      purchase_approvals: {
+        Row: {
+          approved_at: string | null
+          approver_id: string
+          comments: string | null
+          created_at: string | null
+          id: string
+          level_order: number
+          purchase_id: string | null
+          request_id: string | null
+          status: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approver_id: string
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          level_order: number
+          purchase_id?: string | null
+          request_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approver_id?: string
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          level_order?: number
+          purchase_id?: string | null
+          request_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_approvals_approver_id_fkey"
+            columns: ["approver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_approvals_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_approvals_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       purchase_budgets: {
         Row: {
           available_amount: number
@@ -5652,6 +5710,312 @@ export type Database = {
           unit_price?: number
         }
         Relationships: []
+      }
+      purchase_receipt_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          product_id: string
+          purchase_item_id: string
+          quality_check_status: string | null
+          quality_notes: string | null
+          quantity_received: number
+          receipt_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          product_id: string
+          purchase_item_id: string
+          quality_check_status?: string | null
+          quality_notes?: string | null
+          quantity_received: number
+          receipt_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          product_id?: string
+          purchase_item_id?: string
+          quality_check_status?: string | null
+          quality_notes?: string | null
+          quantity_received?: number
+          receipt_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_receipt_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_receipt_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "stock_integrity_check"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_receipt_items_purchase_item_id_fkey"
+            columns: ["purchase_item_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_receipt_items_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_receipts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_receipts: {
+        Row: {
+          created_at: string | null
+          id: string
+          invoice_date: string | null
+          invoice_number: string | null
+          notes: string | null
+          org_id: string
+          purchase_id: string
+          receipt_code: number
+          receipt_date: string | null
+          receipt_number: string | null
+          received_by: string
+          warehouse_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          invoice_date?: string | null
+          invoice_number?: string | null
+          notes?: string | null
+          org_id: string
+          purchase_id: string
+          receipt_code?: number
+          receipt_date?: string | null
+          receipt_number?: string | null
+          received_by: string
+          warehouse_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          invoice_date?: string | null
+          invoice_number?: string | null
+          notes?: string | null
+          org_id?: string
+          purchase_id?: string
+          receipt_code?: number
+          receipt_date?: string | null
+          receipt_number?: string | null
+          received_by?: string
+          warehouse_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_receipts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_receipts_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_receipts_received_by_fkey"
+            columns: ["received_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_receipts_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_request_items: {
+        Row: {
+          created_at: string | null
+          estimated_total: number | null
+          estimated_unit_price: number | null
+          id: string
+          notes: string | null
+          product_description: string
+          product_id: string | null
+          quantity: number
+          request_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          estimated_total?: number | null
+          estimated_unit_price?: number | null
+          id?: string
+          notes?: string | null
+          product_description: string
+          product_id?: string | null
+          quantity: number
+          request_id: string
+        }
+        Update: {
+          created_at?: string | null
+          estimated_total?: number | null
+          estimated_unit_price?: number | null
+          id?: string
+          notes?: string | null
+          product_description?: string
+          product_id?: string | null
+          quantity?: number
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_request_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_request_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "stock_integrity_check"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_request_items_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string | null
+          converted_to_purchase_id: string | null
+          cost_center_id: string | null
+          created_at: string | null
+          department: string | null
+          description: string | null
+          id: string
+          justification: string | null
+          org_id: string
+          priority: string | null
+          rejection_reason: string | null
+          request_code: number
+          request_number: string | null
+          requested_by: string
+          status: string
+          title: string
+          total_estimated_amount: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string | null
+          converted_to_purchase_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string | null
+          department?: string | null
+          description?: string | null
+          id?: string
+          justification?: string | null
+          org_id: string
+          priority?: string | null
+          rejection_reason?: string | null
+          request_code?: number
+          request_number?: string | null
+          requested_by: string
+          status?: string
+          title: string
+          total_estimated_amount?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string | null
+          converted_to_purchase_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string | null
+          department?: string | null
+          description?: string | null
+          id?: string
+          justification?: string | null
+          org_id?: string
+          priority?: string | null
+          rejection_reason?: string | null
+          request_code?: number
+          request_number?: string | null
+          requested_by?: string
+          status?: string
+          title?: string
+          total_estimated_amount?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_requests_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_requests_converted_to_purchase_id_fkey"
+            columns: ["converted_to_purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_requests_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_requests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       purchases: {
         Row: {

@@ -185,6 +185,15 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
+          <Route path="/finance/automacao" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <AutomacaoFinanceira />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
           <Route path="/charges" element={
             <ProtectedRoute>
               <AppLayout>

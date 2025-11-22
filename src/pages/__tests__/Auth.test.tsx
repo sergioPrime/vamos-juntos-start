@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderWithProviders, screen, waitFor } from '@/test/utils/renderWithProviders';
-import userEvent from '@testing-library/user-event';
+import { renderWithProviders, screen, waitFor, userEvent } from '@/test/utils/renderWithProviders';
 import Auth from '../Auth';
 import { supabase } from '@/integrations/supabase/client';
 

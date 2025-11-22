@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { renderWithProviders, screen } from '@/test/utils/renderWithProviders';
+import { renderWithProviders } from '@/test/utils/renderWithProviders';
+import { screen } from '@testing-library/react';
 import { PasswordStrengthIndicator } from '../PasswordStrengthIndicator';
 
 describe('PasswordStrengthIndicator', () => {

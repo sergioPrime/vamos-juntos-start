@@ -25,16 +25,23 @@ export function CustomerSearchDialog({
     try {
       setLoading(true);
       
-      const query = supabase
-        .from("pessoas")
-        .select("*")
-        .eq("tipo", "cliente");
+      let result;
+      if (search) {
+        result = await supabase
+          .from("pessoas")
+          .select("*")
+          .eq("tipo", "cliente")
+          .or(`razao_social.ilike.%${search}%,documento.ilike.%${search}%`)
+          .limit(20);
+      } else {
+        result = await supabase
+          .from("pessoas")
+          .select("*")
+          .eq("tipo", "cliente")
+          .limit(20);
+      }
 
-      const queryWithSearch = search 
-        ? query.or(`razao_social.ilike.%${search}%,documento.ilike.%${search}%`)
-        : query;
-
-      const { data, error } = await queryWithSearch.limit(20);
+      const { data, error } = result;
 
       if (error) {
         console.error("Erro ao buscar clientes:", error);

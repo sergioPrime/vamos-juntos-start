@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Plus, Search, Download, Eye, Filter } from "lucide-react";
+import { FileText, Plus, Search, Download, Eye, Filter, BarChart3 } from "lucide-react";
 import NFeActionsMenu from "@/components/fiscal/NFeActionsMenu";
 import {
   Select,

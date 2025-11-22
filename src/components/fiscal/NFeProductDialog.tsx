@@ -28,6 +28,7 @@ interface NFeProduct {
   quantidade: number;
   valor_unitario: number;
   valor_total: number;
+  // Tributos antigos (transição)
   icms_aliquota: number;
   icms_valor: number;
   ipi_aliquota: number;
@@ -36,6 +37,25 @@ interface NFeProduct {
   pis_valor: number;
   cofins_aliquota: number;
   cofins_valor: number;
+  // Reforma Tributária 2026 - IBS/CBS/IS
+  cst_ibs_cbs?: string;
+  codigo_classificacao_tributaria?: string;
+  // IBS UF (Estadual)
+  ibs_uf_aliquota?: number;
+  ibs_uf_valor?: number;
+  ibs_uf_base_calculo?: number;
+  // IBS Municipal
+  ibs_mun_aliquota?: number;
+  ibs_mun_valor?: number;
+  ibs_mun_base_calculo?: number;
+  // CBS (Federal)
+  cbs_aliquota?: number;
+  cbs_valor?: number;
+  cbs_base_calculo?: number;
+  // IS (Imposto Seletivo)
+  is_aliquota?: number;
+  is_valor?: number;
+  is_base_calculo?: number;
 }
 
 interface NFeProductDialogProps {
@@ -61,6 +81,7 @@ export default function NFeProductDialog({
     quantidade: 1,
     valor_unitario: 0,
     valor_total: 0,
+    // Tributos antigos (ainda em transição)
     icms_aliquota: 18,
     icms_valor: 0,
     ipi_aliquota: 0,
@@ -69,6 +90,19 @@ export default function NFeProductDialog({
     pis_valor: 0,
     cofins_aliquota: 7.6,
     cofins_valor: 0,
+    // Reforma 2026
+    ibs_uf_aliquota: 0,
+    ibs_uf_valor: 0,
+    ibs_uf_base_calculo: 0,
+    ibs_mun_aliquota: 0,
+    ibs_mun_valor: 0,
+    ibs_mun_base_calculo: 0,
+    cbs_aliquota: 0,
+    cbs_valor: 0,
+    cbs_base_calculo: 0,
+    is_aliquota: 0,
+    is_valor: 0,
+    is_base_calculo: 0,
   });
 
   useEffect(() => {
@@ -102,6 +136,7 @@ export default function NFeProductDialog({
     const valor_unitario = data.valor_unitario || formData.valor_unitario;
     const valor_total = quantidade * valor_unitario;
 
+    // Tributos antigos (transição)
     const icms_aliquota = data.icms_aliquota ?? formData.icms_aliquota;
     const ipi_aliquota = data.ipi_aliquota ?? formData.ipi_aliquota;
     const pis_aliquota = data.pis_aliquota ?? formData.pis_aliquota;
@@ -112,12 +147,33 @@ export default function NFeProductDialog({
     const pis_valor = (valor_total * pis_aliquota) / 100;
     const cofins_valor = (valor_total * cofins_aliquota) / 100;
 
+    // Novos tributos - Reforma 2026
+    const ibs_uf_aliquota = data.ibs_uf_aliquota ?? formData.ibs_uf_aliquota ?? 0;
+    const ibs_mun_aliquota = data.ibs_mun_aliquota ?? formData.ibs_mun_aliquota ?? 0;
+    const cbs_aliquota = data.cbs_aliquota ?? formData.cbs_aliquota ?? 0;
+    const is_aliquota = data.is_aliquota ?? formData.is_aliquota ?? 0;
+
+    const ibs_uf_valor = (valor_total * ibs_uf_aliquota) / 100;
+    const ibs_mun_valor = (valor_total * ibs_mun_aliquota) / 100;
+    const cbs_valor = (valor_total * cbs_aliquota) / 100;
+    const is_valor = (valor_total * is_aliquota) / 100;
+
     return {
       valor_total,
+      // Tributos antigos
       icms_valor,
       ipi_valor,
       pis_valor,
       cofins_valor,
+      // Reforma 2026
+      ibs_uf_valor,
+      ibs_uf_base_calculo: valor_total,
+      ibs_mun_valor,
+      ibs_mun_base_calculo: valor_total,
+      cbs_valor,
+      cbs_base_calculo: valor_total,
+      is_valor,
+      is_base_calculo: valor_total,
     };
   };
 

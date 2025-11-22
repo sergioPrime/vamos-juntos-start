@@ -212,13 +212,17 @@ export function useBankReconciliation(bankAccountId?: string) {
       }
 
       // Insert transactions
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Usuário não autenticado')
+
       const transactionsToInsert = transactions.map(t => ({
         org_id: currentOrg.id,
         bank_account_id: bankAccountId,
         transaction_date: t.date,
         description: t.description || 'Transação bancária',
         amount: t.amount,
-        transaction_type: t.type
+        transaction_type: t.type,
+        created_by: user.id
       }))
 
       const { error } = await supabase

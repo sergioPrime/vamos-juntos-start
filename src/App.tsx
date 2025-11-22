@@ -84,6 +84,7 @@ const FiscalOperations = lazy(() => import("./pages/cadastros/FiscalOperations")
 const FiscalOperationsForm = lazy(() => import("./pages/cadastros/FiscalOperationsForm"));
 const NFe = lazy(() => import("./pages/fiscal/NFe"));
 const NFeForm = lazy(() => import("./pages/fiscal/NFeForm"));
+const NFeDetails = lazy(() => import("./pages/fiscal/NFeDetails"));
 const Index = lazy(() => import("./pages/Index"));
 
 const queryClient = new QueryClient({
@@ -716,6 +717,15 @@ const App = () => (
             </ProtectedRoute>
           } />
           <Route path="/fiscal/nfe/:id" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <NFeDetails />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/fiscal/nfe/:id/edit" element={
             <ProtectedRoute>
               <AppLayout>
                 <PageTransition direction="left">

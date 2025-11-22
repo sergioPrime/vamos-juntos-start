@@ -2786,6 +2786,126 @@ export type Database = {
           },
         ]
       }
+      nfe_itens: {
+        Row: {
+          aliquota_cbs: number | null
+          aliquota_cofins: number | null
+          aliquota_ibs_municipal: number | null
+          aliquota_ibs_uf: number | null
+          aliquota_icms: number | null
+          aliquota_ipi: number | null
+          aliquota_pis: number | null
+          base_calculo_icms: number | null
+          base_calculo_icms_st: number | null
+          cfop: string | null
+          codigo_classificacao_tributaria: string | null
+          codigo_produto: string | null
+          created_at: string | null
+          descricao: string
+          id: string
+          ncm: string | null
+          nfe_id: string
+          numero_item: number
+          org_id: string
+          quantidade: number
+          unidade: string | null
+          updated_at: string | null
+          valor_cbs: number | null
+          valor_cofins: number | null
+          valor_ibs_municipal: number | null
+          valor_ibs_uf: number | null
+          valor_icms: number | null
+          valor_icms_st: number | null
+          valor_ipi: number | null
+          valor_pis: number | null
+          valor_total: number
+          valor_unitario: number
+        }
+        Insert: {
+          aliquota_cbs?: number | null
+          aliquota_cofins?: number | null
+          aliquota_ibs_municipal?: number | null
+          aliquota_ibs_uf?: number | null
+          aliquota_icms?: number | null
+          aliquota_ipi?: number | null
+          aliquota_pis?: number | null
+          base_calculo_icms?: number | null
+          base_calculo_icms_st?: number | null
+          cfop?: string | null
+          codigo_classificacao_tributaria?: string | null
+          codigo_produto?: string | null
+          created_at?: string | null
+          descricao: string
+          id?: string
+          ncm?: string | null
+          nfe_id: string
+          numero_item: number
+          org_id: string
+          quantidade: number
+          unidade?: string | null
+          updated_at?: string | null
+          valor_cbs?: number | null
+          valor_cofins?: number | null
+          valor_ibs_municipal?: number | null
+          valor_ibs_uf?: number | null
+          valor_icms?: number | null
+          valor_icms_st?: number | null
+          valor_ipi?: number | null
+          valor_pis?: number | null
+          valor_total: number
+          valor_unitario: number
+        }
+        Update: {
+          aliquota_cbs?: number | null
+          aliquota_cofins?: number | null
+          aliquota_ibs_municipal?: number | null
+          aliquota_ibs_uf?: number | null
+          aliquota_icms?: number | null
+          aliquota_ipi?: number | null
+          aliquota_pis?: number | null
+          base_calculo_icms?: number | null
+          base_calculo_icms_st?: number | null
+          cfop?: string | null
+          codigo_classificacao_tributaria?: string | null
+          codigo_produto?: string | null
+          created_at?: string | null
+          descricao?: string
+          id?: string
+          ncm?: string | null
+          nfe_id?: string
+          numero_item?: number
+          org_id?: string
+          quantidade?: number
+          unidade?: string | null
+          updated_at?: string | null
+          valor_cbs?: number | null
+          valor_cofins?: number | null
+          valor_ibs_municipal?: number | null
+          valor_ibs_uf?: number | null
+          valor_icms?: number | null
+          valor_icms_st?: number | null
+          valor_ipi?: number | null
+          valor_pis?: number | null
+          valor_total?: number
+          valor_unitario?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfe_itens_nfe_id_fkey"
+            columns: ["nfe_id"]
+            isOneToOne: false
+            referencedRelation: "nfe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_itens_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nfe_manifestacao: {
         Row: {
           chave_acesso: string

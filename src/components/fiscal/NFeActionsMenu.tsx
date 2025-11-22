@@ -22,7 +22,7 @@ import {
 import { toast } from "sonner";
 
 interface NFeActionsMenuProps {
-  status: "autorizada" | "cancelada" | "pendente" | "rejeitada";
+  status: "autorizada" | "cancelada" | "pendente" | "rejeitada" | "rascunho" | string;
   chaveAcesso: string;
   onView: () => void;
 }

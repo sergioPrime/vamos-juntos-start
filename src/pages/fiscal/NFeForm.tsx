@@ -189,14 +189,54 @@ export default function NFeForm() {
     }
   }, []);
 
-  const handleSave = async () => {
-    try {
-      // Validações básicas
-      if (!formData.cliente_nome) {
-        toast.error("Selecione um cliente");
-        return;
-      }
+  const validateForm = (): boolean => {
+    // Validar destinatário
+    if (!formData.destinatario_id) {
+      toast.error("Selecione um destinatário");
+      return false;
+    }
 
+    // Validar empresa
+    if (!formData.company_id) {
+      toast.error("Selecione uma empresa emitente");
+      return false;
+    }
+
+    // Validar produtos
+    if (formData.produtos.length === 0) {
+      toast.error("Adicione pelo menos um produto à NFe");
+      return false;
+    }
+
+    // Validar dados da NFe
+    if (!formData.natureza_operacao || formData.natureza_operacao.trim() === "") {
+      toast.error("Informe a natureza da operação");
+      return false;
+    }
+
+    if (!formData.data_emissao) {
+      toast.error("Informe a data de emissão");
+      return false;
+    }
+
+    if (!formData.data_saida) {
+      toast.error("Informe a data de saída");
+      return false;
+    }
+
+    // Validar valores
+    if (parseFloat(formData.valor_total) <= 0) {
+      toast.error("O valor total da NFe deve ser maior que zero");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSave = async () => {
+    if (!validateForm()) return;
+
+    try {
       // Aqui você implementaria a lógica de salvar
       toast.success(
         isEditing ? "NFe salva com sucesso!" : "NFe criada com sucesso!"
@@ -210,14 +250,23 @@ export default function NFeForm() {
   };
 
   const handleEmit = async () => {
+    if (!validateForm()) return;
+
     try {
       // Validações antes de emitir
-      if (!formData.cliente_nome) {
-        toast.error("Selecione um cliente");
+      if (parseFloat(formData.valor_produtos) <= 0) {
+        toast.error("Adicione produtos à NFe");
         return;
       }
 
-      if (parseFloat(formData.valor_produtos) <= 0) {
+      toast.success("NFe enviada para autorização! (Funcionalidade em desenvolvimento)");
+      // TODO: Integrar com SEFAZ
+      navigate("/fiscal/nfe");
+    } catch (error) {
+      toast.error("Erro ao emitir NFe");
+      console.error(error);
+    }
+  };
         toast.error("Adicione produtos à nota");
         return;
       }

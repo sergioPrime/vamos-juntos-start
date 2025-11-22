@@ -2463,6 +2463,48 @@ export type Database = {
           },
         ]
       }
+      nfe_envios_email: {
+        Row: {
+          created_at: string | null
+          email_destinatario: string
+          enviado_em: string
+          id: string
+          nfe_id: string
+          org_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email_destinatario: string
+          enviado_em?: string
+          id?: string
+          nfe_id: string
+          org_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email_destinatario?: string
+          enviado_em?: string
+          id?: string
+          nfe_id?: string
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfe_envios_email_nfe_id_fkey"
+            columns: ["nfe_id"]
+            isOneToOne: false
+            referencedRelation: "nfe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_envios_email_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nfe_items: {
         Row: {
           cbs_aliquota: number | null

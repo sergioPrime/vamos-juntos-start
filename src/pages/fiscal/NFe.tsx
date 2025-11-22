@@ -230,13 +230,16 @@ export default function NFe() {
                       }).format(nfe.valor_total)}
                     </TableCell>
                     <TableCell>{getStatusBadge(nfe.status)}</TableCell>
-                    <TableCell className="text-right">
-                      <NFeActionsMenu
-                        status={nfe.status}
-                        chaveAcesso={nfe.chave_acesso}
-                        onView={() => navigate(`/fiscal/nfe/${nfe.id}`)}
-                      />
-                    </TableCell>
+                     <TableCell className="text-right">
+                       <NFeActionsMenu
+                         status={nfe.status}
+                         chaveAcesso={nfe.chave_acesso}
+                         nfeId={nfe.id}
+                         nfeNumero={nfe.numero}
+                         onView={() => navigate(`/fiscal/nfe/${nfe.id}`)}
+                         onRefresh={() => window.location.reload()}
+                       />
+                     </TableCell>
                   </TableRow>
                 ))
               )}

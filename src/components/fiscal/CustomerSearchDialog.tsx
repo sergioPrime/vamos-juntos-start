@@ -7,10 +7,19 @@ import { supabase } from "@/integrations/supabase/client"
 import { Search, Plus } from "lucide-react"
 import { toast } from "sonner"
 
+interface SimpleCustomer {
+  id: string
+  razao_social: string
+  documento: string | null
+  email_geral: string | null
+  cidade: string | null
+  uf: string | null
+}
+
 interface CustomerSearchDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSelectCustomer: (customer: any) => void
+  onSelectCustomer: (customer: SimpleCustomer) => void
 }
 
 export function CustomerSearchDialog({
@@ -19,7 +28,7 @@ export function CustomerSearchDialog({
   onSelectCustomer
 }: CustomerSearchDialogProps) {
   const [searchTerm, setSearchTerm] = useState("")
-  const [customers, setCustomers] = useState<any[]>([])
+  const [customers, setCustomers] = useState<SimpleCustomer[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -31,7 +40,7 @@ export function CustomerSearchDialog({
   const loadCustomers = async () => {
     try {
       setIsLoading(true)
-      const { data, error } = await supabase
+      const response = await supabase
         .from('pessoas')
         .select('id, razao_social, documento, email_geral, cidade, uf')
         .eq('tipo', 'cliente')
@@ -39,8 +48,18 @@ export function CustomerSearchDialog({
         .order('razao_social')
         .limit(50)
 
-      if (error) throw error
-      setCustomers(data as any[] || [])
+      if (response.error) throw response.error
+      
+      const mappedData: SimpleCustomer[] = (response.data || []).map((item: any) => ({
+        id: item.id,
+        razao_social: item.razao_social,
+        documento: item.documento,
+        email_geral: item.email_geral,
+        cidade: item.cidade,
+        uf: item.uf
+      }))
+      
+      setCustomers(mappedData)
     } catch (error) {
       console.error('Erro ao carregar clientes:', error)
       toast.error('Erro ao carregar clientes')
@@ -55,7 +74,7 @@ export function CustomerSearchDialog({
     customer.email_geral?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const handleSelectCustomer = (customer: any) => {
+  const handleSelectCustomer = (customer: SimpleCustomer) => {
     onSelectCustomer(customer)
     onOpenChange(false)
     setSearchTerm("")

@@ -39,6 +39,7 @@ export default function NFe() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("todos");
   const [dateFilter, setDateFilter] = useState<string>("todos");
+  const [inutilizacaoDialogOpen, setInutilizacaoDialogOpen] = useState(false);
 
   // Dados mockados para demonstração
   const [nfeList] = useState<NFe[]>([
@@ -255,6 +256,12 @@ export default function NFe() {
             </TableBody>
           </Table>
         </Card>
+
+        <NFeInutilizacaoDialog
+          open={inutilizacaoDialogOpen}
+          onOpenChange={setInutilizacaoDialogOpen}
+          onSuccess={handleReload}
+        />
       </div>
     </div>
   );

@@ -161,7 +161,7 @@ export function useNFe() {
       .maybeSingle();
 
     if (error) throw error;
-    return data;
+    return data as NFe | null;
   };
 
   // Criar NFe

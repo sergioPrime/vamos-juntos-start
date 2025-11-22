@@ -23,6 +23,8 @@ export default function NFeForm() {
   const location = useLocation();
   const { id } = useParams();
   const isEditing = !!id;
+  const { currentOrg } = useOrganization();
+  const [isSaving, setIsSaving] = useState(false);
 
   // Dados vindos do PDV
   const fromOrder = location.state?.fromOrder || false;
@@ -191,26 +193,108 @@ export default function NFeForm() {
 
   const handleSave = async () => {
     try {
+      if (!currentOrg) {
+        toast.error("Organização não encontrada");
+        return;
+      }
+
       // Validações básicas
       if (!formData.cliente_nome) {
         toast.error("Selecione um cliente");
         return;
       }
 
-      // Aqui você implementaria a lógica de salvar
-      toast.success(
-        isEditing ? "NFe salva com sucesso!" : "NFe criada com sucesso!"
+      if (formData.produtos.length === 0) {
+        toast.error("Adicione pelo menos um produto");
+        return;
+      }
+
+      setIsSaving(true);
+
+      // Salvar como rascunho
+      const { data: nfe, error } = await supabase
+        .from('nfe')
+        .insert({
+          org_id: currentOrg,
+          serie: formData.serie,
+          natureza_operacao: formData.natureza_operacao,
+          tipo_operacao: formData.tipo_operacao,
+          finalidade: formData.finalidade,
+          destinatario_nome: formData.cliente_nome,
+          destinatario_cpf_cnpj: formData.cliente_cpf_cnpj,
+          destinatario_ie: formData.cliente_ie,
+          destinatario_endereco: formData.cliente_endereco,
+          destinatario_numero: formData.cliente_numero,
+          destinatario_bairro: formData.cliente_bairro,
+          destinatario_cidade: formData.cliente_cidade,
+          destinatario_uf: formData.cliente_uf,
+          destinatario_cep: formData.cliente_cep,
+          valor_produtos: parseFloat(formData.valor_produtos),
+          valor_frete: parseFloat(formData.valor_frete || '0'),
+          valor_seguro: parseFloat(formData.valor_seguro || '0'),
+          valor_desconto: parseFloat(formData.valor_desconto || '0'),
+          valor_outras_despesas: parseFloat(formData.valor_outras_despesas || '0'),
+          valor_total: parseFloat(formData.valor_total),
+          valor_icms: parseFloat(formData.valor_icms),
+          valor_ipi: parseFloat(formData.valor_ipi),
+          valor_pis: parseFloat(formData.valor_pis),
+          valor_cofins: parseFloat(formData.valor_cofins),
+          informacoes_complementares: formData.informacoes_complementares,
+          informacoes_fisco: formData.informacoes_fisco,
+          status: 'pendente',
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Salvar itens
+      const itensPromises = formData.produtos.map((produto: any) =>
+        supabase.from('nfe_items').insert({
+          nfe_id: nfe.id,
+          produto_codigo: produto.codigo,
+          produto_descricao: produto.descricao,
+          ncm: produto.ncm,
+          cfop: produto.cfop,
+          unidade: produto.unidade,
+          quantidade: parseFloat(produto.quantidade),
+          valor_unitario: parseFloat(produto.valor_unitario),
+          valor_total: parseFloat(produto.valor_total),
+          icms_cst: produto.icms_cst,
+          icms_base: parseFloat(produto.icms_base),
+          icms_aliquota: parseFloat(produto.icms_aliquota),
+          icms_valor: parseFloat(produto.icms_valor),
+          ipi_cst: produto.ipi_cst,
+          ipi_aliquota: parseFloat(produto.ipi_aliquota),
+          ipi_valor: parseFloat(produto.ipi_valor),
+          pis_cst: produto.pis_cst,
+          pis_aliquota: parseFloat(produto.pis_aliquota),
+          pis_valor: parseFloat(produto.pis_valor),
+          cofins_cst: produto.cofins_cst,
+          cofins_aliquota: parseFloat(produto.cofins_aliquota),
+          cofins_valor: parseFloat(produto.cofins_valor),
+        })
       );
-      
+
+      await Promise.all(itensPromises);
+
+      toast.success("Rascunho salvo com sucesso!");
       navigate("/fiscal/nfe");
-    } catch (error) {
-      toast.error("Erro ao salvar NFe");
-      console.error(error);
+    } catch (error: any) {
+      console.error("Erro ao salvar NFe:", error);
+      toast.error(error.message || "Erro ao salvar NFe");
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleEmit = async () => {
     try {
+      if (!currentOrg) {
+        toast.error("Organização não encontrada");
+        return;
+      }
+
       // Validações antes de emitir
       if (!formData.cliente_nome) {
         toast.error("Selecione um cliente");
@@ -222,13 +306,37 @@ export default function NFeForm() {
         return;
       }
 
-      // Aqui você implementaria a integração com a SEFAZ
-      toast.success("NFe enviada para autorização!");
-      
+      if (formData.produtos.length === 0) {
+        toast.error("Adicione pelo menos um produto");
+        return;
+      }
+
+      setIsSaving(true);
+
+      // Chamar edge function para emitir
+      const { data, error } = await supabase.functions.invoke('emitir-nfe', {
+        body: {
+          nfeData: {
+            ...formData,
+            org_id: currentOrg,
+          },
+          produtos: formData.produtos,
+        },
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        throw new Error(data.error || 'Erro ao emitir NFe');
+      }
+
+      toast.success(`NFe ${data.nfe.numero} emitida com sucesso!`);
       navigate("/fiscal/nfe");
-    } catch (error) {
-      toast.error("Erro ao emitir NFe");
-      console.error(error);
+    } catch (error: any) {
+      console.error("Erro ao emitir NFe:", error);
+      toast.error(error.message || "Erro ao emitir NFe");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -620,16 +728,27 @@ export default function NFeForm() {
 
         {/* Botões de ação no rodapé */}
         <div className="flex justify-end gap-2 sticky bottom-4 bg-background/95 backdrop-blur-sm p-4 rounded-lg border">
-          <Button variant="outline" onClick={() => navigate("/fiscal/nfe")}>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/fiscal/nfe")}
+            disabled={isSaving}
+          >
             Cancelar
           </Button>
-          <Button variant="outline" onClick={handleSave}>
+          <Button 
+            variant="outline" 
+            onClick={handleSave}
+            disabled={isSaving}
+          >
             <Save className="h-4 w-4 mr-2" />
             Salvar Rascunho
           </Button>
-          <Button onClick={handleEmit}>
+          <Button 
+            onClick={handleEmit}
+            disabled={isSaving}
+          >
             <Send className="h-4 w-4 mr-2" />
-            Emitir NFe
+            {isSaving ? "Emitindo..." : "Emitir NFe"}
           </Button>
         </div>
 

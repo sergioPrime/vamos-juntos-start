@@ -25,12 +25,14 @@ interface NFeActionsMenuProps {
   status: "autorizada" | "cancelada" | "pendente" | "rejeitada" | "rascunho";
   chaveAcesso: string;
   onView: () => void;
+  onEmit?: () => void;
 }
 
 export default function NFeActionsMenu({
   status,
   chaveAcesso,
   onView,
+  onEmit,
 }: NFeActionsMenuProps) {
   const handleDownloadXML = () => {
     toast.success("Download do XML iniciado");
@@ -131,10 +133,18 @@ export default function NFeActionsMenu({
         )}
 
         {status === "rascunho" && (
-          <DropdownMenuItem onClick={onView}>
-            <FileText className="mr-2 h-4 w-4" />
-            Editar Rascunho
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuItem onClick={onView}>
+              <FileText className="mr-2 h-4 w-4" />
+              Editar Rascunho
+            </DropdownMenuItem>
+            {onEmit && (
+              <DropdownMenuItem onClick={onEmit}>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Emitir NFe
+              </DropdownMenuItem>
+            )}
+          </>
         )}
 
         <DropdownMenuSeparator />

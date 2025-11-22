@@ -613,6 +613,56 @@ export type Database = {
           },
         ]
       }
+      business_alerts: {
+        Row: {
+          alert_type: string
+          condition: string
+          config: Json | null
+          created_at: string
+          id: string
+          is_active: boolean
+          last_triggered_at: string | null
+          notify_users: string[] | null
+          org_id: string
+          threshold: number | null
+          updated_at: string
+        }
+        Insert: {
+          alert_type: string
+          condition: string
+          config?: Json | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_triggered_at?: string | null
+          notify_users?: string[] | null
+          org_id: string
+          threshold?: number | null
+          updated_at?: string
+        }
+        Update: {
+          alert_type?: string
+          condition?: string
+          config?: Json | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_triggered_at?: string | null
+          notify_users?: string[] | null
+          org_id?: string
+          threshold?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_alerts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       caixa_movimentacoes: {
         Row: {
           created_at: string
@@ -4587,6 +4637,100 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          email_enabled: boolean
+          id: string
+          in_app_enabled: boolean
+          notification_type: string
+          org_id: string
+          push_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_enabled?: boolean
+          id?: string
+          in_app_enabled?: boolean
+          notification_type: string
+          org_id: string
+          push_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_enabled?: boolean
+          id?: string
+          in_app_enabled?: boolean
+          notification_type?: string
+          org_id?: string
+          push_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          action_url: string | null
+          created_at: string
+          id: string
+          message: string
+          metadata: Json | null
+          org_id: string
+          priority: string
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          org_id: string
+          priority?: string
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          org_id?: string
+          priority?: string
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string
@@ -6845,6 +6989,7 @@ export type Database = {
         }[]
       }
       cleanup_old_nfce_logs: { Args: never; Returns: undefined }
+      cleanup_old_notifications: { Args: never; Returns: undefined }
       create_blockchain_alert: {
         Args: {
           p_alert_type: string
@@ -6854,6 +6999,19 @@ export type Database = {
           p_message: string
           p_org_id: string
           p_severity: string
+        }
+        Returns: string
+      }
+      create_notification: {
+        Args: {
+          p_action_url?: string
+          p_message: string
+          p_metadata?: Json
+          p_org_id: string
+          p_priority?: string
+          p_title: string
+          p_type: string
+          p_user_id: string
         }
         Returns: string
       }
@@ -7011,6 +7169,10 @@ export type Database = {
         Args: { p_org_id: string }
         Returns: number
       }
+      get_unread_notification_count: {
+        Args: { p_org_id: string }
+        Returns: number
+      }
       get_warehouse_stock: {
         Args: { p_product_id: string; p_warehouse_id: string }
         Returns: number
@@ -7048,12 +7210,20 @@ export type Database = {
         Args: { item_id: string; reference_type: string }
         Returns: boolean
       }
+      mark_all_notifications_as_read: {
+        Args: { p_org_id: string }
+        Returns: number
+      }
       mark_contingency_failed: {
         Args: { p_error_message: string; p_queue_id: string }
         Returns: boolean
       }
       mark_contingency_transmitted: {
         Args: { p_queue_id: string }
+        Returns: boolean
+      }
+      mark_notification_as_read: {
+        Args: { p_notification_id: string }
         Returns: boolean
       }
       reject_access_request: {

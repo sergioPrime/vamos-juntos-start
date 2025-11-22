@@ -52,9 +52,6 @@ export default function NFeActionsMenu({
     toast.info("Abrindo formulário de cancelamento");
   };
 
-  const handleCartaCorrecao = () => {
-    toast.info("Abrindo Carta de Correção Eletrônica");
-  };
 
   const handleConsultarStatus = () => {
     toast.info("Consultando status na SEFAZ...");

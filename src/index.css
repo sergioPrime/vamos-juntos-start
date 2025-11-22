@@ -145,7 +145,6 @@
   *:focus:not(:focus-visible) {
     outline: none;
   }
-}
 
 /* Animation Classes */
 .animate-slide-up {

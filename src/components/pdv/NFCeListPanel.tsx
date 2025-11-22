@@ -100,15 +100,6 @@ export function NFCeListPanel() {
                       >
                         <RefreshCw className="h-4 w-4" />
                       </Button>
-                      {nfce.xml_path && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => window.open(nfce.xml_path, "_blank")}
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      )}
                     </div>
                   </TableCell>
                 </TableRow>

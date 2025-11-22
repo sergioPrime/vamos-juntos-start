@@ -210,9 +210,9 @@ export default function NFeForm() {
       }
 
       // Salvar NFe como rascunho
-      // @ts-ignore - org_id exists in database
       const { data: nfeData, error: nfeError } = await supabase
         .from("nfe")
+        // @ts-ignore - org_id exists in database
         .insert({
           org_id: currentOrg.id,
           numero: 0, // Será gerado pelo trigger

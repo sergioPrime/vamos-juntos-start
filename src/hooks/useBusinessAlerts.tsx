@@ -182,12 +182,6 @@ export function useBusinessAlerts() {
   const checkRejectedNFSe = useCallback(async () => {
     // TODO: Reativar quando a tabela nfse tiver a estrutura correta
     return []
-
-      return []
-    } catch (error) {
-      console.error('Error checking rejected NFSe:', error)
-      return []
-    }
   }, [currentOrg?.id])
 
   // Check for pending orders

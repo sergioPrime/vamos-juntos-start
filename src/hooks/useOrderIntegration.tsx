@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useInventoryIntegration } from './useInventoryIntegration'
 import { useFinancialEntries } from './useFinancialEntries'
-import { useStockValidation } from './sales/useStockValidation'
+import { useStockValidation } from './useStockValidation'
 import { useToast } from './use-toast'
 
 interface OrderCompletionHookProps {

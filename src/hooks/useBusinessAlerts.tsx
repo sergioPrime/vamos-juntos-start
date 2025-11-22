@@ -182,41 +182,6 @@ export function useBusinessAlerts() {
   const checkRejectedNFSe = useCallback(async () => {
     // Temporarily disabled due to table structure inconsistencies
     return []
-    
-    /* if (!currentOrg?.id) return []
-
-    try {
-      const { data: nfseList, error } = await supabase
-        .from('nfse')
-        .select('id, number, service_amount, service_description')
-        .eq('org_id', currentOrg.id)
-        .eq('status', 'rejected')
-
-      if (error) throw error
-
-      if (nfseList && nfseList.length > 0) {
-        const totalRejectedAmount = nfseList.reduce((sum, nfse) => sum + (nfse.service_amount || 0), 0)
-        
-        return [{
-          id: 'rejected_nfse',
-          type: 'rejected_nfse' as const,
-          severity: 'high' as const,
-          title: 'NFSe rejeitadas',
-          description: `${nfseList.length} NFSe rejeitada(s) totalizando R$ ${totalRejectedAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-          action_label: 'Ver NFSe',
-          action_route: '/nfse',
-          amount: totalRejectedAmount,
-          count: nfseList.length,
-          created_at: new Date().toISOString(),
-          resolved: false
-        }]
-      } */
-
-      return []
-    } catch (error) {
-      console.error('Error checking rejected NFSe:', error)
-      return []
-    }
   }, [currentOrg?.id])
 
   // Check for pending orders

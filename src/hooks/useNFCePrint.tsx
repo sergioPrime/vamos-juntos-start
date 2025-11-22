@@ -12,7 +12,7 @@ export function useNFCePrint() {
 
   // Print to thermal printer
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
+    contentRef: componentRef,
     documentTitle: 'DANFE-NFCe',
     pageStyle: `
       @page {
@@ -34,14 +34,6 @@ export function useNFCePrint() {
       toast({
         title: "Impressão concluída",
         description: "DANFE NFC-e enviado para impressora",
-      });
-    },
-    onPrintError: (error) => {
-      console.error('Print error:', error);
-      toast({
-        title: "Erro ao imprimir",
-        description: "Não foi possível imprimir o DANFE NFC-e",
-        variant: "destructive",
       });
     },
   });

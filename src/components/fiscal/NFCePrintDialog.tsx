@@ -46,7 +46,7 @@ export function NFCePrintDialog({ open, onOpenChange, nfce }: NFCePrintDialogPro
           <Button
             variant="outline"
             size="sm"
-            onClick={handlePrint}
+            onClick={() => handlePrint()}
           >
             <Printer className="w-4 h-4 mr-2" />
             Imprimir

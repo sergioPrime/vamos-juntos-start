@@ -12,76 +12,59 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Send, Plus, Eye } from "lucide-react";
+import { ArrowLeft, Save, Send } from "lucide-react";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import NFeProductsTable from "@/components/fiscal/NFeProductsTable";
 import NFeProductDialog from "@/components/fiscal/NFeProductDialog";
+import { ComboboxAsync } from "@/components/ui/combobox-async";
+import { useAsyncSearch } from "@/hooks/useAsyncSearch";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
+
+const UF_BRASILEIRAS = [
+  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
+  "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
+  "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+];
 
 export default function NFeForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
   const isEditing = !!id;
+  const { currentOrg } = useOrganization();
+  const { searchPessoas } = useAsyncSearch();
 
-  // Dados vindos do PDV
   const fromOrder = location.state?.fromOrder || false;
   const orderData = location.state?.orderData;
   const orderItems = location.state?.orderItems || [];
 
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
-
-  // Inicializar produtos vindos do pedido (se houver)
-  const initialProducts = orderItems.map((item: any) => ({
-    id: item.product_id,
-    codigo: item.product_sku || item.product_id.substring(0, 8),
-    descricao: item.product_name,
-    ncm: "00000000",
-    cfop: "5102",
-    unidade: "UN",
-    quantidade: item.quantity.toString(),
-    valor_unitario: item.unit_price.toFixed(2),
-    valor_total: item.total_price.toFixed(2),
-    // Tributos
-    icms_cst: "00",
-    icms_base: item.total_price.toFixed(2),
-    icms_aliquota: "0.00",
-    icms_valor: "0.00",
-    ipi_cst: "99",
-    ipi_aliquota: "0.00",
-    ipi_valor: "0.00",
-    pis_cst: "01",
-    pis_aliquota: "0.00",
-    pis_valor: "0.00",
-    cofins_cst: "01",
-    cofins_aliquota: "0.00",
-    cofins_valor: "0.00",
-  }));
+  const [loading, setLoading] = useState(false);
+  const [produtos, setProdutos] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
-    // Dados do Destinatário
-    cliente_id: "",
-    cliente_nome: "",
-    cliente_cpf_cnpj: "",
-    cliente_ie: "",
-    cliente_endereco: "",
-    cliente_numero: "",
-    cliente_bairro: "",
-    cliente_cidade: "",
-    cliente_uf: "",
-    cliente_cep: "",
+    // Destinatário
+    destinatario_id: "",
+    destinatario_nome: "",
+    destinatario_cpf_cnpj: "",
+    destinatario_ie: "",
+    destinatario_endereco: "",
+    destinatario_numero: "",
+    destinatario_bairro: "",
+    destinatario_cidade: "",
+    destinatario_uf: "",
+    destinatario_cep: "",
 
-    // Dados da NFe
+    // Operação
     natureza_operacao: "VENDA",
-    tipo_operacao: "1", // 1=Saída
-    finalidade: "1", // 1=Normal
+    tipo_operacao: "1",
+    finalidade: "1",
     serie: "1",
-    
-    // Produtos/Serviços
-    produtos: initialProducts,
 
-    // Valores Totalizadores
+    // Totais
     bc_icms: "0.00",
     valor_icms: "0.00",
     valor_frete: "0.00",
@@ -91,13 +74,164 @@ export default function NFeForm() {
     valor_ipi: "0.00",
     valor_pis: "0.00",
     valor_cofins: "0.00",
-    valor_produtos: orderData?.subtotal?.toFixed(2) || "0.00",
-    valor_total: orderData?.total_amount?.toFixed(2) || "0.00",
+    valor_produtos: "0.00",
+    valor_total: "0.00",
 
-    // Informações Adicionais
+    // Informações adicionais
     informacoes_complementares: "",
     informacoes_fisco: "",
   });
+
+  useEffect(() => {
+    if (isEditing && id) {
+      loadNFeData();
+    }
+  }, [id, isEditing]);
+
+  useEffect(() => {
+    if (fromOrder && orderData) {
+      loadOrderData();
+    }
+  }, [fromOrder, orderData]);
+
+  const loadNFeData = async () => {
+    try {
+      setLoading(true);
+      const { data: nfe, error } = await supabase
+        .from("nfe")
+        .select("*, nfe_items(*)")
+        .eq("id", id!)
+        .single();
+
+      if (error) throw error;
+
+      if (nfe) {
+        setFormData({
+          destinatario_id: nfe.destinatario_id || "",
+          destinatario_nome: nfe.destinatario_nome || "",
+          destinatario_cpf_cnpj: nfe.destinatario_cpf_cnpj || "",
+          destinatario_ie: nfe.destinatario_ie || "",
+          destinatario_endereco: nfe.destinatario_endereco || "",
+          destinatario_numero: nfe.destinatario_numero || "",
+          destinatario_bairro: nfe.destinatario_bairro || "",
+          destinatario_cidade: nfe.destinatario_cidade || "",
+          destinatario_uf: nfe.destinatario_uf || "",
+          destinatario_cep: nfe.destinatario_cep || "",
+          natureza_operacao: nfe.natureza_operacao || "VENDA",
+          tipo_operacao: nfe.tipo_operacao || "1",
+          finalidade: nfe.finalidade || "1",
+          serie: nfe.serie || "1",
+          bc_icms: nfe.bc_icms?.toString() || "0.00",
+          valor_icms: nfe.valor_icms?.toString() || "0.00",
+          valor_frete: nfe.valor_frete?.toString() || "0.00",
+          valor_seguro: nfe.valor_seguro?.toString() || "0.00",
+          valor_desconto: nfe.valor_desconto?.toString() || "0.00",
+          valor_outras_despesas: nfe.valor_outras_despesas?.toString() || "0.00",
+          valor_ipi: nfe.valor_ipi?.toString() || "0.00",
+          valor_pis: nfe.valor_pis?.toString() || "0.00",
+          valor_cofins: nfe.valor_cofins?.toString() || "0.00",
+          valor_produtos: nfe.valor_produtos?.toString() || "0.00",
+          valor_total: nfe.valor_total?.toString() || "0.00",
+          informacoes_complementares: nfe.informacoes_complementares || "",
+          informacoes_fisco: nfe.informacoes_fisco || "",
+        });
+
+        // Carregar itens
+        if (nfe.nfe_items) {
+          const items = nfe.nfe_items.map((item: any) => ({
+            id: item.id,
+            product_id: item.product_id,
+            codigo: item.codigo_produto,
+            descricao: item.descricao,
+            ncm: item.ncm,
+            cfop: item.cfop,
+            unidade: item.unidade,
+            quantidade: item.quantidade,
+            valor_unitario: item.valor_unitario,
+            valor_total: item.valor_total,
+            icms_aliquota: item.icms_aliquota || 0,
+            icms_valor: item.icms_valor || 0,
+            ipi_aliquota: item.ipi_aliquota || 0,
+            ipi_valor: item.ipi_valor || 0,
+            pis_aliquota: item.pis_aliquota || 0,
+            pis_valor: item.pis_valor || 0,
+            cofins_aliquota: item.cofins_aliquota || 0,
+            cofins_valor: item.cofins_valor || 0,
+          }));
+          setProdutos(items);
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao carregar NFe:", error);
+      toast.error("Erro ao carregar NFe");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadOrderData = async () => {
+    if (!orderData) return;
+
+    // Carregar dados do cliente
+    if (orderData.customer_id) {
+      const { data: pessoa } = await supabase
+        .from("pessoas")
+        .select("*")
+        .eq("id", orderData.customer_id)
+        .single();
+
+      if (pessoa) {
+        setFormData((prev) => ({
+          ...prev,
+          destinatario_id: pessoa.id,
+          destinatario_nome: pessoa.razao_social || pessoa.nome_fantasia,
+          destinatario_cpf_cnpj: pessoa.documento || "",
+          destinatario_ie: "", // Tabela pessoas não tem IE
+          destinatario_endereco: pessoa.endereco || "",
+          destinatario_numero: "", // Extrair do endereco se necessário
+          destinatario_bairro: "", // Não existe na tabela pessoas
+          destinatario_cidade: pessoa.cidade || "",
+          destinatario_uf: pessoa.uf || "",
+          destinatario_cep: pessoa.cep || "",
+        }));
+      }
+    }
+
+    // Carregar produtos do pedido
+    const mappedProducts = await Promise.all(
+      orderItems.map(async (item: any) => {
+        const { data: product } = await supabase
+          .from("products")
+          .select("*")
+          .eq("id", item.product_id)
+          .single();
+
+        return {
+          id: crypto.randomUUID(),
+          product_id: item.product_id,
+          codigo: product?.sku || item.product_id.substring(0, 8),
+          descricao: item.product_name,
+          ncm: product?.ncm_code || "00000000",
+          cfop: "5102",
+          unidade: product?.unit || "UN",
+          quantidade: item.quantity,
+          valor_unitario: item.unit_price,
+          valor_total: item.total_price,
+          icms_aliquota: 0,
+          icms_valor: 0,
+          ipi_aliquota: 0,
+          ipi_valor: 0,
+          pis_aliquota: 0,
+          pis_valor: 0,
+          cofins_aliquota: 0,
+          cofins_valor: 0,
+        };
+      })
+    );
+
+    setProdutos(mappedProducts);
+    updateTotals(mappedProducts);
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -108,6 +242,35 @@ export default function NFeForm() {
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCustomerSelect = async (customerId: string) => {
+    try {
+      const { data: pessoa } = await supabase
+        .from("pessoas")
+        .select("*")
+        .eq("id", customerId)
+        .single();
+
+      if (pessoa) {
+        setFormData((prev) => ({
+          ...prev,
+          destinatario_id: pessoa.id,
+          destinatario_nome: pessoa.razao_social || pessoa.nome_fantasia,
+          destinatario_cpf_cnpj: pessoa.documento || "",
+          destinatario_ie: "",
+          destinatario_endereco: pessoa.endereco || "",
+          destinatario_numero: "",
+          destinatario_bairro: "",
+          destinatario_cidade: pessoa.cidade || "",
+          destinatario_uf: pessoa.uf || "",
+          destinatario_cep: pessoa.cep || "",
+        }));
+      }
+    } catch (error) {
+      console.error("Erro ao carregar cliente:", error);
+      toast.error("Erro ao carregar dados do cliente");
+    }
   };
 
   const handleAddProduct = () => {
@@ -122,35 +285,33 @@ export default function NFeForm() {
 
   const handleSaveProduct = (product: any) => {
     if (editingProduct) {
-      // Editar produto existente
-      const updatedProducts = formData.produtos.map((p) =>
+      const updatedProducts = produtos.map((p) =>
         p.id === product.id ? product : p
       );
-      setFormData((prev) => ({ ...prev, produtos: updatedProducts }));
+      setProdutos(updatedProducts);
+      updateTotals(updatedProducts);
     } else {
-      // Adicionar novo produto
-      setFormData((prev) => ({
-        ...prev,
-        produtos: [...prev.produtos, product],
-      }));
+      const newProducts = [...produtos, product];
+      setProdutos(newProducts);
+      updateTotals(newProducts);
     }
-    updateTotals(formData.produtos);
   };
 
-  const handleRemoveProduct = (id: string) => {
-    const updatedProducts = formData.produtos.filter((p) => p.id !== id);
-    setFormData((prev) => ({ ...prev, produtos: updatedProducts }));
+  const handleRemoveProduct = (productId: string) => {
+    const updatedProducts = produtos.filter((p) => p.id !== productId);
+    setProdutos(updatedProducts);
     updateTotals(updatedProducts);
   };
 
-  const updateTotals = (produtos: any[]) => {
-    const totals = produtos.reduce(
+  const updateTotals = (products: any[]) => {
+    const totals = products.reduce(
       (acc, product) => {
-        acc.valor_produtos += product.valor_total;
-        acc.valor_icms += product.icms_valor;
-        acc.valor_ipi += product.ipi_valor;
-        acc.valor_pis += product.pis_valor;
-        acc.valor_cofins += product.cofins_valor;
+        acc.valor_produtos += parseFloat(product.valor_total) || 0;
+        acc.valor_icms += parseFloat(product.icms_valor) || 0;
+        acc.valor_ipi += parseFloat(product.ipi_valor) || 0;
+        acc.valor_pis += parseFloat(product.pis_valor) || 0;
+        acc.valor_cofins += parseFloat(product.cofins_valor) || 0;
+        acc.bc_icms += parseFloat(product.valor_total) || 0;
         return acc;
       },
       {
@@ -159,6 +320,7 @@ export default function NFeForm() {
         valor_ipi: 0,
         valor_pis: 0,
         valor_cofins: 0,
+        bc_icms: 0,
       }
     );
 
@@ -174,68 +336,167 @@ export default function NFeForm() {
       ...prev,
       valor_produtos: totals.valor_produtos.toFixed(2),
       valor_icms: totals.valor_icms.toFixed(2),
+      bc_icms: totals.bc_icms.toFixed(2),
       valor_ipi: totals.valor_ipi.toFixed(2),
       valor_pis: totals.valor_pis.toFixed(2),
       valor_cofins: totals.valor_cofins.toFixed(2),
-      bc_icms: totals.valor_produtos.toFixed(2),
       valor_total: valor_total.toFixed(2),
     }));
   };
 
-  // Calcular totais ao carregar produtos do pedido
-  useEffect(() => {
-    if (initialProducts.length > 0) {
-      updateTotals(formData.produtos);
-    }
-  }, []);
-
   const handleSave = async () => {
     try {
-      // Validações básicas
-      if (!formData.cliente_nome) {
+      if (!formData.destinatario_id) {
         toast.error("Selecione um cliente");
         return;
       }
 
-      // Aqui você implementaria a lógica de salvar
+      if (produtos.length === 0) {
+        toast.error("Adicione pelo menos um produto");
+        return;
+      }
+
+      setLoading(true);
+
+      if (!currentOrg) {
+        toast.error("Organização não encontrada");
+        return;
+      }
+
+      const nfeData: any = {
+        org_id: currentOrg.id,
+        destinatario_id: formData.destinatario_id,
+        destinatario_nome: formData.destinatario_nome,
+        destinatario_cpf_cnpj: formData.destinatario_cpf_cnpj,
+        destinatario_ie: formData.destinatario_ie || null,
+        destinatario_endereco: formData.destinatario_endereco,
+        destinatario_numero: formData.destinatario_numero,
+        destinatario_bairro: formData.destinatario_bairro,
+        destinatario_cidade: formData.destinatario_cidade,
+        destinatario_uf: formData.destinatario_uf,
+        destinatario_cep: formData.destinatario_cep,
+        natureza_operacao: formData.natureza_operacao,
+        tipo_operacao: formData.tipo_operacao,
+        finalidade: formData.finalidade,
+        serie: formData.serie,
+        bc_icms: parseFloat(formData.bc_icms),
+        valor_icms: parseFloat(formData.valor_icms),
+        valor_frete: parseFloat(formData.valor_frete),
+        valor_seguro: parseFloat(formData.valor_seguro),
+        valor_desconto: parseFloat(formData.valor_desconto),
+        valor_outras_despesas: parseFloat(formData.valor_outras_despesas),
+        valor_ipi: parseFloat(formData.valor_ipi),
+        valor_pis: parseFloat(formData.valor_pis),
+        valor_cofins: parseFloat(formData.valor_cofins),
+        valor_produtos: parseFloat(formData.valor_produtos),
+        valor_total: parseFloat(formData.valor_total),
+        informacoes_complementares: formData.informacoes_complementares || null,
+        informacoes_fisco: formData.informacoes_fisco || null,
+        status: "rascunho",
+      };
+
+      let nfeId = id;
+
+      if (isEditing) {
+        const { error } = await supabase
+          .from("nfe")
+          .update(nfeData)
+          .eq("id", id!);
+
+        if (error) throw error;
+
+        // Remover itens antigos
+        await supabase.from("nfe_items").delete().eq("nfe_id", id!);
+      } else {
+        const { data: newNFe, error } = await supabase
+          .from("nfe")
+          .insert(nfeData)
+          .select()
+          .single();
+
+        if (error) throw error;
+        nfeId = newNFe.id;
+      }
+
+      // Salvar itens
+      const itemsToInsert = produtos.map((produto) => ({
+        org_id: currentOrg.id,
+        nfe_id: nfeId!,
+        product_id: produto.product_id,
+        codigo_produto: produto.codigo,
+        descricao: produto.descricao,
+        ncm: produto.ncm,
+        cfop: produto.cfop,
+        unidade: produto.unidade,
+        quantidade: produto.quantidade,
+        valor_unitario: produto.valor_unitario,
+        valor_total: produto.valor_total,
+        icms_aliquota: produto.icms_aliquota,
+        icms_valor: produto.icms_valor,
+        ipi_aliquota: produto.ipi_aliquota,
+        ipi_valor: produto.ipi_valor,
+        pis_aliquota: produto.pis_aliquota,
+        pis_valor: produto.pis_valor,
+        cofins_aliquota: produto.cofins_aliquota,
+        cofins_valor: produto.cofins_valor,
+        icms_origem: "0",
+        icms_cst: "00",
+        pis_cst: "01",
+        cofins_cst: "01",
+      }));
+
+      const { error: itemsError } = await supabase
+        .from("nfe_items")
+        .insert(itemsToInsert);
+
+      if (itemsError) throw itemsError;
+
       toast.success(
-        isEditing ? "NFe salva com sucesso!" : "NFe criada com sucesso!"
+        isEditing ? "NFe atualizada com sucesso!" : "NFe criada com sucesso!"
       );
-      
       navigate("/fiscal/nfe");
     } catch (error) {
+      console.error("Erro ao salvar NFe:", error);
       toast.error("Erro ao salvar NFe");
-      console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleEmit = async () => {
     try {
-      // Validações antes de emitir
-      if (!formData.cliente_nome) {
+      if (!formData.destinatario_id) {
         toast.error("Selecione um cliente");
         return;
       }
 
-      if (parseFloat(formData.valor_produtos) <= 0) {
-        toast.error("Adicione produtos à nota");
+      if (produtos.length === 0) {
+        toast.error("Adicione pelo menos um produto");
         return;
       }
 
-      // Aqui você implementaria a integração com a SEFAZ
-      toast.success("NFe enviada para autorização!");
-      
-      navigate("/fiscal/nfe");
+      // Primeiro salva
+      await handleSave();
+
+      // TODO: Implementar integração com SEFAZ
+      toast.info("Funcionalidade de autorização será implementada em breve");
     } catch (error) {
+      console.error("Erro ao emitir NFe:", error);
       toast.error("Erro ao emitir NFe");
-      console.error(error);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="container-comfortable flex items-center justify-center min-h-[400px]">
+        <p className="text-muted-foreground">Carregando...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container-comfortable">
       <div className="flex flex-col gap-6">
-        {/* Header com botões fixos no topo direito */}
         <div className="flex justify-between items-start">
           <div>
             <h1 className="title-xl">
@@ -247,10 +508,9 @@ export default function NFeForm() {
               )}
             </h1>
             <p className="text-muted-foreground mt-2">
-              {fromOrder 
+              {fromOrder
                 ? "Verifique e complete os dados para emissão da nota fiscal"
-                : "Preencha os dados para emissão da nota fiscal"
-              }
+                : "Preencha os dados para emissão da nota fiscal"}
             </p>
           </div>
           <div className="flex gap-2">
@@ -265,6 +525,7 @@ export default function NFeForm() {
             <Button
               variant="outline"
               onClick={handleSave}
+              disabled={loading}
               className="gap-2"
             >
               <Save className="h-4 w-4" />
@@ -273,126 +534,127 @@ export default function NFeForm() {
           </div>
         </div>
 
-        {/* Formulário */}
         <Card className="bg-level-2">
           <div className="space-y-6">
-            {/* Seção: Dados do Destinatário */}
+            {/* Dados do Destinatário */}
             <div>
               <h2 className="title-md mb-4">Dados do Destinatário</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="col-span-full">
-                  <Label htmlFor="cliente_nome" className="required">
+                  <Label htmlFor="destinatario_id" className="required">
                     Cliente
                   </Label>
-                  <Input
-                    id="cliente_nome"
-                    name="cliente_nome"
-                    value={formData.cliente_nome}
-                    onChange={handleInputChange}
-                    placeholder="Selecione ou busque o cliente"
+                  <ComboboxAsync
+                    value={formData.destinatario_id}
+                    onValueChange={handleCustomerSelect}
+                    searchFunction={(query) => searchPessoas(query, "cliente")}
+                    placeholder="Busque o cliente..."
+                    emptyText="Nenhum cliente encontrado"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="cliente_cpf_cnpj" className="required">
+                  <Label htmlFor="destinatario_cpf_cnpj" className="required">
                     CPF/CNPJ
                   </Label>
                   <Input
-                    id="cliente_cpf_cnpj"
-                    name="cliente_cpf_cnpj"
-                    value={formData.cliente_cpf_cnpj}
+                    id="destinatario_cpf_cnpj"
+                    name="destinatario_cpf_cnpj"
+                    value={formData.destinatario_cpf_cnpj}
                     onChange={handleInputChange}
+                    readOnly
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="cliente_ie">Inscrição Estadual</Label>
+                  <Label htmlFor="destinatario_ie">Inscrição Estadual</Label>
                   <Input
-                    id="cliente_ie"
-                    name="cliente_ie"
-                    value={formData.cliente_ie}
+                    id="destinatario_ie"
+                    name="destinatario_ie"
+                    value={formData.destinatario_ie}
                     onChange={handleInputChange}
                   />
                 </div>
 
                 <div className="col-span-full md:col-span-2">
-                  <Label htmlFor="cliente_endereco" className="required">
+                  <Label htmlFor="destinatario_endereco" className="required">
                     Endereço
                   </Label>
                   <Input
-                    id="cliente_endereco"
-                    name="cliente_endereco"
-                    value={formData.cliente_endereco}
+                    id="destinatario_endereco"
+                    name="destinatario_endereco"
+                    value={formData.destinatario_endereco}
                     onChange={handleInputChange}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="cliente_numero" className="required">
+                  <Label htmlFor="destinatario_numero" className="required">
                     Número
                   </Label>
                   <Input
-                    id="cliente_numero"
-                    name="cliente_numero"
-                    value={formData.cliente_numero}
+                    id="destinatario_numero"
+                    name="destinatario_numero"
+                    value={formData.destinatario_numero}
                     onChange={handleInputChange}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="cliente_bairro" className="required">
+                  <Label htmlFor="destinatario_bairro" className="required">
                     Bairro
                   </Label>
                   <Input
-                    id="cliente_bairro"
-                    name="cliente_bairro"
-                    value={formData.cliente_bairro}
+                    id="destinatario_bairro"
+                    name="destinatario_bairro"
+                    value={formData.destinatario_bairro}
                     onChange={handleInputChange}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="cliente_cidade" className="required">
+                  <Label htmlFor="destinatario_cidade" className="required">
                     Cidade
                   </Label>
                   <Input
-                    id="cliente_cidade"
-                    name="cliente_cidade"
-                    value={formData.cliente_cidade}
+                    id="destinatario_cidade"
+                    name="destinatario_cidade"
+                    value={formData.destinatario_cidade}
                     onChange={handleInputChange}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="cliente_uf" className="required">
+                  <Label htmlFor="destinatario_uf" className="required">
                     UF
                   </Label>
                   <Select
-                    value={formData.cliente_uf}
+                    value={formData.destinatario_uf}
                     onValueChange={(value) =>
-                      handleSelectChange("cliente_uf", value)
+                      handleSelectChange("destinatario_uf", value)
                     }
                   >
-                    <SelectTrigger id="cliente_uf">
+                    <SelectTrigger id="destinatario_uf">
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="SP">SP</SelectItem>
-                      <SelectItem value="RJ">RJ</SelectItem>
-                      <SelectItem value="MG">MG</SelectItem>
-                      {/* Adicionar outros estados */}
+                      {UF_BRASILEIRAS.map((uf) => (
+                        <SelectItem key={uf} value={uf}>
+                          {uf}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div>
-                  <Label htmlFor="cliente_cep" className="required">
+                  <Label htmlFor="destinatario_cep" className="required">
                     CEP
                   </Label>
                   <Input
-                    id="cliente_cep"
-                    name="cliente_cep"
-                    value={formData.cliente_cep}
+                    id="destinatario_cep"
+                    name="destinatario_cep"
+                    value={formData.destinatario_cep}
                     onChange={handleInputChange}
                   />
                 </div>
@@ -401,7 +663,7 @@ export default function NFeForm() {
 
             <Separator />
 
-            {/* Seção: Dados da NFe */}
+            {/* Dados da Operação */}
             <div>
               <h2 className="title-md mb-4">Dados da Operação</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -475,77 +737,96 @@ export default function NFeForm() {
 
             <Separator />
 
-            {/* Seção: Produtos */}
+            {/* Produtos */}
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h2 className="title-md">Produtos/Serviços</h2>
                 <Button onClick={handleAddProduct} size="sm" className="gap-2">
-                  <Plus className="h-4 w-4" />
                   Adicionar Produto
                 </Button>
               </div>
               <NFeProductsTable
-                products={formData.produtos}
+                products={produtos}
                 onRemove={handleRemoveProduct}
                 onEdit={handleEditProduct}
-                onUpdateTotals={() => updateTotals(formData.produtos)}
+                onUpdateTotals={() => updateTotals(produtos)}
               />
             </div>
 
             <Separator />
 
-            {/* Seção: Totais */}
+            {/* Totais */}
             <div>
               <h2 className="title-md mb-4">Totais da NFe</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <div>
-                  <Label htmlFor="valor_produtos">Valor Produtos</Label>
+                  <Label>Base ICMS</Label>
                   <Input
-                    id="valor_produtos"
-                    name="valor_produtos"
-                    type="number"
-                    step="0.01"
-                    value={formData.valor_produtos}
-                    onChange={handleInputChange}
-                    className="font-mono"
+                    value={new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(parseFloat(formData.bc_icms))}
+                    readOnly
+                    className="font-mono bg-muted"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="valor_desconto">Desconto</Label>
+                  <Label>Valor ICMS</Label>
                   <Input
-                    id="valor_desconto"
-                    name="valor_desconto"
-                    type="number"
-                    step="0.01"
-                    value={formData.valor_desconto}
-                    onChange={handleInputChange}
-                    className="font-mono"
+                    value={new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(parseFloat(formData.valor_icms))}
+                    readOnly
+                    className="font-mono bg-muted"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="valor_frete">Frete</Label>
+                  <Label htmlFor="valor_frete">Valor Frete</Label>
                   <Input
                     id="valor_frete"
                     name="valor_frete"
                     type="number"
                     step="0.01"
                     value={formData.valor_frete}
-                    onChange={handleInputChange}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      updateTotals(produtos);
+                    }}
                     className="font-mono"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="valor_seguro">Seguro</Label>
+                  <Label htmlFor="valor_seguro">Valor Seguro</Label>
                   <Input
                     id="valor_seguro"
                     name="valor_seguro"
                     type="number"
                     step="0.01"
                     value={formData.valor_seguro}
-                    onChange={handleInputChange}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      updateTotals(produtos);
+                    }}
+                    className="font-mono"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="valor_desconto">Valor Desconto</Label>
+                  <Input
+                    id="valor_desconto"
+                    name="valor_desconto"
+                    type="number"
+                    step="0.01"
+                    value={formData.valor_desconto}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      updateTotals(produtos);
+                    }}
                     className="font-mono"
                   />
                 </div>
@@ -558,23 +839,47 @@ export default function NFeForm() {
                     type="number"
                     step="0.01"
                     value={formData.valor_outras_despesas}
-                    onChange={handleInputChange}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      updateTotals(produtos);
+                    }}
                     className="font-mono"
                   />
                 </div>
 
-                <div className="col-span-2 md:col-span-1">
-                  <Label htmlFor="valor_total" className="font-bold">
-                    Valor Total
-                  </Label>
+                <div>
+                  <Label>Valor IPI</Label>
                   <Input
-                    id="valor_total"
-                    name="valor_total"
-                    type="number"
-                    step="0.01"
-                    value={formData.valor_total}
+                    value={new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(parseFloat(formData.valor_ipi))}
                     readOnly
-                    className="font-mono font-bold bg-muted"
+                    className="font-mono bg-muted"
+                  />
+                </div>
+
+                <div>
+                  <Label>Valor Produtos</Label>
+                  <Input
+                    value={new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(parseFloat(formData.valor_produtos))}
+                    readOnly
+                    className="font-mono bg-muted"
+                  />
+                </div>
+
+                <div className="col-span-full">
+                  <Label className="text-lg">Total da NFe</Label>
+                  <Input
+                    value={new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(parseFloat(formData.valor_total))}
+                    readOnly
+                    className="font-mono font-bold text-lg bg-primary/10"
                   />
                 </div>
               </div>
@@ -582,10 +887,10 @@ export default function NFeForm() {
 
             <Separator />
 
-            {/* Seção: Informações Adicionais */}
+            {/* Informações Adicionais */}
             <div>
               <h2 className="title-md mb-4">Informações Adicionais</h2>
-              <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-4">
                 <div>
                   <Label htmlFor="informacoes_complementares">
                     Informações Complementares
@@ -595,22 +900,20 @@ export default function NFeForm() {
                     name="informacoes_complementares"
                     value={formData.informacoes_complementares}
                     onChange={handleInputChange}
-                    placeholder="Informações de interesse do contribuinte"
                     rows={3}
+                    placeholder="Informações de interesse do contribuinte"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="informacoes_fisco">
-                    Informações ao Fisco
-                  </Label>
+                  <Label htmlFor="informacoes_fisco">Informações ao Fisco</Label>
                   <Textarea
                     id="informacoes_fisco"
                     name="informacoes_fisco"
                     value={formData.informacoes_fisco}
                     onChange={handleInputChange}
-                    placeholder="Informações de interesse do fisco"
                     rows={3}
+                    placeholder="Informações de interesse do fisco"
                   />
                 </div>
               </div>
@@ -618,29 +921,37 @@ export default function NFeForm() {
           </div>
         </Card>
 
-        {/* Botões de ação no rodapé */}
-        <div className="flex justify-end gap-2 sticky bottom-4 bg-background/95 backdrop-blur-sm p-4 rounded-lg border">
-          <Button variant="outline" onClick={() => navigate("/fiscal/nfe")}>
+        {/* Botões de Ação */}
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            onClick={() => navigate("/fiscal/nfe")}
+            disabled={loading}
+          >
             Cancelar
           </Button>
-          <Button variant="outline" onClick={handleSave}>
-            <Save className="h-4 w-4 mr-2" />
+          <Button
+            variant="outline"
+            onClick={handleSave}
+            disabled={loading}
+            className="gap-2"
+          >
+            <Save className="h-4 w-4" />
             Salvar Rascunho
           </Button>
-          <Button onClick={handleEmit}>
-            <Send className="h-4 w-4 mr-2" />
+          <Button onClick={handleEmit} disabled={loading} className="gap-2">
+            <Send className="h-4 w-4" />
             Emitir NFe
           </Button>
         </div>
-
-        {/* Dialog de Produtos */}
-        <NFeProductDialog
-          open={productDialogOpen}
-          onOpenChange={setProductDialogOpen}
-          onSave={handleSaveProduct}
-          product={editingProduct}
-        />
       </div>
+
+      <NFeProductDialog
+        open={productDialogOpen}
+        onOpenChange={setProductDialogOpen}
+        onSave={handleSaveProduct}
+        product={editingProduct}
+      />
     </div>
   );
 }

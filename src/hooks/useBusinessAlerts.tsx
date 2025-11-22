@@ -181,35 +181,10 @@ export function useBusinessAlerts() {
   // Check for rejected NFSe
   const checkRejectedNFSe = useCallback(async () => {
     if (!currentOrg?.id) return []
-
+    
     // TEMPORÁRIO: Desabilitado devido a problemas de tipo com tabela NFSe
     // Será reimplementado quando os tipos estiverem corretos
     return []
-    
-    try {
-      const nfseList: any[] = []
-      const totalRejectedAmount = 0
-        
-        return [{
-          id: 'rejected_nfse',
-          type: 'rejected_nfse' as const,
-          severity: 'high' as const,
-          title: 'NFSe rejeitadas',
-          description: `${nfseList.length} NFSe rejeitada(s) totalizando R$ ${totalRejectedAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-          action_label: 'Ver NFSe',
-          action_route: '/nfse',
-          amount: totalRejectedAmount,
-          count: nfseList.length,
-          created_at: new Date().toISOString(),
-          resolved: false
-        }]
-      }
-
-      return []
-    } catch (error) {
-      console.error('Error checking rejected NFSe:', error)
-      return []
-    }
   }, [currentOrg?.id])
 
   // Check for pending orders

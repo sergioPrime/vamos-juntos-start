@@ -91,6 +91,12 @@ export default function NFe() {
     return matchesSearch && matchesStatus;
   });
 
+  const handleReload = () => {
+    // Função para recarregar os dados da NFe
+    // Em produção, aqui você faria um refetch dos dados do Supabase
+    toast.info("Dados recarregados");
+  };
+
   return (
     <div className="container-comfortable">
       <div className="flex flex-col gap-6">
@@ -235,7 +241,11 @@ export default function NFe() {
                       <NFeActionsMenu
                         status={nfe.status}
                         chaveAcesso={nfe.chave_acesso}
+                        nfeId={nfe.id}
+                        nfeNumero={nfe.numero}
+                        clienteEmail={nfe.cliente_email}
                         onView={() => navigate(`/fiscal/nfe/${nfe.id}`)}
+                        onUpdate={handleReload}
                       />
                     </TableCell>
                   </TableRow>

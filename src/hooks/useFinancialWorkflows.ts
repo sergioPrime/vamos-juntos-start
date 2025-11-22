@@ -97,7 +97,6 @@ export function useFinancialWorkflows() {
         .from('financial_transactions')
         .select('id, amount, transaction_date, description')
         .eq('org_id', currentOrg.id)
-        .is('reconciled_with_entry_id', null)
         .limit(100);
 
       if (txError) throw txError;
@@ -119,14 +118,14 @@ export function useFinancialWorkflows() {
           .limit(1);
 
         if (entries && entries.length > 0) {
-          // Reconciliar automaticamente
+          // Marcar lançamento como quitado
           const { error: updateError } = await supabase
-            .from('financial_transactions')
+            .from('financial_entries')
             .update({ 
-              reconciled_with_entry_id: entries[0].id,
-              reconciled_at: new Date().toISOString()
+              is_settled: true,
+              settled_at: new Date().toISOString()
             })
-            .eq('id', tx.id);
+            .eq('id', entries[0].id);
 
           if (!updateError) {
             reconciledCount++;

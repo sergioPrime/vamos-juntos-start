@@ -179,7 +179,7 @@ export function useBusinessAlerts() {
   }, [currentOrg?.id])
 
   // Check for rejected NFSe
-  const checkRejectedNFSe = useCallback(async (): Promise<Alert[]> => {
+  const checkRejectedNFSe = useCallback(async () => {
     return [];
   }, []);
 

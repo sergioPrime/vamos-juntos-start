@@ -178,11 +178,11 @@ export function useNFe() {
       // Criar NFe
       const { data: nfe, error: nfeError } = await supabase
         .from("nfe")
-        .insert({
+        .insert([{
           ...nfeFields,
           org_id: currentOrg.id,
           created_by: user.user.id,
-        })
+        }] as any)
         .select()
         .maybeSingle();
 

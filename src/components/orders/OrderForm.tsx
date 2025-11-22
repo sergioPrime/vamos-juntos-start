@@ -19,6 +19,7 @@ import { useSidebarConfig } from "@/contexts/SidebarConfigContext"
 import { ProductionOrderDialog } from "@/components/production/ProductionOrderDialog"
 import { ShippingLabelTemplate } from "@/components/logistics/ShippingLabelTemplate"
 import { ExchangeVoucherTemplate } from "@/components/logistics/ExchangeVoucherTemplate"
+import { supabase } from "@/integrations/supabase/client"
 
 interface OrderItem {
   id?: string

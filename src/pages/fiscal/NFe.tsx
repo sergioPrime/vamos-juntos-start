@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -21,6 +21,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
+import { toast } from "sonner";
 
 interface NFe {
   id: string;
@@ -35,33 +38,51 @@ interface NFe {
 
 export default function NFe() {
   const navigate = useNavigate();
+  const { currentOrg } = useOrganization();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("todos");
   const [dateFilter, setDateFilter] = useState<string>("todos");
+  const [nfeList, setNfeList] = useState<NFe[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Dados mockados para demonstração
-  const [nfeList] = useState<NFe[]>([
-    {
-      id: "1",
-      numero: "000001",
-      serie: "1",
-      cliente: "Cliente Exemplo LTDA",
-      data_emissao: "2025-01-15",
-      valor_total: 1500.00,
-      status: "autorizada",
-      chave_acesso: "35250112345678000100550010000000011234567890",
-    },
-    {
-      id: "2",
-      numero: "000002",
-      serie: "1",
-      cliente: "Empresa ABC S.A.",
-      data_emissao: "2025-01-16",
-      valor_total: 2300.50,
-      status: "autorizada",
-      chave_acesso: "35250112345678000100550010000000021234567891",
-    },
-  ]);
+  useEffect(() => {
+    if (currentOrg) {
+      loadNFes();
+    }
+  }, [currentOrg]);
+
+  const loadNFes = async () => {
+    if (!currentOrg) return;
+
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("nfe")
+        .select("*")
+        .eq("org_id", currentOrg.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      const mappedData: NFe[] = (data || []).map((nfe: any) => ({
+        id: nfe.id,
+        numero: nfe.numero?.toString().padStart(6, "0") || "000000",
+        serie: nfe.serie || "1",
+        cliente: nfe.destinatario_nome || "Cliente não informado",
+        data_emissao: nfe.data_emissao || nfe.created_at,
+        valor_total: parseFloat(nfe.valor_total) || 0,
+        status: nfe.status || "pendente",
+        chave_acesso: nfe.chave_acesso || "",
+      }));
+
+      setNfeList(mappedData);
+    } catch (error) {
+      console.error("Erro ao carregar NFes:", error);
+      toast.error("Erro ao carregar notas fiscais");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusBadge = (status: NFe["status"]) => {
     const variants = {
@@ -205,13 +226,24 @@ export default function NFe() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredNFes.length === 0 ? (
+              {loading ? (
                 <TableRow>
                   <TableCell
                     colSpan={7}
                     className="text-center text-muted-foreground py-8"
                   >
-                    Nenhuma nota fiscal encontrada
+                    Carregando...
+                  </TableCell>
+                </TableRow>
+              ) : filteredNFes.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className="text-center text-muted-foreground py-8"
+                  >
+                    {searchTerm || statusFilter !== "todos"
+                      ? "Nenhuma nota fiscal encontrada com os filtros aplicados"
+                      : "Nenhuma nota fiscal cadastrada. Clique em 'Nova NFe' para começar."}
                   </TableCell>
                 </TableRow>
               ) : (

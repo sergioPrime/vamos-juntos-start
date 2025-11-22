@@ -234,6 +234,7 @@ export default function NFe() {
                       <NFeActionsMenu
                         status={nfe.status}
                         chaveAcesso={nfe.chave_acesso}
+                        nfeId={nfe.id}
                         onView={() => navigate(`/fiscal/nfe/${nfe.id}`)}
                       />
                     </TableCell>

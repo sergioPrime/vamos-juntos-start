@@ -61,7 +61,11 @@ export default function NFeActionsMenu({
   };
 
   const handleManifestacao = () => {
-    toast.info("Abrindo Manifestação do Destinatário");
+    setManifestDialogOpen(true);
+  };
+
+  const handleViewDetails = () => {
+    setDetailsDialogOpen(true);
   };
 
   return (
@@ -75,10 +79,10 @@ export default function NFeActionsMenu({
         <DropdownMenuLabel>Ações da NFe</DropdownMenuLabel>
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem onClick={onView}>
-          <Eye className="mr-2 h-4 w-4" />
-          Visualizar Detalhes
-        </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleViewDetails}>
+            <Eye className="mr-2 h-4 w-4" />
+            Visualizar Detalhes
+          </DropdownMenuItem>
 
         {status === "autorizada" && (
           <>

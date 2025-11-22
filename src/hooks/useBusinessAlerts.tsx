@@ -185,14 +185,14 @@ export function useBusinessAlerts() {
     try {
       const { data: nfseList, error } = await supabase
         .from('nfse')
-        .select('id, numero, valor_servicos, discriminacao')
+        .select('*')
         .eq('org_id', currentOrg.id)
         .eq('rejeitada', true)
 
       if (error) throw error
 
       if (nfseList && nfseList.length > 0) {
-        const totalRejectedAmount = nfseList.reduce((sum, nfse) => sum + (nfse.valor_servicos || 0), 0)
+        const totalRejectedAmount = nfseList.reduce((sum: number, nfse: any) => sum + (nfse.valor_servicos || 0), 0)
         
         return [{
           id: 'rejected_nfse',

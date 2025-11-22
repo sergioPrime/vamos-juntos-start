@@ -203,17 +203,12 @@ export function usePrintDANFE() {
 
       if (nfeError) throw nfeError
 
-      // Buscar itens da NFe
-      const { data: items, error: itemsError } = await supabase
-        .from('nfe_itens')
-        .select('*')
-        .eq('nfe_id', nfeId)
-        .order('numero_item')
-
-      if (itemsError) throw itemsError
+      // Por enquanto, usar array vazio de itens
+      // TODO: Implementar busca de itens quando a tabela for criada
+      const items: any[] = []
 
       // Gerar HTML do DANFE
-      const html = generateDANFEHTML(nfe, items || [])
+      const html = generateDANFEHTML(nfe, items)
 
       // Abrir em nova janela e imprimir
       const printWindow = window.open('', '_blank')

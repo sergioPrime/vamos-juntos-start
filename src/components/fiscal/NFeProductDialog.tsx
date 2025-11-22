@@ -43,6 +43,7 @@ interface NFeProductDialogProps {
   onOpenChange: (open: boolean) => void;
   onSave: (product: NFeProduct) => void;
   product?: NFeProduct | null;
+  clienteUF?: string;
 }
 
 export default function NFeProductDialog({
@@ -123,8 +124,60 @@ export default function NFeProductDialog({
 
   const handleInputChange = (field: string, value: any) => {
     const newData = { ...formData, [field]: value };
-    const calculated = calculateTotals(newData);
-    setFormData({ ...newData, ...calculated });
+    
+    // Se mudou o CFOP, buscar nova operação fiscal
+    if (field === "cfop") {
+      loadFiscalOperation(value, newData);
+    } else {
+      const calculated = calculateTotals(newData);
+      setFormData({ ...newData, ...calculated });
+    }
+  };
+
+  // Buscar operação fiscal
+  const loadFiscalOperation = async (cfop: string, currentData: Partial<NFeProduct>) => {
+    if (!currentOrg || !cfop) return;
+
+    const { data: fiscalOps, error } = await supabase
+      .from("fiscal_operations")
+      .select("*")
+      .eq("org_id", currentOrg.id)
+      .eq("destination_state", clienteUF)
+      .contains("cfop_codes", [cfop])
+      .limit(1);
+
+    if (error) {
+      console.error("Erro ao buscar operação fiscal:", error);
+      const calculated = calculateTotals(currentData);
+      setFormData({ ...currentData, ...calculated } as NFeProduct);
+      return;
+    }
+
+    // Se encontrou operação fiscal, aplicar as alíquotas
+    if (fiscalOps && fiscalOps.length > 0) {
+      const op = fiscalOps[0];
+      
+      const newData = {
+        ...currentData,
+        // ICMS - usar taxa interna ou interestadual baseado no estado
+        icms_aliquota: op.internal_icms_rate || 0,
+        // IPI - usar taxa geral
+        ipi_aliquota: op.ipi_rate_general || 0,
+        // PIS e COFINS - alíquotas padrão (podem ser ajustadas manualmente)
+        pis_aliquota: 1.65,
+        cofins_aliquota: 7.6,
+      };
+
+      const calculated = calculateTotals(newData);
+      setFormData({ ...newData, ...calculated } as NFeProduct);
+      
+      toast.success("Impostos aplicados automaticamente da operação fiscal");
+    } else {
+      // Se não encontrou, manter os valores atuais
+      const calculated = calculateTotals(currentData);
+      setFormData({ ...currentData, ...calculated } as NFeProduct);
+      toast.info("Nenhuma operação fiscal configurada para este CFOP");
+    }
   };
 
   const handleSave = () => {

@@ -17,7 +17,7 @@ describe('usePermissionGuard', () => {
 
     const { result } = renderHook(() => usePermissionGuard());
 
-    const hasPermission = result.current.checkPermission('financial', 'create');
+    const hasPermission = result.current.hasPermission('financial', 'create');
     expect(hasPermission).toBe(true);
   });
 
@@ -28,7 +28,7 @@ describe('usePermissionGuard', () => {
 
     const { result } = renderHook(() => usePermissionGuard());
 
-    const hasPermission = result.current.checkPermission('financial', 'delete');
+    const hasPermission = result.current.hasPermission('financial', 'delete');
     expect(hasPermission).toBe(false);
   });
 
@@ -43,8 +43,8 @@ describe('usePermissionGuard', () => {
 
     const { result } = renderHook(() => usePermissionGuard());
 
-    const hasCreatePermission = result.current.checkPermission('financial', 'create');
-    const hasDeletePermission = result.current.checkPermission('financial', 'delete');
+    const hasCreatePermission = result.current.hasPermission('financial', 'create');
+    const hasDeletePermission = result.current.hasPermission('financial', 'delete');
 
     expect(hasCreatePermission).toBe(true);
     expect(hasDeletePermission).toBe(false);
@@ -55,7 +55,7 @@ describe('usePermissionGuard', () => {
 
     const { result } = renderHook(() => usePermissionGuard());
 
-    const hasPermission = result.current.checkPermission('financial', 'create');
+    const hasPermission = result.current.hasPermission('financial', 'create');
     expect(hasPermission).toBe(false);
   });
 });

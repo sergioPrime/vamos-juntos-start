@@ -79,8 +79,8 @@ describe('useStockValidation', () => {
     let validationResult;
     await act(async () => {
       validationResult = await result.current.validateOrderStock([
-        { productId: 'prod-1', quantity: 5 },
-        { productId: 'prod-2', quantity: 3 },
+        { product_id: 'prod-1', quantity: 5 },
+        { product_id: 'prod-2', quantity: 3 },
       ]);
     });
 

@@ -180,14 +180,9 @@ export function useBusinessAlerts() {
 
   // Check for rejected NFSe
   const checkRejectedNFSe = useCallback(async () => {
-    if (!currentOrg?.id) return []
-
-    try {
-      const { data: nfseList, error } = await supabase
-        .from('nfse')
-        .select('id, number, service_amount, service_description')
-        .eq('org_id', currentOrg.id)
-        .eq('status', 'rejected')
+    // Temporarily disabled due to nfse table structure issues
+    return []
+  }, [currentOrg?.id])
 
       if (error) throw error
 

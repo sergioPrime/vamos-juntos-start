@@ -47,6 +47,7 @@ const OrdersAndQuotes = lazy(() => import("./pages/OrdersAndQuotes"));
 const OrdersQuotesForm = lazy(() => import("./pages/OrdersQuotesForm"));
 const PurchaseRequests = lazy(() => import("./pages/purchases/PurchaseRequests"));
 const PurchaseReports = lazy(() => import("./pages/purchases/PurchaseReports"));
+const Purchases = lazy(() => import("./pages/purchases/Purchases"));
 const Suppliers = lazy(() => import("./pages/Suppliers"));
 const Welcome = lazy(() => import("./pages/onboarding/Welcome"));
 const Signup = lazy(() => import("./pages/onboarding/Signup"));
@@ -259,6 +260,15 @@ const App = () => (
               <AppLayout>
                 <PageTransition direction="left">
                   <OrderForm />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/purchases" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <Purchases />
                 </PageTransition>
               </AppLayout>
             </ProtectedRoute>

@@ -16,6 +16,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { useSidebarConfig } from "@/contexts/SidebarConfigContext"
+import { useOrderForm } from "@/hooks/sales/useOrderForm"
 import { ProductionOrderDialog } from "@/components/production/ProductionOrderDialog"
 import { ShippingLabelTemplate } from "@/components/logistics/ShippingLabelTemplate"
 import { ExchangeVoucherTemplate } from "@/components/logistics/ExchangeVoucherTemplate"
@@ -70,6 +71,7 @@ const OrderForm = () => {
   const { user } = useAuth()
   const { currentOrg } = useOrganization()
   const { lockNumberFields } = useSidebarConfig()
+  const { saveOrder, generateOrderNumber: generateNumber, isSaving } = useOrderForm()
   
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState<OrderFormData>({
@@ -109,10 +111,13 @@ const OrderForm = () => {
     }
   }, [id])
 
-  const generateOrderNumber = () => {
-    // Generate sequential number starting from 1
-    const nextNumber = "1" // In a real implementation, this would come from the database
-    setFormData(prev => ({ ...prev, number: nextNumber }))
+  const generateOrderNumber = async () => {
+    try {
+      const orderNumber = await generateNumber()
+      setFormData(prev => ({ ...prev, number: orderNumber }))
+    } catch (error) {
+      console.error('Error generating order number:', error)
+    }
   }
 
   const loadOrder = async (orderId: string) => {
@@ -132,7 +137,7 @@ const OrderForm = () => {
     }
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!currentOrg?.id) {
       toast({
         title: "Erro",
@@ -142,11 +147,32 @@ const OrderForm = () => {
       return
     }
 
-    // Save order implementation
-    toast({
-      title: "Pedido salvo",
-      description: "Pedido salvo com sucesso."
-    })
+    try {
+      // Convert OrderFormData to match schema
+      const orderData = {
+        order_number: formData.number,
+        order_type: formData.order_type as 'sale' | 'order' | 'quote',
+        customer_id: formData.customer_id || '',
+        system_status: formData.status as 'draft' | 'confirmed' | 'processing' | 'completed' | 'cancelled',
+        total_amount: formData.total_amount,
+        notes: formData.notes,
+        items: formData.order_items.map(item => ({
+          product_id: item.product_id,
+          product_name: item.product_name,
+          item_type: 'product' as const,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          total_price: item.total_price,
+          auto_purchase: false
+        }))
+      }
+
+      const orderId = await saveOrder(orderData)
+      navigate(`/orders`)
+    } catch (error) {
+      // Error already handled by useOrderForm
+      console.error('Save error:', error)
+    }
   }
 
   function addNewItem() {
@@ -271,9 +297,9 @@ const OrderForm = () => {
             </DropdownMenuContent>
           </DropdownMenu>
           
-          <Button onClick={handleSave} className="btn-action-primary">
+          <Button onClick={handleSave} disabled={isSaving} className="btn-action-primary">
             <Save className="h-4 w-4 mr-2" />
-            Salvar (Ctrl+S)
+            {isSaving ? 'Salvando...' : 'Salvar (Ctrl+S)'}
           </Button>
         </div>
       </div>

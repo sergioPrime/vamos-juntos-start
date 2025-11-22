@@ -2028,6 +2028,371 @@ export type Database = {
           },
         ]
       }
+      nfe: {
+        Row: {
+          bc_icms: number | null
+          chave_acesso: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string
+          data_autorizacao: string | null
+          data_cancelamento: string | null
+          data_emissao: string
+          data_saida_entrada: string | null
+          destinatario_bairro: string
+          destinatario_cep: string
+          destinatario_cidade: string
+          destinatario_complemento: string | null
+          destinatario_cpf_cnpj: string
+          destinatario_email: string | null
+          destinatario_endereco: string
+          destinatario_id: string | null
+          destinatario_ie: string | null
+          destinatario_nome: string
+          destinatario_numero: string
+          destinatario_telefone: string | null
+          destinatario_uf: string
+          finalidade: string
+          id: string
+          informacoes_complementares: string | null
+          informacoes_fisco: string | null
+          modelo: string
+          motivo_cancelamento: string | null
+          motivo_rejeicao: string | null
+          natureza_operacao: string
+          numero: number
+          numero_protocolo: string | null
+          order_id: string | null
+          org_id: string
+          protocolo_cancelamento: string | null
+          serie: string
+          status: string
+          tipo_operacao: string
+          updated_at: string
+          valor_cofins: number | null
+          valor_desconto: number | null
+          valor_frete: number | null
+          valor_icms: number | null
+          valor_icms_st: number | null
+          valor_ipi: number | null
+          valor_outras_despesas: number | null
+          valor_pis: number | null
+          valor_produtos: number
+          valor_seguro: number | null
+          valor_total: number
+          xml_autorizado: string | null
+          xml_gerado: string | null
+        }
+        Insert: {
+          bc_icms?: number | null
+          chave_acesso?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by: string
+          data_autorizacao?: string | null
+          data_cancelamento?: string | null
+          data_emissao?: string
+          data_saida_entrada?: string | null
+          destinatario_bairro: string
+          destinatario_cep: string
+          destinatario_cidade: string
+          destinatario_complemento?: string | null
+          destinatario_cpf_cnpj: string
+          destinatario_email?: string | null
+          destinatario_endereco: string
+          destinatario_id?: string | null
+          destinatario_ie?: string | null
+          destinatario_nome: string
+          destinatario_numero: string
+          destinatario_telefone?: string | null
+          destinatario_uf: string
+          finalidade?: string
+          id?: string
+          informacoes_complementares?: string | null
+          informacoes_fisco?: string | null
+          modelo?: string
+          motivo_cancelamento?: string | null
+          motivo_rejeicao?: string | null
+          natureza_operacao?: string
+          numero: number
+          numero_protocolo?: string | null
+          order_id?: string | null
+          org_id: string
+          protocolo_cancelamento?: string | null
+          serie?: string
+          status?: string
+          tipo_operacao?: string
+          updated_at?: string
+          valor_cofins?: number | null
+          valor_desconto?: number | null
+          valor_frete?: number | null
+          valor_icms?: number | null
+          valor_icms_st?: number | null
+          valor_ipi?: number | null
+          valor_outras_despesas?: number | null
+          valor_pis?: number | null
+          valor_produtos?: number
+          valor_seguro?: number | null
+          valor_total?: number
+          xml_autorizado?: string | null
+          xml_gerado?: string | null
+        }
+        Update: {
+          bc_icms?: number | null
+          chave_acesso?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string
+          data_autorizacao?: string | null
+          data_cancelamento?: string | null
+          data_emissao?: string
+          data_saida_entrada?: string | null
+          destinatario_bairro?: string
+          destinatario_cep?: string
+          destinatario_cidade?: string
+          destinatario_complemento?: string | null
+          destinatario_cpf_cnpj?: string
+          destinatario_email?: string | null
+          destinatario_endereco?: string
+          destinatario_id?: string | null
+          destinatario_ie?: string | null
+          destinatario_nome?: string
+          destinatario_numero?: string
+          destinatario_telefone?: string | null
+          destinatario_uf?: string
+          finalidade?: string
+          id?: string
+          informacoes_complementares?: string | null
+          informacoes_fisco?: string | null
+          modelo?: string
+          motivo_cancelamento?: string | null
+          motivo_rejeicao?: string | null
+          natureza_operacao?: string
+          numero?: number
+          numero_protocolo?: string | null
+          order_id?: string | null
+          org_id?: string
+          protocolo_cancelamento?: string | null
+          serie?: string
+          status?: string
+          tipo_operacao?: string
+          updated_at?: string
+          valor_cofins?: number | null
+          valor_desconto?: number | null
+          valor_frete?: number | null
+          valor_icms?: number | null
+          valor_icms_st?: number | null
+          valor_ipi?: number | null
+          valor_outras_despesas?: number | null
+          valor_pis?: number | null
+          valor_produtos?: number
+          valor_seguro?: number | null
+          valor_total?: number
+          xml_autorizado?: string | null
+          xml_gerado?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfe_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_destinatario_id_fkey"
+            columns: ["destinatario_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "sales_integrity_check"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nfe_items: {
+        Row: {
+          cest: string | null
+          cfop: string
+          codigo_produto: string
+          cofins_aliquota: number | null
+          cofins_bc: number | null
+          cofins_cst: string
+          cofins_valor: number | null
+          created_at: string
+          descricao: string
+          icms_aliquota: number | null
+          icms_bc: number | null
+          icms_cst: string
+          icms_modalidade_bc: string | null
+          icms_origem: string
+          icms_st_aliquota: number | null
+          icms_st_bc: number | null
+          icms_st_valor: number | null
+          icms_valor: number | null
+          id: string
+          informacoes_adicionais: string | null
+          ipi_aliquota: number | null
+          ipi_bc: number | null
+          ipi_cst: string | null
+          ipi_valor: number | null
+          item_numero: number
+          ncm: string
+          nfe_id: string
+          org_id: string
+          pis_aliquota: number | null
+          pis_bc: number | null
+          pis_cst: string
+          pis_valor: number | null
+          product_id: string | null
+          quantidade: number
+          unidade: string
+          updated_at: string
+          valor_desconto: number | null
+          valor_frete: number | null
+          valor_outras_despesas: number | null
+          valor_seguro: number | null
+          valor_total: number
+          valor_unitario: number
+        }
+        Insert: {
+          cest?: string | null
+          cfop: string
+          codigo_produto: string
+          cofins_aliquota?: number | null
+          cofins_bc?: number | null
+          cofins_cst: string
+          cofins_valor?: number | null
+          created_at?: string
+          descricao: string
+          icms_aliquota?: number | null
+          icms_bc?: number | null
+          icms_cst: string
+          icms_modalidade_bc?: string | null
+          icms_origem?: string
+          icms_st_aliquota?: number | null
+          icms_st_bc?: number | null
+          icms_st_valor?: number | null
+          icms_valor?: number | null
+          id?: string
+          informacoes_adicionais?: string | null
+          ipi_aliquota?: number | null
+          ipi_bc?: number | null
+          ipi_cst?: string | null
+          ipi_valor?: number | null
+          item_numero: number
+          ncm: string
+          nfe_id: string
+          org_id: string
+          pis_aliquota?: number | null
+          pis_bc?: number | null
+          pis_cst: string
+          pis_valor?: number | null
+          product_id?: string | null
+          quantidade: number
+          unidade: string
+          updated_at?: string
+          valor_desconto?: number | null
+          valor_frete?: number | null
+          valor_outras_despesas?: number | null
+          valor_seguro?: number | null
+          valor_total: number
+          valor_unitario: number
+        }
+        Update: {
+          cest?: string | null
+          cfop?: string
+          codigo_produto?: string
+          cofins_aliquota?: number | null
+          cofins_bc?: number | null
+          cofins_cst?: string
+          cofins_valor?: number | null
+          created_at?: string
+          descricao?: string
+          icms_aliquota?: number | null
+          icms_bc?: number | null
+          icms_cst?: string
+          icms_modalidade_bc?: string | null
+          icms_origem?: string
+          icms_st_aliquota?: number | null
+          icms_st_bc?: number | null
+          icms_st_valor?: number | null
+          icms_valor?: number | null
+          id?: string
+          informacoes_adicionais?: string | null
+          ipi_aliquota?: number | null
+          ipi_bc?: number | null
+          ipi_cst?: string | null
+          ipi_valor?: number | null
+          item_numero?: number
+          ncm?: string
+          nfe_id?: string
+          org_id?: string
+          pis_aliquota?: number | null
+          pis_bc?: number | null
+          pis_cst?: string
+          pis_valor?: number | null
+          product_id?: string | null
+          quantidade?: number
+          unidade?: string
+          updated_at?: string
+          valor_desconto?: number | null
+          valor_frete?: number | null
+          valor_outras_despesas?: number | null
+          valor_seguro?: number | null
+          valor_total?: number
+          valor_unitario?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfe_items_nfe_id_fkey"
+            columns: ["nfe_id"]
+            isOneToOne: false
+            referencedRelation: "nfe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_items_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "stock_integrity_check"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nfse: {
         Row: {
           created_at: string
@@ -2654,6 +3019,7 @@ export type Database = {
           minimum_sale_price: number | null
           model: string | null
           name: string
+          ncm_code: string | null
           operational_expenses_percent: number | null
           org_id: string
           owner_id: string
@@ -2714,6 +3080,7 @@ export type Database = {
           minimum_sale_price?: number | null
           model?: string | null
           name: string
+          ncm_code?: string | null
           operational_expenses_percent?: number | null
           org_id: string
           owner_id: string
@@ -2774,6 +3141,7 @@ export type Database = {
           minimum_sale_price?: number | null
           model?: string | null
           name?: string
+          ncm_code?: string | null
           operational_expenses_percent?: number | null
           org_id?: string
           owner_id?: string
@@ -4269,6 +4637,7 @@ export type Database = {
           original_amount: number
         }[]
       }
+      calculate_nfe_totals: { Args: { p_nfe_id: string }; Returns: undefined }
       check_low_stock_alert: {
         Args: never
         Returns: {
@@ -4354,6 +4723,10 @@ export type Database = {
         Returns: number
       }
       generate_next_entry_code: { Args: { p_org_id: string }; Returns: number }
+      generate_next_nfe_number: {
+        Args: { p_org_id: string; p_serie?: string }
+        Returns: number
+      }
       generate_next_order_number: {
         Args: { p_org_id: string }
         Returns: number

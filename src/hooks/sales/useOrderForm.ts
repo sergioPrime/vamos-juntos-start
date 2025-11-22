@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useOrganization } from '@/hooks/useOrganization'
 import { orderFormSchema, type OrderFormData } from '@/schemas/orders'
-import { useStockValidation } from './useStockValidation'
+import { useStockValidation } from '../useStockValidation'
 
 export function useOrderForm() {
   const navigate = useNavigate()

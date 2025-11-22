@@ -12,17 +12,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Send, Plus, Eye } from "lucide-react";
+import { ArrowLeft, Save, Send, Plus, Eye, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import NFeProductsTable from "@/components/fiscal/NFeProductsTable";
 import NFeProductDialog from "@/components/fiscal/NFeProductDialog";
+import CustomerSearchDialog from "@/components/fiscal/CustomerSearchDialog";
+import ProductSearchDialog from "@/components/fiscal/ProductSearchDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
 
 export default function NFeForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
   const isEditing = !!id;
+  const { currentOrg } = useOrganization();
 
   // Dados vindos do PDV
   const fromOrder = location.state?.fromOrder || false;
@@ -30,7 +35,10 @@ export default function NFeForm() {
   const orderItems = location.state?.orderItems || [];
 
   const [productDialogOpen, setProductDialogOpen] = useState(false);
+  const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
+  const [productSearchDialogOpen, setProductSearchDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Inicializar produtos vindos do pedido (se houver)
   const initialProducts = orderItems.map((item: any) => ({
@@ -190,45 +198,155 @@ export default function NFeForm() {
   }, []);
 
   const handleSave = async () => {
+    if (!currentOrg) return;
+    
     try {
+      setIsSaving(true);
+
       // Validações básicas
       if (!formData.cliente_nome) {
         toast.error("Selecione um cliente");
         return;
       }
 
-      // Aqui você implementaria a lógica de salvar
-      toast.success(
-        isEditing ? "NFe salva com sucesso!" : "NFe criada com sucesso!"
-      );
-      
+      // Salvar NFe como rascunho
+      const { data: nfeData, error: nfeError } = await supabase
+        .from("nfe")
+        .insert({
+          organization_id: currentOrg.id,
+          numero: 0, // Será gerado pelo trigger
+          serie: formData.serie,
+          natureza_operacao: formData.natureza_operacao,
+          tipo_operacao: parseInt(formData.tipo_operacao),
+          finalidade: parseInt(formData.finalidade),
+          destinatario_nome: formData.cliente_nome,
+          destinatario_cpf_cnpj: formData.cliente_cpf_cnpj,
+          destinatario_endereco: formData.cliente_endereco,
+          destinatario_numero: formData.cliente_numero,
+          destinatario_bairro: formData.cliente_bairro,
+          destinatario_cidade: formData.cliente_cidade,
+          destinatario_uf: formData.cliente_uf,
+          destinatario_cep: formData.cliente_cep,
+          valor_produtos: parseFloat(formData.valor_produtos),
+          valor_frete: parseFloat(formData.valor_frete || "0"),
+          valor_seguro: parseFloat(formData.valor_seguro || "0"),
+          valor_desconto: parseFloat(formData.valor_desconto || "0"),
+          valor_total: parseFloat(formData.valor_total),
+          informacoes_complementares: formData.informacoes_complementares,
+          status: "rascunho",
+        })
+        .select()
+        .single();
+
+      if (nfeError) throw nfeError;
+
+      // Salvar itens da NFe
+      if (formData.produtos.length > 0) {
+        const items = formData.produtos.map((produto: any, index: number) => ({
+          nfe_id: nfeData.id,
+          organization_id: currentOrg.id,
+          item_numero: index + 1,
+          codigo_produto: produto.codigo,
+          descricao: produto.descricao,
+          ncm: produto.ncm,
+          cfop: produto.cfop,
+          unidade_comercial: produto.unidade,
+          quantidade_comercial: parseFloat(produto.quantidade),
+          valor_unitario: parseFloat(produto.valor_unitario),
+          valor_total: parseFloat(produto.valor_total),
+          icms_origem: "0",
+          icms_cst: produto.icms_cst,
+          icms_base_calculo: parseFloat(produto.icms_base || "0"),
+          icms_aliquota: parseFloat(produto.icms_aliquota || "0"),
+          icms_valor: parseFloat(produto.icms_valor || "0"),
+        }));
+
+        const { error: itemsError } = await supabase
+          .from("nfe_items")
+          .insert(items);
+
+        if (itemsError) throw itemsError;
+      }
+
+      toast.success("Rascunho salvo com sucesso!");
       navigate("/fiscal/nfe");
     } catch (error) {
-      toast.error("Erro ao salvar NFe");
-      console.error(error);
+      console.error("Erro ao salvar:", error);
+      toast.error("Erro ao salvar rascunho");
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleEmit = async () => {
+    if (!currentOrg) return;
+    
     try {
-      // Validações antes de emitir
+      setIsSaving(true);
+
+      // Validações
       if (!formData.cliente_nome) {
         toast.error("Selecione um cliente");
         return;
       }
 
-      if (parseFloat(formData.valor_produtos) <= 0) {
+      if (formData.produtos.length === 0) {
         toast.error("Adicione produtos à nota");
         return;
       }
 
-      // Aqui você implementaria a integração com a SEFAZ
-      toast.success("NFe enviada para autorização!");
-      
+      // Chamar edge function para emitir NFe
+      const { data, error } = await supabase.functions.invoke("emitir-nfe", {
+        body: {
+          org_id: currentOrg.id,
+          nfe_data: {
+            serie: formData.serie,
+            natureza_operacao: formData.natureza_operacao,
+            tipo_operacao: parseInt(formData.tipo_operacao),
+            finalidade: parseInt(formData.finalidade),
+            destinatario_nome: formData.cliente_nome,
+            destinatario_cpf_cnpj: formData.cliente_cpf_cnpj,
+            destinatario_endereco: formData.cliente_endereco,
+            destinatario_numero: formData.cliente_numero,
+            destinatario_bairro: formData.cliente_bairro,
+            destinatario_cidade: formData.cliente_cidade,
+            destinatario_uf: formData.cliente_uf,
+            destinatario_cep: formData.cliente_cep,
+            valor_produtos: parseFloat(formData.valor_produtos),
+            valor_frete: parseFloat(formData.valor_frete || "0"),
+            valor_seguro: parseFloat(formData.valor_seguro || "0"),
+            valor_desconto: parseFloat(formData.valor_desconto || "0"),
+            valor_total: parseFloat(formData.valor_total),
+            informacoes_complementares: formData.informacoes_complementares,
+          },
+          items: formData.produtos.map((produto: any, index: number) => ({
+            item_numero: index + 1,
+            codigo_produto: produto.codigo,
+            descricao: produto.descricao,
+            ncm: produto.ncm,
+            cfop: produto.cfop,
+            unidade_comercial: produto.unidade,
+            quantidade_comercial: parseFloat(produto.quantidade),
+            valor_unitario: parseFloat(produto.valor_unitario),
+            valor_total: parseFloat(produto.valor_total),
+            icms_origem: "0",
+            icms_cst: produto.icms_cst,
+            icms_base_calculo: parseFloat(produto.icms_base || "0"),
+            icms_aliquota: parseFloat(produto.icms_aliquota || "0"),
+            icms_valor: parseFloat(produto.icms_valor || "0"),
+          })),
+        },
+      });
+
+      if (error) throw error;
+
+      toast.success("NFe emitida com sucesso!");
       navigate("/fiscal/nfe");
     } catch (error) {
+      console.error("Erro ao emitir:", error);
       toast.error("Erro ao emitir NFe");
-      console.error(error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -284,13 +402,23 @@ export default function NFeForm() {
                   <Label htmlFor="cliente_nome" className="required">
                     Cliente
                   </Label>
-                  <Input
-                    id="cliente_nome"
-                    name="cliente_nome"
-                    value={formData.cliente_nome}
-                    onChange={handleInputChange}
-                    placeholder="Selecione ou busque o cliente"
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      id="cliente_nome"
+                      name="cliente_nome"
+                      value={formData.cliente_nome}
+                      onChange={handleInputChange}
+                      placeholder="Selecione ou busque o cliente"
+                      readOnly
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setCustomerDialogOpen(true)}
+                    >
+                      <Search className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
 
                 <div>
@@ -479,10 +607,21 @@ export default function NFeForm() {
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h2 className="title-md">Produtos/Serviços</h2>
-                <Button onClick={handleAddProduct} size="sm" className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  Adicionar Produto
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setProductSearchDialogOpen(true)}
+                    size="sm"
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <Search className="h-4 w-4" />
+                    Buscar Produto
+                  </Button>
+                  <Button onClick={handleAddProduct} size="sm" className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Adicionar Produto
+                  </Button>
+                </div>
               </div>
               <NFeProductsTable
                 products={formData.produtos}
@@ -623,11 +762,18 @@ export default function NFeForm() {
           <Button variant="outline" onClick={() => navigate("/fiscal/nfe")}>
             Cancelar
           </Button>
-          <Button variant="outline" onClick={handleSave}>
+          <Button 
+            variant="outline" 
+            onClick={handleSave}
+            disabled={isSaving}
+          >
             <Save className="h-4 w-4 mr-2" />
             Salvar Rascunho
           </Button>
-          <Button onClick={handleEmit}>
+          <Button 
+            onClick={handleEmit}
+            disabled={isSaving}
+          >
             <Send className="h-4 w-4 mr-2" />
             Emitir NFe
           </Button>
@@ -639,6 +785,63 @@ export default function NFeForm() {
           onOpenChange={setProductDialogOpen}
           onSave={handleSaveProduct}
           product={editingProduct}
+        />
+
+        {/* Dialog de Busca de Cliente */}
+        <CustomerSearchDialog
+          open={customerDialogOpen}
+          onOpenChange={setCustomerDialogOpen}
+          onSelect={(customer) => {
+            setFormData((prev) => ({
+              ...prev,
+              cliente_id: customer.id,
+              cliente_nome: customer.name,
+              cliente_cpf_cnpj: customer.document || "",
+              cliente_endereco: customer.address || "",
+              cliente_cidade: customer.city || "",
+              cliente_uf: customer.state || "",
+              cliente_cep: customer.zip_code || "",
+            }));
+            setCustomerDialogOpen(false);
+          }}
+        />
+
+        {/* Dialog de Busca de Produto */}
+        <ProductSearchDialog
+          open={productSearchDialogOpen}
+          onOpenChange={setProductSearchDialogOpen}
+          onSelect={(product) => {
+            const newProduct = {
+              id: product.id,
+              codigo: product.sku || product.id.substring(0, 8),
+              descricao: product.name,
+              ncm: product.ncm || "00000000",
+              cfop: "5102",
+              unidade: "UN",
+              quantidade: "1",
+              valor_unitario: product.sale_price?.toFixed(2) || "0.00",
+              valor_total: product.sale_price?.toFixed(2) || "0.00",
+              icms_cst: "00",
+              icms_base: product.sale_price?.toFixed(2) || "0.00",
+              icms_aliquota: "0.00",
+              icms_valor: "0.00",
+              ipi_cst: "99",
+              ipi_aliquota: "0.00",
+              ipi_valor: "0.00",
+              pis_cst: "01",
+              pis_aliquota: "0.00",
+              pis_valor: "0.00",
+              cofins_cst: "01",
+              cofins_aliquota: "0.00",
+              cofins_valor: "0.00",
+            };
+            setFormData((prev) => ({
+              ...prev,
+              produtos: [...prev.produtos, newProduct],
+            }));
+            updateTotals([...formData.produtos, newProduct]);
+            setProductSearchDialogOpen(false);
+          }}
         />
       </div>
     </div>

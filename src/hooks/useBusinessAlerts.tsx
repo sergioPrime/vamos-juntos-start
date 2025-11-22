@@ -181,8 +181,7 @@ export function useBusinessAlerts() {
   // Check for rejected NFSe - Disabled (NFSe module not fully implemented)
   const checkRejectedNFSe = useCallback(async () => {
     return []
-    }
-  }, [currentOrg?.id])
+  }, [])
 
   // Check for pending orders
   const checkPendingOrders = useCallback(async () => {

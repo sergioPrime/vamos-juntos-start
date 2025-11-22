@@ -132,8 +132,8 @@ const OrderForm = () => {
     }
   }
 
-  function handleSave() {
-    if (!currentOrg?.id) {
+  async function handleSave() {
+    if (!currentOrg?.id || !user?.id) {
       toast({
         title: "Erro",
         description: "Organização não encontrada.",
@@ -142,11 +142,89 @@ const OrderForm = () => {
       return
     }
 
-    // Save order implementation
-    toast({
-      title: "Pedido salvo",
-      description: "Pedido salvo com sucesso."
-    })
+    // Validação básica
+    if (!formData.customer_id) {
+      toast({
+        title: "Validação",
+        description: "Selecione um cliente.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (formData.order_items.length === 0) {
+      toast({
+        title: "Validação",
+        description: "Adicione pelo menos um item ao pedido.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setLoading(true)
+    
+    try {
+      // 1. Salvar pedido
+      const orderData = {
+        org_id: currentOrg.id,
+        owner_id: user.id,
+        order_number: formData.number,
+        status: formData.status,
+        order_type: formData.order_type,
+        customer_id: formData.customer_id,
+        subtotal: formData.subtotal,
+        discount_amount: formData.discount_amount || 0,
+        tax_amount: formData.tax_amount || 0,
+        total_amount: formData.total_amount,
+        payment_status: formData.payment_status,
+        payment_method: formData.payment_method,
+        delivery_date: formData.delivery_date,
+        notes: formData.notes
+      }
+
+      const { data: savedOrder, error: orderError } = await supabase
+        .from('orders')
+        .insert([orderData])
+        .select()
+        .single()
+
+      if (orderError) throw orderError
+
+      // 2. Salvar itens do pedido
+      const orderItemsData = formData.order_items.map(item => ({
+        order_id: savedOrder.id,
+        product_id: item.product_id,
+        product_name: item.product_name,
+        product_sku: item.product_sku,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        total_price: item.total_price,
+        discount_amount: item.discount_amount || 0
+      }))
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItemsData)
+
+      if (itemsError) throw itemsError
+
+      toast({
+        title: "Pedido salvo",
+        description: `Pedido #${formData.number} salvo com sucesso.`
+      })
+
+      // Redirecionar para listagem
+      navigate('/orders')
+    } catch (error) {
+      console.error('Error saving order:', error)
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar o pedido. Tente novamente.",
+        variant: "destructive"
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   function addNewItem() {

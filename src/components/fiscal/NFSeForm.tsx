@@ -10,20 +10,13 @@ import { Loader2, Save, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useNFSe } from '@/hooks/useNFSe';
 
-interface NFSeFormProps {
-  fiscalConfigs: Array<{
-    id: string;
-    razao_social: string;
-    cnpj: string;
-  }>;
-}
+interface NFSeFormProps {}
 
-export function NFSeForm({ fiscalConfigs }: NFSeFormProps) {
+export function NFSeForm({}: NFSeFormProps) {
   const navigate = useNavigate();
   const { emitirNFSe } = useNFSe();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    fiscalConfigId: '',
     tomador: {
       nome: '',
       cpfCnpj: '',
@@ -60,14 +53,13 @@ export function NFSeForm({ fiscalConfigs }: NFSeFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.fiscalConfigId || !formData.tomador.nome || !formData.tomador.cpfCnpj) {
+    if (!formData.tomador.nome || !formData.tomador.cpfCnpj) {
       return;
     }
 
     setLoading(true);
     try {
       await emitirNFSe({
-        fiscalConfigId: formData.fiscalConfigId,
         tomador: formData.tomador,
         servico: formData.servico,
         valores: {
@@ -112,35 +104,6 @@ export function NFSeForm({ fiscalConfigs }: NFSeFormProps) {
           )}
         </Button>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Dados do Prestador</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="fiscalConfig">Empresa Prestadora *</Label>
-              <Select
-                value={formData.fiscalConfigId}
-                onValueChange={(value) => setFormData({ ...formData, fiscalConfigId: value })}
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a empresa" />
-                </SelectTrigger>
-                <SelectContent>
-                  {fiscalConfigs.map((config) => (
-                    <SelectItem key={config.id} value={config.id}>
-                      {config.razao_social} - CNPJ: {config.cnpj}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>

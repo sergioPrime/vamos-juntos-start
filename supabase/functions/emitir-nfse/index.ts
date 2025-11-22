@@ -6,7 +6,6 @@ const corsHeaders = {
 };
 
 interface EmitirNFSeRequest {
-  fiscalConfigId: string;
   tomador: {
     nome: string;
     cpfCnpj: string;
@@ -62,20 +61,23 @@ Deno.serve(async (req) => {
     }
 
     const body: EmitirNFSeRequest = await req.json();
-    const { fiscalConfigId, tomador, servico, valores, retencoes, dataCompetencia } = body;
+    const { tomador, servico, valores, retencoes, dataCompetencia } = body;
 
-    console.log('Iniciando emissão de NFS-e:', { fiscalConfigId, tomador: tomador.nome });
+    console.log('Iniciando emissão de NFS-e:', { tomador: tomador.nome });
 
-    // Buscar configuração fiscal
-    const { data: fiscalConfig, error: configError } = await supabaseClient
-      .from('fiscal_config')
-      .select('*')
-      .eq('id', fiscalConfigId)
+    // Buscar organização do usuário
+    const { data: userOrgs, error: orgError } = await supabaseClient
+      .from('user_organizations')
+      .select('org_id')
+      .eq('user_id', user.id)
+      .limit(1)
       .single();
 
-    if (configError || !fiscalConfig) {
-      throw new Error('Configuração fiscal não encontrada');
+    if (orgError || !userOrgs) {
+      throw new Error('Organização não encontrada');
     }
+
+    const orgId = userOrgs.org_id;
 
     // Calcular valores
     const aliquota = valores.aliquotaIss || 5.0;
@@ -97,8 +99,7 @@ Deno.serve(async (req) => {
     const { data: nfse, error: insertError } = await supabaseClient
       .from('nfse')
       .insert({
-        org_id: fiscalConfig.org_id,
-        fiscal_config_id: fiscalConfigId,
+        org_id: orgId,
         serie: '1',
         tomador_nome: tomador.nome,
         tomador_cpf_cnpj: tomador.cpfCnpj,
@@ -166,10 +167,6 @@ Deno.serve(async (req) => {
   <Numero>${nfse.numero}</Numero>
   <CodigoVerificacao>${codigoVerificacao}</CodigoVerificacao>
   <DataEmissao>${new Date().toISOString()}</DataEmissao>
-  <Prestador>
-    <RazaoSocial>${fiscalConfig.razao_social}</RazaoSocial>
-    <CNPJ>${fiscalConfig.cnpj}</CNPJ>
-  </Prestador>
   <Tomador>
     <Nome>${tomador.nome}</Nome>
     <CpfCnpj>${tomador.cpfCnpj}</CpfCnpj>

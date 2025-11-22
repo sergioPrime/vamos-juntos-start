@@ -6,7 +6,6 @@ import { toast } from 'sonner';
 export interface NFSe {
   id: string;
   org_id: string;
-  fiscal_config_id: string;
   numero: number;
   serie: string;
   tomador_nome: string;

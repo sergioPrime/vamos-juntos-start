@@ -3882,78 +3882,167 @@ export type Database = {
       }
       nfse: {
         Row: {
-          created_at: string
-          customer_id: string | null
+          aliquota_iss: number | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          codigo_servico: string
+          codigo_tributacao_municipio: string | null
+          codigo_verificacao: string | null
+          cofins_retido: boolean | null
+          created_at: string | null
+          created_by: string
+          csll_retido: boolean | null
+          data_competencia: string
+          data_emissao: string
+          discriminacao: string
           id: string
-          invoice_id: string | null
-          iss_amount: number | null
-          iss_rate: number | null
-          issued_at: string | null
-          net_amount: number | null
-          number: string | null
+          inss_retido: boolean | null
+          ir_retido: boolean | null
+          iss_retido: boolean | null
+          link_visualizacao: string | null
+          mensagem_retorno: string | null
+          numero: number
+          numero_rps: number | null
           org_id: string
-          owner_id: string
-          pdf_url: string | null
-          service_amount: number
-          service_description: string
+          pis_retido: boolean | null
+          protocolo: string | null
+          serie: string
+          serie_rps: string | null
           status: string
-          updated_at: string
-          verification_code: string | null
-          xml_content: string | null
+          tomador_bairro: string | null
+          tomador_cep: string | null
+          tomador_cidade: string | null
+          tomador_cpf_cnpj: string
+          tomador_email: string | null
+          tomador_endereco: string | null
+          tomador_nome: string
+          tomador_numero: string | null
+          tomador_telefone: string | null
+          tomador_uf: string | null
+          updated_at: string | null
+          valor_cofins: number | null
+          valor_csll: number | null
+          valor_deducoes: number | null
+          valor_inss: number | null
+          valor_ir: number | null
+          valor_iss: number | null
+          valor_iss_retido: number | null
+          valor_liquido: number
+          valor_pis: number | null
+          valor_servicos: number
+          xml_nfse: string | null
         }
         Insert: {
-          created_at?: string
-          customer_id?: string | null
+          aliquota_iss?: number | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          codigo_servico: string
+          codigo_tributacao_municipio?: string | null
+          codigo_verificacao?: string | null
+          cofins_retido?: boolean | null
+          created_at?: string | null
+          created_by: string
+          csll_retido?: boolean | null
+          data_competencia: string
+          data_emissao?: string
+          discriminacao: string
           id?: string
-          invoice_id?: string | null
-          iss_amount?: number | null
-          iss_rate?: number | null
-          issued_at?: string | null
-          net_amount?: number | null
-          number?: string | null
+          inss_retido?: boolean | null
+          ir_retido?: boolean | null
+          iss_retido?: boolean | null
+          link_visualizacao?: string | null
+          mensagem_retorno?: string | null
+          numero: number
+          numero_rps?: number | null
           org_id: string
-          owner_id: string
-          pdf_url?: string | null
-          service_amount?: number
-          service_description: string
+          pis_retido?: boolean | null
+          protocolo?: string | null
+          serie?: string
+          serie_rps?: string | null
           status?: string
-          updated_at?: string
-          verification_code?: string | null
-          xml_content?: string | null
+          tomador_bairro?: string | null
+          tomador_cep?: string | null
+          tomador_cidade?: string | null
+          tomador_cpf_cnpj: string
+          tomador_email?: string | null
+          tomador_endereco?: string | null
+          tomador_nome: string
+          tomador_numero?: string | null
+          tomador_telefone?: string | null
+          tomador_uf?: string | null
+          updated_at?: string | null
+          valor_cofins?: number | null
+          valor_csll?: number | null
+          valor_deducoes?: number | null
+          valor_inss?: number | null
+          valor_ir?: number | null
+          valor_iss?: number | null
+          valor_iss_retido?: number | null
+          valor_liquido: number
+          valor_pis?: number | null
+          valor_servicos: number
+          xml_nfse?: string | null
         }
         Update: {
-          created_at?: string
-          customer_id?: string | null
+          aliquota_iss?: number | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          codigo_servico?: string
+          codigo_tributacao_municipio?: string | null
+          codigo_verificacao?: string | null
+          cofins_retido?: boolean | null
+          created_at?: string | null
+          created_by?: string
+          csll_retido?: boolean | null
+          data_competencia?: string
+          data_emissao?: string
+          discriminacao?: string
           id?: string
-          invoice_id?: string | null
-          iss_amount?: number | null
-          iss_rate?: number | null
-          issued_at?: string | null
-          net_amount?: number | null
-          number?: string | null
+          inss_retido?: boolean | null
+          ir_retido?: boolean | null
+          iss_retido?: boolean | null
+          link_visualizacao?: string | null
+          mensagem_retorno?: string | null
+          numero?: number
+          numero_rps?: number | null
           org_id?: string
-          owner_id?: string
-          pdf_url?: string | null
-          service_amount?: number
-          service_description?: string
+          pis_retido?: boolean | null
+          protocolo?: string | null
+          serie?: string
+          serie_rps?: string | null
           status?: string
-          updated_at?: string
-          verification_code?: string | null
-          xml_content?: string | null
+          tomador_bairro?: string | null
+          tomador_cep?: string | null
+          tomador_cidade?: string | null
+          tomador_cpf_cnpj?: string
+          tomador_email?: string | null
+          tomador_endereco?: string | null
+          tomador_nome?: string
+          tomador_numero?: string | null
+          tomador_telefone?: string | null
+          tomador_uf?: string | null
+          updated_at?: string | null
+          valor_cofins?: number | null
+          valor_csll?: number | null
+          valor_deducoes?: number | null
+          valor_inss?: number | null
+          valor_ir?: number | null
+          valor_iss?: number | null
+          valor_iss_retido?: number | null
+          valor_liquido?: number
+          valor_pis?: number | null
+          valor_servicos?: number
+          xml_nfse?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "fk_nfse_customer_id"
-            columns: ["customer_id"]
+            foreignKeyName: "nfse_org_id_fkey"
+            columns: ["org_id"]
             isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_nfse_invoice_id"
-            columns: ["invoice_id"]
-            isOneToOne: false
-            referencedRelation: "invoices"
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -6286,6 +6375,10 @@ export type Database = {
       }
       generate_next_entry_code: { Args: { p_org_id: string }; Returns: number }
       generate_next_nfe_number: {
+        Args: { p_org_id: string; p_serie?: string }
+        Returns: number
+      }
+      generate_next_nfse_number: {
         Args: { p_org_id: string; p_serie?: string }
         Returns: number
       }

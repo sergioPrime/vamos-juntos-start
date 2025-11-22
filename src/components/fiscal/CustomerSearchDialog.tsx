@@ -9,16 +9,16 @@ import { toast } from "sonner"
 
 interface Customer {
   id: string
-  nome: string
-  documento: string | null
-  email: string | null
-  telefone: string | null
-  endereco: string | null
-  numero: string | null
+  razao_social: string
+  documento: string
+  email_geral: string | null
+  telefones: string[] | null
+  logradouro: string | null
+  numero_endereco: string | null
   bairro: string | null
   cidade: string | null
   uf: string | null
-  cep: string | null
+  cep: string
 }
 
 interface CustomerSearchDialogProps {
@@ -64,9 +64,9 @@ export function CustomerSearchDialog({
   }
 
   const filteredCustomers = customers.filter(customer =>
-    customer.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.razao_social.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.documento?.includes(searchTerm) ||
-    customer.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    customer.email_geral?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const handleSelectCustomer = (customer: Customer) => {
@@ -115,7 +115,7 @@ export function CustomerSearchDialog({
                 <TableBody>
                   {filteredCustomers.map((customer) => (
                     <TableRow key={customer.id}>
-                      <TableCell>{customer.nome}</TableCell>
+                      <TableCell>{customer.razao_social}</TableCell>
                       <TableCell>{customer.documento || '-'}</TableCell>
                       <TableCell>
                         {customer.cidade && customer.uf 

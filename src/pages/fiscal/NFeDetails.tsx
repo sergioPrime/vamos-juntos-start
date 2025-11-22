@@ -19,8 +19,8 @@ interface NFe {
   status: 'rascunho' | 'autorizada' | 'cancelada' | 'rejeitada'
   data_emissao: string
   valor_total: number
-  destinatario_nome: string
-  destinatario_documento: string
+  destinatario_nome: string | null
+  destinatario_documento: string | null
   destinatario_endereco: string | null
   destinatario_cidade: string | null
   destinatario_uf: string | null
@@ -34,7 +34,7 @@ interface NFe {
 
 interface NFeItem {
   id: string
-  produto_nome: string
+  produto_nome: string | null
   produto_codigo: string | null
   quantidade: number
   valor_unitario: number
@@ -230,11 +230,11 @@ export default function NFeDetails() {
           <CardContent className="space-y-2">
             <div>
               <p className="text-sm text-muted-foreground">Nome/Razão Social</p>
-              <p className="font-medium">{nfe.destinatario_nome}</p>
+              <p className="font-medium">{nfe.destinatario_nome || '-'}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">CPF/CNPJ</p>
-              <p className="font-medium">{formatDocument(nfe.destinatario_documento)}</p>
+              <p className="font-medium">{nfe.destinatario_documento ? formatDocument(nfe.destinatario_documento) : '-'}</p>
             </div>
             {nfe.destinatario_endereco && (
               <div>
@@ -274,7 +274,7 @@ export default function NFeDetails() {
                 {items.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="font-medium">{item.produto_codigo || '-'}</TableCell>
-                    <TableCell>{item.produto_nome}</TableCell>
+                    <TableCell>{item.produto_nome || '-'}</TableCell>
                     <TableCell className="text-center">{item.ncm || '-'}</TableCell>
                     <TableCell className="text-center">{item.cfop || '-'}</TableCell>
                     <TableCell className="text-center">{item.unidade || '-'}</TableCell>

@@ -1838,6 +1838,10 @@ export type Database = {
           logradouro: string
           motivo_contingencia: string | null
           municipio: string
+          nfce_contingencia_ativa: boolean | null
+          nfce_csc: string | null
+          nfce_numero_atual: number | null
+          nfce_serie: number | null
           nome_fantasia: string | null
           numero: string
           org_id: string
@@ -1881,6 +1885,10 @@ export type Database = {
           logradouro: string
           motivo_contingencia?: string | null
           municipio: string
+          nfce_contingencia_ativa?: boolean | null
+          nfce_csc?: string | null
+          nfce_numero_atual?: number | null
+          nfce_serie?: number | null
           nome_fantasia?: string | null
           numero: string
           org_id: string
@@ -1924,6 +1932,10 @@ export type Database = {
           logradouro?: string
           motivo_contingencia?: string | null
           municipio?: string
+          nfce_contingencia_ativa?: boolean | null
+          nfce_csc?: string | null
+          nfce_numero_atual?: number | null
+          nfce_serie?: number | null
           nome_fantasia?: string | null
           numero?: string
           org_id?: string

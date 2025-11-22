@@ -1,325 +1,23 @@
-import { useState, useEffect } from "react"
-import { Search, Package, TrendingUp, TrendingDown, RotateCcw, AlertTriangle, BarChart3, FileText, Plus, Eye, Edit, Trash2, Settings, Bell } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { IntegrationStatus } from "@/components/integration/IntegrationStatus"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
-import { useAuth } from "@/hooks/useAuth"
-import { useOrganization } from "@/hooks/useOrganization"
-import { ResponsiveTable } from "@/components/ui/responsive-table"
+import { useState } from "react"
 import { usePermissionCheck } from "@/hooks/usePermissionCheck"
-
-interface Product {
-  id: string
-  name: string
-  sku?: string
-  category?: string
-  unit: string
-  stock_quantity: number
-  min_stock_level: number
-  unit_price: number
-  cost_price: number
-}
-
-interface StockMovement {
-  id: string
-  product_id: string
-  movement_type: string
-  quantity: number
-  notes?: string
-  created_at: string
-  created_by: string
-  product?: {
-    id: string
-    name: string
-    sku?: string
-    unit: string
-  }
-}
-
-interface InventoryCount {
-  id: string
-  product_id: string
-  counted_quantity: number
-  system_quantity: number
-  difference: number
-  notes?: string
-  created_at: string
-  created_by: string
-  product?: Product
-}
+import { useOrganization } from "@/hooks/useOrganization"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { InventoryHeader } from "@/components/inventory/InventoryHeader"
+import { InventoryStats } from "@/components/inventory/InventoryStats"
+import { InventoryFilters } from "@/components/inventory/InventoryFilters"
+import { InventoryProductsTable } from "@/components/inventory/InventoryProductsTable"
+import { StockMovementsTable } from "@/components/inventory/StockMovementsTable"
+import { QuickMovementDialog } from "@/components/inventory/QuickMovementDialog"
+import { InventoryAlertCenter } from "@/components/inventory/InventoryAlertCenter"
 
 const Inventory = () => {
   usePermissionCheck('estoque', 'read')
-  const { user } = useAuth()
   const { currentOrg, loading: orgLoading } = useOrganization()
-  const { toast } = useToast()
-  
-  const [products, setProducts] = useState<Product[]>([])
-  const [stockMovements, setStockMovements] = useState<StockMovement[]>([])
-  const [inventoryCounts, setInventoryCounts] = useState<InventoryCount[]>([])
-  const [loading, setLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState("produtos")
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
-  const [categories, setCategories] = useState<string[]>([])
-  const [activeTab, setActiveTab] = useState("overview")
-  
-  // Movement dialog state
-  const [isMovementDialogOpen, setIsMovementDialogOpen] = useState(false)
-  const [movementFormData, setMovementFormData] = useState({
-    product_id: "",
-    movement_type: "in",
-    quantity: 0,
-    notes: ""
-  })
-  
-  // Inventory count dialog state
-  const [isInventoryDialogOpen, setIsInventoryDialogOpen] = useState(false)
-  const [inventoryFormData, setInventoryFormData] = useState({
-    product_id: "",
-    counted_quantity: 0,
-    notes: ""
-  })
 
-  useEffect(() => {
-    if (currentOrg?.id) {
-      loadData()
-      
-      // Setup realtime subscriptions for automatic updates
-      const stockMovementsChannel = supabase
-        .channel('stock_movements_changes')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'stock_movements',
-            filter: `org_id=eq.${currentOrg.id}`
-          },
-          () => {
-            // Reload data when stock movements change
-            loadData()
-          }
-        )
-        .subscribe()
-
-      const productsChannel = supabase
-        .channel('products_changes')
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'products',
-            filter: `org_id=eq.${currentOrg.id}`
-          },
-          () => {
-            // Reload data when products are updated
-            loadData()
-          }
-        )
-        .subscribe()
-
-      // Cleanup subscriptions on unmount
-      return () => {
-        supabase.removeChannel(stockMovementsChannel)
-        supabase.removeChannel(productsChannel)
-      }
-    }
-  }, [currentOrg])
-
-  const loadData = async () => {
-    if (!currentOrg?.id) return
-    setLoading(true)
-    try {
-      // Load products
-      const { data: productsData, error: productsError } = await supabase
-        .from('products')
-        .select('id, name, sku, category, unit, stock_quantity, min_stock_level, unit_price, cost_price')
-        .eq('org_id', currentOrg.id)
-        .eq('active', true)
-        .order('name')
-
-      if (productsError) throw productsError
-      setProducts(productsData || [])
-
-      // Extract categories
-      const uniqueCategories = [...new Set(productsData?.map(p => p.category).filter(Boolean))]
-      setCategories(uniqueCategories)
-
-      // Load stock movements
-      const { data: movementsData, error: movementsError } = await supabase
-        .from('stock_movements')
-        .select(`
-          *,
-          product:products(id, name, sku, unit)
-        `)
-        .eq('org_id', currentOrg.id)
-        .order('created_at', { ascending: false })
-        .limit(100)
-
-      if (movementsError) throw movementsError
-      setStockMovements((movementsData || []) as unknown as StockMovement[])
-
-    } catch (error) {
-      toast({
-        title: "Erro ao carregar dados",
-        description: "Não foi possível carregar os dados do estoque.",
-        variant: "destructive",
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleStockMovement = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!movementFormData.product_id || movementFormData.quantity <= 0) {
-      toast({
-        title: "Dados incompletos",
-        description: "Selecione um produto e informe uma quantidade válida.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    try {
-      const { error } = await supabase
-        .from('stock_movements')
-        .insert({
-          product_id: movementFormData.product_id,
-          movement_type: movementFormData.movement_type,
-          quantity: movementFormData.quantity,
-          notes: movementFormData.notes,
-          org_id: currentOrg?.id,
-          created_by: user?.id,
-        })
-
-      if (error) throw error
-
-      toast({
-        title: "Movimentação registrada",
-        description: "A movimentação de estoque foi registrada com sucesso.",
-      })
-
-      setIsMovementDialogOpen(false)
-      setMovementFormData({
-        product_id: "",
-        movement_type: "in",
-        quantity: 0,
-        notes: ""
-      })
-      loadData()
-    } catch (error) {
-      toast({
-        title: "Erro ao registrar movimentação",
-        description: "Ocorreu um erro ao registrar a movimentação.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const handleInventoryCount = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!inventoryFormData.product_id || inventoryFormData.counted_quantity < 0) {
-      toast({
-        title: "Dados incompletos",
-        description: "Selecione um produto e informe uma quantidade válida.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    const product = products.find(p => p.id === inventoryFormData.product_id)
-    if (!product) return
-
-    const difference = inventoryFormData.counted_quantity - product.stock_quantity
-
-    try {
-      // If there's a difference, create an adjustment stock movement
-      if (difference !== 0) {
-        const { error: movementError } = await supabase
-          .from('stock_movements')
-          .insert({
-            product_id: inventoryFormData.product_id,
-            movement_type: 'adjustment',
-            quantity: inventoryFormData.counted_quantity,
-            notes: `Ajuste de inventário: ${inventoryFormData.notes}`,
-            org_id: currentOrg?.id,
-            created_by: user?.id,
-          })
-
-        if (movementError) throw movementError
-      }
-
-      toast({
-        title: "Contagem de inventário registrada",
-        description: difference === 0 ? "Estoque conferido - sem divergências." : `Ajuste aplicado: ${difference > 0 ? '+' : ''}${difference} unidades`,
-      })
-
-      setIsInventoryDialogOpen(false)
-      setInventoryFormData({
-        product_id: "",
-        counted_quantity: 0,
-        notes: ""
-      })
-      loadData()
-    } catch (error) {
-      toast({
-        title: "Erro ao registrar contagem",
-        description: "Ocorreu um erro ao registrar a contagem de inventário.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const getStockStatus = (product: Product) => {
-    if (product.stock_quantity <= 0) return { status: "out", label: "Sem estoque", variant: "destructive" as const }
-    if (product.stock_quantity <= product.min_stock_level) return { status: "low", label: "Estoque baixo", variant: "destructive" as const }
-    return { status: "ok", label: "Normal", variant: "secondary" as const }
-  }
-
-  const getMovementIcon = (type: string) => {
-    switch (type) {
-      case 'in': return <TrendingUp className="h-4 w-4 text-green-600" />
-      case 'out': return <TrendingDown className="h-4 w-4 text-red-600" />
-      case 'adjustment': return <RotateCcw className="h-4 w-4 text-blue-600" />
-      default: return <Package className="h-4 w-4" />
-    }
-  }
-
-  const getMovementTypeLabel = (type: string) => {
-    switch (type) {
-      case 'in': return 'Entrada'
-      case 'out': return 'Saída'
-      case 'adjustment': return 'Ajuste'
-      default: return type
-    }
-  }
-
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.sku?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
-    return matchesSearch && matchesCategory
-  })
-
-  const lowStockProducts = products.filter(p => p.stock_quantity <= p.min_stock_level)
-  const outOfStockProducts = products.filter(p => p.stock_quantity <= 0)
-  const totalValue = products.reduce((sum, p) => sum + (p.stock_quantity * p.cost_price), 0)
-
-  if (orgLoading || loading) {
+  if (orgLoading) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-lg">Carregando estoque...</div>
@@ -340,146 +38,44 @@ const Inventory = () => {
     )
   }
 
-  const getCriticalityLevel = () => {
-    const criticalPercentage = (outOfStockProducts.length / products.length) * 100;
-    if (criticalPercentage > 20) return 'critical';
-    if (lowStockProducts.length > 5) return 'warning';
-    return 'normal';
-  };
-
   return (
     <div className="page-container container mx-auto p-6 space-y-6">
-      {/* Enhanced Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight">Gestão de Estoque</h1>
-            {getCriticalityLevel() !== 'normal' && (
-              <Badge variant={getCriticalityLevel() === 'critical' ? 'destructive' : 'default'}>
-                <AlertTriangle className="h-3 w-3 mr-1" />
-                {outOfStockProducts.length > 0 && `${outOfStockProducts.length} sem estoque`}
-              </Badge>
-            )}
-          </div>
-          <p className="text-muted-foreground">
-            Controle total do seu inventário e movimentações
-          </p>
-        </div>
-        
-        {/* Quick Actions Grid */}
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => window.open('/inventory/entry', '_blank')} className="hover-scale">
-            <TrendingUp className="mr-2 h-4 w-4 text-success" />
-            <span className="hidden sm:inline">Entrada</span>
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => window.open('/inventory/exit', '_blank')} className="hover-scale">
-            <TrendingDown className="mr-2 h-4 w-4 text-destructive" />
-            <span className="hidden sm:inline">Saída</span>
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => window.open('/inventory/transfer', '_blank')} className="hover-scale">
-            <RotateCcw className="mr-2 h-4 w-4 text-primary" />
-            <span className="hidden sm:inline">Transferência</span>
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => window.open('/inventory/reports', '_blank')} className="hover-scale">
-            <BarChart3 className="mr-2 h-4 w-4 text-chart-3" />
-            <span className="hidden sm:inline">Relatórios</span>
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => window.open('/inventory/alerts', '_blank')} className="hover-scale">
-            <Bell className="mr-2 h-4 w-4 text-warning" />
-            <span className="hidden sm:inline">Alertas</span>
-          </Button>
-          <Dialog open={isMovementDialogOpen} onOpenChange={setIsMovementDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Movimento Rápido
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Nova Movimentação de Estoque</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleStockMovement} className="space-y-4">
-                <div>
-                  <Label htmlFor="product">Produto *</Label>
-                  <Select 
-                    value={movementFormData.product_id} 
-                    onValueChange={(value) => setMovementFormData(prev => ({...prev, product_id: value}))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um produto" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {products.map(product => (
-                        <SelectItem key={product.id} value={product.id}>
-                          {product.name} ({product.sku || 'Sem SKU'})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="movement_type">Tipo de Movimentação *</Label>
-                    <Select 
-                      value={movementFormData.movement_type} 
-                      onValueChange={(value) => setMovementFormData(prev => ({...prev, movement_type: value}))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="in">Entrada</SelectItem>
-                        <SelectItem value="out">Saída</SelectItem>
-                        <SelectItem value="adjustment">Ajuste</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="quantity">Quantidade *</Label>
-                    <Input
-                      id="quantity"
-                      type="number"
-                      min="1"
-                      value={movementFormData.quantity}
-                      onChange={(e) => setMovementFormData(prev => ({...prev, quantity: Number(e.target.value)}))}
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <Label htmlFor="notes">Observações</Label>
-                  <Textarea
-                    id="notes"
-                    value={movementFormData.notes}
-                    onChange={(e) => setMovementFormData(prev => ({...prev, notes: e.target.value}))}
-                    placeholder="Motivo da movimentação, número da nota fiscal, etc."
-                  />
-                </div>
-                
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsMovementDialogOpen(false)}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit">Registrar Movimentação</Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-          
-          <Dialog open={isInventoryDialogOpen} onOpenChange={setIsInventoryDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <FileText className="mr-2 h-4 w-4" />
-                Contagem de Inventário
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Contagem de Inventário</DialogTitle>
+      {/* Header com ações rápidas */}
+      <InventoryHeader />
+      
+      {/* Estatísticas em tempo real */}
+      <InventoryStats />
+      
+      {/* Tabs principais */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="produtos">Produtos</TabsTrigger>
+          <TabsTrigger value="movimentacoes">Movimentações</TabsTrigger>
+          <TabsTrigger value="alertas">Alertas</TabsTrigger>
+        </TabsList>
+
+        {/* Tab: Produtos */}
+        <TabsContent value="produtos" className="space-y-4">
+          <InventoryFilters
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+          />
+          <InventoryProductsTable
+            searchTerm={searchTerm}
+            selectedCategory={selectedCategory}
+          />
+        </TabsContent>
+
+        {/* Tab: Movimentações */}
+        <TabsContent value="movimentacoes" className="space-y-4">
+          <StockMovementsTable />
+        </TabsContent>
+
+        {/* Tab: Alertas */}
+        <TabsContent value="alertas">
+          <InventoryAlertCenter />
               </DialogHeader>
               <form onSubmit={handleInventoryCount} className="space-y-4">
                 <div>

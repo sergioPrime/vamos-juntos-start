@@ -33,7 +33,7 @@ export default function NFCe() {
             </Badge>
           )}
           {queuedCount > 0 && (
-            <Badge variant="warning" className="flex items-center gap-1">
+            <Badge variant="secondary" className="flex items-center gap-1">
               <Server className="h-3 w-3" />
               {queuedCount} na fila
             </Badge>
@@ -56,7 +56,7 @@ export default function NFCe() {
             <Server className="h-4 w-4" />
             Contingência
             {queuedCount > 0 && (
-              <Badge variant="warning" className="ml-1">
+              <Badge variant="secondary" className="ml-1">
                 {queuedCount}
               </Badge>
             )}

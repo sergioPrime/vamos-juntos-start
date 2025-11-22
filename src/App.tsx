@@ -716,6 +716,15 @@ const App = () => (
               </AppLayout>
             </ProtectedRoute>
           } />
+          <Route path="/fiscal/nfce" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <PageTransition direction="left">
+                  <NFCe />
+                </PageTransition>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
           <Route path="/fiscal/nfe/:id" element={
             <ProtectedRoute>
               <AppLayout>

@@ -127,18 +127,6 @@ export default function NFe() {
                   <SelectItem value="rejeitada">Rejeitada</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={dateFilter} onValueChange={setDateFilter}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Período" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos os Períodos</SelectItem>
-                  <SelectItem value="hoje">Hoje</SelectItem>
-                  <SelectItem value="semana">Esta Semana</SelectItem>
-                  <SelectItem value="mes">Este Mês</SelectItem>
-                  <SelectItem value="ano">Este Ano</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
             {/* Resumo rápido */}

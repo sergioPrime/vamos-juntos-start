@@ -17,16 +17,13 @@ export function useNFe() {
         .from("nfe")
         .select(`
           *,
-          pessoas:destinatario_id(nome),
-          companies:company_id(name)
+          pessoas!nfe_destinatario_id_fkey(nome),
+          companies!nfe_company_id_fkey(name)
         `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as (NFe & { 
-        pessoas: { nome: string } | null;
-        companies: { name: string } | null;
-      })[];
+      return data as any[];
     },
   });
 

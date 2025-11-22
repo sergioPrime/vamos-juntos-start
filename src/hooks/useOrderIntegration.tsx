@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useInventoryIntegration } from './useInventoryIntegration'
 import { useFinancialEntries } from './useFinancialEntries'
+import { useStockValidation } from './sales/useStockValidation'
 import { useToast } from './use-toast'
 
 interface OrderCompletionHookProps {
@@ -13,6 +14,7 @@ interface OrderCompletionHookProps {
 export function useOrderIntegration() {
   const { processOrderCompletion } = useInventoryIntegration()
   const { createFromOrder } = useFinancialEntries()
+  const { validateOrderStock, showValidationMessages } = useStockValidation()
   const { toast } = useToast()
 
   // Handle order status change with inventory integration
@@ -23,12 +25,27 @@ export function useOrderIntegration() {
         // Get order items for stock movement
         const { data: orderItems, error: itemsError } = await supabase
           .from('order_items')
-          .select('product_id, quantity, unit_price')
+          .select('product_id, quantity, unit_price, product_name')
           .eq('order_id', orderData.order_id)
 
         if (itemsError) throw itemsError
 
         if (orderItems && orderItems.length > 0) {
+          // Validate stock before processing
+          const stockValidation = await validateOrderStock(
+            orderItems.map(item => ({
+              product_id: item.product_id || '',
+              quantity: item.quantity,
+              product_name: item.product_name || 'Produto'
+            }))
+          )
+
+          showValidationMessages(stockValidation)
+
+          if (!stockValidation.isValid) {
+            throw new Error('Estoque insuficiente para completar o pedido')
+          }
+
           // Process automatic stock exit
           await processOrderCompletion({
             order_id: orderData.order_id,
@@ -67,13 +84,15 @@ export function useOrderIntegration() {
       }
     } catch (error) {
       console.error('Error in order integration:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
       toast({
         title: "Erro na integração",
-        description: "Erro ao processar integração automática do pedido.",
+        description: errorMessage,
         variant: "destructive",
       })
+      throw error
     }
-  }, [processOrderCompletion, toast])
+  }, [processOrderCompletion, validateOrderStock, showValidationMessages, toast])
 
   // Complete order with automatic integrations
   const completeOrderWithIntegration = useCallback(async (orderId: string) => {

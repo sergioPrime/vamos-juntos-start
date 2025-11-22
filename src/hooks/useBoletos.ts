@@ -101,7 +101,7 @@ export function useBoletos() {
       const personIds = [...new Set(data?.map(item => item.person_id).filter(Boolean))];
       const { data: pessoas } = await supabase
         .from('pessoas')
-        .select('id, nome_razao, cpf_cnpj')
+        .select('id, name, document')
         .in('id', personIds);
 
       const pessoasMap = new Map(pessoas?.map(p => [p.id, p]) || []);
@@ -118,8 +118,8 @@ export function useBoletos() {
           digitable_line: generateDigitableLine(inst.id, inst.amount, inst.due_date),
           amount: inst.amount,
           due_date: inst.due_date,
-          person_name: pessoa?.nome_razao || 'N/A',
-          person_document: pessoa?.cpf_cnpj || 'N/A',
+          person_name: pessoa?.name || 'N/A',
+          person_document: pessoa?.document || 'N/A',
           status: inst.is_settled ? 'paid' : 
                   new Date(inst.due_date) < new Date() ? 'overdue' : 'pending',
           generated_at: new Date().toISOString(),

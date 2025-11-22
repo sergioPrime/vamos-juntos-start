@@ -52,10 +52,10 @@ export function BoletosList({
 
   const getStatusBadge = (status: Boleto['status']) => {
     const variants = {
-      pending: { variant: 'default' as const, label: 'Pendente' },
+      pending: { variant: 'default' as const, label: 'Pendente', className: '' },
       paid: { variant: 'default' as const, label: 'Pago', className: 'bg-success text-success-foreground' },
-      overdue: { variant: 'destructive' as const, label: 'Vencido' },
-      cancelled: { variant: 'secondary' as const, label: 'Cancelado' }
+      overdue: { variant: 'destructive' as const, label: 'Vencido', className: '' },
+      cancelled: { variant: 'secondary' as const, label: 'Cancelado', className: '' }
     };
     
     const config = variants[status];

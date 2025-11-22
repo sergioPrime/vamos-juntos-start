@@ -30,7 +30,7 @@ export function BoletoGenerationDialog({
   personName
 }: BoletoGenerationDialogProps) {
   const { generateBoleto, loading } = useBoletos();
-  const { bankAccounts, loadBankAccounts } = useBankAccounts();
+  const { accounts: bankAccounts, loadAccounts: loadBankAccounts } = useBankAccounts();
   
   const [selectedBankAccount, setSelectedBankAccount] = useState<string>('');
   const [lateFee, setLateFee] = useState<number>(2.0);

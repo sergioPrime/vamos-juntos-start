@@ -70,7 +70,7 @@ export default function NFeCancelDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange(onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

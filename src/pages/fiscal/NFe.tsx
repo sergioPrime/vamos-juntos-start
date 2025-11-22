@@ -32,7 +32,7 @@ interface NFe {
   cliente: string;
   data_emissao: string;
   valor_total: number;
-  status: "autorizada" | "cancelada" | "pendente" | "rejeitada";
+  status: "autorizada" | "cancelada" | "pendente" | "rejeitada" | "rascunho";
   chave_acesso: string;
 }
 
@@ -90,11 +90,20 @@ export default function NFe() {
       cancelada: "destructive",
       pendente: "secondary",
       rejeitada: "destructive",
+      rascunho: "outline",
+    };
+
+    const labels = {
+      autorizada: "Autorizada",
+      cancelada: "Cancelada",
+      pendente: "Pendente",
+      rejeitada: "Rejeitada",
+      rascunho: "Rascunho",
     };
 
     return (
       <Badge variant={variants[status] as any}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+        {labels[status]}
       </Badge>
     );
   };
@@ -156,9 +165,10 @@ export default function NFe() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos os Status</SelectItem>
+                  <SelectItem value="rascunho">Rascunho</SelectItem>
+                  <SelectItem value="pendente">Pendente</SelectItem>
                   <SelectItem value="autorizada">Autorizada</SelectItem>
                   <SelectItem value="cancelada">Cancelada</SelectItem>
-                  <SelectItem value="pendente">Pendente</SelectItem>
                   <SelectItem value="rejeitada">Rejeitada</SelectItem>
                 </SelectContent>
               </Select>

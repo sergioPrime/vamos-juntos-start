@@ -11,7 +11,6 @@ interface Product {
   id: string
   name: string
   sku: string | null
-  ncm: string | null
   unit: string
   sale_price: number
 }
@@ -42,7 +41,7 @@ export function ProductSearchDialog({
       setIsLoading(true)
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, sku, ncm, unit, sale_price')
+        .select('id, name, sku, unit, sale_price')
         .eq('active', true)
         .order('name')
         .limit(50)
@@ -59,8 +58,7 @@ export function ProductSearchDialog({
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.ncm?.includes(searchTerm)
+    product.sku?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const handleSelectProduct = (product: Product) => {
@@ -80,7 +78,7 @@ export function ProductSearchDialog({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar por nome, código ou NCM..."
+              placeholder="Buscar por nome ou código..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -102,7 +100,6 @@ export function ProductSearchDialog({
                   <TableRow>
                     <TableHead>Código</TableHead>
                     <TableHead>Descrição</TableHead>
-                    <TableHead>NCM</TableHead>
                     <TableHead>Unidade</TableHead>
                     <TableHead className="text-right">Preço</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
@@ -113,7 +110,6 @@ export function ProductSearchDialog({
                     <TableRow key={product.id}>
                       <TableCell>{product.sku || '-'}</TableCell>
                       <TableCell>{product.name}</TableCell>
-                      <TableCell>{product.ncm || '-'}</TableCell>
                       <TableCell>{product.unit}</TableCell>
                       <TableCell className="text-right">
                         {new Intl.NumberFormat('pt-BR', {

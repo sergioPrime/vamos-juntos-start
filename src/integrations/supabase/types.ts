@@ -7049,6 +7049,21 @@ export type Database = {
         Args: { notes?: string; request_id: string; reviewer_id: string }
         Returns: undefined
       }
+      auto_allocate_lots: {
+        Args: {
+          p_org_id: string
+          p_product_id: string
+          p_required_quantity: number
+          p_warehouse_id?: string
+        }
+        Returns: {
+          allocated_quantity: number
+          expiration_date: string
+          lot_id: string
+          lot_number: string
+          manufacturing_date: string
+        }[]
+      }
       calcular_ibs_cbs_is: {
         Args: {
           p_aliquota_cbs: number
@@ -7251,6 +7266,21 @@ export type Database = {
           new_value: string
           old_value: string
           user_email: string
+        }[]
+      }
+      get_expiring_lots_alert: {
+        Args: { p_days_threshold?: number; p_org_id: string }
+        Returns: {
+          available_quantity: number
+          days_until_expiration: number
+          expiration_date: string
+          lot_id: string
+          lot_number: string
+          product_id: string
+          product_name: string
+          severity: string
+          warehouse_id: string
+          warehouse_name: string
         }[]
       }
       get_installments_summary: {
@@ -7478,6 +7508,23 @@ export type Database = {
         }
         Returns: Json
       }
+      suggest_lot_fifo: {
+        Args: {
+          p_org_id: string
+          p_product_id: string
+          p_required_quantity?: number
+          p_warehouse_id?: string
+        }
+        Returns: {
+          available_quantity: number
+          days_until_expiration: number
+          expiration_date: string
+          lot_id: string
+          lot_number: string
+          manufacturing_date: string
+          suggested_quantity: number
+        }[]
+      }
       unsettle_installment: {
         Args: { p_installment_id: string }
         Returns: boolean
@@ -7509,6 +7556,15 @@ export type Database = {
       validate_hierarchy_cycle: {
         Args: { new_id: string; new_parent_id: string; table_name: string }
         Returns: boolean
+      }
+      validate_lot_fifo: {
+        Args: {
+          p_lot_id: string
+          p_org_id: string
+          p_product_id: string
+          p_warehouse_id?: string
+        }
+        Returns: Json
       }
       validate_nfce_emission: {
         Args: { p_org_id: string }

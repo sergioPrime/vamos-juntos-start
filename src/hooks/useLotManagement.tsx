@@ -292,6 +292,10 @@ export function useLotManagement() {
     getProductLots,
     updateLot,
     deactivateLot,
-    requiresLotControl
+    requiresLotControl,
+    suggestLotFIFO,
+    validateLotFIFO,
+    getExpiringLotsAlert,
+    autoAllocateLots
   }
 }

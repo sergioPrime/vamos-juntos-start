@@ -82,7 +82,7 @@ export default function NFeProductDialog({
     if (product) {
       setFormData(product);
     } else {
-      setFormData({
+      const initialData = {
         id: crypto.randomUUID(),
         codigo: "",
         descricao: "",
@@ -100,7 +100,13 @@ export default function NFeProductDialog({
         pis_valor: 0,
         cofins_aliquota: 7.6,
         cofins_valor: 0,
-      });
+      };
+      setFormData(initialData);
+      
+      // Carregar operação fiscal para o CFOP padrão
+      if (open && currentOrg) {
+        loadFiscalOperation("5102", initialData);
+      }
     }
   }, [product, open]);
 

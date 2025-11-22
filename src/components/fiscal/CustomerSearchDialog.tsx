@@ -27,7 +27,7 @@ export function CustomerSearchDialog({
   onSelectCustomer,
 }: CustomerSearchDialogProps) {
   const [search, setSearch] = useState("");
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   const searchCustomers = async () => {
@@ -45,7 +45,7 @@ export function CustomerSearchDialog({
       const { data, error } = await query.limit(20);
 
       if (error) throw error;
-      setCustomers(data || []);
+      setCustomers((data as any[]) || []);
     } catch (error) {
       console.error("Erro ao buscar clientes:", error);
       toast.error("Erro ao buscar clientes");

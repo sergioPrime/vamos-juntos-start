@@ -46,7 +46,7 @@ export default function NFeCCeHistory({ nfeId, chaveAcesso }: NFeCCeHistoryProps
 
       if (error) throw error;
 
-      setCceList(data || []);
+      setCceList((data as any) || []);
     } catch (error) {
       console.error('Error loading CCe history:', error);
       toast.error("Erro ao carregar histórico de correções");

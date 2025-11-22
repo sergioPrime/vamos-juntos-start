@@ -86,13 +86,16 @@
   }
   100% {
     background-position: calc(200px + 100%) 0;
-  /* Skip Links - visível apenas no foco */
-  .skip-links {
-    position: relative;
-    z-index: 9999;
   }
+}
 
-  .skip-link {
+/* Skip Links - visível apenas no foco */
+.skip-links {
+  position: relative;
+  z-index: 9999;
+}
+
+.skip-link {
     position: absolute;
     top: -40px;
     left: 0;

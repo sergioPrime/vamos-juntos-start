@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,8 +12,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Plus, Search, Download, Eye, Filter } from "lucide-react";
+import { FileText, Plus, Search, FileX } from "lucide-react";
 import NFeActionsMenu from "@/components/fiscal/NFeActionsMenu";
+import { NFeInutilizationDialog } from "@/components/fiscal/NFeInutilizationDialog";
 import {
   Select,
   SelectContent,
@@ -21,6 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
+import { toast } from "sonner";
 
 interface NFe {
   id: string;
@@ -31,13 +35,22 @@ interface NFe {
   valor_total: number;
   status: "autorizada" | "cancelada" | "pendente" | "rejeitada";
   chave_acesso: string;
+  cliente_email?: string;
 }
 
 export default function NFe() {
   const navigate = useNavigate();
+  const { currentOrg } = useOrganization();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("todos");
   const [dateFilter, setDateFilter] = useState<string>("todos");
+  const [showInutilizationDialog, setShowInutilizationDialog] = useState(false);
+  const [fiscalConfigs, setFiscalConfigs] = useState<Array<{
+    id: string;
+    razao_social: string;
+    cnpj: string;
+    serie_nfe: string;
+  }>>([]);
 
   // Dados mockados para demonstração
   const [nfeList] = useState<NFe[]>([
@@ -50,6 +63,7 @@ export default function NFe() {
       valor_total: 1500.00,
       status: "autorizada",
       chave_acesso: "35250112345678000100550010000000011234567890",
+      cliente_email: "cliente@exemplo.com",
     },
     {
       id: "2",
@@ -60,8 +74,36 @@ export default function NFe() {
       valor_total: 2300.50,
       status: "autorizada",
       chave_acesso: "35250112345678000100550010000000021234567891",
+      cliente_email: "empresa@abc.com",
     },
   ]);
+
+  useEffect(() => {
+    if (currentOrg) {
+      loadFiscalConfigs();
+    }
+  }, [currentOrg]);
+
+  const loadFiscalConfigs = async () => {
+    if (!currentOrg) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('fiscal_config')
+        .select('id, razao_social, cnpj, serie_nfe')
+        .eq('org_id', currentOrg.id)
+        .eq('is_active', true);
+
+      if (error) throw error;
+      setFiscalConfigs(data || []);
+    } catch (error) {
+      console.error('Erro ao carregar configurações fiscais:', error);
+    }
+  };
+
+  const handleReload = () => {
+    toast.success("Lista de NFe atualizada");
+  };
 
   const getStatusBadge = (status: NFe["status"]) => {
     const variants = {
@@ -104,14 +146,24 @@ export default function NFe() {
               Gerencie suas notas fiscais modelo 55
             </p>
           </div>
-          <Button
-            onClick={() => navigate("/fiscal/nfe/new")}
-            size="lg"
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Nova NFe
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowInutilizationDialog(true)}
+              className="gap-2"
+            >
+              <FileX className="h-4 w-4" />
+              Inutilizar Numeração
+            </Button>
+            <Button
+              onClick={() => navigate("/fiscal/nfe/new")}
+              size="lg"
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Nova NFe
+            </Button>
+          </div>
         </div>
 
         {/* Filtros */}
@@ -234,6 +286,10 @@ export default function NFe() {
                       <NFeActionsMenu
                         status={nfe.status}
                         chaveAcesso={nfe.chave_acesso}
+                        nfeId={nfe.id}
+                        nfeNumero={nfe.numero}
+                        clienteEmail={nfe.cliente_email}
+                        onUpdate={handleReload}
                         onView={() => navigate(`/fiscal/nfe/${nfe.id}`)}
                       />
                     </TableCell>
@@ -244,6 +300,13 @@ export default function NFe() {
           </Table>
         </Card>
       </div>
+
+      <NFeInutilizationDialog
+        open={showInutilizationDialog}
+        onOpenChange={setShowInutilizationDialog}
+        fiscalConfigs={fiscalConfigs}
+        onSuccess={handleReload}
+      />
     </div>
   );
 }

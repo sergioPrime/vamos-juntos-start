@@ -2,3 +2,6 @@ project_id = "wrdyffwjlylgxfbxbztf"
 
 [functions.search-ncm]
 verify_jwt = false
+
+[functions.inutilizar-numeracao-nfe]
+verify_jwt = true

@@ -17,11 +17,15 @@ import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import NFeProductsTable from "@/components/fiscal/NFeProductsTable";
 import NFeProductDialog from "@/components/fiscal/NFeProductDialog";
+import { ComboboxAsync } from "@/components/ui/combobox-async";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrganization } from "@/hooks/useOrganization";
 
 export default function NFeForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
+  const { currentOrg } = useOrganization();
   const isEditing = !!id;
 
   // Dados vindos do PDV

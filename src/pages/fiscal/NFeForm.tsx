@@ -17,6 +17,9 @@ import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import NFeProductsTable from "@/components/fiscal/NFeProductsTable";
 import NFeProductDialog from "@/components/fiscal/NFeProductDialog";
+import { CustomerSearchDialog } from "@/components/fiscal/CustomerSearchDialog";
+import { ProductSearchDialog } from "@/components/fiscal/ProductSearchDialog";
+import { Search } from "lucide-react";
 
 export default function NFeForm() {
   const navigate = useNavigate();
@@ -31,6 +34,8 @@ export default function NFeForm() {
 
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [customerSearchOpen, setCustomerSearchOpen] = useState(false);
+  const [productSearchOpen, setProductSearchOpen] = useState(false);
 
   // Inicializar produtos vindos do pedido (se houver)
   const initialProducts = orderItems.map((item: any) => ({
@@ -111,8 +116,61 @@ export default function NFeForm() {
   };
 
   const handleAddProduct = () => {
+    setProductSearchOpen(true);
+  };
+
+  const handleAddProductManually = () => {
     setEditingProduct(null);
     setProductDialogOpen(true);
+  };
+
+  const handleSelectProduct = (product: any) => {
+    const newProduct = {
+      id: product.id,
+      codigo: product.sku || product.id.substring(0, 8),
+      descricao: product.name,
+      ncm: product.ncm || "00000000",
+      cfop: "5102",
+      unidade: product.unit || "UN",
+      quantidade: "1",
+      valor_unitario: product.unit_price?.toFixed(2) || "0.00",
+      valor_total: product.unit_price?.toFixed(2) || "0.00",
+      icms_cst: "00",
+      icms_base: product.unit_price?.toFixed(2) || "0.00",
+      icms_aliquota: "0.00",
+      icms_valor: "0.00",
+      ipi_cst: "99",
+      ipi_aliquota: "0.00",
+      ipi_valor: "0.00",
+      pis_cst: "01",
+      pis_aliquota: "0.00",
+      pis_valor: "0.00",
+      cofins_cst: "01",
+      cofins_aliquota: "0.00",
+      cofins_valor: "0.00",
+    };
+    
+    setFormData((prev) => ({
+      ...prev,
+      produtos: [...prev.produtos, newProduct],
+    }));
+    updateTotals([...formData.produtos, newProduct]);
+  };
+
+  const handleSelectCustomer = (customer: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      cliente_id: customer.id,
+      cliente_nome: customer.razao_social || "",
+      cliente_cpf_cnpj: customer.documento || "",
+      cliente_ie: customer.inscricao_estadual || "",
+      cliente_endereco: customer.endereco || "",
+      cliente_numero: customer.numero || "",
+      cliente_bairro: customer.bairro || "",
+      cliente_cidade: customer.cidade || "",
+      cliente_uf: customer.uf || "",
+      cliente_cep: customer.cep || "",
+    }));
   };
 
   const handleEditProduct = (product: any) => {
@@ -284,13 +342,25 @@ export default function NFeForm() {
                   <Label htmlFor="cliente_nome" className="required">
                     Cliente
                   </Label>
-                  <Input
-                    id="cliente_nome"
-                    name="cliente_nome"
-                    value={formData.cliente_nome}
-                    onChange={handleInputChange}
-                    placeholder="Selecione ou busque o cliente"
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      id="cliente_nome"
+                      name="cliente_nome"
+                      value={formData.cliente_nome}
+                      onChange={handleInputChange}
+                      placeholder="Selecione ou busque o cliente"
+                      readOnly
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setCustomerSearchOpen(true)}
+                      className="gap-2"
+                    >
+                      <Search className="h-4 w-4" />
+                      Buscar
+                    </Button>
+                  </div>
                 </div>
 
                 <div>
@@ -479,10 +549,21 @@ export default function NFeForm() {
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h2 className="title-md">Produtos/Serviços</h2>
-                <Button onClick={handleAddProduct} size="sm" className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  Adicionar Produto
-                </Button>
+                <div className="flex gap-2">
+                  <Button onClick={handleAddProduct} size="sm" className="gap-2">
+                    <Search className="h-4 w-4" />
+                    Buscar Produto
+                  </Button>
+                  <Button 
+                    onClick={handleAddProductManually} 
+                    size="sm" 
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Manual
+                  </Button>
+                </div>
               </div>
               <NFeProductsTable
                 products={formData.produtos}

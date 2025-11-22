@@ -33,14 +33,14 @@ export function CustomerSearchDialog({
       setIsLoading(true)
       const { data, error } = await supabase
         .from('pessoas')
-        .select('*')
+        .select('id, razao_social, documento, email_geral, cidade, uf')
         .eq('tipo', 'cliente')
         .eq('ativo', true)
         .order('razao_social')
         .limit(50)
 
       if (error) throw error
-      setCustomers(data || [])
+      setCustomers(data as any[] || [])
     } catch (error) {
       console.error('Erro ao carregar clientes:', error)
       toast.error('Erro ao carregar clientes')

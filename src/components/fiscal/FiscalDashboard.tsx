@@ -228,14 +228,14 @@ export function FiscalDashboard() {
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
-                      <ChartTooltip
+                      <Tooltip
                         content={({ active, payload }) => {
                           if (active && payload && payload.length) {
                             return (
                               <div className="bg-background border rounded-lg p-2 shadow-lg">
                                 <p className="font-medium">{payload[0].name}</p>
                                 <p className="text-sm text-muted-foreground">
-                                  {formatCurrency(payload[0].value as number)}
+                                  {formatCurrency(Number(payload[0].value) || 0)}
                                 </p>
                               </div>
                             );

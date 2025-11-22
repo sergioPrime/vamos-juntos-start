@@ -30,7 +30,7 @@ interface TaxBreakdown {
 }
 
 export function useFiscalMetrics(startDate?: Date, endDate?: Date) {
-  const { currentOrganization } = useOrganization();
+  const { organization } = useOrganization();
   const [metrics, setMetrics] = useState<FiscalMetrics>({
     totalNFes: 0,
     totalFaturamento: 0,
@@ -48,13 +48,13 @@ export function useFiscalMetrics(startDate?: Date, endDate?: Date) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (currentOrganization?.id) {
+    if (organization?.id) {
       loadMetrics();
     }
-  }, [currentOrganization?.id, startDate, endDate]);
+  }, [organization?.id, startDate, endDate]);
 
   const loadMetrics = async () => {
-    if (!currentOrganization?.id) return;
+    if (!organization?.id) return;
 
     setLoading(true);
     try {
@@ -65,7 +65,7 @@ export function useFiscalMetrics(startDate?: Date, endDate?: Date) {
       let query = supabase
         .from('nfe')
         .select('*')
-        .eq('org_id', currentOrganization.id)
+        .eq('org_id', organization.id)
         .gte('data_emissao', format(start, 'yyyy-MM-dd'))
         .lte('data_emissao', format(end, 'yyyy-MM-dd'));
 
@@ -86,7 +86,7 @@ export function useFiscalMetrics(startDate?: Date, endDate?: Date) {
       ) || 0;
 
       const issTotal = nfes?.reduce((sum, nfe) => 
-        nfe.status !== 'cancelada' ? sum + (Number(nfe.valor_iss) || 0) : sum, 0
+        nfe.status !== 'cancelada' ? sum + (Number(nfe.valor_is) || 0) : sum, 0
       ) || 0;
 
       const pisTotal = nfes?.reduce((sum, nfe) => 
@@ -129,7 +129,7 @@ export function useFiscalMetrics(startDate?: Date, endDate?: Date) {
         const existing = monthlyMap.get(month) || { month, faturamento: 0, tributos: 0, nfes: 0 };
         
         existing.faturamento += Number(nfe.valor_total) || 0;
-        existing.tributos += (Number(nfe.valor_icms) || 0) + (Number(nfe.valor_iss) || 0) + 
+        existing.tributos += (Number(nfe.valor_icms) || 0) + (Number(nfe.valor_is) || 0) + 
                             (Number(nfe.valor_pis) || 0) + (Number(nfe.valor_cofins) || 0) + 
                             (Number(nfe.valor_ipi) || 0);
         existing.nfes += 1;

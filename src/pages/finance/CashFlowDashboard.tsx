@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAdvancedCashFlow } from '@/hooks/useAdvancedCashFlow';
 import { AdvancedCashFlowChart } from '@/components/finance/AdvancedCashFlowChart';
 import { CashFlowAlertsPanel } from '@/components/finance/CashFlowAlertsPanel';
 import { CashFlowMetricsGrid } from '@/components/finance/CashFlowMetricsGrid';
-import { RefreshCw, TrendingUp, Download } from 'lucide-react';
+import { RefreshCw, TrendingUp, TrendingDown, Download, Activity } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { formatCurrency } from '@/lib/utils';
 
 export default function CashFlowDashboard() {
   const [daysAhead, setDaysAhead] = useState(90);

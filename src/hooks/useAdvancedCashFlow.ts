@@ -140,9 +140,9 @@ export function useAdvancedCashFlow(daysAhead: number = 90) {
 
       setMetrics({
         current_balance: currentBalance,
-        projected_30d,
-        projected_60d,
-        projected_90d,
+        projected_30d: projected30d,
+        projected_60d: projected60d,
+        projected_90d: projected90d,
         avg_daily_inflow: avgDailyInflow,
         avg_daily_outflow: avgDailyOutflow,
         burn_rate: burnRate,

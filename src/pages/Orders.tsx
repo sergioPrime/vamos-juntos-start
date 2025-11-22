@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, Eye, Zap, Plus, Filter } from "lucide-react"
+import { Search, Eye, Zap, Plus, Filter, Edit, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
@@ -15,6 +18,7 @@ import { useOrderIntegration } from "@/hooks/useOrderIntegration"
 import { useStockValidation } from "@/hooks/useStockValidation"
 import { useBusinessNotifications } from "@/hooks/useBusinessNotifications"
 import { usePermissionCheck } from "@/hooks/usePermissionCheck"
+import { useOrderForm } from "@/hooks/useOrderForm"
 
 interface Order {
   id: string
@@ -83,6 +87,7 @@ const Orders = () => {
   const { completeOrderWithIntegration } = useOrderIntegration()
   const { validateOrderStock, showValidationMessages } = useStockValidation()
   const { runPeriodicChecks } = useBusinessNotifications()
+  const { cancelOrder: cancelOrderFn } = useOrderForm()
   
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(false)
@@ -91,6 +96,9 @@ const Orders = () => {
   const [paymentFilter, setPaymentFilter] = useState("all")
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false)
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
+  const [cancelReason, setCancelReason] = useState("")
+  const [orderToCancel, setOrderToCancel] = useState<Order | null>(null)
 
   useEffect(() => {
     if (currentOrg?.id) {

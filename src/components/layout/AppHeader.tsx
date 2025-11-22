@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Plus, User, MoreHorizontal, LogOut, Moon, Sun, Zap, Shield, Settings, Lock, Link2, Camera, DollarSign, UserCog, ChevronDown, UserPlus, Truck, Package, Wrench, TrendingUp, Sparkles } from "lucide-react"
+import { Plus, User, MoreHorizontal, LogOut, Moon, Sun, Zap, Shield, Settings, Lock, Link2, Camera, DollarSign, UserCog, ChevronDown, UserPlus, Truck, Package, Wrench, TrendingUp, Sparkles, Bell } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { UserPhotoDialog } from "@/components/UserPhotoDialog"
@@ -36,6 +36,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { AIAssistantDialog } from "@/components/ai/AIAssistantDialog"
+import { NotificationBell } from "@/components/dashboard/NotificationBell"
 
 export function AppHeader() {
   const navigate = useNavigate()
@@ -168,6 +169,9 @@ export function AppHeader() {
             </TooltipContent>
           </Tooltip>
           
+           {/* Notification Bell */}
+           <NotificationBell />
+           
            {/* Notification Center */}
            <NotificationCenter />
            
@@ -276,6 +280,9 @@ export function AppHeader() {
 
         {/* Mobile Actions */}
         <div className="flex lg:hidden items-center gap-2">
+           {/* Notification Bell Mobile */}
+           <NotificationBell />
+           
            {/* Overdue Appointments Mobile */}
            <OverdueNotifications />
            

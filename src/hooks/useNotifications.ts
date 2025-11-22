@@ -18,43 +18,43 @@ export interface Notification {
 }
 
 export function useNotifications() {
-  const { currentOrganization } = useOrganization();
+  const { currentOrg } = useOrganization();
   const queryClient = useQueryClient();
 
   // Buscar notificações
   const { data: notifications = [], isLoading } = useQuery({
-    queryKey: ['notifications', currentOrganization?.id],
+    queryKey: ['notifications', currentOrg?.id],
     queryFn: async () => {
-      if (!currentOrganization?.id) return [];
+      if (!currentOrg?.id) return [];
 
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
-        .eq('org_id', currentOrganization.id)
+        .eq('org_id', currentOrg.id)
         .order('created_at', { ascending: false })
         .limit(50);
 
       if (error) throw error;
       return data as Notification[];
     },
-    enabled: !!currentOrganization?.id,
+    enabled: !!currentOrg?.id,
   });
 
   // Buscar contagem de não lidas
   const { data: unreadCount = 0 } = useQuery({
-    queryKey: ['notifications-unread-count', currentOrganization?.id],
+    queryKey: ['notifications-unread-count', currentOrg?.id],
     queryFn: async () => {
-      if (!currentOrganization?.id) return 0;
+      if (!currentOrg?.id) return 0;
 
       const { data, error } = await supabase
         .rpc('get_unread_notification_count', {
-          p_org_id: currentOrganization.id,
+          p_org_id: currentOrg.id,
         });
 
       if (error) throw error;
       return data || 0;
     },
-    enabled: !!currentOrganization?.id,
+    enabled: !!currentOrg?.id,
     refetchInterval: 30000, // Atualizar a cada 30 segundos
   });
 
@@ -75,10 +75,10 @@ export function useNotifications() {
   // Marcar todas como lidas
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
-      if (!currentOrganization?.id) throw new Error('Organização não encontrada');
+      if (!currentOrg?.id) throw new Error('Organização não encontrada');
 
       const { error } = await supabase.rpc('mark_all_notifications_as_read', {
-        p_org_id: currentOrganization.id,
+        p_org_id: currentOrg.id,
       });
       if (error) throw error;
     },

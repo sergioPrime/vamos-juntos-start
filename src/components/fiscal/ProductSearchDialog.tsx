@@ -12,7 +12,6 @@ interface Product {
   sku: string | null;
   unit: string | null;
   unit_price: number | null;
-  ncm: string | null;
 }
 
 interface ProductSearchDialogProps {
@@ -35,7 +34,7 @@ export function ProductSearchDialog({
       setLoading(true);
       let query = supabase
         .from("products")
-        .select("id, name, sku, unit, unit_price, ncm")
+        .select("id, name, sku, unit, unit_price")
         .eq("active", true);
 
       if (search) {
@@ -105,11 +104,6 @@ export function ProductSearchDialog({
                       <p className="text-sm text-muted-foreground">
                         SKU: {product.sku || "N/A"}
                       </p>
-                      {product.ncm && (
-                        <p className="text-sm text-muted-foreground">
-                          NCM: {product.ncm}
-                        </p>
-                      )}
                     </div>
                     <div className="text-right">
                       <p className="font-medium">

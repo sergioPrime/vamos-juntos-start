@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,17 +21,24 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
+import NFeCancelDialog from "./NFeCancelDialog";
 
 interface NFeActionsMenuProps {
   status: "autorizada" | "cancelada" | "pendente" | "rejeitada";
   chaveAcesso: string;
+  nfeId: string;
+  nfeNumero: string;
   onView: () => void;
+  onUpdate?: () => void;
 }
 
 export default function NFeActionsMenu({
   status,
   chaveAcesso,
+  nfeId,
+  nfeNumero,
   onView,
+  onUpdate,
 }: NFeActionsMenuProps) {
   const handleDownloadXML = () => {
     toast.success("Download do XML iniciado");
@@ -48,8 +56,10 @@ export default function NFeActionsMenu({
     toast.success("Imprimindo DANFE...");
   };
 
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+
   const handleCancel = () => {
-    toast.info("Abrindo formulário de cancelamento");
+    setCancelDialogOpen(true);
   };
 
   const handleCartaCorrecao = () => {
@@ -65,7 +75,8 @@ export default function NFeActionsMenu({
   };
 
   return (
-    <DropdownMenu>
+    <>
+      <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm">
           <MoreVertical className="h-4 w-4" />
@@ -138,5 +149,14 @@ export default function NFeActionsMenu({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+
+    <NFeCancelDialog
+      open={cancelDialogOpen}
+      onOpenChange={setCancelDialogOpen}
+      nfeId={nfeId}
+      nfeNumero={nfeNumero}
+      onSuccess={onUpdate}
+    />
+    </>
   );
 }

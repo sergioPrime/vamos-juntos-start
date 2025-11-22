@@ -1713,11 +1713,13 @@ export type Database = {
           codigo_municipio: string
           company_id: string | null
           complemento: string | null
+          contingencia_ativa: boolean | null
           created_at: string
           csc_homologacao: string | null
           csc_id_homologacao: number | null
           csc_id_producao: number | null
           csc_producao: string | null
+          data_inicio_contingencia: string | null
           email: string | null
           id: string
           impressora_padrao: string | null
@@ -1725,6 +1727,7 @@ export type Database = {
           inscricao_municipal: string | null
           is_active: boolean
           logradouro: string
+          motivo_contingencia: string | null
           municipio: string
           nome_fantasia: string | null
           numero: string
@@ -1753,11 +1756,13 @@ export type Database = {
           codigo_municipio: string
           company_id?: string | null
           complemento?: string | null
+          contingencia_ativa?: boolean | null
           created_at?: string
           csc_homologacao?: string | null
           csc_id_homologacao?: number | null
           csc_id_producao?: number | null
           csc_producao?: string | null
+          data_inicio_contingencia?: string | null
           email?: string | null
           id?: string
           impressora_padrao?: string | null
@@ -1765,6 +1770,7 @@ export type Database = {
           inscricao_municipal?: string | null
           is_active?: boolean
           logradouro: string
+          motivo_contingencia?: string | null
           municipio: string
           nome_fantasia?: string | null
           numero: string
@@ -1793,11 +1799,13 @@ export type Database = {
           codigo_municipio?: string
           company_id?: string | null
           complemento?: string | null
+          contingencia_ativa?: boolean | null
           created_at?: string
           csc_homologacao?: string | null
           csc_id_homologacao?: number | null
           csc_id_producao?: number | null
           csc_producao?: string | null
+          data_inicio_contingencia?: string | null
           email?: string | null
           id?: string
           impressora_padrao?: string | null
@@ -1805,6 +1813,7 @@ export type Database = {
           inscricao_municipal?: string | null
           is_active?: boolean
           logradouro?: string
+          motivo_contingencia?: string | null
           municipio?: string
           nome_fantasia?: string | null
           numero?: string
@@ -3047,6 +3056,50 @@ export type Database = {
           },
           {
             foreignKeyName: "nfce_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nfce_contingency_queue: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          last_retry_at: string | null
+          nfce_data: Json
+          org_id: string
+          retry_count: number | null
+          status: string
+          transmitted_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          last_retry_at?: string | null
+          nfce_data: Json
+          org_id: string
+          retry_count?: number | null
+          status?: string
+          transmitted_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          last_retry_at?: string | null
+          nfce_data?: Json
+          org_id?: string
+          retry_count?: number | null
+          status?: string
+          transmitted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfce_contingency_queue_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -6732,6 +6785,10 @@ export type Database = {
       }
     }
     Functions: {
+      activate_nfce_contingency: {
+        Args: { p_motivo: string; p_org_id: string }
+        Returns: boolean
+      }
       add_blockchain_record: {
         Args: {
           p_data_snapshot: Json
@@ -6820,6 +6877,10 @@ export type Database = {
           p_target_table?: string
         }
         Returns: string
+      }
+      deactivate_nfce_contingency: {
+        Args: { p_org_id: string }
+        Returns: boolean
       }
       generate_blockchain_hash: {
         Args: {
@@ -6927,6 +6988,15 @@ export type Database = {
           total_installments: number
         }[]
       }
+      get_pending_contingency_nfce: {
+        Args: { p_limit?: number; p_org_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          nfce_data: Json
+          retry_count: number
+        }[]
+      }
       get_sync_statistics: {
         Args: { p_days?: number; p_org_id: string }
         Returns: {
@@ -6976,6 +7046,14 @@ export type Database = {
       }
       is_used_in_financial_entries: {
         Args: { item_id: string; reference_type: string }
+        Returns: boolean
+      }
+      mark_contingency_failed: {
+        Args: { p_error_message: string; p_queue_id: string }
+        Returns: boolean
+      }
+      mark_contingency_transmitted: {
+        Args: { p_queue_id: string }
         Returns: boolean
       }
       reject_access_request: {

@@ -52,10 +52,6 @@ export default function NFeActionsMenu({
     toast.info("Abrindo formulário de cancelamento");
   };
 
-  const handleCartaCorrecao = () => {
-    toast.info("Abrindo Carta de Correção Eletrônica");
-  };
-
   const handleConsultarStatus = () => {
     toast.info("Consultando status na SEFAZ...");
   };
@@ -65,7 +61,26 @@ export default function NFeActionsMenu({
   };
 
   return (
-    <DropdownMenu>
+    <>
+      <NFeCancelDialog
+        open={cancelDialogOpen}
+        onClose={() => setCancelDialogOpen(false)}
+        nfeId={nfeId}
+        nfeNumero={nfeNumero}
+        orgId={orgId}
+        onSuccess={handleCancelSuccess}
+      />
+
+      <NFeCCeDialog
+        open={cceDialogOpen}
+        onClose={() => setCCeDialogOpen(false)}
+        nfeId={nfeId}
+        nfeNumero={nfeNumero}
+        orgId={orgId}
+        onSuccess={handleCCeSuccess}
+      />
+
+      <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm">
           <MoreVertical className="h-4 w-4" />
@@ -104,12 +119,15 @@ export default function NFeActionsMenu({
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem onClick={handleCartaCorrecao}>
+            <DropdownMenuItem onClick={() => setCCeDialogOpen(true)}>
               <FileText className="mr-2 h-4 w-4" />
               Carta de Correção
             </DropdownMenuItem>
 
-            <DropdownMenuItem onClick={handleCancel}>
+            <DropdownMenuItem 
+              onClick={() => setCancelDialogOpen(true)}
+              className="text-red-600 dark:text-red-400"
+            >
               <XCircle className="mr-2 h-4 w-4" />
               Cancelar NFe
             </DropdownMenuItem>
@@ -136,7 +154,8 @@ export default function NFeActionsMenu({
           <CheckCircle className="mr-2 h-4 w-4" />
           Manifestação do Destinatário
         </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   );
 }

@@ -2115,6 +2115,7 @@ export type Database = {
           id: string
           informacoes_complementares: string | null
           informacoes_fisco: string | null
+          manifestacao_destinatario: string | null
           modelo: string
           motivo_cancelamento: string | null
           motivo_rejeicao: string | null
@@ -2191,6 +2192,7 @@ export type Database = {
           id?: string
           informacoes_complementares?: string | null
           informacoes_fisco?: string | null
+          manifestacao_destinatario?: string | null
           modelo?: string
           motivo_cancelamento?: string | null
           motivo_rejeicao?: string | null
@@ -2267,6 +2269,7 @@ export type Database = {
           id?: string
           informacoes_complementares?: string | null
           informacoes_fisco?: string | null
+          manifestacao_destinatario?: string | null
           modelo?: string
           motivo_cancelamento?: string | null
           motivo_rejeicao?: string | null
@@ -2342,6 +2345,117 @@ export type Database = {
           },
           {
             foreignKeyName: "nfe_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nfe_cancelamentos: {
+        Row: {
+          created_at: string | null
+          data_cancelamento: string | null
+          id: string
+          motivo: string
+          nfe_id: string
+          org_id: string
+          protocolo_cancelamento: string | null
+          updated_at: string | null
+          usuario_cancelamento: string | null
+          xml_cancelamento: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data_cancelamento?: string | null
+          id?: string
+          motivo: string
+          nfe_id: string
+          org_id: string
+          protocolo_cancelamento?: string | null
+          updated_at?: string | null
+          usuario_cancelamento?: string | null
+          xml_cancelamento?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data_cancelamento?: string | null
+          id?: string
+          motivo?: string
+          nfe_id?: string
+          org_id?: string
+          protocolo_cancelamento?: string | null
+          updated_at?: string | null
+          usuario_cancelamento?: string | null
+          xml_cancelamento?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfe_cancelamentos_nfe_id_fkey"
+            columns: ["nfe_id"]
+            isOneToOne: false
+            referencedRelation: "nfe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_cancelamentos_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nfe_carta_correcao: {
+        Row: {
+          correcao: string
+          created_at: string | null
+          created_by: string | null
+          data_evento: string | null
+          id: string
+          nfe_id: string
+          org_id: string
+          protocolo: string | null
+          sequencia: number
+          updated_at: string | null
+          xml_evento: string | null
+        }
+        Insert: {
+          correcao: string
+          created_at?: string | null
+          created_by?: string | null
+          data_evento?: string | null
+          id?: string
+          nfe_id: string
+          org_id: string
+          protocolo?: string | null
+          sequencia?: number
+          updated_at?: string | null
+          xml_evento?: string | null
+        }
+        Update: {
+          correcao?: string
+          created_at?: string | null
+          created_by?: string | null
+          data_evento?: string | null
+          id?: string
+          nfe_id?: string
+          org_id?: string
+          protocolo?: string | null
+          sequencia?: number
+          updated_at?: string | null
+          xml_evento?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfe_carta_correcao_nfe_id_fkey"
+            columns: ["nfe_id"]
+            isOneToOne: false
+            referencedRelation: "nfe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_carta_correcao_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -2626,6 +2740,66 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "stock_integrity_check"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nfe_manifestacao: {
+        Row: {
+          chave_acesso: string
+          created_at: string | null
+          created_by: string | null
+          data_evento: string | null
+          id: string
+          justificativa: string | null
+          nfe_id: string
+          org_id: string
+          protocolo: string | null
+          tipo_evento: string
+          updated_at: string | null
+          xml_evento: string | null
+        }
+        Insert: {
+          chave_acesso: string
+          created_at?: string | null
+          created_by?: string | null
+          data_evento?: string | null
+          id?: string
+          justificativa?: string | null
+          nfe_id: string
+          org_id: string
+          protocolo?: string | null
+          tipo_evento: string
+          updated_at?: string | null
+          xml_evento?: string | null
+        }
+        Update: {
+          chave_acesso?: string
+          created_at?: string | null
+          created_by?: string | null
+          data_evento?: string | null
+          id?: string
+          justificativa?: string | null
+          nfe_id?: string
+          org_id?: string
+          protocolo?: string | null
+          tipo_evento?: string
+          updated_at?: string | null
+          xml_evento?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfe_manifestacao_nfe_id_fkey"
+            columns: ["nfe_id"]
+            isOneToOne: false
+            referencedRelation: "nfe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_manifestacao_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]

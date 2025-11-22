@@ -26,7 +26,7 @@ interface NFCe {
   valor_total: number;
   status: string;
   chave_acesso: string | null;
-  destinatario_cpf_cnpj: string | null;
+  destinatario_documento: string | null;
   data_emissao: string;
 }
 
@@ -85,7 +85,7 @@ export function NFCeListPanel() {
     const filtered = nfceList.filter(nfce =>
       nfce.numero.toString().includes(searchTerm) ||
       nfce.chave_acesso?.includes(searchTerm) ||
-      nfce.destinatario_cpf_cnpj?.includes(searchTerm)
+      nfce.destinatario_documento?.includes(searchTerm)
     );
     setFilteredList(filtered);
   };
@@ -240,7 +240,7 @@ export function NFCeListPanel() {
                   <TableCell>
                     {format(new Date(nfce.data_emissao), 'dd/MM/yyyy HH:mm')}
                   </TableCell>
-                  <TableCell>{nfce.destinatario_cpf_cnpj || '-'}</TableCell>
+                  <TableCell>{nfce.destinatario_documento || '-'}</TableCell>
                   <TableCell>R$ {nfce.valor_total.toFixed(2)}</TableCell>
                   <TableCell>{getStatusBadge(nfce.status)}</TableCell>
                   <TableCell className="text-right space-x-2">

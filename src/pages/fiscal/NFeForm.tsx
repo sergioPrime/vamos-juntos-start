@@ -114,6 +114,76 @@ export default function NFeForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Buscar clientes
+  const searchClientes = async (query: string) => {
+    if (!currentOrg) return [];
+
+    const { data, error } = await supabase
+      .from("pessoas")
+      .select("id, razao_social, documento, endereco, cidade, uf, cep")
+      .eq("org_id", currentOrg.id)
+      .or(`razao_social.ilike.%${query}%,documento.ilike.%${query}%`)
+      .limit(20);
+
+    if (error) {
+      console.error("Erro ao buscar clientes:", error);
+      return [];
+    }
+
+    return (
+      data?.map((pessoa) => ({
+        id: pessoa.id,
+        name: `${pessoa.razao_social || "Sem nome"} - ${pessoa.documento || ""}`,
+        code: pessoa.documento || "",
+      })) || []
+    );
+  };
+
+  // Carregar dados do cliente selecionado
+  const handleClienteChange = async (clienteId: string) => {
+    if (!clienteId) {
+      setFormData((prev) => ({
+        ...prev,
+        cliente_id: "",
+        cliente_nome: "",
+        cliente_cpf_cnpj: "",
+        cliente_ie: "",
+        cliente_endereco: "",
+        cliente_numero: "",
+        cliente_bairro: "",
+        cliente_cidade: "",
+        cliente_uf: "",
+        cliente_cep: "",
+      }));
+      return;
+    }
+
+    const { data: pessoa, error } = await supabase
+      .from("pessoas")
+      .select("*")
+      .eq("id", clienteId)
+      .single();
+
+    if (error) {
+      toast.error("Erro ao carregar dados do cliente");
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      cliente_id: pessoa.id,
+      cliente_nome: pessoa.razao_social || "",
+      cliente_cpf_cnpj: pessoa.documento || "",
+      cliente_ie: "", // IE não existe na tabela pessoas
+      cliente_endereco: pessoa.endereco || "",
+      cliente_numero: "",
+      cliente_bairro: "",
+      cliente_cidade: pessoa.cidade || "",
+      cliente_uf: pessoa.uf || "",
+      cliente_cep: pessoa.cep || "",
+    }));
+  };
+
   const handleAddProduct = () => {
     setEditingProduct(null);
     setProductDialogOpen(true);

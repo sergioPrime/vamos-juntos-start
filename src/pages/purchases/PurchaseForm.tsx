@@ -28,7 +28,7 @@ export default function PurchaseForm() {
   const { data: purchaseData } = usePurchaseDetails(id)
   const { pessoas } = usePessoas()
   
-  const suppliers = pessoas?.filter(p => p.tipo === 'fornecedor')
+  const suppliers = pessoas || []
   
   const [supplierId, setSupplierId] = useState("")
   const [notes, setNotes] = useState("")

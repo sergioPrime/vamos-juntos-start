@@ -114,9 +114,7 @@ export default function PurchaseDetails() {
             <CardTitle>Fornecedor</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-medium">
-              {purchase?.pessoas?.razao_social || purchase?.pessoas?.nome_fantasia || 'N/A'}
-            </p>
+            <p className="font-medium">Fornecedor</p>
           </CardContent>
         </Card>
 

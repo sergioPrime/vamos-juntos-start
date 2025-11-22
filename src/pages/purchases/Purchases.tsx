@@ -87,9 +87,7 @@ export default function Purchases() {
                 filteredPurchases?.map((purchase) => (
                   <TableRow key={purchase.id}>
                     <TableCell className="font-medium">{purchase.purchase_number}</TableCell>
-                    <TableCell>
-                      {purchase.pessoas?.razao_social || purchase.pessoas?.nome || 'N/A'}
-                    </TableCell>
+                    <TableCell>Fornecedor</TableCell>
                     <TableCell>
                       {new Date(purchase.created_at).toLocaleDateString('pt-BR')}
                     </TableCell>

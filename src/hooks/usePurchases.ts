@@ -51,10 +51,7 @@ export function usePurchases() {
 
       const { data, error } = await supabase
         .from('purchases')
-        .select(`
-          *,
-          pessoas:supplier_id (nome, razao_social)
-        `)
+        .select('*')
         .eq('org_id', currentOrg.id)
         .order('created_at', { ascending: false })
 
@@ -286,10 +283,7 @@ export function usePurchases() {
 
         const { data: purchase, error: purchaseError } = await supabase
           .from('purchases')
-          .select(`
-            *,
-            pessoas:supplier_id (nome, razao_social)
-          `)
+          .select('*')
           .eq('id', id)
           .single()
 
@@ -297,10 +291,7 @@ export function usePurchases() {
 
         const { data: items, error: itemsError } = await supabase
           .from('purchase_items')
-          .select(`
-            *,
-            products:product_id (codigo, descricao)
-          `)
+          .select('*')
           .eq('purchase_id', id)
 
         if (itemsError) throw itemsError

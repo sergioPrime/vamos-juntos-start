@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,7 +21,6 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
 import { NFeEmailDialog } from "./NFeEmailDialog";
 import { NFeCancelDialog } from "./NFeCancelDialog";
 import { NFeCorrectDialog } from "./NFeCorrectDialog";
@@ -28,14 +28,22 @@ import { NFeCorrectDialog } from "./NFeCorrectDialog";
 interface NFeActionsMenuProps {
   status: "autorizada" | "cancelada" | "pendente" | "rejeitada";
   chaveAcesso: string;
+  nfeId: string;
+  nfeNumero: string;
   onView: () => void;
 }
 
 export default function NFeActionsMenu({
   status,
   chaveAcesso,
+  nfeId,
+  nfeNumero,
   onView,
 }: NFeActionsMenuProps) {
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showCorrectDialog, setShowCorrectDialog] = useState(false);
+
   const handleDownloadXML = () => {
     toast.success("Download do XML iniciado");
   };
@@ -44,20 +52,8 @@ export default function NFeActionsMenu({
     toast.success("Download do DANFE iniciado");
   };
 
-  const handleSendEmail = () => {
-    toast.success("Email enviado com sucesso");
-  };
-
   const handlePrint = () => {
     toast.success("Imprimindo DANFE...");
-  };
-
-  const handleCancel = () => {
-    toast.info("Abrindo formulário de cancelamento");
-  };
-
-  const handleCartaCorrecao = () => {
-    toast.info("Abrindo Carta de Correção Eletrônica");
   };
 
   const handleConsultarStatus = () => {

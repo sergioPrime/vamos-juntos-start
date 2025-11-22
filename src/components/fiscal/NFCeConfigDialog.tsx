@@ -74,10 +74,15 @@ export function NFCeConfigDialog({ open, onOpenChange }: NFCeConfigDialogProps) 
     try {
       const { error } = await supabase
         .from('fiscal_config')
-        .upsert({
-          org_id: currentOrg.id,
-          ...data,
+        .update({
+          nfce_serie: data.nfce_serie,
+          nfce_numero_atual: data.nfce_numero_atual,
+          nfce_csc: data.nfce_csc,
+          nfce_id_csc: data.nfce_id_csc,
+          nfce_ambiente: data.nfce_ambiente,
+          nfce_contingencia_ativa: data.nfce_contingencia_ativa,
         })
+        .eq('org_id', currentOrg.id)
 
       if (error) throw error
 

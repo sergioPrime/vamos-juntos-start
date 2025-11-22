@@ -153,7 +153,7 @@ export default function NFeDetails() {
               status={nfe.status}
               chaveAcesso={nfe.chave_acesso}
               orgId={nfe.org_id}
-              onView={() => {}}
+              onView={() => navigate(`/fiscal/nfe/${nfe.id}`)}
               onRefresh={loadNFeDetails}
             />
           </div>

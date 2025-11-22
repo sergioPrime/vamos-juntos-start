@@ -138,7 +138,7 @@ export default function NFeProductDialog({
 
     const { data, error } = await supabase
       .from("products")
-      .select("id, name, sku, price")
+      .select("id, name, sku, unit_price")
       .eq("org_id", currentOrg.id)
       .or(`name.ilike.%${query}%,sku.ilike.%${query}%`)
       .limit(20);
@@ -185,7 +185,7 @@ export default function NFeProductDialog({
       id: produto.id,
       codigo: produto.sku || produto.id.substring(0, 8),
       descricao: produto.name || "",
-      valor_unitario: produto.price || 0,
+      valor_unitario: produto.unit_price || 0,
     };
 
     const calculated = calculateTotals(newData);

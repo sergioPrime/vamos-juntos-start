@@ -184,18 +184,21 @@ export function useNFe() {
           created_by: user.user.id,
         })
         .select()
-        .single();
+        .maybeSingle();
 
-      if (nfeError) throw nfeError;
+      if (nfeError || !nfe) throw nfeError || new Error("Erro ao criar NFe");
 
       // Criar itens da NFe
       if (items && items.length > 0) {
-        const nfeItems = items.map((item, index) => ({
-          ...item,
-          nfe_id: nfe.id,
-          org_id: currentOrg.id,
-          item_numero: index + 1,
-        }));
+        const nfeItems = items.map((item, index) => {
+          const { id, nfe_id, org_id, ...itemData } = item;
+          return {
+            ...itemData,
+            nfe_id: nfe.id,
+            org_id: currentOrg.id,
+            item_numero: index + 1,
+          };
+        });
 
         const { error: itemsError } = await supabase
           .from("nfe_items")
@@ -204,7 +207,7 @@ export function useNFe() {
         if (itemsError) throw itemsError;
       }
 
-      return nfe;
+      return nfe as NFe;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["nfe"] });
@@ -282,7 +285,7 @@ export function useNFe() {
       const { error } = await supabase
         .from("nfe")
         .update({
-          status: "autorizada",
+          status: "autorizada" as const,
           data_autorizacao: new Date().toISOString(),
           chave_acesso: `35${new Date().getFullYear()}${Math.random().toString().slice(2, 46)}`,
           numero_protocolo: Math.random().toString().slice(2, 17),
@@ -322,7 +325,7 @@ export function useNFe() {
       const { error } = await supabase
         .from("nfe")
         .update({
-          status: "cancelada",
+          status: "cancelada" as const,
           data_cancelamento: new Date().toISOString(),
           motivo_cancelamento: motivo,
           updated_at: new Date().toISOString(),

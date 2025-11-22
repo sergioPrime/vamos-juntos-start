@@ -18,20 +18,33 @@ import {
   CheckCircle,
   AlertTriangle,
   RefreshCw,
+  Edit,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface NFeActionsMenuProps {
-  status: "autorizada" | "cancelada" | "pendente" | "rejeitada";
+  nfeId: string;
+  status: "autorizada" | "cancelada" | "pendente" | "rejeitada" | "rascunho";
   chaveAcesso: string;
-  onView: () => void;
+  onEmit?: (nfeId: string) => void;
 }
 
 export default function NFeActionsMenu({
+  nfeId,
   status,
   chaveAcesso,
-  onView,
+  onEmit,
 }: NFeActionsMenuProps) {
+  const navigate = useNavigate();
+  
+  const handleViewDetails = () => {
+    navigate(`/fiscal/nfe/${nfeId}`)
+  }
+  
+  const handleEdit = () => {
+    navigate(`/fiscal/nfe/${nfeId}/edit`)
+  }
   const handleDownloadXML = () => {
     toast.success("Download do XML iniciado");
   };
@@ -75,10 +88,26 @@ export default function NFeActionsMenu({
         <DropdownMenuLabel>Ações da NFe</DropdownMenuLabel>
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem onClick={onView}>
+        <DropdownMenuItem onClick={handleViewDetails}>
           <Eye className="mr-2 h-4 w-4" />
           Visualizar Detalhes
         </DropdownMenuItem>
+        
+        {status === "rascunho" && (
+          <>
+            <DropdownMenuItem onClick={handleEdit}>
+              <Edit className="mr-2 h-4 w-4" />
+              Editar Rascunho
+            </DropdownMenuItem>
+            
+            {onEmit && (
+              <DropdownMenuItem onClick={() => onEmit(nfeId)}>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Emitir NFe
+              </DropdownMenuItem>
+            )}
+          </>
+        )}
 
         {status === "autorizada" && (
           <>

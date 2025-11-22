@@ -84,7 +84,7 @@ describe('Permission Request Flow', () => {
     });
 
     await act(async () => {
-      await result.current.rejectRequest('request-123', 'admin-123', 'Não aprovado');
+      await result.current.rejectRequest('request-123', 'Não aprovado');
     });
 
     expect(supabase.from).toHaveBeenCalledWith('access_requests');

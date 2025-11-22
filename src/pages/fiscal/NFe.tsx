@@ -27,6 +27,7 @@ interface NFe {
   numero: string;
   serie: string;
   cliente: string;
+  cliente_email?: string;
   data_emissao: string;
   valor_total: number;
   status: "autorizada" | "cancelada" | "pendente" | "rejeitada";
@@ -89,6 +90,10 @@ export default function NFe() {
 
     return matchesSearch && matchesStatus;
   });
+
+  const handleReload = () => {
+    toast.info("Dados recarregados");
+  };
 
   return (
     <div className="container-comfortable">

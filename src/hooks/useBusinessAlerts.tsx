@@ -179,7 +179,7 @@ export function useBusinessAlerts() {
   }, [currentOrg?.id])
 
   // Check for rejected NFSe - DISABLED (Type issues with nfse table)
-  const checkRejectedNFSe = useCallback(async (): Promise<Alert[]> => {
+  const checkRejectedNFSe = useCallback(async (): Promise<BusinessAlert[]> => {
     // Temporarily disabled due to type mismatch
     return []
   }, [currentOrg])

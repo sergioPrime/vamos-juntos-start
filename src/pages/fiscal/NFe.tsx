@@ -84,6 +84,78 @@ export default function NFe() {
     }
   };
 
+  const handleEmitNFe = async (nfeId: string) => {
+    try {
+      // Buscar dados da NFe do banco
+      const { data: nfeData, error: nfeError } = await supabase
+        .from("nfe")
+        .select("*")
+        .eq("id", nfeId)
+        .single();
+
+      if (nfeError) throw nfeError;
+
+      // Buscar itens da NFe
+      const { data: nfeItems, error: itemsError } = await supabase
+        .from("nfe_items")
+        .select("*")
+        .eq("nfe_id", nfeId);
+
+      if (itemsError) throw itemsError;
+
+      // Chamar edge function para emitir
+      const { error: emitError } = await supabase.functions.invoke("emitir-nfe", {
+        body: {
+          org_id: currentOrg?.id,
+          nfe_data: {
+            serie: nfeData.serie,
+            natureza_operacao: nfeData.natureza_operacao,
+            tipo_operacao: nfeData.tipo_operacao,
+            finalidade: nfeData.finalidade,
+            destinatario_nome: nfeData.destinatario_nome,
+            destinatario_cpf_cnpj: nfeData.destinatario_cpf_cnpj,
+            destinatario_endereco: nfeData.destinatario_endereco,
+            destinatario_numero: nfeData.destinatario_numero,
+            destinatario_bairro: nfeData.destinatario_bairro,
+            destinatario_cidade: nfeData.destinatario_cidade,
+            destinatario_uf: nfeData.destinatario_uf,
+            destinatario_cep: nfeData.destinatario_cep,
+            valor_produtos: nfeData.valor_produtos,
+            valor_frete: nfeData.valor_frete,
+            valor_seguro: nfeData.valor_seguro,
+            valor_desconto: nfeData.valor_desconto,
+            valor_total: nfeData.valor_total,
+            informacoes_complementares: nfeData.informacoes_complementares,
+          },
+          items: (nfeItems || []).map((item: any) => ({
+            item_numero: item.item_numero,
+            codigo_produto: item.codigo_produto,
+            descricao: item.descricao,
+            ncm: item.ncm,
+            cfop: item.cfop,
+            unidade_comercial: item.unidade_comercial,
+            quantidade_comercial: item.quantidade_comercial,
+            valor_unitario: item.valor_unitario,
+            valor_total: item.valor_total,
+            icms_origem: item.icms_origem,
+            icms_cst: item.icms_cst,
+            icms_base_calculo: item.icms_base_calculo,
+            icms_aliquota: item.icms_aliquota,
+            icms_valor: item.icms_valor,
+          })),
+        },
+      });
+
+      if (emitError) throw emitError;
+
+      toast.success("NFe emitida com sucesso!");
+      loadNFes(); // Recarregar lista
+    } catch (error) {
+      console.error("Erro ao emitir NFe:", error);
+      toast.error("Erro ao emitir NFe");
+    }
+  };
+
   const getStatusBadge = (status: NFe["status"]) => {
     const variants = {
       autorizada: "default",

@@ -15,11 +15,10 @@ describe('usePermissionGuard', () => {
       checkPermission: vi.fn().mockReturnValue(true),
     } as any);
 
-    const { result } = renderHook(() =>
-      usePermissionGuard('financial', 'create')
-    );
+    const { result } = renderHook(() => usePermissionGuard());
 
-    expect(result.current.hasPermission).toBe(true);
+    const hasPermission = result.current.checkPermission('financial', 'create');
+    expect(hasPermission).toBe(true);
   });
 
   it('deve retornar false quando usuário não tem permissão', () => {
@@ -27,11 +26,10 @@ describe('usePermissionGuard', () => {
       checkPermission: vi.fn().mockReturnValue(false),
     } as any);
 
-    const { result } = renderHook(() =>
-      usePermissionGuard('financial', 'delete')
-    );
+    const { result } = renderHook(() => usePermissionGuard());
 
-    expect(result.current.hasPermission).toBe(false);
+    const hasPermission = result.current.checkPermission('financial', 'delete');
+    expect(hasPermission).toBe(false);
   });
 
   it('deve verificar múltiplas permissões corretamente', () => {
@@ -43,24 +41,21 @@ describe('usePermissionGuard', () => {
       checkPermission: mockCheckPermission,
     } as any);
 
-    const { result: result1 } = renderHook(() =>
-      usePermissionGuard('financial', 'create')
-    );
-    const { result: result2 } = renderHook(() =>
-      usePermissionGuard('financial', 'delete')
-    );
+    const { result } = renderHook(() => usePermissionGuard());
 
-    expect(result1.current.hasPermission).toBe(true);
-    expect(result2.current.hasPermission).toBe(false);
+    const hasCreatePermission = result.current.checkPermission('financial', 'create');
+    const hasDeletePermission = result.current.checkPermission('financial', 'delete');
+
+    expect(hasCreatePermission).toBe(true);
+    expect(hasDeletePermission).toBe(false);
   });
 
   it('deve retornar false quando checkPermission não existe', () => {
     vi.spyOn(authHook, 'useAuth').mockReturnValue({} as any);
 
-    const { result } = renderHook(() =>
-      usePermissionGuard('financial', 'create')
-    );
+    const { result } = renderHook(() => usePermissionGuard());
 
-    expect(result.current.hasPermission).toBe(false);
+    const hasPermission = result.current.checkPermission('financial', 'create');
+    expect(hasPermission).toBe(false);
   });
 });

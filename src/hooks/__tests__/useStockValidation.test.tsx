@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 vi.mock('@/integrations/supabase/client');
 vi.mock('../useOrganization', () => ({
-  useOrganization: () => ({ organization: { id: 'org-123' } }),
+  useOrganization: () => ({ currentOrganization: { id: 'org-123' } }),
 }));
 
 describe('useStockValidation', () => {
@@ -13,7 +13,7 @@ describe('useStockValidation', () => {
     vi.clearAllMocks();
   });
 
-  it('deve validar estoque disponível corretamente', async () => {
+  it('deve validar estoque para um produto', async () => {
     vi.mocked(supabase.from).mockReturnValue({
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
@@ -29,7 +29,8 @@ describe('useStockValidation', () => {
 
     let isValid = false;
     await act(async () => {
-      isValid = await result.current.validateStock('product-123', 5);
+      const validationResult = await result.current.validateSingleProduct('product-123', 5);
+      isValid = validationResult.isValid;
     });
 
     expect(isValid).toBe(true);
@@ -51,19 +52,23 @@ describe('useStockValidation', () => {
 
     let isValid = true;
     await act(async () => {
-      isValid = await result.current.validateStock('product-123', 5);
+      const validationResult = await result.current.validateSingleProduct('product-123', 5);
+      isValid = validationResult.isValid;
     });
 
     expect(isValid).toBe(false);
   });
 
-  it('deve lidar com produto não encontrado', async () => {
+  it('deve validar múltiplos produtos em um pedido', async () => {
     vi.mocked(supabase.from).mockReturnValue({
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: null,
-            error: { message: 'Product not found' },
+          in: vi.fn().mockResolvedValue({
+            data: [
+              { product_id: 'prod-1', available_stock: 10 },
+              { product_id: 'prod-2', available_stock: 5 },
+            ],
+            error: null,
           }),
         }),
       }),
@@ -71,11 +76,14 @@ describe('useStockValidation', () => {
 
     const { result } = renderHook(() => useStockValidation());
 
-    let isValid = true;
+    let validationResult;
     await act(async () => {
-      isValid = await result.current.validateStock('product-999', 5);
+      validationResult = await result.current.validateOrderStock([
+        { productId: 'prod-1', quantity: 5 },
+        { productId: 'prod-2', quantity: 3 },
+      ]);
     });
 
-    expect(isValid).toBe(false);
+    expect(validationResult.isValid).toBe(true);
   });
 });

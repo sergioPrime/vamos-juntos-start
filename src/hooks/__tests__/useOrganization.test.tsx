@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { useOrganization } from '../useOrganization';
 import { supabase } from '@/integrations/supabase/client';
 import { AllTheProviders } from '@/test/utils/renderWithProviders';
@@ -42,9 +42,10 @@ describe('useOrganization', () => {
       wrapper: AllTheProviders,
     });
 
-    await waitFor(() => {
-      expect(result.current.organization).toEqual(mockOrg);
-    });
+    // Wait for the hook to settle
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    expect(result.current.currentOrganization).toEqual(mockOrg);
   });
 
   it('deve retornar null quando não há usuário autenticado', async () => {
@@ -57,9 +58,9 @@ describe('useOrganization', () => {
       wrapper: AllTheProviders,
     });
 
-    await waitFor(() => {
-      expect(result.current.organization).toBeNull();
-    });
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    expect(result.current.currentOrganization).toBeNull();
   });
 
   it('deve indicar loading durante busca', () => {
@@ -98,9 +99,9 @@ describe('useOrganization', () => {
       wrapper: AllTheProviders,
     });
 
-    await waitFor(() => {
-      expect(result.current.organization).toBeNull();
-      expect(result.current.loading).toBe(false);
-    });
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    expect(result.current.currentOrganization).toBeNull();
+    expect(result.current.loading).toBe(false);
   });
 });

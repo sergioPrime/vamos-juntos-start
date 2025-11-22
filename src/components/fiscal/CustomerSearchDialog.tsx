@@ -25,21 +25,16 @@ export function CustomerSearchDialog({
     try {
       setLoading(true);
       
-      let result;
-      if (search) {
-        result = await supabase
-          .from("pessoas")
-          .select("*")
-          .eq("tipo", "cliente")
-          .or(`razao_social.ilike.%${search}%,documento.ilike.%${search}%`)
-          .limit(20);
-      } else {
-        result = await supabase
-          .from("pessoas")
-          .select("*")
-          .eq("tipo", "cliente")
-          .limit(20);
-      }
+      // @ts-ignore - Avoiding type complexity with Supabase
+      const query = supabase
+        .from("pessoas")
+        .select("*")
+        .eq("tipo", "cliente");
+
+      // @ts-ignore
+      const result = search 
+        ? await query.or(`razao_social.ilike.%${search}%,documento.ilike.%${search}%`).limit(20)
+        : await query.limit(20);
 
       const { data, error } = result;
 

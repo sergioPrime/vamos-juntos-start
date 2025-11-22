@@ -49,15 +49,15 @@ export default function NFeActionsMenu({
   };
 
   const handleCancel = () => {
-    toast.info("Abrindo formulário de cancelamento");
+    setCancelDialogOpen(true);
   };
 
   const handleCartaCorrecao = () => {
-    toast.info("Abrindo Carta de Correção Eletrônica");
+    setCorrectDialogOpen(true);
   };
 
   const handleConsultarStatus = () => {
-    toast.info("Consultando status na SEFAZ...");
+    setStatusDialogOpen(true);
   };
 
   const handleManifestacao = () => {

@@ -20,18 +20,23 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
+import { usePrintDANFE } from "@/hooks/usePrintDANFE";
 
 interface NFeActionsMenuProps {
-  status: "autorizada" | "cancelada" | "pendente" | "rejeitada";
+  nfeId: string;
+  status: "autorizada" | "cancelada" | "pendente" | "rejeitada" | "rascunho" | string;
   chaveAcesso: string;
   onView: () => void;
 }
 
 export default function NFeActionsMenu({
+  nfeId,
   status,
   chaveAcesso,
   onView,
 }: NFeActionsMenuProps) {
+  const { printDANFE, isPrinting } = usePrintDANFE();
+
   const handleDownloadXML = () => {
     toast.success("Download do XML iniciado");
   };
@@ -44,8 +49,8 @@ export default function NFeActionsMenu({
     toast.success("Email enviado com sucesso");
   };
 
-  const handlePrint = () => {
-    toast.success("Imprimindo DANFE...");
+  const handlePrint = async () => {
+    await printDANFE(nfeId);
   };
 
   const handleCancel = () => {
@@ -92,9 +97,9 @@ export default function NFeActionsMenu({
               Download DANFE
             </DropdownMenuItem>
 
-            <DropdownMenuItem onClick={handlePrint}>
+            <DropdownMenuItem onClick={handlePrint} disabled={isPrinting}>
               <Printer className="mr-2 h-4 w-4" />
-              Imprimir DANFE
+              {isPrinting ? 'Gerando DANFE...' : 'Imprimir DANFE'}
             </DropdownMenuItem>
 
             <DropdownMenuItem onClick={handleSendEmail}>

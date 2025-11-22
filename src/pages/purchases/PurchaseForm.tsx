@@ -24,7 +24,8 @@ interface PurchaseItem {
 export default function PurchaseForm() {
   const navigate = useNavigate()
   const { id } = useParams()
-  const { createPurchase, updatePurchase, fetchPurchase, isCreating, isUpdating } = usePurchases()
+  const { createPurchase, updatePurchase, usePurchaseDetails, isCreating, isUpdating } = usePurchases()
+  const { data: purchaseData } = usePurchaseDetails(id)
   const { pessoas: suppliers } = usePessoas('fornecedor')
   
   const [supplierId, setSupplierId] = useState("")
@@ -35,10 +36,13 @@ export default function PurchaseForm() {
 
   useEffect(() => {
     loadProducts()
-    if (id) {
-      loadPurchase()
+    if (purchaseData) {
+      const { purchase, items: purchaseItems } = purchaseData
+      setSupplierId(purchase.supplier_id || '')
+      setNotes(purchase.notes || '')
+      setItems(purchaseItems || [])
     }
-  }, [id])
+  }, [purchaseData])
 
   const loadProducts = async () => {
     const { data, error } = await supabase
@@ -48,25 +52,6 @@ export default function PurchaseForm() {
 
     if (!error && data) {
       setProducts(data)
-    }
-  }
-
-  const loadPurchase = async () => {
-    if (!id) return
-    setLoading(true)
-    try {
-      const { purchase, items: purchaseItems } = await fetchPurchase(id)
-      setSupplierId(purchase.supplier_id || '')
-      setNotes(purchase.notes || '')
-      setItems(purchaseItems || [])
-    } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Erro ao carregar pedido',
-        variant: 'destructive'
-      })
-    } finally {
-      setLoading(false)
     }
   }
 

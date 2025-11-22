@@ -11,61 +11,25 @@ import { toast } from "@/hooks/use-toast"
 export default function PurchaseDetails() {
   const navigate = useNavigate()
   const { id } = useParams()
-  const { fetchPurchase, changeStatus } = usePurchases()
+  const { usePurchaseDetails, changeStatus } = usePurchases()
+  const { data, isLoading } = usePurchaseDetails(id)
   
-  const [purchase, setPurchase] = useState<any>(null)
-  const [items, setItems] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    if (id) {
-      loadPurchase()
-    }
-  }, [id])
-
-  const loadPurchase = async () => {
-    if (!id) return
-    setLoading(true)
-    try {
-      const data = await fetchPurchase(id)
-      setPurchase(data.purchase)
-      setItems(data.items || [])
-    } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Erro ao carregar pedido',
-        variant: 'destructive'
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
+  const purchase = data?.purchase
+  const items = data?.items || []
 
   const handleApprove = () => {
     if (!id) return
-    changeStatus({ id, status: 'approved' }, {
-      onSuccess: () => {
-        loadPurchase()
-      }
-    })
+    changeStatus({ id, status: 'approved' })
   }
 
   const handleReceive = () => {
     if (!id) return
-    changeStatus({ id, status: 'received' }, {
-      onSuccess: () => {
-        loadPurchase()
-      }
-    })
+    changeStatus({ id, status: 'received' })
   }
 
   const handleCancel = () => {
     if (!id) return
-    changeStatus({ id, status: 'cancelled' }, {
-      onSuccess: () => {
-        loadPurchase()
-      }
-    })
+    changeStatus({ id, status: 'cancelled' })
   }
 
   const getStatusBadge = (status: string) => {
@@ -79,7 +43,7 @@ export default function PurchaseDetails() {
     return <Badge className={variant.className}>{variant.label}</Badge>
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-muted-foreground">Carregando...</div>

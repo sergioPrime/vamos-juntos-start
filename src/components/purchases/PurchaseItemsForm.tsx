@@ -85,10 +85,9 @@ export function PurchaseItemsForm({ items, onChange, orgId }: PurchaseItemsFormP
         <div className="col-span-5">
           <Label>Produto</Label>
           <ProductSelector
-            value={selectedProduct}
-            onValueChange={setSelectedProduct}
-            orgId={orgId}
+            onSelect={(product) => setSelectedProduct(product)}
             placeholder="Selecione o produto..."
+            className="w-full"
           />
         </div>
         

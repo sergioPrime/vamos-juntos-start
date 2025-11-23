@@ -34,7 +34,7 @@ export default function PurchaseForm() {
   
   const [items, setItems] = useState<PurchaseItem[]>([])
   
-  const suppliers = pessoas?.filter(p => p.is_supplier) || []
+  const suppliers = pessoas?.filter(p => p.rotulos?.includes('fornecedor')) || []
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -116,7 +116,7 @@ export default function PurchaseForm() {
                   <SelectContent>
                     {suppliers.map((supplier) => (
                       <SelectItem key={supplier.id} value={supplier.id}>
-                        {supplier.name}
+                        {supplier.nome_fantasia}
                       </SelectItem>
                     ))}
                   </SelectContent>

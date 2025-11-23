@@ -1,5 +1,8 @@
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanManagement } from "@/components/admin/PlanManagement"
+import { LicenseMetricsCards } from "@/components/admin/LicenseMetricsCards"
+import { CreateLicenseDialog } from "@/components/admin/CreateLicenseDialog"
 import { useSuperAdmin } from "@/hooks/useSuperAdmin"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate } from "react-router-dom"
@@ -10,6 +13,7 @@ export default function AdminDashboard() {
   const { user } = useAuth()
   const { isSuperAdmin, loading } = useSuperAdmin()
   const navigate = useNavigate()
+  const [createLicenseOpen, setCreateLicenseOpen] = useState(false)
 
   useEffect(() => {
     // Se não tiver usuário logado, redireciona para login
@@ -68,20 +72,29 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="page-container space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-          <Shield className="h-5 w-5 text-primary" />
+    <>
+      <div className="page-container space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+            <Shield className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
+            <p className="text-muted-foreground">
+              Gerencie licenças, planos de assinatura e configurações do sistema
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
-          <p className="text-muted-foreground">
-            Gerencie planos de assinatura e configurações do sistema
-          </p>
-        </div>
+
+        <LicenseMetricsCards onCreateLicense={() => setCreateLicenseOpen(true)} />
+
+        <PlanManagement />
       </div>
 
-      <PlanManagement />
-    </div>
+      <CreateLicenseDialog 
+        open={createLicenseOpen} 
+        onOpenChange={setCreateLicenseOpen} 
+      />
+    </>
   )
 }

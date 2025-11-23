@@ -1,10 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PlanManagement } from "@/components/admin/PlanManagement"
+import { AdminNotificationsPanel } from "@/components/admin/AdminNotificationsPanel"
+import { AdminNotificationBell } from "@/components/admin/AdminNotificationBell"
 import { useSuperAdmin } from "@/hooks/useSuperAdmin"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate } from "react-router-dom"
 import { useEffect } from "react"
-import { Shield, Lock } from "lucide-react"
+import { Shield, Lock, Bell } from "lucide-react"
 
 export default function AdminDashboard() {
   const { user } = useAuth()
@@ -69,19 +72,38 @@ export default function AdminDashboard() {
 
   return (
     <div className="page-container space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-          <Shield className="h-5 w-5 text-primary" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+            <Shield className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
+            <p className="text-muted-foreground">
+              Gerencie planos de assinatura e configurações do sistema
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
-          <p className="text-muted-foreground">
-            Gerencie planos de assinatura e configurações do sistema
-          </p>
-        </div>
+        <AdminNotificationBell />
       </div>
 
-      <PlanManagement />
+      <Tabs defaultValue="planos" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="planos">Planos</TabsTrigger>
+          <TabsTrigger value="notificacoes">
+            <Bell className="h-4 w-4 mr-2" />
+            Notificações
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="planos">
+          <PlanManagement />
+        </TabsContent>
+
+        <TabsContent value="notificacoes">
+          <AdminNotificationsPanel />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

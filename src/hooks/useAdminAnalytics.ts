@@ -15,6 +15,7 @@ export interface AdminMetrics {
 export interface PlanDistribution {
   plan_name: string;
   count: number;
+  [key: string]: any;
 }
 
 export interface RecentOrganization {

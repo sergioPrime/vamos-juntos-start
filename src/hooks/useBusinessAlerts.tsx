@@ -183,13 +183,6 @@ export function useBusinessAlerts() {
     return []
   }, [currentOrg])
 
-      return []
-    } catch (error) {
-      console.error('Error checking rejected NFSe:', error)
-      return []
-    }
-  }, [currentOrg?.id])
-
   // Check for pending orders
   const checkPendingOrders = useCallback(async () => {
     if (!currentOrg?.id) return []

@@ -185,7 +185,7 @@ export function useBusinessAlerts() {
     try {
       const { data: nfseList, error } = await supabase
         .from('nfse')
-        .select('id, number, service_amount, service_description')
+        .select('id, numero, valor_servicos, discriminacao')
         .eq('org_id', currentOrg.id)
         .eq('status', 'rejected')
 

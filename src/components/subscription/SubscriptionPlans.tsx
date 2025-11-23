@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { Check, Edit, CreditCard, Settings } from "lucide-react"
+import { Check, Edit, CreditCard, Settings, QrCode } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/hooks/useAuth"
 import { useOrganization } from "@/hooks/useOrganization"
 import { useSuperAdmin } from "@/hooks/useSuperAdmin"
 import { toast } from "sonner"
+import { PixPaymentDialog } from "./PixPaymentDialog"
 
 interface SubscriptionPlan {
   id: string

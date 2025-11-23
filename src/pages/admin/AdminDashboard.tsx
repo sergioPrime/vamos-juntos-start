@@ -1,10 +1,63 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PlanManagement } from "@/components/admin/PlanManagement"
+import { OrganizationsManagement } from "@/components/admin/OrganizationsManagement"
+import { AdminAnalytics } from "@/components/admin/AdminAnalytics"
+import { MetricCard } from "@/components/admin/MetricCard"
+import { PlanDistributionChart } from "@/components/admin/PlanDistributionChart"
+import { RecentOrganizationsTable } from "@/components/admin/RecentOrganizationsTable"
+import { useAdminMetrics } from "@/hooks/useAdminMetrics"
 import { useSuperAdmin } from "@/hooks/useSuperAdmin"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate } from "react-router-dom"
 import { useEffect } from "react"
-import { Shield, Lock } from "lucide-react"
+import { Shield, Lock, Users, Building2, DollarSign, TrendingUp } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
+
+function MetricsGrid() {
+  const { metrics, loading } = useAdminMetrics()
+
+  if (loading) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <Skeleton key={i} className="h-32" />
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <MetricCard
+        title="Total de Empresas"
+        value={metrics.totalOrganizations.toString()}
+        change={metrics.organizationsGrowth}
+        icon={Building2}
+      />
+      <MetricCard
+        title="Total de Usuários"
+        value={metrics.totalUsers.toString()}
+        change={metrics.usersGrowth}
+        icon={Users}
+      />
+      <MetricCard
+        title="Receita Total"
+        value={new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }).format(metrics.totalRevenue)}
+        change={metrics.revenueGrowth}
+        icon={DollarSign}
+      />
+      <MetricCard
+        title="Lançamentos"
+        value={metrics.totalFinancialEntries.toString()}
+        icon={TrendingUp}
+      />
+    </div>
+  )
+}
 
 export default function AdminDashboard() {
   const { user } = useAuth()
@@ -12,7 +65,6 @@ export default function AdminDashboard() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Se não tiver usuário logado, redireciona para login
     if (!loading && !user) {
       navigate("/auth")
     }
@@ -76,12 +128,39 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
           <p className="text-muted-foreground">
-            Gerencie planos de assinatura e configurações do sistema
+            Gerencie planos, empresas e visualize analytics da plataforma
           </p>
         </div>
       </div>
 
-      <PlanManagement />
+      <Tabs defaultValue="dashboard" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="plans">Planos</TabsTrigger>
+          <TabsTrigger value="empresas">Empresas</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="dashboard" className="space-y-4">
+          <MetricsGrid />
+          <div className="grid gap-4 md:grid-cols-2">
+            <PlanDistributionChart />
+            <RecentOrganizationsTable />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <AdminAnalytics />
+        </TabsContent>
+
+        <TabsContent value="plans">
+          <PlanManagement />
+        </TabsContent>
+
+        <TabsContent value="empresas">
+          <OrganizationsManagement />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

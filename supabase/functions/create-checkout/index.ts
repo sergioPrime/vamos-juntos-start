@@ -79,7 +79,7 @@ serve(async (req) => {
     
     logStep("Price calculated", { originalPrice: plan.price, finalPrice, interval, billingCycle });
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
+    const stripe = new Stripe(stripeKey, { apiVersion: "2024-11-20.acacia" });
     
     // Check if customer already exists
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
@@ -87,8 +87,23 @@ serve(async (req) => {
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
       logStep("Existing customer found", { customerId });
+      
+      // Update customer metadata
+      await stripe.customers.update(customerId, {
+        metadata: {
+          supabase_user_id: user.id,
+        },
+      });
     } else {
-      logStep("No existing customer found");
+      // Create new customer with metadata
+      const newCustomer = await stripe.customers.create({
+        email: user.email,
+        metadata: {
+          supabase_user_id: user.id,
+        },
+      });
+      customerId = newCustomer.id;
+      logStep("New customer created", { customerId });
     }
 
     // Create checkout session
@@ -121,6 +136,8 @@ serve(async (req) => {
       metadata: {
         plan_id: planId,
         user_id: user.id,
+        billing_cycle: billingCycle,
+        plan_name: plan.name,
       },
     });
 

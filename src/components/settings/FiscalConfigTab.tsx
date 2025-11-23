@@ -455,8 +455,9 @@ export function FiscalConfigTab() {
                   <div className="space-y-2">
                     <Label>Série</Label>
                     <Input
-                      value={formData.serie_nfce || ''}
-                      onChange={(e) => handleInputChange('serie_nfce', e.target.value)}
+                      type="number"
+                      value={formData.nfce_serie || ''}
+                      onChange={(e) => handleInputChange('nfce_serie', parseInt(e.target.value) || null)}
                       placeholder="Ex: 1"
                     />
                   </div>
@@ -465,31 +466,7 @@ export function FiscalConfigTab() {
                     <Input
                       type="number"
                       value={formData.proximo_numero_nfce || ''}
-                      onChange={(e) => handleInputChange('proximo_numero_nfce', parseInt(e.target.value))}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-4">
-                <h3 className="font-semibold">NFS-e (Nota Fiscal de Serviço)</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Série</Label>
-                    <Input
-                      value={formData.serie_nfse || ''}
-                      onChange={(e) => handleInputChange('serie_nfse', e.target.value)}
-                      placeholder="Ex: 1"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Próximo Número</Label>
-                    <Input
-                      type="number"
-                      value={formData.proximo_numero_nfse || ''}
-                      onChange={(e) => handleInputChange('proximo_numero_nfse', parseInt(e.target.value))}
+                      onChange={(e) => handleInputChange('proximo_numero_nfce', parseInt(e.target.value) || null)}
                     />
                   </div>
                 </div>

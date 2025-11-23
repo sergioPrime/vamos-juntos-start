@@ -15,7 +15,7 @@ export function useFiscalConfig() {
   const { currentOrg } = useOrganization()
 
   const loadConfig = async () => {
-    if (!currentOrg) {
+    if (!currentOrg?.id) {
       setLoading(false)
       return
     }
@@ -25,7 +25,7 @@ export function useFiscalConfig() {
       const { data, error } = await supabase
         .from('fiscal_config')
         .select('*')
-        .eq('org_id', currentOrg)
+        .eq('org_id', currentOrg.id)
         .eq('is_active', true)
         .maybeSingle()
 
@@ -45,7 +45,7 @@ export function useFiscalConfig() {
   }
 
   const saveConfig = async (data: FiscalConfigUpdate) => {
-    if (!currentOrg) return false
+    if (!currentOrg?.id) return false
 
     try {
       if (config?.id) {
@@ -59,7 +59,7 @@ export function useFiscalConfig() {
       } else {
         // Insert - ensuring required fields
         const insertData: FiscalConfigInsert = {
-          org_id: currentOrg,
+          org_id: currentOrg.id,
           cnpj: data.cnpj || '',
           inscricao_estadual: data.inscricao_estadual || '',
           razao_social: data.razao_social || '',
@@ -105,7 +105,7 @@ export function useFiscalConfig() {
   }
 
   const uploadCertificate = async (file: File, password: string) => {
-    if (!currentOrg) return false
+    if (!currentOrg?.id) return false
 
     try {
       // Converter arquivo para base64

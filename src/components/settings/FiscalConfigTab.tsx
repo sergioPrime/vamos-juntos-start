@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -12,13 +12,22 @@ import { Badge } from "@/components/ui/badge"
 import { useFiscalConfig } from "@/hooks/useFiscalConfig"
 import { FileUp, Shield, AlertCircle, CheckCircle2, Save } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import type { Database } from '@/integrations/supabase/types'
+
+type FiscalConfig = Database['public']['Tables']['fiscal_config']['Row']
 
 export function FiscalConfigTab() {
   const { config, loading, saveConfig, uploadCertificate } = useFiscalConfig()
   const { toast } = useToast()
-  const [formData, setFormData] = useState(config || {})
+  const [formData, setFormData] = useState<Partial<FiscalConfig>>({})
   const [certificateFile, setCertificateFile] = useState<File | null>(null)
   const [certificatePassword, setCertificatePassword] = useState('')
+
+  useEffect(() => {
+    if (config) {
+      setFormData(config)
+    }
+  }, [config])
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -328,8 +337,9 @@ export function FiscalConfigTab() {
                   <div className="space-y-2">
                     <Label>ID do CSC</Label>
                     <Input
+                      type="number"
                       value={formData.csc_id_producao || ''}
-                      onChange={(e) => handleInputChange('csc_id_producao', e.target.value)}
+                      onChange={(e) => handleInputChange('csc_id_producao', parseInt(e.target.value) || null)}
                       placeholder="Ex: 1"
                     />
                   </div>
@@ -353,8 +363,9 @@ export function FiscalConfigTab() {
                   <div className="space-y-2">
                     <Label>ID do CSC</Label>
                     <Input
+                      type="number"
                       value={formData.csc_id_homologacao || ''}
-                      onChange={(e) => handleInputChange('csc_id_homologacao', e.target.value)}
+                      onChange={(e) => handleInputChange('csc_id_homologacao', parseInt(e.target.value) || null)}
                       placeholder="Ex: 1"
                     />
                   </div>

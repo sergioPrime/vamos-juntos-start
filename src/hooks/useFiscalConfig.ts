@@ -2,59 +2,11 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from './use-toast'
 import { useOrganization } from './useOrganization'
+import type { Database } from '@/integrations/supabase/types'
 
-export interface FiscalConfig {
-  id?: string
-  org_id: string
-  cnpj?: string
-  inscricao_estadual?: string
-  inscricao_municipal?: string
-  razao_social?: string
-  nome_fantasia?: string
-  regime_tributario?: string
-  logradouro?: string
-  numero?: string
-  complemento?: string
-  bairro?: string
-  municipio?: string
-  uf?: string
-  cep?: string
-  telefone?: string
-  email?: string
-  
-  // Certificado Digital
-  certificate_pfx?: string
-  certificate_password?: string
-  certificate_expires_at?: string
-  
-  // CSC (Código de Segurança do Contribuinte)
-  csc_producao?: string
-  csc_id_producao?: string
-  csc_homologacao?: string
-  csc_id_homologacao?: string
-  
-  // Configurações NFe/NFCe
-  ambiente?: 'producao' | 'homologacao'
-  serie_nfe?: string
-  serie_nfce?: string
-  proximo_numero_nfe?: number
-  proximo_numero_nfce?: number
-  
-  // Configurações NFSe
-  serie_nfse?: string
-  proximo_numero_nfse?: number
-  codigo_tributacao_municipio?: string
-  item_lista_servico?: string
-  
-  // Contingência
-  contingencia_ativa?: boolean
-  motivo_contingencia?: string
-  data_inicio_contingencia?: string
-  
-  is_active?: boolean
-  created_at?: string
-  updated_at?: string
-}
+type FiscalConfig = Database['public']['Tables']['fiscal_config']['Row']
+type FiscalConfigInsert = Database['public']['Tables']['fiscal_config']['Insert']
+type FiscalConfigUpdate = Database['public']['Tables']['fiscal_config']['Update']
 
 export function useFiscalConfig() {
   const [config, setConfig] = useState<FiscalConfig | null>(null)
@@ -75,11 +27,11 @@ export function useFiscalConfig() {
         .select('*')
         .eq('org_id', currentOrg)
         .eq('is_active', true)
-        .single()
+        .maybeSingle()
 
-      if (error && error.code !== 'PGRST116') throw error
+      if (error) throw error
       
-      setConfig(data || null)
+      setConfig(data)
     } catch (error) {
       console.error('Error loading fiscal config:', error)
       toast({
@@ -92,8 +44,8 @@ export function useFiscalConfig() {
     }
   }
 
-  const saveConfig = async (data: Partial<FiscalConfig>) => {
-    if (!currentOrg) return
+  const saveConfig = async (data: FiscalConfigUpdate) => {
+    if (!currentOrg) return false
 
     try {
       if (config?.id) {
@@ -105,10 +57,31 @@ export function useFiscalConfig() {
 
         if (error) throw error
       } else {
-        // Insert
+        // Insert - ensuring required fields
+        const insertData: FiscalConfigInsert = {
+          org_id: currentOrg,
+          cnpj: data.cnpj || '',
+          inscricao_estadual: data.inscricao_estadual || '',
+          razao_social: data.razao_social || '',
+          regime_tributario: data.regime_tributario || '1',
+          logradouro: data.logradouro || '',
+          numero: data.numero || '',
+          bairro: data.bairro || '',
+          municipio: data.municipio || '',
+          uf: data.uf || '',
+          uf_emitente: data.uf || '',
+          cep: data.cep || '',
+          codigo_municipio: data.codigo_municipio || '',
+          serie_nfe: data.serie_nfe || '1',
+          proximo_numero_nfe: data.proximo_numero_nfe || 1,
+          ambiente: data.ambiente || 'homologacao',
+          is_active: true,
+          ...data,
+        }
+
         const { error } = await supabase
           .from('fiscal_config')
-          .insert({ ...data, org_id: currentOrg, is_active: true })
+          .insert(insertData)
 
         if (error) throw error
       }
@@ -151,7 +124,7 @@ export function useFiscalConfig() {
 
       const success = await saveConfig({
         certificate_pfx: base64,
-        certificate_password: password,
+        certificate_password_encrypted: password,
         certificate_expires_at: expiresAt.toISOString(),
       })
 

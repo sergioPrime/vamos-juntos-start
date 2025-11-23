@@ -3,6 +3,7 @@ import { CompaniesTab } from "@/components/settings/CompaniesTab"
 import { APIIntegrations } from "@/components/integrations/APIIntegrations"
 import { ERPSettings } from "@/components/settings/ERPSettings"
 import { AuditLogsTable } from "@/components/audit/AuditLogsTable"
+import { FiscalConfigTab } from "@/components/settings/FiscalConfigTab"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 export default function Settings() {
@@ -35,6 +36,13 @@ export default function Settings() {
           </AccordionContent>
         </AccordionItem>
         
+        <AccordionItem value="fiscal-config" className="border rounded-lg">
+          <AccordionTrigger className="px-6">Configurações Fiscais</AccordionTrigger>
+          <AccordionContent className="px-6">
+            <FiscalConfigTab />
+          </AccordionContent>
+        </AccordionItem>
+
         <AccordionItem value="erp-config" className="border rounded-lg">
           <AccordionTrigger className="px-6">Configurações do ERP</AccordionTrigger>
           <AccordionContent className="px-6">

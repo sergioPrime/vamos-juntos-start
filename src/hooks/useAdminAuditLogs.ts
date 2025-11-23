@@ -4,10 +4,10 @@ import { supabase } from '@/integrations/supabase/client'
 export interface AdminAuditLog {
   id: string
   user_id: string
-  user_email: string
-  action_type: 'create' | 'update' | 'delete' | 'activate' | 'deactivate'
+  user_email: string | null
+  action_type: string
   entity_type: string
-  entity_id: string
+  entity_id: string | null
   old_values?: any
   new_values?: any
   metadata?: any

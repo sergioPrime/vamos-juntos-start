@@ -1,10 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PlanManagement } from "@/components/admin/PlanManagement"
-import { useSuperAdmin } from "@/hooks/useSuperAdmin"
-import { useAuth } from "@/hooks/useAuth"
-import { useNavigate } from "react-router-dom"
-import { useEffect } from "react"
-import { Shield, Lock } from "lucide-react"
+import { useAuth } from '@/hooks/useAuth';
+import { useSuperAdmin } from '@/hooks/useSuperAdmin';
+import { Card } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Lock, Shield } from 'lucide-react';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { LicenseMetricsCards } from '@/components/admin/LicenseMetricsCards';
+import { AdminAnalytics } from '@/components/admin/AdminAnalytics';
+import { AdminNotifications } from '@/components/admin/AdminNotifications';
+import { AdminUsersManagement } from '@/components/admin/AdminUsersManagement';
+import { AdminOrganizationsManagement } from '@/components/admin/AdminOrganizationsManagement';
+import { AdminAuditLogs } from '@/components/admin/AdminAuditLogs';
 
 export default function AdminDashboard() {
   const { user } = useAuth()
@@ -76,12 +82,42 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
           <p className="text-muted-foreground">
-            Gerencie planos de assinatura e configurações do sistema
+            Gestão completa do sistema PrimeGestor
           </p>
         </div>
       </div>
 
-      <PlanManagement />
+      <LicenseMetricsCards />
+
+      <Tabs defaultValue="analytics" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="users">Usuários</TabsTrigger>
+          <TabsTrigger value="organizations">Organizações</TabsTrigger>
+          <TabsTrigger value="audit">Auditoria</TabsTrigger>
+          <TabsTrigger value="notifications">Notificações</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="analytics">
+          <AdminAnalytics />
+        </TabsContent>
+
+        <TabsContent value="users">
+          <AdminUsersManagement />
+        </TabsContent>
+
+        <TabsContent value="organizations">
+          <AdminOrganizationsManagement />
+        </TabsContent>
+
+        <TabsContent value="audit">
+          <AdminAuditLogs />
+        </TabsContent>
+
+        <TabsContent value="notifications">
+          <AdminNotifications />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

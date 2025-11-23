@@ -27,11 +27,10 @@ export function PlanDistributionChart({ data }: PlanDistributionChartProps) {
                 data={data}
                 cx="50%"
                 cy="50%"
-                labelLine={false}
-                label={(entry) => entry.plan_name}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="count"
+                nameKey="plan_name"
               >
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

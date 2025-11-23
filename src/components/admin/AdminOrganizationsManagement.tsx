@@ -52,23 +52,16 @@ export function AdminOrganizationsManagement() {
     queryKey: ['admin-organizations', searchTerm, planFilter],
     queryFn: async () => {
       let query = supabase
-        .from('organizations')
+        .from('user_organizations')
         .select(`
-          id,
-          name,
-          created_at,
-          user_organizations(count),
+          org_id,
           subscription_plan_id,
           subscription_status,
-          subscription_start_date,
-          subscription_end_date,
+          subscription_started_at,
+          organizations(id, name, created_at),
           subscription_plans(name)
         `)
         .order('created_at', { ascending: false });
-
-      if (searchTerm) {
-        query = query.ilike('name', `%${searchTerm}%`);
-      }
 
       if (planFilter !== 'all') {
         query = query.eq('subscription_plan_id', planFilter);
@@ -78,16 +71,34 @@ export function AdminOrganizationsManagement() {
 
       if (error) throw error;
 
-      return data?.map((org: any) => ({
-        id: org.id,
-        name: org.name,
-        created_at: org.created_at,
-        subscription_plan_id: org.subscription_plan_id,
-        subscription_status: org.subscription_status,
-        subscription_start_date: org.subscription_start_date,
-        subscription_end_date: org.subscription_end_date,
-        user_count: org.user_organizations?.[0]?.count || 0,
-        plan_name: org.subscription_plans?.name || null,
+      // Count users per organization
+      const orgIds = data?.map((uo: any) => uo.org_id) || [];
+      const { data: userCounts } = await supabase
+        .from('user_organizations')
+        .select('org_id')
+        .in('org_id', orgIds);
+
+      const countByOrg = userCounts?.reduce((acc: any, item: any) => {
+        acc[item.org_id] = (acc[item.org_id] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      const filtered = searchTerm
+        ? data?.filter((uo: any) =>
+            uo.organizations?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+        : data;
+
+      return filtered?.map((uo: any) => ({
+        id: uo.organizations?.id || uo.org_id,
+        name: uo.organizations?.name || 'N/A',
+        created_at: uo.organizations?.created_at || new Date().toISOString(),
+        subscription_plan_id: uo.subscription_plan_id,
+        subscription_status: uo.subscription_status,
+        subscription_start_date: uo.subscription_started_at,
+        subscription_end_date: null,
+        user_count: countByOrg?.[uo.org_id] || 0,
+        plan_name: uo.subscription_plans?.name || null,
       })) as OrganizationWithMetrics[];
     },
   });
@@ -108,9 +119,9 @@ export function AdminOrganizationsManagement() {
   const suspendOrgMutation = useMutation({
     mutationFn: async (orgId: string) => {
       const { error } = await supabase
-        .from('organizations')
+        .from('user_organizations')
         .update({ subscription_status: 'suspended' })
-        .eq('id', orgId);
+        .eq('org_id', orgId);
 
       if (error) throw error;
     },

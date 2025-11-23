@@ -61,7 +61,7 @@ export function AdminUsersManagement() {
           user_organizations!inner(
             organizations(name),
             role,
-            status
+            subscription_status
           )
         `)
         .order('created_at', { ascending: false });
@@ -71,7 +71,7 @@ export function AdminUsersManagement() {
       }
 
       if (statusFilter !== 'all') {
-        query = query.eq('user_organizations.status', statusFilter);
+        query = query.eq('user_organizations.subscription_status', statusFilter);
       }
 
       const { data, error } = await query;
@@ -86,7 +86,7 @@ export function AdminUsersManagement() {
         organizations: user.user_organizations.map((uo: any) => ({
           name: uo.organizations?.name || 'N/A',
           role: uo.role,
-          status: uo.status,
+          status: uo.subscription_status || 'pending',
         })),
       })) as UserWithOrg[];
     },
@@ -96,7 +96,7 @@ export function AdminUsersManagement() {
     mutationFn: async (userId: string) => {
       const { error } = await supabase
         .from('user_organizations')
-        .update({ status: 'inactive' })
+        .update({ subscription_status: 'inactive' })
         .eq('user_id', userId);
 
       if (error) throw error;

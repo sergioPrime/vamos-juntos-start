@@ -43,7 +43,7 @@ export function CreateLicenseDialog({ open, onOpenChange }: CreateLicenseDialogP
           org_id: orgId,
           plan_type: planType,
           status: 'active',
-          expires_at: expiresAt.toISOString(),
+          expiration_date: expiresAt.toISOString(),
         })
 
       if (error) throw error

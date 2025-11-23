@@ -15,7 +15,7 @@ export function useSubscriptionMetrics() {
       const { data: expired, error: expiredError } = await supabase
         .from('subscriptions')
         .select('*, organizations(name)')
-        .lt('expires_at', todayStart.toISOString())
+        .lt('expiration_date', todayStart.toISOString())
         .eq('status', 'active')
 
       if (expiredError) throw expiredError
@@ -24,8 +24,8 @@ export function useSubscriptionMetrics() {
       const { data: expiringToday, error: todayError } = await supabase
         .from('subscriptions')
         .select('*, organizations(name)')
-        .gte('expires_at', todayStart.toISOString())
-        .lte('expires_at', todayEnd.toISOString())
+        .gte('expiration_date', todayStart.toISOString())
+        .lte('expiration_date', todayEnd.toISOString())
         .eq('status', 'active')
 
       if (todayError) throw todayError
@@ -34,8 +34,8 @@ export function useSubscriptionMetrics() {
       const { data: expiringNext7Days, error: next7Error } = await supabase
         .from('subscriptions')
         .select('*, organizations(name)')
-        .gt('expires_at', todayEnd.toISOString())
-        .lte('expires_at', next7Days.toISOString())
+        .gt('expiration_date', todayEnd.toISOString())
+        .lte('expiration_date', next7Days.toISOString())
         .eq('status', 'active')
 
       if (next7Error) throw next7Error
@@ -43,14 +43,14 @@ export function useSubscriptionMetrics() {
       // Total de organizações ativas
       const { count: totalOrgs, error: orgsError } = await supabase
         .from('organizations')
-        .select('*', { count: 'only', head: true })
+        .select('*', { count: 'exact', head: true })
 
       if (orgsError) throw orgsError
 
       // Total de usuários
       const { count: totalUsers, error: usersError } = await supabase
         .from('profiles')
-        .select('*', { count: 'only', head: true })
+        .select('*', { count: 'exact', head: true })
 
       if (usersError) throw usersError
 

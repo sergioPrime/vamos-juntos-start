@@ -28,7 +28,7 @@ export function AdminAnalytics() {
         last6Months.map(async ({ month, start, end }) => {
           const { count } = await supabase
             .from('profiles')
-            .select('*', { count: 'only', head: true })
+            .select('*', { count: 'exact', head: true })
             .gte('created_at', start)
             .lte('created_at', end)
 
@@ -41,7 +41,7 @@ export function AdminAnalytics() {
         last6Months.map(async ({ month, start, end }) => {
           const { count } = await supabase
             .from('organizations')
-            .select('*', { count: 'only', head: true })
+            .select('*', { count: 'exact', head: true })
             .gte('created_at', start)
             .lte('created_at', end)
 
@@ -67,8 +67,8 @@ export function AdminAnalytics() {
       }))
 
       // Taxa de crescimento
-      const currentMonthUsers = usersByMonth[usersByMonth.length - 1]?.users || 0
-      const lastMonthUsers = usersByMonth[usersByMonth.length - 2]?.users || 0
+      const currentMonthUsers = Number(usersByMonth[usersByMonth.length - 1]?.users) || 0
+      const lastMonthUsers = Number(usersByMonth[usersByMonth.length - 2]?.users) || 0
       const growthRate = lastMonthUsers > 0 
         ? ((currentMonthUsers - lastMonthUsers) / lastMonthUsers) * 100 
         : 0

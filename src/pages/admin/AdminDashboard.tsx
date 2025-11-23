@@ -1,10 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PlanManagement } from "@/components/admin/PlanManagement"
+import { AdminAnalytics } from "@/components/admin/AdminAnalytics"
 import { useSuperAdmin } from "@/hooks/useSuperAdmin"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate } from "react-router-dom"
 import { useEffect } from "react"
-import { Shield, Lock } from "lucide-react"
+import { Shield, Lock, BarChart3, CreditCard } from "lucide-react"
 
 export default function AdminDashboard() {
   const { user } = useAuth()
@@ -76,12 +78,31 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
           <p className="text-muted-foreground">
-            Gerencie planos de assinatura e configurações do sistema
+            Gerencie planos de assinatura e monitore métricas do sistema
           </p>
         </div>
       </div>
 
-      <PlanManagement />
+      <Tabs defaultValue="analytics" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="analytics" className="gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Analytics
+          </TabsTrigger>
+          <TabsTrigger value="plans" className="gap-2">
+            <CreditCard className="h-4 w-4" />
+            Planos
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="analytics" className="mt-6">
+          <AdminAnalytics />
+        </TabsContent>
+
+        <TabsContent value="plans" className="mt-6">
+          <PlanManagement />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

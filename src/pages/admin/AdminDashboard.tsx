@@ -1,10 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PlanManagement } from "@/components/admin/PlanManagement"
+import { AdminAuditLogs } from "@/components/admin/AdminAuditLogs"
 import { useSuperAdmin } from "@/hooks/useSuperAdmin"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate } from "react-router-dom"
 import { useEffect } from "react"
-import { Shield, Lock } from "lucide-react"
+import { Shield, Lock, FileText } from "lucide-react"
 
 export default function AdminDashboard() {
   const { user } = useAuth()
@@ -81,7 +83,26 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <PlanManagement />
+      <Tabs defaultValue="plans" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="plans" className="gap-2">
+            <Shield className="w-4 h-4" />
+            Planos
+          </TabsTrigger>
+          <TabsTrigger value="audit" className="gap-2">
+            <FileText className="w-4 h-4" />
+            Auditoria
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="plans" className="mt-6">
+          <PlanManagement />
+        </TabsContent>
+
+        <TabsContent value="audit" className="mt-6">
+          <AdminAuditLogs />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

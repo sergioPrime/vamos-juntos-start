@@ -7,6 +7,11 @@ import { useEffect } from "react"
 import { Shield, Lock } from "lucide-react"
 import { AdminNotificationBell } from "@/components/admin/AdminNotificationBell"
 import { AdminNotificationsPanel } from "@/components/admin/AdminNotificationsPanel"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { AdminAnalytics } from "@/components/admin/AdminAnalytics"
+import { StripeWebhookGuide } from "@/components/admin/StripeWebhookGuide"
+import { WebhookLogsPanel } from "@/components/admin/WebhookLogsPanel"
+import { AdminAuditLogs } from "@/components/admin/AdminAuditLogs"
 
 export default function AdminDashboard() {
   const { user } = useAuth()
@@ -86,7 +91,38 @@ export default function AdminDashboard() {
         <AdminNotificationBell />
       </div>
 
-      <PlanManagement />
+      <Tabs defaultValue="analytics" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="planos">Planos</TabsTrigger>
+          <TabsTrigger value="notificacoes">Notificações</TabsTrigger>
+          <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
+          <TabsTrigger value="auditoria">Auditoria</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="analytics">
+          <AdminAnalytics />
+        </TabsContent>
+
+        <TabsContent value="planos">
+          <PlanManagement />
+        </TabsContent>
+
+        <TabsContent value="notificacoes">
+          <AdminNotificationsPanel />
+        </TabsContent>
+
+        <TabsContent value="webhooks">
+          <div className="space-y-6">
+            <StripeWebhookGuide />
+            <WebhookLogsPanel />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="auditoria">
+          <AdminAuditLogs />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

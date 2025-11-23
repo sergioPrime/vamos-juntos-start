@@ -103,26 +103,11 @@ export function useAdminUsers(): UseAdminUsersReturn {
 
   const toggleUserStatus = async (userId: string, currentStatus: boolean) => {
     try {
-      // Update organization subscription status instead
-      const userOrg = users.find(u => u.id === userId);
-      if (!userOrg?.org_id) {
-        toast.error('Organização não encontrada');
-        return;
-      }
-
-      const newStatus = currentStatus ? 'suspended' : 'active';
-      const { error } = await supabase
-        .from('organizations')
-        .update({ subscription_status: newStatus })
-        .eq('id', userOrg.org_id);
-
-      if (error) throw error;
-
-      toast.success(currentStatus ? 'Assinatura suspensa' : 'Assinatura ativada');
-      await fetchUsers();
+      toast.info('Funcionalidade de suspensão em desenvolvimento');
+      // TODO: Implementar lógica de suspensão de usuário
     } catch (error) {
       console.error('Erro ao alterar status:', error);
-      toast.error('Erro ao alterar status da assinatura');
+      toast.error('Erro ao alterar status do usuário');
     }
   };
 

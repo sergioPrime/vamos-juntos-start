@@ -1,22 +1,29 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PlanManagement } from "@/components/admin/PlanManagement"
-import { useSuperAdmin } from "@/hooks/useSuperAdmin"
-import { useAuth } from "@/hooks/useAuth"
-import { useNavigate } from "react-router-dom"
-import { useEffect } from "react"
-import { Shield, Lock } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PlanManagement } from "@/components/admin/PlanManagement";
+import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
+import { StripeWebhookGuide } from "@/components/admin/StripeWebhookGuide";
+import { WebhookLogsPanel } from "@/components/admin/WebhookLogsPanel";
+import { AdminAuditLogs } from "@/components/admin/AdminAuditLogs";
+import { AdminNotificationBell } from "@/components/admin/AdminNotificationBell";
+import { AdminNotificationsPanel } from "@/components/admin/AdminNotificationsPanel";
+import { AdminUsersPanel } from "@/components/admin/AdminUsersPanel";
+import { useSuperAdmin } from "@/hooks/useSuperAdmin";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Shield, Lock } from "lucide-react";
 
 export default function AdminDashboard() {
-  const { user } = useAuth()
-  const { isSuperAdmin, loading } = useSuperAdmin()
-  const navigate = useNavigate()
+  const { user } = useAuth();
+  const { isSuperAdmin, loading } = useSuperAdmin();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Se não tiver usuário logado, redireciona para login
     if (!loading && !user) {
-      navigate("/auth")
+      navigate("/auth");
     }
-  }, [user, loading, navigate])
+  }, [user, loading, navigate]);
 
   if (loading) {
     return (
@@ -31,7 +38,7 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!isSuperAdmin) {
@@ -64,24 +71,63 @@ export default function AdminDashboard() {
           </Card>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="page-container space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-          <Shield className="h-5 w-5 text-primary" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+            <Shield className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
+            <p className="text-muted-foreground">
+              Gerencie planos, usuários e configurações do sistema
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
-          <p className="text-muted-foreground">
-            Gerencie planos de assinatura e configurações do sistema
-          </p>
-        </div>
+        <AdminNotificationBell />
       </div>
 
-      <PlanManagement />
+      <Tabs defaultValue="analytics" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="plans">Planos</TabsTrigger>
+          <TabsTrigger value="users">Usuários</TabsTrigger>
+          <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
+          <TabsTrigger value="audit">Auditoria</TabsTrigger>
+          <TabsTrigger value="notifications">Notificações</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="analytics">
+          <AdminAnalytics />
+        </TabsContent>
+
+        <TabsContent value="plans">
+          <PlanManagement />
+        </TabsContent>
+
+        <TabsContent value="users">
+          <AdminUsersPanel />
+        </TabsContent>
+
+        <TabsContent value="webhooks">
+          <div className="space-y-6">
+            <StripeWebhookGuide />
+            <WebhookLogsPanel />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="audit">
+          <AdminAuditLogs />
+        </TabsContent>
+
+        <TabsContent value="notifications">
+          <AdminNotificationsPanel />
+        </TabsContent>
+      </Tabs>
     </div>
-  )
+  );
 }

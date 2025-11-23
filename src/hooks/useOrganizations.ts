@@ -62,16 +62,27 @@ export function useOrganizations() {
             .eq('org_id', org.id)
             .eq('role', 'owner')
             .limit(1)
-            .single()
+            .maybeSingle()
 
-          // Get owner email
-          const { data: ownerData } = await supabase
+          // Get owner email - fetch separately to avoid join issues
+          let ownerEmail: string | undefined
+          const { data: ownerOrgData } = await supabase
             .from('user_organizations')
-            .select('profiles!user_id(email)')
+            .select('user_id')
             .eq('org_id', org.id)
             .eq('role', 'owner')
             .limit(1)
             .maybeSingle()
+
+          if (ownerOrgData?.user_id) {
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('email')
+              .eq('id', ownerOrgData.user_id)
+              .single()
+            
+            ownerEmail = profileData?.email
+          }
 
           return {
             ...org,
@@ -80,8 +91,8 @@ export function useOrganizations() {
             subscription_plan_id: subData?.subscription_plan_id,
             subscription_status: subData?.subscription_status,
             plan_name: subData?.subscription_plans?.name,
-            owner_email: ownerData?.profiles?.email,
-            is_active: true // Default value since column doesn't exist yet
+            owner_email: ownerEmail,
+            is_active: subData?.subscription_status === 'active'
           }
         })
       )

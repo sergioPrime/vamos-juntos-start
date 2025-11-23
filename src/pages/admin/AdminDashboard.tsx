@@ -1,18 +1,26 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlanManagement } from "@/components/admin/PlanManagement"
+import { OrganizationsManagement } from "@/components/admin/OrganizationsManagement"
 import { useSuperAdmin } from "@/hooks/useSuperAdmin"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate } from "react-router-dom"
 import { useEffect } from "react"
-import { Shield, Lock } from "lucide-react"
+import { Shield, Lock, Building2, Users, DollarSign, TrendingUp, RefreshCw } from "lucide-react"
+import { useAdminMetrics } from "@/hooks/useAdminMetrics"
+import { MetricCard } from "@/components/admin/MetricCard"
+import { PlanDistributionChart } from "@/components/admin/PlanDistributionChart"
+import { RecentOrganizationsTable } from "@/components/admin/RecentOrganizationsTable"
+import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function AdminDashboard() {
   const { user } = useAuth()
   const { isSuperAdmin, loading } = useSuperAdmin()
+  const { metrics, loading: metricsLoading, refreshMetrics } = useAdminMetrics()
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Se não tiver usuário logado, redireciona para login
     if (!loading && !user) {
       navigate("/auth")
     }
@@ -69,19 +77,120 @@ export default function AdminDashboard() {
 
   return (
     <div className="page-container space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-          <Shield className="h-5 w-5 text-primary" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+            <Shield className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
+            <p className="text-muted-foreground">
+              Visão geral do sistema e gerenciamento
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
-          <p className="text-muted-foreground">
-            Gerencie planos de assinatura e configurações do sistema
-          </p>
-        </div>
+        <Button 
+          onClick={refreshMetrics} 
+          variant="outline" 
+          size="sm"
+          disabled={metricsLoading}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${metricsLoading ? 'animate-spin' : ''}`} />
+          Atualizar
+        </Button>
       </div>
 
-      <PlanManagement />
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+          <TabsTrigger value="organizations">Empresas</TabsTrigger>
+          <TabsTrigger value="plans">Planos</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          {metricsLoading ? (
+            <>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <Card key={i}>
+                    <CardHeader className="pb-2">
+                      <Skeleton className="h-4 w-32" />
+                    </CardHeader>
+                    <CardContent>
+                      <Skeleton className="h-8 w-24 mb-2" />
+                      <Skeleton className="h-3 w-40" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Skeleton className="h-[400px]" />
+                <Skeleton className="h-[400px]" />
+              </div>
+            </>
+          ) : metrics ? (
+            <>
+              {/* Métricas Principais */}
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <MetricCard
+                  title="Organizações"
+                  value={metrics.totalOrganizations}
+                  icon={Building2}
+                  growth={metrics.organizationsGrowth}
+                  description="Total de empresas cadastradas"
+                />
+                <MetricCard
+                  title="Usuários"
+                  value={metrics.totalUsers}
+                  icon={Users}
+                  growth={metrics.usersGrowth}
+                  description="Total de usuários ativos"
+                />
+                <MetricCard
+                  title="Receita Total"
+                  value={metrics.totalRevenue}
+                  icon={DollarSign}
+                  format="currency"
+                  description="Total de receitas recebidas"
+                />
+                <MetricCard
+                  title="Lançamentos"
+                  value={metrics.totalFinancialEntries}
+                  icon={TrendingUp}
+                  growth={metrics.entriesGrowth}
+                  description="Total de lançamentos financeiros"
+                />
+              </div>
+
+              {/* Gráficos e Tabelas */}
+              <div className="grid gap-4 md:grid-cols-2">
+                {metrics.planDistribution.length > 0 && (
+                  <PlanDistributionChart data={metrics.planDistribution} />
+                )}
+                {metrics.recentOrganizations.length > 0 && (
+                  <RecentOrganizationsTable organizations={metrics.recentOrganizations} />
+                )}
+              </div>
+            </>
+          ) : (
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-center text-muted-foreground">
+                  Nenhuma métrica disponível no momento.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="organizations">
+          <OrganizationsManagement />
+        </TabsContent>
+
+        <TabsContent value="plans">
+          <PlanManagement />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

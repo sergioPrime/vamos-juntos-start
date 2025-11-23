@@ -34,7 +34,7 @@ export function useAdminNotifications() {
 
       if (error) throw error;
 
-      setNotifications(data || []);
+      setNotifications((data || []) as AdminNotification[]);
       setUnreadCount(data?.filter(n => !n.is_read).length || 0);
     } catch (error) {
       console.error('Erro ao buscar notificações:', error);

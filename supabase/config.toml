@@ -2,3 +2,6 @@ project_id = "wrdyffwjlylgxfbxbztf"
 
 [functions.search-ncm]
 verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false

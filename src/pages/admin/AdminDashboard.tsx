@@ -1,10 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PlanManagement } from "@/components/admin/PlanManagement"
+import { AdminAnalytics } from "@/components/admin/AdminAnalytics"
+import { StripeWebhookGuide } from "@/components/admin/StripeWebhookGuide"
+import { WebhookLogsPanel } from "@/components/admin/WebhookLogsPanel"
+import { AdminAuditLogs } from "@/components/admin/AdminAuditLogs"
 import { useSuperAdmin } from "@/hooks/useSuperAdmin"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate } from "react-router-dom"
 import { useEffect } from "react"
-import { Shield, Lock } from "lucide-react"
+import { Shield, Lock, BarChart3, CreditCard, Webhook, FileText } from "lucide-react"
 
 export default function AdminDashboard() {
   const { user } = useAuth()
@@ -76,12 +81,60 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
           <p className="text-muted-foreground">
-            Gerencie planos de assinatura e configurações do sistema
+            Gerencie planos de assinatura e monitore métricas do sistema
           </p>
         </div>
       </div>
 
-      <PlanManagement />
+      <Tabs defaultValue="analytics" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="analytics" className="gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Analytics
+          </TabsTrigger>
+          <TabsTrigger value="plans" className="gap-2">
+            <CreditCard className="h-4 w-4" />
+            Planos
+          </TabsTrigger>
+          <TabsTrigger value="webhooks" className="gap-2">
+            <Webhook className="h-4 w-4" />
+            Webhooks
+          </TabsTrigger>
+          <TabsTrigger value="audit" className="gap-2">
+            <FileText className="h-4 w-4" />
+            Auditoria
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="analytics" className="mt-6">
+          <AdminAnalytics />
+        </TabsContent>
+
+        <TabsContent value="plans" className="mt-6">
+          <PlanManagement />
+        </TabsContent>
+
+        <TabsContent value="webhooks" className="mt-6">
+          <Tabs defaultValue="logs" className="w-full">
+            <TabsList>
+              <TabsTrigger value="logs">Logs</TabsTrigger>
+              <TabsTrigger value="guide">Guia de Configuração</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="logs" className="mt-6">
+              <WebhookLogsPanel />
+            </TabsContent>
+            
+            <TabsContent value="guide" className="mt-6">
+              <StripeWebhookGuide />
+            </TabsContent>
+          </Tabs>
+        </TabsContent>
+
+        <TabsContent value="audit" className="mt-6">
+          <AdminAuditLogs />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

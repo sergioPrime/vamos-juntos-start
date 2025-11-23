@@ -191,8 +191,9 @@ export function useBusinessAlerts() {
 
       if (error) throw error
 
-      if (nfseList && nfseList.length > 0) {
-        const totalRejectedAmount = nfseList.reduce((sum, nfse) => sum + (nfse.service_amount || 0), 0)
+  const checkRejectedNFSe = useCallback(async (): Promise<BusinessAlert[]> => {
+    return []
+  }, [])
         
         return [{
           id: 'rejected_nfse',

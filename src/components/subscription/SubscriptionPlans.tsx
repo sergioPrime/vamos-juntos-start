@@ -33,6 +33,8 @@ export function SubscriptionPlans() {
   const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null)
   const [isAnnual, setIsAnnual] = useState(false)
   const [processing, setProcessing] = useState<string | null>(null)
+  const [pixDialogOpen, setPixDialogOpen] = useState(false)
+  const [selectedPlanForPix, setSelectedPlanForPix] = useState<{ id: string; name: string } | null>(null)
   const { user } = useAuth()
   const { currentOrg: organization } = useOrganization()
   const { isSuperAdmin } = useSuperAdmin()
@@ -373,32 +375,59 @@ export function SubscriptionPlans() {
                   </div>
                 </div>
 
-                <Button
-                  onClick={() => selectPlan(plan.id)}
-                  disabled={isCurrentPlan || isProcessing}
-                  className="w-full mt-6"
-                  variant={isCurrentPlan ? "secondary" : "default"}
-                >
-                  {isProcessing ? (
-                    <>
-                      <CreditCard className="h-4 w-4 mr-2 animate-pulse" />
-                      Processando...
-                    </>
-                  ) : isCurrentPlan ? (
-                    'Plano Atual'
-                  ) : (
-                    <>
-                      <CreditCard className="h-4 w-4 mr-2" />
-                      Assinar Plano
-                    </>
+                <div className="space-y-2">
+                  <Button
+                    onClick={() => selectPlan(plan.id)}
+                    disabled={isCurrentPlan || isProcessing}
+                    className="w-full"
+                    variant={isCurrentPlan ? "secondary" : "default"}
+                  >
+                    {isProcessing ? (
+                      <>
+                        <CreditCard className="h-4 w-4 mr-2 animate-pulse" />
+                        Processando...
+                      </>
+                    ) : isCurrentPlan ? (
+                      'Plano Atual'
+                    ) : (
+                      <>
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        Cartão/Boleto
+                      </>
+                    )}
+                  </Button>
+                  
+                  {!isCurrentPlan && (
+                    <Button
+                      onClick={() => {
+                        setSelectedPlanForPix({ id: plan.id, name: plan.name })
+                        setPixDialogOpen(true)
+                      }}
+                      disabled={isProcessing}
+                      className="w-full"
+                      variant="outline"
+                    >
+                      <QrCode className="h-4 w-4 mr-2" />
+                      Pagar com PIX
+                    </Button>
                   )}
-                </Button>
+                </div>
                 </div>
               )
             })}
           </div>
         </div>
       </CardContent>
+
+      {selectedPlanForPix && (
+        <PixPaymentDialog
+          open={pixDialogOpen}
+          onOpenChange={setPixDialogOpen}
+          planId={selectedPlanForPix.id}
+          planName={selectedPlanForPix.name}
+          billingCycle={isAnnual ? "annual" : "monthly"}
+        />
+      )}
     </Card>
   )
 }

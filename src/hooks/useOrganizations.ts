@@ -67,11 +67,11 @@ export function useOrganizations() {
           // Get owner email
           const { data: ownerData } = await supabase
             .from('user_organizations')
-            .select('user_id, profiles(email)')
+            .select('profiles!user_id(email)')
             .eq('org_id', org.id)
             .eq('role', 'owner')
             .limit(1)
-            .single()
+            .maybeSingle()
 
           return {
             ...org,
@@ -80,7 +80,8 @@ export function useOrganizations() {
             subscription_plan_id: subData?.subscription_plan_id,
             subscription_status: subData?.subscription_status,
             plan_name: subData?.subscription_plans?.name,
-            owner_email: ownerData?.profiles?.email
+            owner_email: ownerData?.profiles?.email,
+            is_active: true // Default value since column doesn't exist yet
           }
         })
       )
@@ -96,10 +97,12 @@ export function useOrganizations() {
 
   const toggleOrganizationStatus = async (orgId: string, currentStatus: boolean) => {
     try {
+      // Since is_active doesn't exist in organizations table, we'll update subscription_status
       const { error } = await supabase
-        .from('organizations')
-        .update({ is_active: !currentStatus })
-        .eq('id', orgId)
+        .from('user_organizations')
+        .update({ subscription_status: !currentStatus ? 'active' : 'suspended' })
+        .eq('org_id', orgId)
+        .eq('role', 'owner')
 
       if (error) throw error
 
@@ -180,15 +183,27 @@ export function useOrganizations() {
           id,
           role,
           created_at,
-          profiles:user_id (
-            email,
-            first_name,
-            last_name
-          )
+          user_id
         `)
         .eq('org_id', orgId)
 
       if (usersError) throw usersError
+
+      // Get emails for each user
+      const usersWithProfiles = await Promise.all(
+        (users || []).map(async (user) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('email, first_name, last_name')
+            .eq('id', user.user_id)
+            .single()
+
+          return {
+            ...user,
+            profiles: profile
+          }
+        })
+      )
 
       // Get recent activity (financial entries count)
       const { count: entriesCount } = await supabase
@@ -210,7 +225,7 @@ export function useOrganizations() {
 
       return {
         organization: org,
-        users: users || [],
+        users: usersWithProfiles || [],
         stats: {
           financial_entries: entriesCount || 0,
           products: productsCount || 0,

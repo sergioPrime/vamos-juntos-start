@@ -71,10 +71,10 @@ export function useAdminAnalytics(days: number = 30) {
       // Active organizations
       const { data: orgs } = await supabase
         .from("user_organizations")
-        .select("organization_id")
+        .select("org_id")
         .eq("subscription_status", "active")
 
-      const activeOrganizations = new Set(orgs?.map(o => o.organization_id) || []).size
+      const activeOrganizations = new Set(orgs?.map(o => o.org_id) || []).size
 
       // Conversion rate (organizations with paid plans)
       const { data: allOrgs } = await supabase
@@ -83,11 +83,11 @@ export function useAdminAnalytics(days: number = 30) {
 
       const { data: paidOrgs } = await supabase
         .from("user_organizations")
-        .select("organization_id")
+        .select("org_id")
         .in("subscription_status", ["active", "trialing"])
 
       const conversionRate = allOrgs && paidOrgs 
-        ? (new Set(paidOrgs.map(o => o.organization_id)).size / allOrgs.length) * 100 
+        ? (new Set(paidOrgs.map(o => o.org_id)).size / allOrgs.length) * 100 
         : 0
 
       // Average lifetime (days since first org creation)
@@ -124,7 +124,7 @@ export function useAdminAnalytics(days: number = 30) {
     }, {} as Record<string, number>)
 
     return Object.entries(grouped)
-      .map(([date, value]) => ({ date, value }))
+      .map(([date, value]) => ({ date, value: value as number }))
       .sort((a, b) => a.date.localeCompare(b.date))
   }
 
@@ -136,7 +136,7 @@ export function useAdminAnalytics(days: number = 30) {
     }, {} as Record<string, number>)
 
     return Object.entries(grouped)
-      .map(([date, value]) => ({ date, value }))
+      .map(([date, value]) => ({ date, value: value as number }))
       .sort((a, b) => a.date.localeCompare(b.date))
   }
 
@@ -148,8 +148,8 @@ export function useAdminAnalytics(days: number = 30) {
     }, {} as Record<string, number>)
 
     return Object.entries(grouped)
-      .map(([module, count]) => ({ module, count }))
-      .sort((a, b) => b.count - a.count)
+      .map(([module, count]) => ({ module, count: count as number }))
+      .sort((a, b) => (b.count as number) - (a.count as number))
       .slice(0, 10)
   }
 

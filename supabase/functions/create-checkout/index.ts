@@ -116,6 +116,8 @@ serve(async (req) => {
           expires_after_days: 7,
         },
       },
+      allow_promotion_codes: true,
+      billing_address_collection: "required",
       success_url: `${req.headers.get("origin")}/settings?tab=planos&success=true`,
       cancel_url: `${req.headers.get("origin")}/settings?tab=planos&canceled=true`,
       metadata: {

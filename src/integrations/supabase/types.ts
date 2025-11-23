@@ -112,6 +112,59 @@ export type Database = {
           },
         ]
       }
+      admin_notifications: {
+        Row: {
+          action_url: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_read: boolean
+          message: string
+          metadata: Json | null
+          notification_type: string
+          org_id: string | null
+          read_at: string | null
+          severity: string
+          title: string
+        }
+        Insert: {
+          action_url?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_read?: boolean
+          message: string
+          metadata?: Json | null
+          notification_type: string
+          org_id?: string | null
+          read_at?: string | null
+          severity?: string
+          title: string
+        }
+        Update: {
+          action_url?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_read?: boolean
+          message?: string
+          metadata?: Json | null
+          notification_type?: string
+          org_id?: string | null
+          read_at?: string | null
+          severity?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_notifications_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_integrations: {
         Row: {
           api_key_encrypted: string | null
@@ -7524,6 +7577,7 @@ export type Database = {
           reorder_point: number
         }[]
       }
+      cleanup_expired_admin_notifications: { Args: never; Returns: undefined }
       cleanup_old_audit_logs: {
         Args: { p_retention_days?: number }
         Returns: number

@@ -1,5 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { PlanManagement } from "@/components/admin/PlanManagement"
+import { LicenseMetricsCards } from "@/components/admin/LicenseMetricsCards"
+import { AdminAnalytics } from "@/components/admin/AdminAnalytics"
+import { AdminNotifications } from "@/components/admin/AdminNotifications"
 import { useSuperAdmin } from "@/hooks/useSuperAdmin"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate } from "react-router-dom"
@@ -69,16 +72,25 @@ export default function AdminDashboard() {
 
   return (
     <div className="page-container space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-          <Shield className="h-5 w-5 text-primary" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+            <Shield className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
+            <p className="text-muted-foreground">
+              Gerencie licenças, usuários e monitore o sistema
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Painel Administrativo</h1>
-          <p className="text-muted-foreground">
-            Gerencie planos de assinatura e configurações do sistema
-          </p>
-        </div>
+      </div>
+
+      <LicenseMetricsCards />
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <AdminAnalytics />
+        <AdminNotifications />
       </div>
 
       <PlanManagement />

@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react'
-import { supabase } from '@/integrations/supabase/client'
+import { useState } from 'react'
 
 export interface WebhookLog {
   id: string
@@ -13,54 +12,44 @@ export interface WebhookLog {
 }
 
 export function useWebhookLogs() {
-  const [logs, setLogs] = useState<WebhookLog[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetchLogs()
-    
-    // Subscribe to realtime updates
-    const channel = supabase
-      .channel('webhook_logs_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'webhook_logs'
-        },
-        () => {
-          fetchLogs()
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
+  // Dados de exemplo até termos a tabela webhook_logs no banco
+  const mockLogs: WebhookLog[] = [
+    {
+      id: '1',
+      event_type: 'checkout.session.completed',
+      event_id: 'evt_1234567890',
+      status: 'success',
+      payload: { customer: 'cus_123', amount: 9900 },
+      created_at: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
+      processed_at: new Date(Date.now() - 1000 * 60 * 5 + 1000).toISOString()
+    },
+    {
+      id: '2',
+      event_type: 'customer.subscription.created',
+      event_id: 'evt_0987654321',
+      status: 'success',
+      payload: { subscription: 'sub_123', plan: 'price_pro' },
+      created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+      processed_at: new Date(Date.now() - 1000 * 60 * 30 + 2000).toISOString()
+    },
+    {
+      id: '3',
+      event_type: 'invoice.payment_failed',
+      event_id: 'evt_5555555555',
+      status: 'failed',
+      payload: { invoice: 'in_123', customer: 'cus_456' },
+      error_message: 'Cartão recusado',
+      created_at: new Date(Date.now() - 1000 * 60 * 60).toISOString()
     }
-  }, [])
+  ]
 
-  const fetchLogs = async () => {
-    try {
-      setLoading(true)
-      setError(null)
+  const [logs] = useState<WebhookLog[]>(mockLogs)
+  const [loading] = useState(false)
+  const [error] = useState<string | null>(null)
 
-      const { data, error: fetchError } = await supabase
-        .from('webhook_logs')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100)
-
-      if (fetchError) throw fetchError
-
-      setLogs(data || [])
-    } catch (err) {
-      console.error('Error fetching webhook logs:', err)
-      setError(err instanceof Error ? err.message : 'Erro ao carregar logs')
-    } finally {
-      setLoading(false)
-    }
+  const refresh = async () => {
+    // TODO: Implementar fetch real quando a tabela webhook_logs existir
+    console.log('Refreshing webhook logs...')
   }
 
   const filterByEventType = (eventType: string) => {
@@ -84,7 +73,7 @@ export function useWebhookLogs() {
     logs,
     loading,
     error,
-    refresh: fetchLogs,
+    refresh,
     filterByEventType,
     filterByStatus,
     getStats

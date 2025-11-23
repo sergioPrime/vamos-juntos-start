@@ -6,11 +6,11 @@ import { useSuperAdmin } from './useSuperAdmin'
 export interface AdminMetrics {
   totalOrganizations: number
   totalUsers: number
-  activeSubscriptions: number
-  monthlyRevenue: number
+  totalFinancialEntries: number
+  totalRevenue: number
   organizationsGrowth: number
   usersGrowth: number
-  revenueGrowth: number
+  entriesGrowth: number
   planDistribution: { name: string; count: number; value: number }[]
   recentOrganizations: Array<{
     id: string
@@ -49,15 +49,21 @@ export function useAdminMetrics() {
         .from('profiles')
         .select('*', { count: 'exact', head: true })
 
-      // Active Subscriptions
-      const { data: activeSubscriptions } = await supabase
-        .from('user_subscriptions')
-        .select('id, monthly_price')
-        .eq('status', 'active')
+      // Total Financial Entries (settled)
+      const { count: totalEntries } = await supabase
+        .from('financial_entries')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_settled', true)
 
-      const activeSubsCount = activeSubscriptions?.length || 0
-      const monthlyRevenue = activeSubscriptions?.reduce(
-        (sum, sub) => sum + (sub.monthly_price || 0),
+      // Total Revenue from settled receivables
+      const { data: revenueData } = await supabase
+        .from('financial_entries')
+        .select('amount')
+        .eq('entry_type', 'receita')
+        .eq('is_settled', true)
+
+      const totalRevenue = revenueData?.reduce(
+        (sum, entry) => sum + (entry.amount || 0),
         0
       ) || 0
 
@@ -80,48 +86,33 @@ export function useAdminMetrics() {
 
       const usersGrowth = totalUsers ? ((recentUsers || 0) / totalUsers) * 100 : 0
 
-      // Revenue growth (comparing to previous 30 days)
-      const sixtyDaysAgo = new Date()
-      sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60)
+      // Financial Entries growth (last 30 days)
+      const { count: recentEntries } = await supabase
+        .from('financial_entries')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_settled', true)
+        .gte('created_at', thirtyDaysAgo.toISOString())
 
-      const { data: previousPeriodSubs } = await supabase
-        .from('user_subscriptions')
-        .select('monthly_price')
-        .eq('status', 'active')
-        .gte('created_at', sixtyDaysAgo.toISOString())
-        .lt('created_at', thirtyDaysAgo.toISOString())
+      const entriesGrowth = totalEntries ? ((recentEntries || 0) / totalEntries) * 100 : 0
 
-      const previousRevenue = previousPeriodSubs?.reduce(
-        (sum, sub) => sum + (sub.monthly_price || 0),
-        0
-      ) || 0
+      // Activity Distribution by Entry Type
+      const { data: entriesByType } = await supabase
+        .from('financial_entries')
+        .select('entry_type, amount')
+        .eq('is_settled', true)
 
-      const revenueGrowth = previousRevenue > 0 
-        ? ((monthlyRevenue - previousRevenue) / previousRevenue) * 100 
-        : 0
-
-      // Plan Distribution
-      const { data: planData } = await supabase
-        .from('user_subscriptions')
-        .select(`
-          plan_id,
-          monthly_price,
-          subscription_plans!inner(name)
-        `)
-        .eq('status', 'active')
-
-      const planDistribution = planData?.reduce((acc: any[], sub: any) => {
-        const planName = sub.subscription_plans?.name || 'Desconhecido'
-        const existing = acc.find(p => p.name === planName)
+      const planDistribution = entriesByType?.reduce((acc: any[], entry: any) => {
+        const typeName = entry.entry_type === 'receita' ? 'Receitas' : 'Despesas'
+        const existing = acc.find(p => p.name === typeName)
         
         if (existing) {
           existing.count++
-          existing.value += sub.monthly_price || 0
+          existing.value += Math.abs(entry.amount || 0)
         } else {
           acc.push({
-            name: planName,
+            name: typeName,
             count: 1,
-            value: sub.monthly_price || 0
+            value: Math.abs(entry.amount || 0)
           })
         }
         
@@ -157,11 +148,11 @@ export function useAdminMetrics() {
       setMetrics({
         totalOrganizations: totalOrgs || 0,
         totalUsers: totalUsers || 0,
-        activeSubscriptions: activeSubsCount,
-        monthlyRevenue,
+        totalFinancialEntries: totalEntries || 0,
+        totalRevenue,
         organizationsGrowth,
         usersGrowth,
-        revenueGrowth,
+        entriesGrowth,
         planDistribution,
         recentOrganizations: orgsWithUsers
       })

@@ -145,18 +145,18 @@ export default function AdminDashboard() {
                   description="Total de usuários ativos"
                 />
                 <MetricCard
-                  title="MRR"
-                  value={metrics.monthlyRevenue}
+                  title="Receita Total"
+                  value={metrics.totalRevenue}
                   icon={DollarSign}
-                  growth={metrics.revenueGrowth}
                   format="currency"
-                  description="Receita mensal recorrente"
+                  description="Total de receitas recebidas"
                 />
                 <MetricCard
-                  title="Assinaturas Ativas"
-                  value={metrics.activeSubscriptions}
+                  title="Lançamentos"
+                  value={metrics.totalFinancialEntries}
                   icon={TrendingUp}
-                  description="Planos ativos no momento"
+                  growth={metrics.entriesGrowth}
+                  description="Total de lançamentos financeiros"
                 />
               </div>
 

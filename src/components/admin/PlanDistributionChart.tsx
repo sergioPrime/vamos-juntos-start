@@ -11,7 +11,7 @@ export function PlanDistributionChart({ data }: PlanDistributionChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Distribuição de Planos</CardTitle>
+        <CardTitle>Distribuição de Atividades</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>

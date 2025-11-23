@@ -70,7 +70,7 @@ export function useAdminUsers(): UseAdminUsersReturn {
           subscription_plan_id: org?.subscription_plan_id || null,
           subscription_status: org?.subscription_status || 'inactive',
           subscription_end: org?.subscription_end || null,
-          is_super_admin: profile.is_super_admin || false
+          is_super_admin: userOrg?.role === 'super_admin'
         };
       });
 
@@ -103,18 +103,26 @@ export function useAdminUsers(): UseAdminUsersReturn {
 
   const toggleUserStatus = async (userId: string, currentStatus: boolean) => {
     try {
+      // Update organization subscription status instead
+      const userOrg = users.find(u => u.id === userId);
+      if (!userOrg?.org_id) {
+        toast.error('Organização não encontrada');
+        return;
+      }
+
+      const newStatus = currentStatus ? 'suspended' : 'active';
       const { error } = await supabase
-        .from('profiles')
-        .update({ is_active: !currentStatus })
-        .eq('id', userId);
+        .from('organizations')
+        .update({ subscription_status: newStatus })
+        .eq('id', userOrg.org_id);
 
       if (error) throw error;
 
-      toast.success(currentStatus ? 'Usuário suspenso' : 'Usuário ativado');
+      toast.success(currentStatus ? 'Assinatura suspensa' : 'Assinatura ativada');
       await fetchUsers();
     } catch (error) {
       console.error('Erro ao alterar status:', error);
-      toast.error('Erro ao alterar status do usuário');
+      toast.error('Erro ao alterar status da assinatura');
     }
   };
 

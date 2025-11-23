@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ArrowLeft, Save } from 'lucide-react'
 import { toast } from 'sonner'
-import { useAuth } from '@/hooks/useAuth'
+import { useOrganization } from '@/hooks/useOrganization'
 import { usePurchases, type PurchaseItem } from '@/hooks/usePurchases'
 import { PurchaseItemsForm } from '@/components/purchases/PurchaseItemsForm'
 import { usePessoas } from '@/hooks/usePessoas'
@@ -28,13 +28,13 @@ const formSchema = z.object({
 export default function PurchaseForm() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { organization } = useAuth()
-  const { createPurchase, updatePurchase } = usePurchases(organization?.id || '')
-  const { pessoas } = usePessoas(organization?.id || '')
+  const { currentOrg } = useOrganization()
+  const { createPurchase, updatePurchase } = usePurchases(currentOrg?.id || '')
+  const { pessoas } = usePessoas()
   
   const [items, setItems] = useState<PurchaseItem[]>([])
   
-  const suppliers = pessoas?.filter(p => p.tipo === 'fornecedor') || []
+  const suppliers = pessoas?.filter(p => p.is_supplier) || []
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -116,7 +116,7 @@ export default function PurchaseForm() {
                   <SelectContent>
                     {suppliers.map((supplier) => (
                       <SelectItem key={supplier.id} value={supplier.id}>
-                        {supplier.nome}
+                        {supplier.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -197,11 +197,11 @@ export default function PurchaseForm() {
             <CardTitle>Itens do Pedido</CardTitle>
           </CardHeader>
           <CardContent>
-            <PurchaseItemsForm
-              items={items}
-              onChange={setItems}
-              orgId={organization?.id || ''}
-            />
+              <PurchaseItemsForm
+                items={items}
+                onChange={setItems}
+                orgId={currentOrg?.id || ''}
+              />
           </CardContent>
         </Card>
       </form>

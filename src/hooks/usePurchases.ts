@@ -80,10 +80,10 @@ export function usePurchases(orgId: string) {
             items.map(item => ({
               purchase_id: data.id,
               product_id: item.product_id,
+              product_name: item.product_name || '',
               quantity: item.quantity,
               unit_price: item.unit_price,
               total_price: item.total_price,
-              notes: item.notes,
               org_id: orgId,
             }))
           )
@@ -119,10 +119,10 @@ export function usePurchases(orgId: string) {
               items.map(item => ({
                 purchase_id: id,
                 product_id: item.product_id,
+                product_name: item.product_name || '',
                 quantity: item.quantity,
                 unit_price: item.unit_price,
                 total_price: item.total_price,
-                notes: item.notes,
                 org_id: orgId,
               }))
             )

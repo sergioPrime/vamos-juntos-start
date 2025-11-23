@@ -183,8 +183,6 @@ export function useBusinessAlerts() {
     // Temporariamente desabilitado - tabela nfse não está disponível
     return []
   }, [currentOrg])
-    }
-  }, [currentOrg?.id])
 
   // Check for pending orders
   const checkPendingOrders = useCallback(async () => {
